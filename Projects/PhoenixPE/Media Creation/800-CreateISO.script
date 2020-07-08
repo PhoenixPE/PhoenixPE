@@ -1,0 +1,268 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2019 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=Create ISO
+Description=Create an BIOS/UEFI compatible ISO image of the project.
+Author=Homes32
+Level=8
+Selected=True
+Mandatory=False
+Version=1.0.0.0
+Date=2019-04-18
+
+[Variables]
+
+[Process]
+Echo,"Preparing to create bootable ISO file..."
+
+// Sanity Check 
+If,Not,ExistFile,"%OutputDir%\sources\boot.wim",Halt,"ERROR: Boot.wim is missing from [%OutputDir%\Sources]. Please rebuild your project."
+
+// Variables
+System,GetEnv,PROCESSOR_ARCHITECTURE,%HostArch%
+If,%HostArch%,Equal,AMD64,Set,%HostArch%,x64
+Set,%mkISOfs.exe%,"%Tools%\mkISOfs.exe"
+Set,%oscdimg.exe%,"%Tools%\%HostArch%\oscdimg\oscdimg.exe"
+
+// Set ISO File Name
+If,%in_ISOFilename%,Equal,"",Set,%ISOFilename%,%ProjectTitle%
+Else,Set,%ISOFilename%,%in_ISOFilename%
+If,%cb_FilenameAppendArch%,Equal,True,Set,%ISOFilename%,%ISOFilename%_%SourceArch%
+If,%cb_FilenameAppendDate%,Equal,True,Begin
+  StrFormat,Date,%ISODate%,YYYYMMDDHHNNSS
+  Set,%ISOFilename%,%ISOFilename%_%ISODate%
+End
+Set,%ISOFilename%,"%ISOFilename%.iso"
+Set,%ISOFile%,"%ISODir%\%IsoFilename%",PERMANENT
+
+// Get output dir size
+DirSize,%OutputDir%,%sizeFolder%
+StrFormat,Round,%sizeFolder%,M
+StrFormat,Bytes,%sizeFolder%
+Echo,"Creating ISO: [%ISOFileName%] Folder size: %sizeFolder%"
+
+// Build the ISO
+If,%cmb_IsoTool%,Equal,oscdimg,Run,%ScriptFile%,CreateISO_oscdimg
+If,%cmb_IsoTool%,Equal,mkISOfs,Run,%ScriptFile%,CreateISO_mkISOfs
+
+// Get ISO size
+Echo,"Checking image size..."
+If,Not,ExistFile,"%ISODir%\%IsoFilename%",Wait,5
+If,ExistFile,"%ISODir%\%IsoFilename%",Begin
+  FileSize,"%ISODir%\%IsoFilename%",%sizeISO%
+  StrFormat,Round,%sizeISO%,M
+  StrFormat,Bytes,%sizeISO%
+  Echo,"ISO build size is %sizeISO%"
+End
+  
+[#CreateISO_oscdimg#]
+// ===============================================================================================================================
+// Name...........: CreateISO_oscdimg
+// Description....: Create a bootable ISO file using Microsoft's oscdimg tool.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_ISOTool
+// ===============================================================================================================================
+[CreateISO_oscdimg]
+Echo,"Creating ISO File..."
+ShellExecute,Hide,%oscdimg.exe%,"%in_OscdimgSwitch% -l#$q%in_VolName%#$q -bootdata:2#p0#$ce#$cb#$q%OutputDir%\boot\etfsboot.com#$q#pEF#$ce#$cb#$q%OutputDir%\EFI\microsoft\boot\efisys.bin#$q #$q%OutputDir%#$q #$q%ISOFile%#$q"
+If,Not,#r,Equal,0,Halt,"Error: Failed to create ISO image."
+
+[#CreateISO_mkISOfs#]
+// ===============================================================================================================================
+// Name...........: CreateISO_mkISOfs
+// Description....: Create a bootable ISO file using the open source mkISOfs tool.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_ISOTool
+// ===============================================================================================================================
+[CreateISO_mkISOfs]
+Echo,"Creating ISO File..."
+ShellExecute,Hide,%mkISOfs.exe%,"%in_MkISOfsSwitch% -volid #$q%in_VolName%#$q -hide boot.catalog -hide-udf boot.catalog -b boot/etfsboot.com -no-emul-boot -boot-load-size 8 -eltorito-platform efi -no-emul-boot -b efi/microsoft/boot/efisys.bin -o #$q%ISOFile%#$q #$q%OutputDir%#$q"
+If,Not,#r,Equal,0,Halt,"Error: Failed to create ISO image."
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cmb_ISOTool,oscdimg
+WriteInterface,Value,%ScriptFile%,Interface,in_VolName,%ProjectTitle%
+WriteInterface,Value,%ScriptFile%,Interface,in_ISOFilename,%ProjectTitle%
+WriteInterface,Value,%ScriptFile%,Interface,cb_FilenameAppendArch,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_FilenameAppendDate,False
+WriteInterface,Value,%ScriptFile%,Interface,in_MkISOfsSwitch,"-iso-level 4 -udf -r -force-uppercase -duplicates-once"
+WriteInterface,Value,%ScriptFile%,Interface,in_OscdimgSwitch,"-h -m -o -u1 -udfver102"
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%state%
+If,%state%,Equal,False,Begin,
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
+  Else,Set,%Toggle%,False
+End
+Else,Set,%Toggle%,False
+
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,in_MkISOfsSwitch,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,web_MkISOfs,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,in_OscdimgSwitch,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,web_Oscdimg,%Toggle%
+System,EndLocal
+
+[#OpenISOFolder#]
+// ===============================================================================================================================
+// Name...........: OpenISOFolder
+// Description....: Open the %ISODir% folder in explorer.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_OpenISODir
+// ===============================================================================================================================
+[OpenISOFolder]
+ShellExecuteEx,Explore,"%ISODir%\"
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"Create an BIOS/UEFI compatible ISO image of the project.#$x#$xYou may use this image to burn a CD/DVD, test your project in an emulator, such as VMware, or use Rufus to create a bootable USB from the ISO."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_CreateISO=" Create new ISO file",1,8,5,5,132,25,Process,UltraISO16.png,False
+btn_OpenISODir="  Open ISO Folder",1,8,145,5,121,25,OpenISOFolder,OpenFolder_16.png,True
+btn_SetDefaultOptions=,1,8,455,5,25,25,SetDefaultOptions,SetDefaults_16.png,False,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,485,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,515,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_Options="ISO Options",1,12,5,50,535,125,8,Bold
+lbl_ISOTool="Create ISO Using ",1,1,21,72,92,21,8,Normal
+cmb_ISOTool=oscdimg,1,4,19,85,98,21,mkISOfs,oscdimg
+in_VolName="Volume name",1,0,132,85,150,21,PhoenixPE
+in_ISOFilename="File name",1,0,296,85,150,21,PhoenixPE
+lbl_ISOName=.iso,1,1,450,87,34,21,12,Normal
+cb_FilenameAppendArch="Append 'Source Architecture' to file name",1,3,297,122,229,18,True
+cb_FilenameAppendDate="Append timestamp to file name",1,3,297,144,229,18,False
+bvl_AdvancedOptions="Advanced Options",0,12,5,192,535,150,8,Bold
+in_MkISOfsSwitch="MkISOfs Switches",0,0,17,229,515,21,"-iso-level 4 -udf -r -force-uppercase -duplicates-once"
+in_OscdimgSwitch="Oscdimg Switches",0,0,17,276,515,21,"-h -m -o -u1 -udfver102"
+web_MkISOfs="MkISOfs Help",0,10,465,212,68,18,https://wiki.osdev.org/Mkisofs
+web_Oscdimg="Oscdimg Help",0,10,465,258,68,18,http://technet.microsoft.com/en-us/library/hh824847.aspx
+
+[InterfaceEncoded]
+UltraISO16.png=2516,3456
+Program_Defaults_16.png=2529,3484
+OpenFolder_16.png=2299,3168
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+
+[AuthorEncoded]
+ISO.png=12033,16136
+Logo=ISO.png
+
+[EncodedFile-AuthorEncoded-ISO.png]
+lines=3
+0=iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTAzLTE3VDEzOjM0OjIxLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0wNS0wOFQxOTo0MDowMy0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0wNS0wOFQxOTo0MDowMy0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0NTMyMTg5YS0zZjJkLWQ0NDktYWVjOC1kMDMwNDNhMmU1ODEiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpiNGRkNTA0YS00ZWEyLTNiNDctODE2Zi03ODMwYzMzNmIyMGIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDphN2NhYjIwMC01NTNhLTI1NDQtOWNmOS1iYTBhY2NlM2U3NWYiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmE3Y2FiMjAwLTU1M2EtMjU0NC05Y2Y5LWJhMGFjY2UzZTc1ZiIgc3RFdnQ6d2hlbj0iMjAxOS0wMy0xN1QxMzozNDoyMS0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NTMyMTg5YS0zZjJkLWQ0NDktYWVjOC1kMDMwNDNhMmU1ODEiIHN0RXZ0OndoZW49IjIwMTktMDUtMDhUMTk6NDA6MDMtMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz6oBBajAAAorUlEQVR4nO2ceZQcV3nof/fW0vvM9CwaaUbSaBeSPMbBMhivGGwSYxaHh7BxiDHgOHkEsxjeIwSSgJ2cEOIHvDhAMHYgxg4Jdlge2ASCbXmTJdmSF+37Pvv0Mr3Vduu+P3qq1TMabbZzzjvn5TtTp7pqqqurfvXde7/7LSU4jbS0tLBw4UK01pTLZXK5HK2trcRiMRzHIZPJoLXGtm1aWloIw5BisUi1WiWbzVIulzlwYD+LFi2mt7fX6OnpWbBs+fJFtWptyZvedOG8tmxbVkqRNgwjFYbaAoQQQqlAVQIVVIrFYnHTpuePDQ+P7N+7d8++LVu2HCjm8xXP90936a+5aK1P2Ge+lj8ghCAMNbVajfGxMSzLZP78+Zlr3vmuS1afv/rSlatWXpBKp1Z0dnTObsmkjVw+DxpM00BKiWmaSCkRQiKlQE+e8z3vfhcA5Wpt/NixY3te2PzCC2vXPv7MU089+dTOHTsOh2H4Wt7G2d3z6Q44Uw2MxWIYhkFufJz2jg7ecP7qC6655prr+vvPubqrc9ZKFSpq1QqB7+P7PhqN1mAYBoaUIASmaWIYdZhSSizLwjQMLNvGNE981uP5wsATa9f+5qGHHnrokUd+8WixUKz+p1CalJk08FUDbGlpoVqtUi6V6D/3XOOtb7vyne94xztuXrhwwe94nmdOFAtUK1UCpTAMA9M0G5ompZwCrHn/TP8TQmAaBkLKqTcGbN22/fkH7r///u9/7x//eXh4ePQ1o9b8O68lwGQyST6fp1wuM3/+fNasef9Va6677vOzZ8+5opAbo5DP4/p+XYMsq65pTUBm+jwd7MmOCcMQ3/cJfB8VhliWRSwWQ0rJjl27dn3r29/+u3vv/s73ajWn9v8kwLa2NhzHwXEcrn7HO+Z/+lO33b502dIPDQwcZWhwCKUUyWQS27Yn+zQxI5Bo+3QAm9eGYRAEAb7vo5SqgwwCAt9HSEk6nSEVS/L0hnXP3HHH7V/+j1//+j/+MwHKGY47qQgh0Fpz5MgR0qkUX/mbr37oO3d/d2O2ve1DG9c/y4H9+wGwbZswDAnDEK11Y5l+ITPtF0IgxInPNdrf/J3oN8IwJNSaaq1KcSRHaTTPuf39F//Lv/7rL77+9W/8r3Q6nT2b+zwbOWOA0jBwXJdiscgFqy9I/8uPHrpnzZo1339u/bPdL7/4IqHWxGLxxg1G8CKZvm+mpzldIpDT11PATS6BCpBIklac8XKB/Qf2MT46an/kIx+97RcPP/KLlStXnn/mWM5czgiglJJKpcLgwAA33PB7S//tpz99NNvW+tHHHv0N+UKBeCLRuLFmjQuCYMq+6XIqmDPBizSwGVy0rZQiKWP4yqfsVRBCUigU2LVzO0sWL7roJz/7P794z3uuve6VYToFm9MeMAlvaGCAT33q0xd++zt3/8fRw4ffuO6ZpzEMOWNzjewypRRKqca5ZmrS0+FN347ARSCVUlO0OQxDfBVgCQPbtCg6FYIgQE9eg+O6bN++HadWnf2/77rr+39w8x988lXwOkGM0x0QhiGO4/CZz3z28v/5uT/56caN63v27d1LKpXCMIwTNGT6DQON44QQjUFi+vb0pXnAibYBgiBAKdXQOt/3UYEibSdxfY9CbQId6sZI7U/OWPLjY7iOY7772vf+tkYH69c/+9TZwvrSl750wr7TzkQ8z+Mzn/nMxbd99rMPPbl2befQ0CAtLS1orRvaJaVsfG5uZoZh1PunIEBK2dgffW6WUzXx5u1I2yPtDlRAzLCRQlKslVCBQug6aM/zGscKaTA6MkK1VhOf/NSn/7JWrQbf+c4//M0Z0zuJmJZlnbBTCEEQKMJQ8b41a1b8yee/cP8Tax/vPHrkCK2trVMgRM012m4G2Xzc9KUZ0MkGlJkGj2aIfhCAhoQdp1wrU/Mc0JpAKTzPa/TB0UM0TJPc2BjbvJf41Kc/ff
+1=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
+2=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
+3=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
+
+
+[EncodedFile-InterfaceEncoded-UltraISO16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTAzLTE3VDEzOjM0OjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0wNS0xN1QyMjowODozMi0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0wNS0xN1QyMjowODozMi0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozY2I5YTY4ZS05ODRiLWUxNDUtODI2Ni1mNmI2ZDY0NTVmYzciIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDozOWY5ZDQwYi1mNTdmLWJmNDgtYTc1Yi03ZDUyN2NlY2FiOWEiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0NmMyMTk5Ny0zNmM0LTE0NGEtODMyOS1mMmM5NjBhNzI1YTQiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjQ2YzIxOTk3LTM2YzQtMTQ0YS04MzI5LWYyYzk2MGE3MjVhNCIgc3RFdnQ6d2hlbj0iMjAxOS0wMy0xN1QxMzozNDoxMi0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDozY2I5YTY4ZS05ODRiLWUxNDUtODI2Ni1mNmI2ZDY0NTVmYzciIHN0RXZ0OndoZW49IjIwMTktMDUtMTdUMjI6MDg6MzItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz43zowLAAADgElEQVQ4EQXB22tbBQDA4d+55NKcnJwkJ22TNOnWi2yUua7bLDjEehky9qIPRd1ARRQmwvTP8HlPioOCzqe9CCIUQTbarqxrt7q1s7t09pKmaZvLya25nJxL/T7h0fIjbNsmlUyjhm1K5cOzL1f57NWqPGHWleGAAkqktdE31JlND7u3omF1qVZ2KRkGPp8X4f7CfWRJojfZxV7Wc2Ppb+27g404rQpIIkTj4A1AMAZ6PE//yeqPilb7tlkHEBAymR1sDLZeOdPZJ6OXqkWRIwlqRXAsCPdClwa6Dqof5C4gtHIndUx4PxxKIEZ1hWYjcMOpv35J1UTCPaCGwK+A2wHXBJ8fAgEI9kKkG2KB0++ZZuCmKDkIG9vPTuY2tWceJ4FhQLUAbguqBjQ70N0L4RiouoveA+FukWQcKg2XfOXlGblSsq5HgjqNOkgChFTwxEFJrrCzP7NvhaJ239AHqUS8m1AcZC9UCkXKB1marvO9LLrKRV3zYrUhFD5CGxQ4aO7weGFqJuLTZ12OpAfPfxv9dPDq5WZmT1hbnaeRy+BpFJFfG5+Q/YHAcS0CogcCYQFFg2e/PyzovsG5mbn525VyxfrokyuTd2f/GjkvbQ7Ea1tE0zp6IEpGcvrkkCrj18EfhfpunuyLdQQ4jPamWrIk2p2Oacqy4prtkqVFbIJaFFGSsBwLV5YQniw9WK8fFIczqwvIzSwDSovU25P2vWbfbaFVWXZcV1rL107Ht//5OFF85FHjCbRQkKDXoZIc35QLhfyd3PTN4RP9Pk6eTRP0JTjMPpCHuk5ffV73nvGYhjvhZk4tLs9imDYDqLTrJgURoiOpOeHx2vqp/tyfq5GgTdXoYBSL5HJlsv/l2DxocW5A4eKgh+mVJgtrFcIxjai3QWDwBGPXfzgnptPpp0by3Z9zOw2MvV1K5QZ5o0WxckR5r0gpX8T2BhkbDnM8oXCwsU2u2Gbowy9/TSaTy6LbrGKpqWvrXSfuVktVyjs5Do06giughjRswUOp2kFTRE5FKihei/Tk1/PpsTe/aJcLCIuLiwiCSFcsSTv34qeNP6aulZ6u4HQEyjWLWLDNhZEYsWSKPdeP9caVqcT5d76q727hug6yz+fDNNsoRyY9oxe+URIDv+w+nP18/9+Vt4T9wjGP2CE/2J9xRsbn1ZELt5Kp+L3abhbHtvD5/fwP7n2Qwd7kgCYAAAAASUVORK5CYIJ4nOMLzSkpSvQM9jc00yvIS2cYBSMLXOHEL+8SeuEXIwMAeIQIHSKjlZIBAAAAAgAAACYAAADUCQAAAAAAAAEAAAAAAAAAAAAAAA
+
+
+[EncodedFile-InterfaceEncoded-OpenFolder_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTA1LTE3VDIxOjQ1OjAzLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpiMmUxM2M3YS01ODljLWQ0NDItOTQ3MC1lZTI4MGIwNDcyM2IiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0ZmIxZDNiYS00OWNhLTI4NDUtYjQ3My1hMjZjZWRlYWZhMDQiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjRmYjFkM2JhLTQ5Y2EtMjg0NS1iNDczLWEyNmNlZGVhZmEwNCIgc3RFdnQ6d2hlbj0iMjAxOS0wNS0xN1QyMTo0NTowMy0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHN0RXZ0OndoZW49IjIwMTktMTAtMjBUMTk6NDc6NTktMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz63gCC6AAACp0lEQVQ4EX3BS2hcVRzA4d//nHMfc28mk45NGo1JpwpFquBKKmh3KggWC6WCbroQVy5EunBTwb0Vl8WKCwUrlEoXPlAkhlqKYqVYFW1jk0jbiXnM3NxJJjP3zn0cKYKL0vH75O33TnMnLQ6hrvLuwmtcbV+jPhLsnaxlvwZ+YbWU3s22fzROnI92VQcX9TMHD3OnkpxQV5mp7GUp+Z2V/vr2+nb5TdQ1HxZ55Y/xID3pKvukq8on5MSpT0jTgVOUpS/8ywJWysFUdSbNyoSL7a/pZB2+jz6j1YuZqHDmoYAj7Uxhsjx/1XWd47XACQUoLSiBbn/QX2wtvFOr1E4eqB1ip3sv6aC3+9utT88FuQnnO/ktpUuRE6dO2xcPPYvxQpIClAKloEgTZufO047iLd/30GJwlFPdSCOk9Ho/RLMvnG2+/52pBe5gYnzM/XwRogSqI5AZaNQdjh55jjilKhqsBS0wauDyz1GQz003xho7vjBJmqUFuI/vgnj9L7T2uE024IZ2sKLBWm7LShitQ9ydp9P++L6XpxYw/ugMq9cvsDR3DMRHtA9YyhIKQAn/sRaWlVDk8PTU6rE0jx82uVVcnX2TB3Y/wsyBtyi3lgBhmMKCF4Qoi3f+7OvPm6h5hWm1yYP7X0GcNbALoCsMVfQheJRB16G/+fefpt/6haDhIyP3wPpXkLRBudydQLYBO/fRal5ja+PGj0b15hmfmAa2yVcugPZBNHdlLeQxBododZ40GfxkArtMfWI/JE3SzeuIN8lQZYo2FUymiJavgHDJ7Kh0pX7/YxBOEjYOg6kxVNGD+j6QGq1blxKl1GUz5nZGSvHJsnFk7CD/z0JlDyu/nSFeay76YaVvunby3JcfvPSUFRcrBqxlKBGwQtZf23Q89w0Q/gH+aSDn8z1ZagAAAABJRU5ErkJggnicE/QvSM1zy89JSS2KNzTTK8hLZxgFIwj85sAvf+m11BRGBgBbPwmoRWA0QwEAAAACAAAAKQAAAPsIAAAAAAAAAQAAAAAAAAAAAAAA
+
+
+
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA

@@ -1,0 +1,1048 @@
+[Main]
+Title=PhoenixPE API
+Author=Homes32
+Description=Scripting interface.
+Version=1.2.1.0
+Level=0
+Selected=None
+
+[Variables]
+%_PhoenixAPI_ConfigMode%=PECMD
+%_PhoenixAPI_RequireFileEx_BulkFileList%=
+%_PhoenixAPI_RequireFileEx_SingleFileList%=
+
+[Macros]
+RegLoadHives=Run,%API%,_PhoenixAPI_RegLoadHives
+RegUnloadHives=Run,%API%,_PhoenixAPI_RegUnloadHives
+
+RunFromRam=Run,%API%,_PhoenixAPI_RunFromRam
+AddAutoRun=Run,%API%,_PhoenixAPI_AddAutoRun
+AddShortcut=Run,%API%,_PhoenixAPI_AddShortcut
+PinShortcut=Run,%API%,_PhoenixAPI_PinShortcut
+
+DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
+FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
+FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
+
+IniReadEx=Run,%API%,_PhoenixAPI_IniReadEx
+
+// Experimental - May be changed or removed without notice
+7zExtract=Run,%API%,_PhoenixAPI_7zExtract
+InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
+
+XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
+XMLDelete=Run,%API%,_PhoenixAPI_XMLDelete
+//XMLRead=
+XMLRename=Run,%API%,_PhoenixAPI_XMLRename
+XMLUpdate=Run,%API%,_PhoenixAPI_XMLUpdate
+
+
+
+SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
+SetRegACL=Run,%API%,_PhoenixAPI_SetRegACL
+
+RequireFile=Run,%API%,_PhoenixAPI_RequireFile
+RequireFileEx=Run,%API%,_PhoenixAPI_RequireFileEx
+
+Associate=Run,%API%,_PhoenixAPI_Associate
+
+ApplyBitMask=Run,%API%,_PhoenixAPI_ApplyBitMask
+BitClear=Run,%API%,_PhoenixAPI_BitClear
+BitSet=Run,%API%,_PhoenixAPI_BitSet
+BitToggle=Run,%API%,_PhoenixAPI_BitToggle
+
+[_PhoenixAPI_7zExtract]
+System,SetLocal
+If,#1,Equal,"",Halt,"7zip Error: You must specify the file to decompress."
+If,#2,Equal,"",Halt,"7zip Error: You must specify the destination directory."
+
+GetParam,1,%SrcArchive%
+Getparam,2,%DestDir%
+
+ShellExecute,Hide,%Tools%\7z.exe,"x -r -y #$q%SrcArchive%#$q -o#$q%DestDir%#$q"
+
+System,EndLocal
+
+[_PhoenixAPI_InnoExtract]
+System,SetLocal
+If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the file to decompress."
+If,#2,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the program to associate with the file extension."
+
+GetParam,1,%SrcArchive%
+Getparam,2,%DestDir%
+
+ShellExecute,Hide,%Tools%\Innounp.exe,"-x -b -d#$q%DestDir%#$q #$q%SrcArchive%#$q"
+Set,#r,%ReturnCode%
+
+System,EndLocal
+
+[#_PhoenixAPI_Associate#]
+// ===============================================================================================================================
+// Name...........: Associate
+// Description....: Associate a file extension with a program.
+// Syntax.........: Associate,<FileExtension>,<ProgramExe>[,<Icon>]
+// Parameters.....: #1 FileExtension - The file extension to associate.
+//                  #2 ProgramExe - The full path to the executable to which the file extension will be associated with.
+//                  #3 Icon - NOT IMPLIMENTED
+//
+//                  Example: Associate,.ini,"C:\Windows\System32\notepad.exe"
+//
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_Associate]
+System,SetLocal
+If,#1,Equal,"",Halt,"Associate Syntax Error: You must specify the file extension to associate."
+If,#2,Equal,"",Halt,"Associate Syntax Error: You must specify the program to associate with the file extension."
+
+GetParam,1,%FileExt%
+Getparam,2,%Program%
+Set,%ExeExtList%,".exe|.cmd|.bat|.com|.js|.vbs|.wsf"
+
+// Remove . from the file extension if present.
+StrFormat,CTRIM,%FileExt%,".",%FileExt%
+
+StrFormat,FILENAME,%Program%,%ProgramFileName%
+StrFormat,EXT,%ProgramFileName%,%ProgramExt%
+List,Pos,%ExeExtList%,%ProgramExt%,%IsExecutable%
+If,%IsExecutable%,Equal,0,Halt,"Associate Error: [%Program%] is not an executable file (%ExeExtList%)." 
+Else,Begin
+  Echo,"Associating file extension [.%FileExt%] with [%Program%]..."
+  RegHiveLoad,Tmp_Software,%RegSoftware%
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.%FileExt%","","%FileExt%file"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\%FileExt%file","","%FileExt% File"
+  RegWrite,HKLM,0x2,"Tmp_Software\Classes\%FileExt%file\DefaultIcon","","#$q%Program%#$q"
+  RegWrite,HKLM,0x2,"Tmp_Software\Classes\%FileExt%file\shell\open\command","","#$q%Program%#$q #$q#$p1#$q"
+  RegHiveUnLoad,Tmp_Software
+  Echo,""
+End
+
+System,EndLocal
+
+[#_PhoenixAPI_IniReadEx#]
+// ===============================================================================================================================
+// Name...........: IniReadEx
+// Description....: Reads a value from a standard .ini file.
+//                  If the file or key doesn't exist the specified default value will be returned.
+// Syntax.........: IniReadEx,<FileName>,<Section>,<Key>,<DefaultValue>,<DestVar>
+// Parameters.....: #1 FileName - The full path of the file to read.
+//                  #2 Section - The section containing the value to be read.
+//                  #3 Key - The name of the key to be read.
+//                  #4 DefaultValue - The default value to return if the key cannot be found.
+//                  #5 DestVar - The value will be saved to a variable with this name.
+//                               Note that <DestVar> should NOT be enclosed in percent (%) signs 
+//
+//                  Example: IniReadEx,C:\windows\win.ini,mySection,myKey,Default,myVariable
+//
+// Return values..: Sets <DestVar> to the value returned.
+// Author.........: Homes32
+// Remarks........: The Winbuilder/PEBakery IniRead implementation always returns an empty string if the Key is not found.
+//                  If you don't need to specify a default key value IniRead will execute slightly faster then this macro.
+//
+//                  We need to run this macro in the local scope of the calling script in order to set the return var
+//                  so we must not use System,SetLocal isolation here.
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_IniReadEx]
+If,#1,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the full path of the file to read."
+If,#2,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the section containing the value to be read."
+If,#3,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the key to be read."
+If,#4,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the default value to return if the key cannot be found."
+If,#5,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the name of the variable where the value will be saved."
+
+If,ExistFile,#1,Begin
+  IniRead,#1,#2,#3,%IniReadEx_Return%
+  If,%IniReadEx_Return%,Equal,"",Set,%#5%,#4
+  Else,Set,%#5%,%IniReadEx_Return%
+End
+Else,Set,%#5%,#4
+
+Set,%IniReadEx_Return%,Nil
+
+[#_PhoenixAPI_SetFileACL#]
+// ===============================================================================================================================
+// Name...........: SetFileACL
+// Description....: Give full control for "Everyone" on a file or directory using Helge Klein's SetAcl.exe
+// Syntax.........: SetFileACL,<Path>
+// Parameters.....: #1 Path - The file or directory to modify.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Depends on SetAcl.exe in %Tools% <https://helgeklein.com/setacl/>
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_SetFileACL]
+System,SetLocal
+If,#1,Equal,"",Halt,"SetFileACL Syntax Error: You must specify the file or directory to modify."
+
+Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
+ShellExecute,Hide,%Tools%\SetAcl.exe," -ot #$qfile#$q -on #$q#1#$q -actn ace -actn setprot -op #$qdacl:p_nc#$q -ace #$qn:S-1-1-0;p:full;s:y#$q"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: %ExitCode%"
+
+System,EndLocal
+
+[#_PhoenixAPI_SetRegACL#]
+// ===============================================================================================================================
+// Name...........: SetRegACL
+// Description....: Take ownership and full control for "Everyone" on a registry key using Helge Klein's SetAcl.exe
+// Syntax.........: SetRegACL,<Path>
+// Parameters.....: #1 Path - Registry key to modify. The hive must already be mounted.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Depends on SetAcl.exe in %Tools% <https://helgeklein.com/setacl/>
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_SetRegACL]
+System,SetLocal
+If,#1,Equal,"",Halt,"SetRegACL Syntax Error: You must specify the Registry Key to modify."
+
+Echo,"Taking ownership of [#1] ...#$X#$XThis can take awhile, please be patient."
+ShellExecute,Hide,%Tools%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
+If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of#$x#$x#1#$x#$xThe command returned: %ExitCode%"
+Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
+ShellExecute,Hide,%Tools%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: %ExitCode%"
+
+System,EndLocal
+
+[#_PhoenixAPI_FileCopyEx#]
+// ===============================================================================================================================
+// Name...........: FileCopyEx
+// Description....: Extract a single file and it's .mui's (if they exist) from a specified directory.
+// Syntax.........: FileCopyEx,<SourcePath>,<DestPath>
+// Parameters.....: #1 SourcePath - Full path to the source file to copy. Wildcards are NOT supported.
+//                  #2 DestPath - Full path to the destination.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Wildcards are not supported. If you need wildcards use FileCopy instead.
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_FileCopyEx]
+System,SetLocal
+
+If,#1,Equal,"",Halt,"FileCopyEx Syntax Error: Source file was not specified."
+If,#2,Equal,"",Halt,"FileCopyEx Syntax Error: Destination was not specified."
+
+GetParam,1,%SrcFile%
+GetParam,2,%DestPath%
+
+StrFormat,Pos,%SrcFile%,*,%WildCard%
+If,Not,%WildCard%,Equal,0,Halt,"FileCopyEx Syntax Error: Wildcards are not supported."
+StrFormat,Pos,%SrcFile%,?,%WildCard%
+If,Not,%WildCard%,Equal,0,Halt,"FileCopyEx Syntax Error: Wildcards are not supported."
+
+List,Count,%SourceFallbackLang%,%LangCount%
+
+FileCopy,%SrcFile%,%DestPath%
+
+StrFormat,FileName,%SrcFile%,%Filename%
+StrFormat,Split,%DestPath%,"\",1,%DriveLtr%
+If,ExistFile,"%DriveLtr%\Windows\SystemResources\%Filename%.mun",FileCopy,"%DriveLtr%\Windows\SystemResources\%Filename%.mun",APPEND
+
+Loop,%API%,__PhoenixAPI_FileCopyEx_mui_Loop,1,%LangCount%,%SrcFile%,%SourceFallbackLang%,%DestPath%
+
+System,EndLocal
+
+[#__PhoenixAPI_FileCopyEx_mui_Loop#]
+// ===============================================================================================================================
+// Name...........: FileCopyEx_mui_Loop
+// Description....: Loop to copy a file's .mui
+// Syntax.........: FileCopyEx_mui_Loop,<FilePath>,<Language>,<DestPath>
+// Parameters.....: #1 FilePath - Path to the parent file
+//                  #2 Language - Language to copy
+//                  #3 DestPath - Destination path
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Internal Function
+// Related........: FileCopyEx
+// ===============================================================================================================================
+[__PhoenixAPI_FileCopyEx_mui_Loop]
+System,SetLocal
+List,Get,#2,#c,%Language%
+StrFormat,FileName,#1,%FileName%
+StrFormat,Ext,#1,%FileExt%
+StrFormat,DirPath,#1,%SrcDirPath%
+StrFormat,DirPath,#3,%DestDirPath%
+If,%FileExt%,Equal,.msc,FileCopy,"%SrcDirPath%%Language%\%FileName%","#3\%Language%\%FileName%"
+Else,If,ExistFile,"%SrcDirPath%%Language%\%FileName%.mui",FileCopy,"%SrcDirPath%%Language%\%FileName%.mui","%DestDirPath%%Language%\%FileName%.mui"
+System,EndLocal
+
+[#_PhoenixAPI_RequireFile#]
+// ===============================================================================================================================
+// Name...........: RequireFile
+// Description....: Extract a single file and it's .mui's (if they exist) from Install.wim
+// Syntax.........: RequireFileEx,<FilePath>[,NOMUI]
+// Parameters.....: #1 FilePath - Path to the file to extract relative to the root of Install.wim
+//                  #2 NOMUI - Don't extract .mui files.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: This command is an alias to RequireFileEx,ExtractFile
+// Related........: _PhoenixAPI_RequireFileEx
+// ===============================================================================================================================
+[_PhoenixAPI_RequireFile]
+Run,%API%,_PhoenixAPI_RequireFileEx,ExtractFile,#1,#2
+
+[#_PhoenixAPI_RequireFileEx#]
+// ===============================================================================================================================
+// Name...........: RequireFileEx
+// Description....: Extract a file and it's .mui's (if they exist) from Install.wim
+// Syntax.........: RequireFileEx,<Action>,<FilePath>[,NOMUI]
+// Parameters.....: #1 Action:
+//                             Append       - Append the file to a list (bulk extraction)
+//                             ExtractFile  - Single file extraction
+//                             ExtractList  - Extract the list created with Append
+//                  #2 Path to the file to extract relative to the root of Install.wim
+//                  #3 NOMUI - (Optional) Don't extract .mui files.
+//                             If you know the file to be extracted isn't localized you can save a some time by not checking
+//                             for .mui files that don't exist.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: RequireFileEx uses WimExtractBulk in NOERR mode so it does not verify that files exist before trying to extract.
+//                  Check the build log for WimExtract warnings.
+//                  Right now we are lazy and just add the .mun files to the list files regardless of whether or not it exists,
+//                  and let WimExtractBulk log a warning if it doesn't. In order to reduce log clutter with false positive warnings
+//                  we should check if the files exist first using WimExistFile, but it slows things down too much with large lists.
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_RequireFileEx]
+
+If,#1,Equal,"",Halt,"RequireFileEx Syntax Error: Action was not specified."
+
+System,SetLocal
+
+GetParam,1,%Action%
+GetParam,2,%GLOB%
+GetParam,3,%Arg1%
+
+If,%Arg1%,Equal,NOMUI,Set,%ExtractMui%,False
+Else,Set,%ExtractMui%,True
+
+Set,%BulkFileList%,%ProjectTemp%\RequireFileEx-BulkFileList.txt
+Set,%SingleFileList%,%ProjectTemp%\RequireFileEx-SingleFileList.txt
+
+List,Count,%SourceFallbackLang%,%LangCount%
+
+// For .mun file check
+StrFormat,FileName,%GLOB%,%FileName%
+
+If,%Action%,Equal,"Append",Begin
+  If,%GLOB%,Equal,"",Halt,"RequireFileEx Syntax Error: File was not specified."
+  If,Not,ExistFile,%BulkFileList%,FileCreateBlank,%BulkFileList%
+  TXTAddLine,%BulkFileList%,%GLOB%,APPEND
+  TXTAddLine,%BulkFileList%,\Windows\SystemResources\%FileName%.mun,APPEND
+  If,%ExtractMui%,Equal,True,Loop,%API%,__PhoenixAPI_RequireFileEx_mui_Loop,1,%LangCount%,%GLOB%,%SourceFallbackLang%,%BulkFileList%
+End
+Else,If,%Action%,Equal,"ExtractFile",Begin
+  Echo,"Extracting required file(s) [%GLOB%]..."
+  If,%GLOB%,Equal,"",Halt,"RequireFileEx Syntax Error: File was not specified."
+  If,Not,ExistFile,%SingleFileList%,FileCreateBlank,%SingleFileList%
+  TXTAddLine,%SingleFileList%,%GLOB%,APPEND
+  TXTAddLine,%SingleFileList%,\Windows\SystemResources\%FileName%.mun,APPEND
+  If,%ExtractMui%,Equal,True,Loop,%API%,__PhoenixAPI_RequireFileEx_mui_Loop,1,%LangCount%,%GLOB%,%SourceFallbackLang%,%SingleFileList%
+  WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%SingleFileList%,%TargetDir%,NOACL,NOATTRIB,NOERR,NOWARN
+  FileDeleteEx,%SingleFileList%
+End
+Else,If,%Action%,Equal,"ExtractList",Begin
+  If,Not,ExistFile,%BulkFileList%,Halt,"RequireFileEx Error: You must create a list using [RequireFileEx,Append] before you can extract it!"
+  Echo,"Extracting required files...#$x#$xThis can take awhile, please be patient."
+  WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%BulkFileList%,%TargetDir%,NOACL,NOATTRIB,NOERR,NOWARN
+  FileDeleteEx,%BulkFileList%
+End
+Else,Halt,"RequireFileEx Syntax Error: Invalid Action [#1]."
+
+System,EndLocal
+
+[#__PhoenixAPI_RequireFileEx_mui_Loop#]
+// ===============================================================================================================================
+// Name...........: RequireFileEx_mui_Loop
+// Description....: Loop to extract a file's .mui from Install.wim
+// Syntax.........: RequireFileEx_mui_Loop,<FilePath>,<Language>,<ListFile>
+// Parameters.....: #1 FilePath - Path to the file relative to the root of Install.wim
+//                  #2 Language - Language to extract
+//                  #3 ListFile - ListFile to write the MUI path
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Internal Function
+//                  Right now we are lazy and just add the .mui files to the list files regardless of whether or not it exists,
+//                  and let WimExtractBulk log a warning if it doesn't. In order to reduce log clutter with false positive warnings
+//                  we should check if the files exist first using WimExistFile, but it slows things down too much with large lists.
+// Related........: RequireFileEx
+// ===============================================================================================================================
+[__PhoenixAPI_RequireFileEx_mui_Loop]
+System,SetLocal
+List,Get,#2,#c,%Language%
+StrFormat,FileName,#1,%FileName%
+StrFormat,Ext,#1,%FileExt%
+StrFormat,DirPath,#1,%DirPath%
+If,%FileExt%,Equal,.msc,TXTAddLine,#3,%DirPath%%Language%\%FileName%,APPEND
+Else,TXTAddLine,#3,%DirPath%%Language%\%FileName%.mui,APPEND
+System,EndLocal
+
+[#_PhoenixAPI_AddAutoRun#]
+// ===============================================================================================================================
+// Name...........: AddAutoRun
+// Description....: Run a program when the PE Environment starts
+// Syntax.........: AddAutoRun,<RunPos>,<Mode>,<Title>,<ProgramExe>,<Parameters>
+// Parameters.....: #1 RunPos
+//                     PreShell - Run before the shell (ie. Explorer) is loaded.
+//                     PostShell - Run after the shell is loaded.
+//                  #2 Mode
+//                     NoWait     - Do not wait for the program to terminate.
+//                     Wait       - Wait for the program to terminate before moving on.
+//                     HideNoWait - Run the program hidden and do not wait for it to terminate.
+//                     HideWait   - Run the program hidden and wait for it to terminate.
+//                  #3 Title - Title that may be shown in a progress window while the program is running.
+//                  #4 ProgramExe - The full path to the program to be executed.
+//                  #5 Parameters - Parameters that will be passed to the program.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: PECMD: EXEC {[-hide] [-wait]} <ProgramExe> [Parameters]
+//                  PECMD <MODE> needs testing. Wait/HideWait is not working properly?
+// Related........: 
+// ===============================================================================================================================
+[_PhoenixAPI_AddAutoRun]
+System,SetLocal
+If,#1,Equal,"",Halt,"AddAutoRun Syntax Error: Run position was not specified."
+If,#2,Equal,"",Halt,"AddAutoRun Syntax Error: Run mode was not specified."
+If,#4,Equal,"",Halt,"AddAutoRun Syntax Error: Program Executable was not specified."
+
+GetParam,1,%RunPos%
+GetParam,2,%Mode%
+GetParam,3,%Title%
+GetParam,4,%ProgramExe%
+GetParam,5,%Parameters%
+
+If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
+  If,%Mode%,Equal,NoWait,Set,%ExecMode%,""
+  Else,If,%Mode%,Equal,Wait,Set,%ExecMode%,"-wait "
+  Else,If,%Mode%,Equal,HideNoWait,Set,%ExecMode%,"-hide "
+  Else,If,%Mode%,Equal,HideWait,Set,%ExecMode%,"-hide -wait "
+  Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
+  
+  If,%RunPos%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\pecmd.ini","_END Preshell","TEXT %Title%##0xFFFFFF L59 T39 $20#$xEXEC %ExecMode%%ProgramExe% %Parameters%#$x#$x_END Preshell"
+  Else,If,%RunPos%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\pecmd.ini","_END PostShell","TEXT %Title%##0xFFFFFF L59 T39 $20#$xEXEC %ExecMode%%ProgramExe% %Parameters%#$x#$x_END PostShell"
+  //Else,If,%RunPos%,Equal,"RunOnce",Begin
+   // NEED TO HANDLE RUN MODE
+  //  RegHiveLoad,Tmp_Default,%RegDefault%
+  //  RegWrite,HKLM,0x2,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\RunOnce",%Title%,"%ProgramExe%%Parameters%"
+  //  RegHiveUnload,Tmp_Default
+  //End
+  //Else,If,%RunPos%,Equal,
+  Else,Halt,"AddAutoRun Syntax Error: [%RunPos%] is not a supported Run method."
+End
+Else,Begin
+  // Shortcuts.exe - Not fully implemented yet...
+  If,%RunPos%,Equal,"Preshell",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,PreConfig,"%Mode%|%Title%|%ProgramExe% %Parameters%"
+  Else,If,%RunPos%,Equal,"Postshell",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,PostConfig,"%Mode%|%Title%|%ProgramExe% %Parameters%"
+  //Else,If,%RunPos%,Equal,"?",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,Autorun,"%Mode%|%Title%|%ProgramExe% %Parameters%"
+  Else,Halt,"AddAutoRun Syntax Error: [%RunPos%] is not a supported Run method."
+End
+
+System,EndLocal
+
+[#_PhoenixAPI_AddShortcut#]
+// ===============================================================================================================================
+// Name...........: AddShortcut
+// Description....: Handle Shortcut creation
+// Syntax.........: AddShortcut,<Type>,<StartMenuFolder>,<Title>,<PathProgramExe>,<Parameters>,<WorkDir>,<IconPath>,<IconIndex>,<State>,<Hotkey>,<Tooltip>
+// Parameters.....: #1 Type
+//                       Desktop - The shortcut will be created on the desktop.
+//                       StartMenu - The shortcut will be created in the start menu.                  
+//                  #2 StartMenuFolder - The name of the start menu folder where the shortcut will be created.
+//                  #3 Title - The name of the shortcut. 
+//                  #4 ProgramExe - The full path to the program to be executed.
+//                  #5 Parameters - Parameters that will be passed to the program.
+//                  #6 WorkDir - The work directory for the program.
+//                  #7 IconPath - The full path to file containing the icon.
+//                  #8 IconIndex - For files containing multiple icons this is Index of the icon to use.
+//                  #9 WindowState - One of the following:
+//                       Normal - Start the program normally.
+//                       Minimized - Start the program minimized to the taskbar.
+//                       Maximized - Start the program maximized.
+//                  #10 Hotkey -
+//                  #11 Tooltip - Tooltip Text
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: PECMD:         LINK {[!] {[_]|[^]}} <ShortcutPath>, <TargetPath>, [Parameters], [IconPath[#IconIndex]], [Tooltip], [WorkDir], [HotKey]
+//                                 WindowState: ! - Hide, _ - Minimize, ^ - Maximize
+//                                               
+//                  Shortcuts.exe: <ShortcutPath> | <Title> | <TargetPath> | [IconPath,IconIndex] | [Parameters]
+//
+//                  TODO: Shortcuts.exe needs to support all AddShortcut parameters. This requires rewriting a portion of shortcuts.exe
+// Related........: 
+// ===============================================================================================================================
+[_PhoenixAPI_AddShortcut]
+System,SetLocal
+If,#1,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut type was not specified."
+If,#3,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut title was not specified."
+If,#4,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut's ProgramExe was not specified."
+GetParam,1,%Type%
+GetParam,2,%Folder%
+GetParam,3,%Title%
+GetParam,4,%ProgramExe%
+GetParam,5,%Parameters%
+GetParam,6,%WorkDir%
+GetParam,7,%IconPath%
+GetParam,8,%IconIndex%
+GetParam,9,%WindowState%
+GetParam,10,%Hotkey%
+GetParam,11,%Tooltip%
+
+If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
+
+  If,%Folder%,Equal,".",Set,%Folder%,""
+  Else,Set,%Folder%,"\%Folder%"
+  
+  // Type
+  If,%Type%,Equal,"Desktop",Set,%Cmd%,"LINK #$pDesktop#$p\%Title%#$c%ProgramExe%#$c%Parameters%"
+  Else,If,%Type%,Equal,"StartMenu",Set,%Cmd%,"LINK #$pPrograms#$p%Folder%\%Title%#$c%ProgramExe%#$c%Parameters%"
+  Else,Halt,"AddShortcut Syntax Error: Shortcut type [%Type%] is not supported."
+
+  // Window State
+  If,%WindowState%,Equal,"Minimized",Set,%Cmd%,"_%Cmd%"
+  Else,If,%WindowState%,Equal,"Maximized",Set,%Cmd%,"^%Cmd%"
+  Else,Set,%WindowState%,""
+  
+  // Icon
+  If,Not,%IconPath%,Equal,"",Begin
+    Set,%Cmd%,"%Cmd%#$c%IconPath%"
+    If,Not,%IconIndex%,Equal,"",Set,%Cmd%,"%Cmd%##%IconIndex%"
+  End
+  Else,Set,%Cmd%,"%Cmd%#$c"
+  
+  // Tooltip
+  If,Not,%Tooltip%,Equal,"",Set,%Cmd%,"%Cmd%#$c%Tooltip%"
+  Else,Set,%Cmd%,"%Cmd%#$c"
+  
+  // WorkDir
+  If,Not,%WorkDir%,Equal,"",Set,%Cmd%,"%Cmd%#$c%WorkDir%"
+  
+  // Hotkey
+  If,Not,%Hotkey%,Equal,"",Set,%Cmd%,"%Cmd%#$c%HotKey%"
+  
+  // Final LINK command
+  TXTReplace,"%TargetSystem32%\pecmd.ini","_END Shortcuts","%Cmd%#$x#$x_END Shortcuts"
+
+End
+Else,Begin
+  // Shortcuts.exe
+  
+  // Window State
+  If,Not,%WindowState%,Equal,"",Echo,"Warning: Shortcuts.exe does not support the <WindowState> argument for AddShortcut.",Warn
+  
+  // Icon
+  If,Not,%IconIndex%,Equal,"",Set,%Icon%,"%IconPath%#$c%IconIndex%"
+  Else,Set,%Icon%,%IconPath%
+  
+  // Tooltip
+  If,Not,%Tooltip%,Equal,"",Echo,"Warning: Shortcuts.exe does not support the <Tooltip> argument for AddShortcut.",Warn
+  
+  // WorkDir
+  If,Not,%WorkDir%,Equal,"",Echo,"Warning: Shortcuts.exe does not support the <WorkDir> argument for AddShortcut.",Warn
+  
+  // Hotkey
+  If,%Hotkey%,Not,Equal,"",Echo,"Warning: Shortcuts.exe does not support the <Hotkey> argument for AddShortcut.",Warn
+  
+  // Final Cfg Entry
+  If,%Type%,Equal,"Desktop",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,Shortcut,"%Folder%|%Title%|%ProgramExe%|%Icon%|%Parameters%"
+  If,%Type%,Equal,"StartMenu",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,Shortcut,"%Folder%|%Title%|%ProgramExe%|%Icon%|%Parameters%"
+  Else,Halt,"AddShortcut Syntax Error: Shortcut type [%Type%] is not supported."
+End
+System,EndLocal
+
+[_PhoenixAPI_PinShortcut]
+// ===============================================================================================================================
+// Name...........: PinShortcut
+// Description....: Pin a shortcut to the taskbar or start menu.
+// Syntax.........: PinShortcut,<Location>,<Position>,<ProgramExe>
+// Parameters.....: #1 Location
+//                     StartMenu  - Pin to the start menu.
+//                     Taskbar    - Pin to the taskbar.
+//                  #2 Position
+//                     Auto       - (Default) Automatically determine the pin position.
+//                     1-9        - Pin the shortcut to a specific position [1-9].
+//                  #3 ProgramExe - The full path to the program to be executed.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Windows allows a max of 12 pins. This macro relies on PinUtil.exe, which supports pinning up to 10 items.
+//                  Pins cannot target an executable located on removable media.
+// Related........: 
+// ===============================================================================================================================
+[_PhoenixAPI_PinShortcut]
+System,SetLocal
+If,#1,Equal,"",Halt,"PinShortcut Syntax Error: Pin location was not specified."
+If,#2,Equal,"",Halt,"PinShortcut Syntax Error: Pin position was not specified."
+If,#3,Equal,"",Halt,"PinShortcut Syntax Error: Program Executable was not specified."
+
+GetParam,1,%PinLocation%
+GetParam,2,%PinPos%
+GetParam,3,%ProgramExe%
+
+If,Not,%PinLocation%,Equal,"StartMenu",If,Not,%PinLocation%,Equal,"Taskbar",Halt,"PinShortcut Syntax Error: [%PinLocation%] is not a valid pin location."
+
+If,%PinPos%,Equal,"Auto",Begin
+  // Find an unused pin position
+  Loop,%Api%,__PhoenixAPI_PinShortcut_FindOpenPos_Loop,0,9,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%
+  Set,%PinPos%,#r  
+End
+Else,If,%PinPos%,Smaller,0,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [1-9]."
+Else,If,%PinPos%,Bigger,9,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [1-9]."
+
+If,%PinPos%,Equal,-1,Begin
+  Echo,"PinShortcut Warning: Could not find an open [%PinLocation%] position for [%ProgramExe%].",Warn
+  // Return without doing anything.
+End
+Else,Begin
+  // Check if user specified position will be overwritten
+  IniReadSection,"%TargetSystem32%\pecmd.ini","PinUtil",%IniSection%
+  List,Pos,%IniSection%,%PinLocation%%PinPos%,%Index%
+  If,Not,%Index%,Equal,0,Begin
+    IniRead,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ExistingExe%
+    Echo,"PinShortcut Warning: Existing pin for [%ExistingExe%] in [%PinLocation%] position [%PinPos%] will be overwritten by [%ProgramExe%].",Warn
+  End
+
+  IniWrite,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
+End
+System,EndLocal
+
+[#__PhoenixAPI_PinShortcut_FindOpenPos_Loop#]
+// ===============================================================================================================================
+// Name...........: PinShortcut_FindOpenPos_Loop
+// Description....: Loop to 
+// Syntax.........: PinShortcut_FindOpenPos_Loop,<FilePath>,<Section>,<PinLocation>
+// Parameters.....: #1 FilePath - Path to the config file
+//                  #2 Section - Section in the config file
+//                  #3 PinLocation - Location of Pin [StartMenu | Taskbar]
+// Return values..: #r - Success: Returns an int specifying the first open position found
+//                       Failure: Returns -1 indicating no open positions were found
+// Author.........: Homes32
+// Remarks........: Internal Function
+// Related........: PinShortcut
+// ===============================================================================================================================
+[__PhoenixAPI_PinShortcut_FindOpenPos_Loop]
+System,SetLocal
+IniRead,#1,#2,#3#c,%CurrentPos%
+
+If,%CurrentPos%,Equal,"",Begin
+  Set,#r,#c
+  Loop,Break
+End
+Else,Set,#r,-1
+
+System,EndLocal
+
+[#_PhoenixAPI_RunFromRam#]
+// ===============================================================================================================================
+// Name...........: RunFromRam
+// Description....: Choose to redirect the programs folder to Boot.wim
+//
+//                  This macro works by overwriting the GLOBAL %TargetPrograms% and %PEPrograms% with
+//                  local variables that redirect to boot.wim instead of the boot media.
+// Syntax.........: RunFromRam
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_RunFromRam]
+Set,%TargetPrograms%,"%TargetDir%\Program Files"
+Set,%PEPrograms%,"X:\Program Files"
+
+[#_PhoenixAPI_DirDeleteEx#]
+// ===============================================================================================================================
+// Name...........: DirDeleteEx
+// Description....: Delete a directory if it exists. If the DirDelete commands fails, for example if a file is open in another
+//                  application or Explorer then give the user a meaningful error message and a chance to correct the problem.
+//                  if that doesn't work halt the build.
+// Syntax.........: DirDeleteEx,<Directory>
+// Parameters.....: #1 Directory - The full path to the directory to delete.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_DirDeleteEx]
+If,#1,Equal,"",Halt,"Syntax Error: Directory was not specified."
+
+System,ErrorOff
+If,ExistDir,#1,DirDelete,#1
+If,ExistDir,#1,Begin
+  If,Question,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer.#$x#$xRetry?",Begin
+    // User clicked 'Yes'
+	Wait,3
+	System,ErrorOff
+    If,ExistDir,#1,DirDelete,#1
+    If,ExistDir,#1,Begin
+	  Message,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer then try building again.",Error
+	  Halt,"Error: The specified folder could not be deleted."
+	End
+  End
+  Else,Begin
+    // User clicked 'No'
+    Halt,"Error: The specified folder could not be deleted."
+  End
+End
+
+[#_PhoenixAPI_FileDeleteEx#]
+// ===============================================================================================================================
+// Name...........: FileDeleteEx
+// Description....: Delete a file if it exists. If the FileDelete commands fails, for example if a file is open in another
+//                  application, then give the user a meaningful error message and a chance to correct the problem.
+//                  if that doesn't work halt the build.
+// Syntax.........: DirDeleteEx,<File>
+// Parameters.....: #1 File - The full path to the file to delete.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_FileDeleteEx]
+If,#1,Equal,"",Halt,"Syntax Error: File was not specified."
+
+System,ErrorOff
+If,ExistFile,#1,FileDelete,#1
+If,ExistFile,#1,Begin
+  If,Question,"Error: The specified file could not be deleted.#$x#$x#1#$x#$xPlease make sure the file is not running or in use by another application (eg. Text Editor/vmWare/VirtualBox).#$x#$xRetry?",Begin
+    // User clicked 'Yes'
+	Wait,3
+	System,ErrorOff
+    If,ExistFile,#1,FileDelete,#1
+    If,ExistFile,#1,Begin
+	  Message,"Error: The specified file could not be deleted.#$x#$x#1#$x#$xPlease make sure the file is not running or in use by another application (eg. Text Editor/vmWare/VirtualBox) then try building again.",Error
+	  Halt,"Error: The specified file could not be deleted."
+	End
+  End
+  Else,Begin
+    // User clicked 'No'
+    Halt,"Error: The specified file could not be deleted."
+  End
+End
+
+[#_PhoenixAPI_ApplyBitMask#]
+// ===============================================================================================================================
+// Name...........: ApplyBitMask
+// Description....: Apply a bitmask to a hex value in a binary string.
+// Syntax.........: ApplyBitMask,<BitArray>,<BitGroup>,<BitMask>[,BitSize]
+// Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
+//                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
+//                                supplied by <BitArray>. Example: In order to apply or mask to the value 'DB' in
+//                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
+//                  #3 BitMask - The hexadecimal bitmask to apply to the specified <BitGroup>. Ex. 0x000020
+//                  #4 BitSize (Optional) - Specify the bitsize (8,16,32,64) used. Default is 32.
+// Return values..: #r - Returns <BitArray> with the specified bitmask applied.
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_ApplyBitMask]
+System,SetLocal
+GetParam,1,%BitArray%
+GetParam,2,%BitGroup%
+GetParam,3,%BitMask%
+GetParam,4,%BitSize%
+
+If,%BitArray%,Equal,"",Halt,"ApplyBitMask Syntax Error: You must specify a bit array."
+If,%BitGroup%,Equal,"",Halt,"ApplyBitMask Syntax Error: You must specify the bit group in order to apply a mask."
+If,%BitMask%,Equal,"",Halt,"ApplyBitMask Syntax Error: You must specify the bitmask to apply."
+If,%BitSize%,Equal,"",Begin
+  Echo,"ApplyBitMask Warning: BitSize was not specified. Assuming it's a 32bit integer.",WARN
+  Set,%BitSize%,32
+End
+
+List,Get,%BitArray%,%BitGroup%,%Bits%,Delim=#$c
+
+Math,BitOr,%Bits%,0x%Bits%,%BitMask%
+
+// Back to Hex for our return value
+Math,Hex,%Hex%,%Bits%,%BitSize%
+StrFormat,LTRIM,%Hex%,2,%Hex%
+
+List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
+Set,#r,%BitArray%
+
+System,EndLocal
+
+[#_PhoenixAPI_BitClear#]
+// ===============================================================================================================================
+// Name...........: BitClear
+// Description....: Clear a specific bit in a binary string.
+// Syntax.........: BitClear,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
+// Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
+//                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
+//                                supplied by <BitArray>. Example: In order to apply or mask to the value 'DB' in
+//                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
+//                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
+//                  #4 BitSize (Optional) - Specify the bitsize (8,16,32,64) used. Default is 32.
+// Return values..: #r - Returns <BitArray> with the specified bit cleared.
+// Author.........: Homes32
+// Remarks........: BitGroup &= ~(1 << BitPosition); // Take OR of <BitGroup> and 1 shifted <BitPosition> positions negated
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_BitClear]
+System,SetLocal
+GetParam,1,%BitArray%
+GetParam,2,%BitGroup%
+GetParam,3,%BitPosition%
+GetParam,4,%BitSize%
+
+If,%BitArray%,Equal,"",Halt,"BitClear Syntax Error: You must specify a bit array."
+If,%BitGroup%,Equal,"",Halt,"BitClear Syntax Error: You must specify the bit group in order clear a bit."
+If,%BitPosition%,Equal,"",Halt,"BitClear Syntax Error: You must specify the position of the bit to clear."
+If,%BitSize%,Equal,"",Begin
+  Echo,"BitClear Warning: BitSize was not specified. Assuming it's a 32bit integer.",WARN
+  Set,%BitSize%,32
+End
+
+List,Get,%BitArray%,%BitGroup%,%Bits%,Delim=#$c
+
+Math,BitShift,%BitMask%,1,LEFT,%BitPosition%,%BitSize%
+Math,BitNot,%BitMask%,%BitMask%,%BitSize%
+Math,BitAnd,%Bits%,0x%Bits%,%BitMask%
+
+// Back to Hex for our return value
+Math,Hex,%Hex%,%Bits%,%BitSize%
+StrFormat,LTRIM,%Hex%,2,%Hex%
+
+List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
+Set,#r,%BitArray%
+
+System,EndLocal
+
+[#_PhoenixAPI_BitSet#]
+// ===============================================================================================================================
+// Name...........: BitSet
+// Description....: Set a specific bit in a binary string.
+// Syntax.........: BitSet,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
+// Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
+//                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
+//                                supplied by <BitArray>. Example: In order to apply or mask to the value 'DB' in
+//                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
+//                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
+//                  #4 BitSize (Optional) - Specify the bitsize (8,16,32,64) used. Default is 32.
+// Return values..: #r - Returns <BitArray> with the specified bit set.
+// Author.........: Homes32
+// Remarks........: BitGroup |= (1 << BitPosition); // Take OR of <BitGroup> and 1 shifted <BitPosition> positions
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_BitSet]
+System,SetLocal
+GetParam,1,%BitArray%
+GetParam,2,%BitGroup%
+GetParam,3,%BitPosition%
+GetParam,4,%BitSize%
+
+If,%BitArray%,Equal,"",Halt,"BitSet Syntax Error: You must specify a bit array."
+If,%BitGroup%,Equal,"",Halt,"BitSet Syntax Error: You must specify the bit group in order to set a bit."
+If,%BitPosition%,Equal,"",Halt,"BitSet Syntax Error: You must specify the position of the bit to set."
+If,%BitSize%,Equal,"",Begin
+  Echo,"BitSet Warning: BitSize was not specified. Assuming it's a 32bit integer.",WARN
+  Set,%BitSize%,32
+End
+
+List,Get,%BitArray%,%BitGroup%,%Bits%,Delim=#$c
+
+Math,BitShift,%BitMask%,1,LEFT,%BitPosition%,%BitSize%
+Math,BitOr,%Bits%,0x%Bits%,%BitMask%
+
+// Back to Hex for our return value
+Math,Hex,%Hex%,%Bits%,%BitSize%
+StrFormat,LTRIM,%Hex%,2,%Hex%
+
+List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
+Set,#r,%BitArray%
+
+System,EndLocal
+
+[#_PhoenixAPI_BitToggle#]
+// ===============================================================================================================================
+// Name...........: BitToggle
+// Description....: Set/Clear a specific bit in a binary string.
+// Syntax.........: BitToggle,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
+// Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
+//                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
+//                                supplied by <BitArray>. Example: In order to apply or mask to the value 'DB' in
+//                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
+//                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
+//                  #4 BitSize (Optional) - Specify the bitsize (8,16,32,64) used. Default is 32.
+// Return values..: #r - Returns <BitArray> with the specified bit flipped.
+// Author.........: Homes32
+// Remarks........: BitGroup ^= (1 << BitPosition); // Take XOR of <BitGroup> and 1 shifted <BitPosition> positions
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_BitToggle]
+System,SetLocal
+GetParam,1,%BitArray%
+GetParam,2,%BitGroup%
+GetParam,3,%BitPosition%
+GetParam,4,%BitSize%
+
+If,%BitArray%,Equal,"",Halt,"BitFlip Syntax Error: You must specify a bit array."
+If,%BitGroup%,Equal,"",Halt,"BitFlip Syntax Error: You must specify the bit group in order to toggle a bit."
+If,%BitPosition%,Equal,"",Halt,"BitFlip Syntax Error: You must specify the position of the bit to toggle."
+If,%BitSize%,Equal,"",Begin
+  Echo,"BitToggle Warning: BitSize was not specified. Assuming it's a 32bit integer.",WARN
+  Set,%BitSize%,32
+End
+
+List,Get,%BitArray%,%BitGroup%,%Bits%,Delim=#$c
+
+Math,BitShift,%BitMask%,1,LEFT,%BitPosition%,%BitSize%
+Math,BitXOr,%Bits%,0x%Bits%,%BitMask%
+
+// Back to Hex for our return value
+Math,Hex,%Hex%,%Bits%,%BitSize%
+StrFormat,LTRIM,%Hex%,2,%Hex%
+
+List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
+Set,#r,%BitArray%
+
+System,EndLocal
+
+[#_PhoenixAPI_XMLDelete#]
+// ===============================================================================================================================
+// Name...........: XMLDelete
+// Description....: Experimental wrapper for XmlStarlet
+// Syntax.........: XMLDelete,<XMLFile>,<XPath>
+// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
+//                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to delete.
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_XMLDelete]
+System,SetLocal
+GetParam,1,%XMLFile%
+GetParam,2,%XPath%
+
+If,Not,ExistFile,%XMLFile%,Halt,"XMLDelete Syntax Error: The file [%XMLFile%] does not exist."
+If,%XPath%,Equal,"",Halt,"XMLDelete Syntax Error: You must specify an XPath."
+
+ShellExecute,Hide,"%Tools%\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+//If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to query [%XPath%] from [%XMLFile%]."
+
+ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
+If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to delete [%XPath%] from [%XMLFile%]."
+
+System,EndLocal
+
+[#_PhoenixAPI_XMLAdd#]
+// ===============================================================================================================================
+// Name...........: XMLAdd
+// Description....: Experimental wrapper for XmlStarlet
+// Syntax.........: XMLAdd,<Operation>,<XMLFile>,<XPath>,<Type>,<Name>[,<Value>]
+// Parameters.....: #1 Operation - Can be one of:
+//                     Insert  - Insert a node at the the beginning of the XPath.
+//                     Append  - Append a node to the end of the XPath.
+//                     Subnode - Add a new subnode to each XPath in the document.
+//                  #2 XMLFile - Full path to the .xml filed to edit.
+//                  #3 XPath - XPath (XML Path Language) query used to insert the Attribute/Element.
+//                  #4 Type - XPath type [elem|text|attr]
+//                  #5 Name - Value Name
+//                  #6 Value - (Optional) Value
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: 
+//                  http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_XMLAdd]
+System,SetLocal
+GetParam,1,%Operation%
+GetParam,2,%XMLFile%
+GetParam,3,%XPath%
+GetParam,4,%Type%
+GetParam,5,%Name%
+GetParam,6,%Value%
+
+If,%Operation%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify an operation [insert|append|subnode]."
+If,Not,ExistFile,%XMLFile%,Halt,"XMLInsert Syntax Error: The file [%XMLFile%] does not exist."
+If,%XPath%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify an XPath."
+If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a type [elem|text|attr]."
+If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a name."
+// Value is allowed to be empty. If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a value."
+
+ShellExecute,Hide,"%Tools%\xml.exe","sel --text --template --value-of #$q%XPath%/@%Name%#$q #$q%XMLFile%#$q"
+//If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to query [%XPath%/@%Name%] from [%XMLFile%]."
+
+If,%Operation%,Equal,"Insert",Begin
+  ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --insert #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to insert value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+End
+Else,If,%Operation%,Equal,"Append",Begin
+  ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --append #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to append value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+End
+Else,If,%Operation%,Equal,"Subnode",Begin
+  ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --subnode #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to add subnode value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+End
+Else,Halt,"XMLAdd Syntax Error: You must specify an valid operation [insert|append|subnode]."
+
+System,EndLocal
+
+[#_PhoenixAPI_XMLRename#]
+// ===============================================================================================================================
+// Name...........: XMLRename
+// Description....: Experimental wrapper for XmlStarlet
+// Syntax.........: XMLRename,<XMLFile>,<XPath>,<Value>
+// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
+//                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to rename.
+//                  #3 Value - New Value
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: The XPath must exist in order for the value to be Renamed.
+//                  http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_XMLRename]
+System,SetLocal
+GetParam,1,%XMLFile%
+GetParam,2,%XPath%
+GetParam,3,%Value%
+
+If,Not,ExistFile,%XMLFile%,Halt,"XMLRename Syntax Error: The file [%XMLFile%] does not exist."
+If,%XPath%,Equal,"",Halt,"XMLRename Syntax Error: You must specify an XPath."
+If,%Value%,Equal,"",Halt,"XMLRename Syntax Error: You must specify a value."
+
+ShellExecute,Hide,"%Tools%\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+//If,Not,#r,Equal,0,Halt,"XMLRename ERROR: Failed to query [%XPath%] from [%XMLFile%]."
+
+ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --rename #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+If,Not,#r,Equal,0,Halt,"XMLRename ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
+
+System,EndLocal
+
+[#_PhoenixAPI_XMLUpdate#]
+// ===============================================================================================================================
+// Name...........: XMLUpdate
+// Description....: Experimental wrapper for XmlStarlet
+// Syntax.........: XMLUpdate,<XMLFile>,<XPath>,<Value>
+// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
+//                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to update.
+//                  #3 Value - New Value
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: The XPath must exist in order for the value to be updated.
+//                  http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_XMLUpdate]
+System,SetLocal
+GetParam,1,%XMLFile%
+GetParam,2,%XPath%
+GetParam,3,%Value%
+
+If,Not,ExistFile,%XMLFile%,Halt,"XMLUpdate Syntax Error: The file [%XMLFile%] does not exist."
+If,%XPath%,Equal,"",Halt,"XMLUpdate Syntax Error: You must specify an XPath."
+If,%Value%,Equal,"",Halt,"XMLUpdate Syntax Error: You must specify a value."
+
+ShellExecute,Hide,"%Tools%\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+//If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to query [%XPath%] from [%XMLFile%]."
+
+ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --update #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
+
+System,EndLocal

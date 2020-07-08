@@ -1,0 +1,282 @@
+[Main]
+Title=Network Drivers
+Description=Load network drivers included with Windows 10.
+Author=Homes32
+Level=6
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2019-08-12
+
+[Variables]
+%Debug%=True
+RegAddDriver=Run,%ScriptFile%,RegAddDriver
+
+[Process]
+Echo,"Preparing for Network driver integration..."
+
+If,%cb_EnableNetworkDriversHiveCache%,Equal,False,Begin
+  Echo,"Network Drivers Registry Cache: DISABLED"
+  DirDeleteEx,"%ProjectCache%\NetworkDrivers"
+End
+
+// We need this to compare with the .Cache version. This way we can force a rebuild if this script changes.
+IniRead,%ScriptFile%,"Main","Version",%ScriptVer%
+
+If,Not,ExistFile,"%ProjectCache%\NetworkDrivers\.Cache",Run,%ScriptFile%,BuildRegistryCache
+
+// Check for stale cache and rebuild if needed
+IniReadEx,"%ProjectCache%\NetworkDrivers\.Cache","Network Drivers Cache","Version","0.0.0.0",RegCacheVer
+
+If,%RegCacheVer%,Equal,%ScriptVer%,Echo,"Registry Cache: ENABLED (v%RegCacheVer%)"
+Else,Begin
+  Echo,"Registry Cache: STALE (v%RegCacheVer%)#$x#$xRebuilding the registry cache..."
+  DirDeleteEx,"%RegistryCache%\NetworkDrivers"
+  Run,%ScriptFile%,BuildRegistryCache
+End
+
+Set,%RegCacheVer%,Nil
+Set,%ScriptVer%,Nil
+
+
+RegHiveLoad,Tmp_Drivers,%RegDrivers%
+RegHiveLoad,Tmp_Install_Drivers,%RegInstallDrivers%
+
+Run,%ScriptFile%,Drivers%SourceArch%
+
+RegHiveUnload,Tmp_Drivers
+RegHiveUnload,Tmp_Install_Drivers
+
+[Driversx64]
+
+///////////////////////////////////////////////////////////////////////////////////
+// Driver Files to Extract
+
+RequireFileEx,Append,\Windows\INF\athw8x.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netathr10x.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netathrx.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netbc63a.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netbc64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netrtwlane.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netrtwlane_13.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netrtwlanu.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwbw02.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwew00.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwew01.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwlv64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwns64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwsw00.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwtw04.inf,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\athw8x.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netathr10x.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netathrx.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netbc63a.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netbc64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane_13.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlanu.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwbw02.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwew00.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwew01.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwlv64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwns64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwsw00.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw04.inf*,NOMUI
+
+If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
+  // Build 1809+
+  RequireFileEx,Append,\Windows\INF\netwtw02.inf,NOMUI
+  RequireFileEx,Append,\Windows\INF\netwtw06.inf,NOMUI
+  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw02.inf*,NOMUI
+  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw06.inf*,NOMUI
+End
+
+If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
+  // Build 1903+
+  RequireFileEx,Append,\Windows\INF\netrtwlane01.inf,NOMUI
+  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*,NOMUI
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Build Driver Database
+
+RegAddDriver,athw8x.inf
+RegAddDriver,netathr10x.inf
+RegAddDriver,netathrx.inf
+RegAddDriver,netbc63a.inf
+RegAddDriver,netbc64.inf
+RegAddDriver,netrtwlane.inf
+RegAddDriver,netrtwlane_13.inf
+RegAddDriver,netrtwlanu.inf
+RegAddDriver,netwbw02.inf
+RegAddDriver,netwew00.inf
+RegAddDriver,netwew01.inf
+RegAddDriver,netwlv64.inf
+RegAddDriver,netwns64.inf
+RegAddDriver,netwsw00.inf
+RegAddDriver,netwtw04.inf
+
+If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
+  // Build 1809+
+  RegAddDriver,netwtw02.inf
+  RegAddDriver,netwtw06.inf
+End
+
+If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
+  // Build 1903+
+  RegAddDriver,netrtwlane01.inf
+End
+
+[Driversx86]
+
+///////////////////////////////////////////////////////////////////////////////////
+// Driver Files to Extract
+
+RequireFileEx,Append,\Windows\INF\athw8.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netathr.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netathr10.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netbc63.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netbc64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netrtwlane.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netrtwlane_13.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netrtwlanu.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwbn02.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwen00.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwen01.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwlv32.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwns32.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwsn00.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwtn04.inf,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\athw8.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netathr.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netathr10.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netbc63.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netbc64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane_13.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlanu.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwbn02.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwen00.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwen01.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwlv32.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwns32.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwsn00.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtn04.inf*,NOMUI
+
+If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
+  // Build 1809+
+  RequireFileEx,Append,\Windows\INF\netwtn02.inf,NOMUI
+  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtn02.inf*,NOMUI
+End
+
+If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
+  // Build 1903+
+  RequireFileEx,Append,\Windows\INF\netrtwlane01.inf,NOMUI
+  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*,NOMUI
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Build Driver Database
+
+RegAddDriver,athw8.inf
+RegAddDriver,netathr.inf
+RegAddDriver,netathr10.inf
+RegAddDriver,netbc63.inf
+RegAddDriver,netbc64.inf
+RegAddDriver,netrtwlane.inf
+RegAddDriver,netrtwlane_13.inf
+RegAddDriver,netrtwlanu.inf
+RegAddDriver,netwbn02.inf
+RegAddDriver,netwen00.inf
+RegAddDriver,netwen01.inf
+RegAddDriver,netwlv32.inf
+RegAddDriver,netwns32.inf
+RegAddDriver,netwsn00.inf
+RegAddDriver,netwtn04.inf
+
+If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
+  // Build 1809+
+  RegAddDriver,netwtn02.inf
+End
+
+If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
+  // Build 1903+
+  RegAddDriver,netrtwlane01.inf
+End
+
+[#RegAddDriver#]
+// ===============================================================================================================================
+// Name...........: RegAddDriver
+// Description....: Uses ChrisR's RegAddDriver.cmd to add our drivers to the driver database of our target DRIVERS hive.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Uses a modified version of ChrisR's RegAddDriver.cmd as PEBakery does not have a good way to enum/query registry keys yet.
+//                  Registry hives must be loaded before calling.
+// Related........: 
+// ===============================================================================================================================
+[RegAddDriver]
+If,#1,Equal,"",Halt,"Syntax Error: You must specify the name of the driver.inf to register."
+GetParam,1,%RegKey%
+
+//Echo,"Processing [%RegKey%] DriverInfFiles..."
+//System,ErrorOff
+//RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverInfFiles\%RegKey%",HKLM,"Tmp_Drivers\DriverDatabase\DriverInfFiles\%RegKey%"
+
+Echo,"Processing [%RegKey%]..."
+If,Not,ExistFile,"%ProjectTemp%\RegAddDriver.cmd",Begin
+  ExtractFile,%ScriptFile%,cmd,RegAddDriver.cmd,%ProjectTemp%
+  If,%Debug%,Equal,True,TXTReplace,"%ProjectTemp%\RegAddDriver.cmd",":::",""
+End
+
+ShellExecute,Hide,"cmd.exe","/D /C RegAddDriver.cmd #$q%RegKey%#$q",%ProjectTemp%
+
+//Echo,"Processing [%RegKey%] DriverFiles..."
+//RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverFiles\%RegKey%*",HKLM,"Tmp_Drivers\DriverDatabase\DriverFiles",WILDCARD
+
+//Echo,"Processing [%RegKey%] DriverPackages..."
+//RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverPackages\%RegKey%*",HKLM,"Tmp_Drivers\DriverDatabase\DriverPackages",WILDCARD
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+lbl_NoConfig="No configuration options are available for this script.",1,1,5,50,457,16,8,Bold
+
+[EncodedFile-AuthorEncoded-kcmpci.png]
+lines=3
+0=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
+1=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
+2=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
+3=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
+
+[AuthorEncoded]
+kcmpci.png=11204,15032
+Logo=kcmpci.png
+
+[EncodedFolders]
+cmd
+
+[cmd]
+RegAddDriver.cmd=2187,1044
+
+[EncodedFile-cmd-RegAddDriver.cmd]
+lines=0
+0=eJy1Vl1v2jAUfUfiP9xYsgpTRaBTXyJRjYJTImgCrOs0jQmlxNCoacwSl8JLf/vsxAkpHyudupeAk3tPfM499zpfSLvrgGOa5dJXyvts6gZAQvcuoB0auGvi0dXCDWOfhUkAdHumH3o9um7il0a5VC6R6T2DQcSmNI79cA44j8DQifwljaxwZvoBjWu1WoZx7fqhE82b3R75Mek77VZ/ct1qdy2bjG8eFxMrjLkbBJM0Px6nvx2Xu3duTMevYYuYNn0+hHkk1ojOYfhEozUgnGNiBBfhUwBn8louWTPAZDRyRn1yS/oYbDKEOpCVz6GxD0EwxeOCLu9BawsdwJgI0DZb/AXyzVLQpT+llrevCugfy5BBou0SHAI8AshkEegmIM4eaBg3G6dnp58/IcC4BZYNlZMRuVLqFpQAPQadgj4rUj6pQodBpVwCEBLrFtiMC/1wCwEZfkuU3BSkIgmIbdO1FEQGVYEEMU3zAVJ+dC3ZaSrMeEO2Q07UUkjDMJKCSb+0PA+Qpl6gIdCXaqc6F9QvQffkui3WszRZMBI3LlHiFiREmdiOTQSPA2hSv12sxIcZ0Y3TbBbSVwDJXqryzeJSPa7r/0fLf1i/KyBltj3mKvYZSuzlKYe98k3qsZ0eFWodJ9LAnT648w/XKYP9CKk2WDtq7R10Qq2Hd+kkJ51UK3+Q7Vr1ojxmrBQvbbuX+uk5Vs5PGCG4YpyBQRxTDcxiu+I8Uct3qTW1XBUN4+2hnYRvjWnRrmIXcoaQKGJRny5pAA3IWzgfz1ly+j89PaSBZgmNHYBjcwsUlVayTVOt1KKJ8A25HuCxWtf4iiNlw++iFOw5lqF+zAVP4vlcFPRWFF4c7nBeq9fhArBKxSrtp5D/F1zsPkD45Qw17+mqUq8aWwGSkvW4YBEv3hXfE6D/3tzJhM2J/QEEPZe7eJwTCEpNd0xJcSnKLEst0kvOTWEYBSMJdHNA6H1M2OWfdFbcZmADAPbwCh8aAO32AQAAAAIAAAAsAAAAvgIAAAAAAAABAAAAAAAAAAAAAAA

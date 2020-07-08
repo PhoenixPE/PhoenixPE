@@ -1,0 +1,479 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2019 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=Core WoW64
+Description=Wow64 (Windows on Windows64) is a Windows subsystem that allows 32bit programs to run in an 64bit environment.
+Author=Homes32
+Level=2
+Selected=True
+Mandatory=False
+Version=1.0.0.0
+Date=2019-05-18
+
+[Process]
+Echo,"Checking Source Architecture..."
+If,%SourceArch%,Equal,x86,Exit,"WoW64 is not required for x86 builds."
+
+Run,%ScriptFile%,ExtractFiles-Lite
+//Run,%ScriptFile%,ExtractFiles-Full
+
+RegHiveLoad,Tmp_Software,%RegSoftware%
+RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
+
+Run,%ScriptFile%,Reg-WoW64
+
+RegHiveUnload,Tmp_Software
+RegHiveUnload,Tmp_Install_Software
+
+[#ExtractFiles-Full#]
+// ===============================================================================================================================
+// Name...........: ExtractFiles-Full
+// Description....: Full WoW64 Environment
+//                  Builds a list file containing files to extract from install.wim, then uses wimlib to extract to %TargetDir%
+//                  along with the full contents of the Windows\SysWOW64 directory.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Experimental Use Only!
+//                  Called from [Process]
+// Related........: 
+// ===============================================================================================================================
+[ExtractFiles-Full]
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+///////////////////////////////////////////////////////////////////////////////////
+// Core WoW64 Emulation Layer
+
+RequireFileEx,Append,\Windows\System32\wow64.dll,NOMUI
+RequireFileEx,Append,\Windows\System32\wow64cpu.dll,NOMUI
+RequireFileEx,Append,\Windows\System32\wow64win.dll,NOMUI
+RequireFileEx,Append,\Windows\System32\wowreg32.exe,NOMUI
+
+Echo,"Extracting Wow64 files...#$x#$xThis can take awhile, please be patient."
+RequireFileEx,ExtractList
+WimExtract,%SourceInstallWim%,%SourceInstallWimImage%,\Windows\SysWOW64,%TargetWindows%,NOACL,NOATTRIB
+
+[#ExtractFiles-Lite#]
+// ===============================================================================================================================
+// Name...........: ExtractFiles
+// Description....: Minimal WoW64 Environment
+//                  Builds a list file containing files to extract from install.wim, then uses wimlib to extract to %TargetDir%
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called from [Process]
+// Related........: 
+// ===============================================================================================================================
+[ExtractFiles-Lite]
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+///////////////////////////////////////////////////////////////////////////////////
+// Core WoW64 Emulation Layer
+
+RequireFileEx,Append,\Windows\System32\wow64.dll,NOMUI
+RequireFileEx,Append,\Windows\System32\wow64cpu.dll,NOMUI
+RequireFileEx,Append,\Windows\System32\wow64win.dll,NOMUI
+RequireFileEx,Append,\Windows\System32\wowreg32.exe,NOMUI
+
+///////////////////////////////////////////////////////////////////////////////////
+// SysWOW64 Files
+
+// Winre.wim \Windows\SysWOW64\downlevel
+RequireFileEx,Append,\Windows\SysWOW64\C_*.NLS,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\KBD*.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\aclui.dll
+RequireFileEx,Append,\Windows\SysWOW64\activeds.dll
+RequireFileEx,Append,\Windows\SysWOW64\actxprxy.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\adsldp.dll
+RequireFileEx,Append,\Windows\SysWOW64\adsldpc.dll
+RequireFileEx,Append,\Windows\SysWOW64\advapi32.dll
+RequireFileEx,Append,\Windows\SysWOW64\apphelp.dll
+RequireFileEx,Append,\Windows\SysWOW64\asycfilt.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\atl.dll
+RequireFileEx,Append,\Windows\SysWOW64\atlthunk.dll
+RequireFileEx,Append,\Windows\SysWOW64\attrib.exe
+RequireFileEx,Append,\Windows\SysWOW64\authz.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\avifil32.dll
+RequireFileEx,Append,\Windows\SysWOW64\avrt.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\bcd.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\bcrypt.dll
+RequireFileEx,Append,\Windows\SysWOW64\bcryptprimitives.dll
+RequireFileEx,Append,\Windows\SysWOW64\Bcp47Langs.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\bcp47mrm.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\browseui.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\cabinet.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\cfgmgr32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\clb.dll
+RequireFileEx,Append,\Windows\SysWOW64\clbcatq.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\clip.exe
+RequireFileEx,Append,\Windows\SysWOW64\clusapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\cmd.exe
+RequireFileEx,Append,\Windows\SysWOW64\cmdext.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\windows\SysWOW64\ColorAdapterClient.dll
+RequireFileEx,Append,\Windows\SysWOW64\combase.dll
+RequireFileEx,Append,\Windows\SysWOW64\comctl32.dll
+RequireFileEx,Append,\Windows\SysWOW64\comdlg32.dll
+RequireFileEx,Append,\Windows\SysWoW64\Coremessaging.dll
+RequireFileEx,Append,\Windows\SysWOW64\CoreUIComponents.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\credssp.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\crtdll.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\crypt32.dll
+RequireFileEx,Append,\Windows\SysWOW64\cryptbase.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\cryptdll.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\cryptnet.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\cryptsp.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\cscapi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\d2d1.dll
+RequireFileEx,Append,\Windows\SysWOW64\d3d9.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\d3d10warp.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\d3d11.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\d3d12.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\DataExchange.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\davhlpr.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\dbgcore.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\dbghelp.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\dcomp.dll
+RequireFileEx,Append,\Windows\SysWOW64\ddraw.dll
+RequireFileEx,Append,\Windows\SysWOW64\devobj.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\devrtl.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\dfscli.dll
+RequireFileEx,Append,\Windows\SysWOW64\dhcpcsvc.dll
+RequireFileEx,Append,\Windows\SysWOW64\dhcpcsvc6.dll
+RequireFileEx,Append,\Windows\SysWOW64\directmanipulation.dll
+RequireFileEx,Append,\Windows\SysWOW64\dllhost.exe,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\dlnashext.dll
+RequireFileEx,Append,\Windows\SysWOW64\dnsapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\dpapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\drvstore.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\dsrole.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\dui70.dll
+RequireFileEx,Append,\Windows\SysWOW64\duser.dll
+RequireFileEx,Append,\Windows\SysWOW64\dwmapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\Dwrite.dll
+If,%SourceVer%,BiggerEqual,10.0.18300.0,RequireFileEx,Append,\Windows\SysWOW64\DXCore.dll
+RequireFileEx,Append,\Windows\SysWOW64\dxgi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\edputil.dll
+RequireFileEx,Append,\Windows\SysWOW64\ExplorerFrame.dll
+RequireFileEx,Append,\Windows\SysWOW64\FirewallAPI.dll
+RequireFileEx,Append,\Windows\SysWOW64\fltlib.dll
+RequireFileEx,Append,\Windows\SysWOW64\fwbase.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\fwpolicyiomgr.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\fwpuclnt.dll
+RequireFileEx,Append,\Windows\SysWOW64\gdi32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\gdi32full.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\GdiPlus.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\gpapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\hid.dll
+RequireFileEx,Append,\Windows\SysWOW64\ieframe.dll
+RequireFileEx,Append,\Windows\SysWOW64\iertutil.dll
+RequireFileEx,Append,\Windows\SysWOW64\imm32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\InputHost.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\iphlpapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\kerberos.dll
+RequireFileEx,Append,\Windows\SysWOW64\kernel.appcore.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\kernel32.dll
+RequireFileEx,Append,\Windows\SysWOW64\kernelbase.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\linkinfo.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\logoncli.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\lpk.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\lz32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\mfperfhelper.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\mlang.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\mfc40.dll
+RequireFileEx,Append,\Windows\SysWOW64\mfc42.dll
+RequireFileEx,Append,\Windows\SysWOW64\mmcbase.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\mpr.dll
+RequireFileEx,Append,\Windows\SysWOW64\msacm32.dll
+RequireFileEx,Append,\Windows\SysWOW64\msacm32.drv
+RequireFileEx,Append,\Windows\SysWOW64\msasn1.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\mscms.dll
+RequireFileEx,Append,\Windows\SysWOW64\mscories.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msctf.dll
+RequireFileEx,Append,\Windows\SysWOW64\mshtml.dll
+RequireFileEx,Append,\Windows\SysWOW64\msi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msimg32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msIso.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\mskeyprotect.dll
+RequireFileEx,Append,\Windows\SysWOW64\msls31.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msv1_0.dll
+RequireFileEx,Append,\Windows\SysWOW64\msvbvm60.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msvcp60.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msvcp_win.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msvcp110_win.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msvcrt.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msvcrt40.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msvfw32.dll
+RequireFileEx,Append,\Windows\SysWOW64\mswsock.dll
+RequireFileEx,Append,\Windows\SysWOW64\msxml3.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\msxml3r.dll
+RequireFileEx,Append,\Windows\SysWOW64\msxml6.dll
+RequireFileEx,Append,\Windows\SysWOW64\msxml6r.dll
+RequireFileEx,Append,\Windows\SysWOW64\ncrypt.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\ncryptprov.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\ncryptsslp.dll,NOMUI
+RequireFileEx,Append,\windows\SysWOW64\net.exe
+RequireFileEx,Append,\windows\SysWOW64\net1.exe
+RequireFileEx,Append,\Windows\SysWOW64\netmsg.dll
+RequireFileEx,Append,\Windows\SysWOW64\netapi32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\netutils.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\normaliz.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\ntasn1.dll
+RequireFileEx,Append,\Windows\SysWOW64\ntdll.dll
+RequireFileEx,Append,\Windows\SysWOW64\ntdsapi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\ntlanman.dll
+RequireFileEx,Append,\Windows\SysWOW64\ntmarta.dll
+RequireFileEx,Append,\Windows\SysWOW64\ntshrui.dll
+RequireFileEx,Append,\Windows\SysWOW64\odbc32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\odbcint.dll
+RequireFileEx,Append,\Windows\SysWOW64\ole32.dll
+RequireFileEx,Append,\Windows\SysWOW64\oleacc.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\oleaccrc.dll
+RequireFileEx,Append,\Windows\SysWOW64\oleaut32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\olecli32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\oledlg.dll
+RequireFileEx,Append,\Windows\SysWOW64\olepro32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\OnDemandConnRouteHelper.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\OneCoreUAPCommonProxyStub.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\pdh.dll
+RequireFileEx,Append,\Windows\SysWOW64\policymanager.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\powrprof.dll
+RequireFileEx,Append,\Windows\SysWOW64\profapi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\propsys.dll
+RequireFileEx,Append,\Windows\SysWOW64\psapi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\rasadhlp.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\rasapi32.dll
+RequireFileEx,Append,\Windows\SysWOW64\reg.exe
+RequireFileEx,Append,\Windows\SysWOW64\regapi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\regedt32.exe,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\regsvr32.exe
+RequireFileEx,Append,\Windows\SysWOW64\resutils.dll
+RequireFileEx,Append,\Windows\SysWOW64\riched20.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\riched32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\rmclient.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\rpcrt4.dll
+RequireFileEx,Append,\Windows\SysWOW64\rsaenh.dll
+RequireFileEx,Append,\Windows\SysWOW64\rtutils.dll
+RequireFileEx,Append,\Windows\SysWOW64\run64.exe,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\rundll32.exe
+RequireFileEx,Append,\Windows\SysWOW64\samcli.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\samlib.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\schannel.dll
+RequireFileEx,Append,\Windows\SysWOW64\sechost.dll
+RequireFileEx,Append,\Windows\SysWOW64\secur32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\SensApi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\setupapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\SHCore.dll
+RequireFileEx,Append,\Windows\SysWOW64\shell32.dll
+
+// As of Win10 17763 shellstyle.dll is moved to windows\resources, so it will be extract by Explorer
+StrFormat,NTrim,%SourceVer%,%tmp_SourceVer%
+If,%SourceVer%,Equal,10.0.17764.,RequireFileEx,Append,\Windows\SysWOW64\shellstyle.dll
+Set,%tmp_SourceVer%,Nil
+
+RequireFileEx,Append,\Windows\SysWOW64\shfolder.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\shlwapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\slc.dll
+RequireFileEx,Append,\Windows\SysWOW64\spfileq.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\SPInf.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\srvcli.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\sspicli.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\stdole2.tlb,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\stdole32.tlb,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\StructuredQuery.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\svchost.exe
+RequireFileEx,Append,\Windows\SysWOW64\sxs.dll
+RequireFileEx,Append,\Windows\SysWOW64\sxsstore.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\sxstrace.exe
+RequireFileEx,Append,\Windows\SysWoW64\TextInputFramework.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWoW64\TextShaping.dll
+RequireFileEx,Append,\Windows\SysWOW64\thumbcache.dll
+RequireFileEx,Append,\Windows\SysWOW64\twinapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\twinapi.appcore.dll
+RequireFileEx,Append,\Windows\SysWOW64\tzres.dll
+RequireFileEx,Append,\Windows\SysWOW64\ulib.dll
+RequireFileEx,Append,\Windows\SysWOW64\ucrtbase.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\UIAnimation.dll
+RequireFileEx,Append,\Windows\SysWOW64\UIAutomationCore.dll
+If,%SourceVer%,BiggerEqual,10.0.18300.0,RequireFileEx,Append,\Windows\SysWOW64\umpdc.dll
+RequireFileEx,Append,\Windows\SysWOW64\urlmon.dll
+RequireFileEx,Append,\Windows\SysWOW64\user32.dll
+RequireFileEx,Append,\Windows\SysWOW64\userenv.dll
+RequireFileEx,Append,\Windows\SysWOW64\usp10.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\uxtheme.dll
+RequireFileEx,Append,\Windows\SysWOW64\vbscript.dll
+RequireFileEx,Append,\Windows\SysWOW64\version.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\webio.dll
+RequireFileEx,Append,\Windows\SysWOW64\wimgapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\win32u.dll
+RequireFileEx,Append,\Windows\SysWOW64\winbrand.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\WindowsCodecs.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\Windows.Globalization.dll
+RequireFileEx,Append,\Windows\SysWOW64\windows.storage.dll
+RequireFileEx,Append,\Windows\SysWOW64\winhttp.dll
+RequireFileEx,Append,\Windows\SysWOW64\wininet.dll
+RequireFileEx,Append,\Windows\SysWOW64\winmm.dll
+RequireFileEx,Append,\Windows\SysWOW64\winmmbase.dll
+RequireFileEx,Append,\Windows\SysWOW64\winnlsres.dll
+RequireFileEx,Append,\Windows\SysWOW64\winnsi.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\winspool.drv
+RequireFileEx,Append,\Windows\SysWOW64\winsta.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\WinTypes.dll
+RequireFileEx,Append,\Windows\SysWOW64\wintrust.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\wkscli.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\wldap32.dll
+RequireFileEx,Append,\Windows\SysWOW64\wldp.dll
+RequireFileEx,Append,\Windows\SysWOW64\wow32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\ws2_32.dll
+RequireFileEx,Append,\Windows\SysWOW64\wsock32.dll
+RequireFileEx,Append,\Windows\SysWOW64\wtsapi32.dll,NOMUI
+RequireFileEx,Append,\Windows\SysWOW64\xmllite.dll,NOMUI
+
+///////////////////////////////////////////////////////////////////////////////////
+// Multimedia
+
+RequireFileEx,Append,\Windows\SysWOW64\AudioSes.dll
+RequireFileEx,Append,\Windows\SysWOW64\devenum.dll
+RequireFileEx,Append,\Windows\SysWOW64\dsound.dll
+RequireFileEx,Append,\Windows\SysWOW64\MMDevAPI.dll
+RequireFileEx,Append,\Windows\SysWOW64\msdmo.dll
+RequireFileEx,Append,\Windows\SysWOW64\quartz.dll
+
+///////////////////////////////////////////////////////////////////////////////////
+// Web-Based Enterprise Management
+
+// WinRe.wim: wmi.dll
+RequireFileEx,Append,\Windows\SysWOW64\wbem
+RequireFileEx,Append,\Windows\SysWOW64\wbemcomn.dll
+RequireFileEx,Append,\Windows\SysWOW64\framedynos.dll
+RequireFileEx,Append,\Windows\SysWOW64\ncobjapi.dll
+RequireFileEx,Append,\Windows\SysWOW64\wmiclnt.dll
+
+///////////////////////////////////////////////////////////////////////////////////
+// WinSXS (Lite)
+
+Set,%Wow64-WinSxS-Listfile%,%ProjectTemp%\Wow64-WinSxS-ListFile.txt
+FileDeleteEx,%Wow64-WinSxS-Listfile%
+
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\x86_microsoft.windows.c..-controls.resources_*_%SourceLang%_*\*.*",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\x86_microsoft.windows.common-controls*\*.*",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\wow64_microsoft.windows.gdiplus.systemcopy_*\*.*",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\x86_microsoft.windows.gdiplus_*\*.*",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\x86_microsoft.windows.i..utomation.proxystub_*\*.*",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\x86_microsoft.windows.isolationautomation_*\*.*",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\x86_microsoft-windows-servicingstack_*\*.*",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\Manifests\x86_microsoft.windows.c..-controls.resources_*_%SourceLang%_*.manifest",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\Manifests\x86_microsoft.windows.common-controls_*.manifest",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\Manifests\wow64_microsoft.windows.gdiplus.systemcopy_*.manifest",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\Manifests\x86_microsoft.windows.gdiplus_*.manifest",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\Manifests\x86_microsoft.windows.i..utomation.proxystub_*.manifest",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\Manifests\x86_microsoft.windows.isolationautomation_*.manifest",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\Manifests\x86_microsoft.windows.systemcompatible_*.manifest",Append
+TxtAddline,%Wow64-WinSxS-Listfile%,"\Windows\WinSxS\manifests\x86_microsoft-windows-servicingstack_*.manifest",Append
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+Echo,"Extracting Wow64 files...#$x#$xThis can take awhile, please be patient."
+RequireFileEx,ExtractList
+
+Echo,"Extracting Wow64 SidebySide Components...#$x#$xThis can take awhile, please be patient."
+WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%Wow64-WinSxS-Listfile%,%TargetDir%,NOACL,NOATTRIB,NOERR
+
+// Use native full imageres.dll (resource only library) and save space with WIM duplicates-once Compression
+WimExtract,%SourceInstallWim%,%SourceInstallWimImage%,\Windows\System32\imageres.dll,%TargetWindows%\SysWOW64,NOACL,NOATTRIB
+
+Set,%Wow64-WinSxS-Listfile%,Nil
+
+[#Reg-WoW64#]
+// ===============================================================================================================================
+// Name...........: Reg-WoW64
+// Description....: Register components and classes for WoW64.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Reg-WoW64]
+Echo,"Processing WoW64 Registry..."
+
+Echo,"Processing WoW64 Registry [Classes]..."
+RegCopy,HKLM,"Tmp_Install_Software\Classes\Wow6432Node\CLSID",HKLM,"Tmp_Software\Classes\Wow6432Node\CLSID"
+RegCopy,HKLM,"Tmp_Install_Software\Classes\Wow6432Node\Interface",HKLM,"Tmp_Software\Classes\Wow6432Node\Interface"
+RegCopy,HKLM,"Tmp_Install_Software\Classes\WOW6432Node\DirectShow",HKLM,"Tmp_Software\Classes\WOW6432Node\DirectShow"
+RegCopy,HKLM,"Tmp_Install_Software\Classes\WOW6432Node\Media Type",HKLM,"Tmp_Software\Classes\WOW6432Node\Media Type"
+RegCopy,HKLM,"Tmp_Install_Software\Classes\WOW6432Node\MediaFoundation",HKLM,"Tmp_Software\Classes\WOW6432Node\MediaFoundation"
+
+Echo,"Processing WoW64 Registry [WoW6432Node]..."
+RegCopy,HKLM,"Tmp_Install_Software\Wow6432Node",HKLM,"Tmp_Software\Wow6432Node\"
+
+Echo,"Processing WoW64 Registry [SideBySide Settings]..."
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SMI",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SMI"
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.c..-controls.resources_*",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners",WILDCARD
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_*",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners",WILDCARD
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\wow64_microsoft.windows.gdiplus.systemcopy_*",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners",WILDCARD
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.gdiplus_*",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners",WILDCARD
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.i..utomation.proxystub_*",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners",WILDCARD
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.isolationautomation_*",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners",WILDCARD
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.systemcompatible_*",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners",WILDCARD
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft-windows-m..tion-isolationlayer_*",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners",WILDCARD
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+lbl_Info01="This script is only processed if you are building with a 64bit source.",1,1,5,50,450,21,10,Bold
+lbl_Info02="For use with RTM Sources only!",1,1,5,70,450,21,8,Bold
+Web_Wikipedia="WoW64 info Wikipedia",1,10,5,90,129,18,http://en.wikipedia.org/wiki/WoW64
+
+[EncodedFile-AuthorEncoded-Exe 2.png]
+lines=3
+0=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
+1=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
+2=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
+3=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
+
+[AuthorEncoded]
+Exe 2.png=11416,15316
+Logo=Exe 2.png
+

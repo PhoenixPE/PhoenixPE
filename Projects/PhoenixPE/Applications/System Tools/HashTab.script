@@ -1,0 +1,433 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=HashTab
+Description=(v6.0.0.34) HashTab is a shell extension that calculates and displays hash values from over two dozen popular hashing algorithms.
+Author=Homes32
+Level=5
+Selected=True
+Mandatory=False
+Version=1.0.0.0
+Date=2020-04-28
+Interface=Interface
+
+[Variables]
+%ProgramFolder%="HashTab"
+%SetupExe%="HashTab_v6.0.0.34_Setup.exe"
+%DownloadURL%=http://implbits.com/products/hashtab/HashTab_v6.0.0.34_Setup.exe
+%HashTabVer%=6.0.0.34
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+RunFromRam
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
+ShellExecute,Hide,"%Tools%\7z.exe","x -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -xr!$PLUGINSDIR -xr!uninst.exe.nsis -o#$q%TargetPrograms%\%ProgramFolder%#$q"
+If,Not,#r,Equal,0,Halt,"Extract [%SetupExe%] failed: The code returned was [#r]."
+If,%SourceArch%,Equal,x64,FileRename,"%TargetPrograms%\%ProgramFolder%\$R0","%TargetPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
+Else,FileDelete,"%TargetPrograms%\%ProgramFolder%\$R0"
+
+///////////////////////////////////////////////////////////////////////////////////
+// Register Ext.
+
+Run,%ScriptFile%,RegisterShellExtension
+
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+RegHiveLoad,Tmp_Default,%RegDefault%
+If,%cb_LowercaseHashes%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Settings","UseLowercase",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Settings","UseLowercase",0
+If,%cb_Adler32%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Adler32","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Adler32","Enabled",0
+If,%cb_BLAKE2sp%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\BLAKE2sp","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\BLAKE2sp","Enabled",0
+If,%cb_BTIH%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\BTIH","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\BTIH","Enabled",0
+If,%cb_CRC32%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\CRC32","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\CRC32","Enabled",0
+If,%cb_CRC64%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\CRC64","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\CRC64","Enabled",0
+If,%cb_ED2K%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\ED2K","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\ED2K","Enabled",0
+If,%cb_GOST%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\GOST","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\GOST","Enabled",0
+If,%cb_Keccak-224%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-224","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-224","Enabled",0
+If,%cb_Keccak-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-256","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-256","Enabled",0
+If,%cb_Keccak-384%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-384","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-384","Enabled",0
+If,%cb_Keccak-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-512","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-512","Enabled",0
+If,%cb_MD2%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD2","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD2","Enabled",0
+If,%cb_MD4%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD4","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD4","Enabled",0
+If,%cb_MD5%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD5","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD5","Enabled",0
+If,%cb_RIPEMD-128%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-128","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-128","Enabled",0
+If,%cb_RIPEMD-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-256","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-256","Enabled",0
+If,%cb_RIPEMD-320%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-320","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-320","Enabled",0
+If,%cb_SHA-1%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-1","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-1","Enabled",0
+If,%cb_SHA-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-256","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-256","Enabled",0
+If,%cb_SHA-256-Base64%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-256 Base64","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-256 Base64","Enabled",0
+If,%cb_SHA-384%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-384","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-384","Enabled",0
+If,%cb_SHA-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-512","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-512","Enabled",0
+If,%cb_SHA3-224%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-224","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-224","Enabled",0
+If,%cb_SHA3-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-256","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-256","Enabled",0
+If,%cb_SHA3-384%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-384","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-384","Enabled",0
+If,%cb_SHA3-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-512","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-512","Enabled",0
+If,%cb_Tiger%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Tiger","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Tiger","Enabled",0
+If,%cb_TTH%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\TTH","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\TTH","Enabled",0
+If,%cb_Whirlpool%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Whirlpool","Enabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Whirlpool","Enabled",0
+RegHiveUnLoad,Tmp_Default
+
+[#RegisterShellExtension#]
+// ===============================================================================================================================
+// Name...........: RegisterShellExtension
+// Description....: Register HashTab's shell property sheet handler.
+// Syntax.........: Run,%ScriptFile%,RegisterShellExtension
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[RegisterShellExtension]
+Echo,"Registering Property Sheet Handlers..."
+
+RegHiveLoad,Tmp_Software,%RegSoftware%
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\PropertySheetHandlers\HashTab","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}","","HashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\HashTab.DLL","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","","HashPage Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
+Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\ProgID","","HashTab.HashPage.1"
+RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\Programmable"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\VersionIndependentProgID","","HashTab.HashPage"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","","DropTargetImpl Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
+Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\ProgID","","HashTab.DropTargetImpl.1"
+RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\Programmable"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\VersionIndependentProgID","","HashTab.DropTargetImpl"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}","","IDropTargetImpl"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","Version","1.0"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}","","IHashPage"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","Version","1.0"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl","","DropTargetImpl Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl\CLSID","","{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl\CurVer","","HashTab.DropTargetImpl.1"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl.1","","DropTargetImpl Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl.1\CLSID","","{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage","","HashPage Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage\CLSID","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage\CurVer","","HashTab.HashPage.1"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage.1","","HashPage Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage.1\CLSID","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0","","HashTab 1.0 Type Library"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\FLAGS","",0
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{8A56567E-A333-4843-B6E1-C3A262E41D8C}","HashTab Property Page"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{B1883831-F0D8-4453-8245-EEAAD866DD6E}","HashTab Context Menu"
+
+// WOW64
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\AppID\{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}","","HashTab"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\AppID\HashTab.DLL","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+  
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","","HashPage Class"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\ProgID","","HashTab.HashPage.1"
+  RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\Programmable"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\VersionIndependentProgID","","HashTab.HashPage"
+
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","","DropTargetImpl Class"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\ProgID","","HashTab.DropTargetImpl.1"
+  RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\Programmable"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\VersionIndependentProgID","","HashTab.DropTargetImpl"
+
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}","","IDropTargetImpl"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","Version","1.0"
+
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}","","IHashPage"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","Version","1.0"
+
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0","","HashTab 1.0 Type Library"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\FLAGS","",0
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
+End
+
+RegHiveUnLoad,Tmp_Software
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_LowercaseHashes,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Adler32,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_BLAKE2sp,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_BTIH,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_CRC32,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_CRC64,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ED2K,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_GOST,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Keccak-224,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Keccak-256,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Keccak-384,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Keccak-512,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_MD2,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_MD4,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_MD5,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_RIPEMD-128,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_RIPEMD-256,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_RIPEMD-320,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA-1,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA-256,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA-256-Base64,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA-384,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA-512,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA3-224,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA3-256,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA3-384,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA3-512,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Tiger,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_TTH,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Whirlpool,False
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options in the script interface.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"HashTab is a shell extension that calculates and displays hash values from over two dozen popular hashing algorithms.#$x#$xOn first run this script will download the setup file (~1 MB) and cache it for future builds.#$x#$xDeveloped by Implbits Software, LLC. Free for Personal Use."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,http://implbits.com
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_Options=Options,1,12,5,49,498,268,8,Bold
+cb_LowercaseHashes="Use lowercase hash values",1,3,19,77,155,18,False
+bvl_HashType="Display Hashes",1,12,18,121,473,185,8,Bold
+cb_Adler32=Adler32,1,3,29,137,59,18,False
+cb_BLAKE2sp=BLAKE2sp,1,3,29,157,93,18,False
+cb_BTIH=BTIH,1,3,29,177,59,18,False,"__BitTorrent Info Hash"
+cb_CRC32=CRC32,1,3,29,197,59,18,True
+cb_CRC64=CRC64,1,3,29,217,95,18,False
+cb_ED2K=ED2K,1,3,29,237,59,18,False,"__eDonkey2000 hash"
+cb_GOST=GOST,1,3,29,257,59,18,False
+cb_Keccak-224=Keccak-224,1,3,29,276,94,18,False
+cb_Keccak-256=Keccak-256,1,3,139,137,97,18,False
+cb_Keccak-384=Keccak-384,1,3,139,157,96,18,False
+cb_Keccak-512=Keccak-512,1,3,139,177,95,18,False
+cb_MD2=MD2,1,3,139,197,45,18,False
+cb_MD4=MD4,1,3,139,217,52,18,False
+cb_MD5=MD5,1,3,139,237,47,18,True
+cb_RIPEMD-128=RIPEMD-128,1,3,139,257,81,18,False
+cb_RIPEMD-256=RIPEMD-256,1,3,139,277,82,18,False
+cb_RIPEMD-320=RIPEMD-320,1,3,259,137,83,18,False
+cb_SHA-1=SHA-1,1,3,259,157,53,18,True
+cb_SHA-256=SHA-256,1,3,259,177,64,18,True
+cb_SHA-256-Base64="SHA-256 Base64",1,3,259,197,105,18,False
+cb_SHA-384=SHA-384,1,3,259,217,64,18,False
+cb_SHA-512=SHA-512,1,3,259,237,76,18,True
+cb_SHA3-224=SHA3-224,1,3,259,257,76,18,False
+cb_SHA3-256=SHA3-256,1,3,259,277,76,18,False
+cb_SHA3-384=SHA3-384,1,3,379,137,76,18,False
+cb_SHA3-512=SHA3-512,1,3,379,157,76,18,False
+cb_Tiger=Tiger,1,3,379,177,45,18,False
+cb_TTH=TTH,1,3,379,197,64,18,False,"__Tiger Tree Hash"
+cb_Whirlpool=Whirlpool,1,3,379,217,66,18,False
+
+[InterfaceEncoded]
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+
+[AuthorEncoded]
+HashTab.png=2075,2864
+Logo=HashTab.png
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-HashTab.png]
+lines=0
+0=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

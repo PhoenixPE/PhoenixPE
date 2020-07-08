@@ -1,0 +1,571 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+//
+// Based on work by Flower3, with contributions from ChrisR
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=IME Support
+Description=Input Method Editor (IME) Support.
+Author=Homes32
+Level=4
+Selected=True
+Mandatory=False
+Version=2.0.0.0
+Date=2020-05-06
+
+[Variables]
+%Debug%=True
+
+[Process]
+Echo,"Configuring IME common components..."
+
+RegHiveLoad,Tmp_Software,%RegSoftware%
+RegHiveLoad,Tmp_Default,%RegDefault%
+RegHiveLoad,Tmp_System,%RegSystem%
+RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
+
+Run,%ScriptFile%,Process-Common
+If,%SourceLang%,Equal,"ja-JP",Run,%ScriptFile%,Process-ja-JP
+Else,If,%SourceLang%,Equal,"ko-KR",Run,%ScriptFile%,Process-ko-KR
+Else,If,%SourceLang%,Equal,"zh-CN",Run,%ScriptFile%,Process-zh-CN
+Else,If,%SourceLang%,Equal,"zh-TW",Run,%ScriptFile%,Process-zh-TW
+Else,Echo,"WARNING: IME Support is enable but this source is not a supported language.",WARN
+
+If,%Debug%,Equal,True,Begin
+  Run,%ScriptFile%,Process-ja-JP
+  Run,%ScriptFile%,Process-ko-KR
+  Run,%ScriptFile%,Process-zh-CN
+  Run,%ScriptFile%,Process-zh-TW
+End
+
+Run,%ScriptFile%,ConfigureIMEToolbar
+
+ExtractAllFiles,%ScriptFile%,Cmd,%TargetSystem32%
+AddAutoRun,PostShell,HideNoWait,"IME Toolbar","StartCTFMon.cmd"
+
+RegHiveUnload,Tmp_Software
+RegHiveUnload,Tmp_Default
+RegHiveUnload,Tmp_System
+RegHiveUnload,Tmp_Install_Software
+
+[ConfigureIMEToolbar]
+// ===============================================================================================================================
+// Name...........: ConfigureIMEToolbar
+// Description....: Configure various options related to the IME toolbar.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: Called from [Process]
+// ===============================================================================================================================
+[ConfigureIMEToolbar]
+Echo,"Configuring the IME Toolbar..."
+
+// Show/Hide The IME Toolbar
+If,ExistRegValue,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
+Else,Set,%PrefMask%,"93#$c3e#$c03#$c80#$c12#$c00#$c00#$c00"
+If,%cmb_LangBarPos%,Equal,"Hidden",ApplyBitMask,%PrefMask%,6,0x000000,8
+Else,ApplyBitMask,%PrefMask%,6,0x000001,8
+RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+
+// Toolbar Position
+If,%cmb_LangBarPos%,Equal,"Docked in the TaskBar",RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",4
+Else,If,%cmb_LangBarPos%,Equal,"Floating On Desktop",RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",0
+Else,If,%cmb_LangBarPos%,Equal,"Hidden",RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",3
+Else,Halt,"Logic Error: No configuration defined for language bar position [%cmb_LangBarPos%]"
+
+// Show the Language bar as transparent when inactive
+If,%cb_LangBarTransparent%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","Transparency",64
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","Transparency",255
+
+// Show additional Language bar icons in the taskbar
+If,%cb_LangBarShowAdditionalIcons%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ExtraIconsOnMinimized",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ExtraIconsOnMinimized",0
+
+// Show text labels on the Language bar
+If,%cb_LangBarShowTxtLbls%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","Label",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","Label",0
+
+[#Process-Common#]
+// ===============================================================================================================================
+// Name...........: Process-Common
+// Description....: Extract and Register Common IME Components
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: Called from [Process]
+// ===============================================================================================================================
+[Process-Common]
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+///////////////////////////////////////////////////////////////////////////////////
+// Common IME Files
+
+RequireFileEx,Append,\Windows\IME\SPTIP.DLL
+RequireFileEx,Append,\Windows\System32\IME\SHARED\
+RequireFileEx,Append,\Windows\System32\InputMethod\SHARED
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\clbcatq.dll
+RequireFileEx,Append,\Windows\System32\Ctfmon.exe
+RequireFileEx,Append,\Windows\System32\Globinputhost.dll
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\dusmapi.dll
+RequireFileEx,Append,\Windows\System32\input.dll
+RequireFileEx,Append,\Windows\System32\inputHost.dll
+RequireFileEx,Append,\Windows\System32\inputLocaleManager.dll
+RequireFileEx,Append,\Windows\System32\inputService.dll
+RequireFileEx,Append,\Windows\System32\inputSwitch.dll
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\Language*.dll
+RequireFileEx,Append,\Windows\System32\msctf.dll
+RequireFileEx,Append,\Windows\System32\msctfime.ime
+RequireFileEx,Append,\Windows\System32\MsCtfMonitor.dll
+RequireFileEx,Append,\Windows\System32\Msctfp.dll
+RequireFileEx,Append,\Windows\System32\MsctfuiManager.dll
+RequireFileEx,Append,\Windows\System32\msutb.dll
+RequireFileEx,Append,\Windows\System32\MSWB7.dll
+RequireFileEx,Append,\Windows\System32\MTF.dll
+RequireFileEx,Append,\Windows\System32\MTFServer.dll
+RequireFileEx,Append,\Windows\System32\NOISE.DAT
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\netprofm.dll
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\npmproxy.dll
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\TextInputMethodFormatter.dll
+RequireFileEx,Append,\Windows\System32\TextInputFramework.dll
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\umpdc.dll
+RequireFileEx,Append,\Windows\System32\Windows.Globalization.dll
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\Windows.Networking.HostName.dll
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\Windows.UI.Core.TextInput.dll
+If,%SourceVer%,BiggerEqual,10.0.18363,RequireFileEx,Append,\Windows\System32\Windows.Web.dll
+RequireFileEx,Append,\Windows\System32\Winlangdb.dll
+RequireFileEx,Append,\Windows\System32\Winsta.dll
+If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\System32\WordBreakers.dll
+
+///////////////////////////////////////////////////////////////////////////////////
+// WoW64 
+
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  
+  ///////////////////////////////////////////////////////////////////////////////////
+  // Common IME Files
+
+  RequireFileEx,Append,\Windows\SysWOW64\IME\SHARED
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\clbcatq.dll
+  RequireFileEx,Append,\Windows\SysWOW64\Ctfmon.exe
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\dusmapi.dll
+  RequireFileEx,Append,\Windows\SysWOW64\Globinputhost.dll
+  RequireFileEx,Append,\Windows\SysWOW64\input.dll
+  RequireFileEx,Append,\Windows\SysWOW64\inputHost.dll
+  RequireFileEx,Append,\Windows\SysWOW64\inputLocaleManager.dll
+  RequireFileEx,Append,\Windows\SysWOW64\inputService.dll
+  RequireFileEx,Append,\Windows\SysWOW64\inputSwitch.dll
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\Language*.dll
+  RequireFileEx,Append,\Windows\SysWOW64\msctf.dll
+  RequireFileEx,Append,\Windows\SysWOW64\msctfime.ime
+  RequireFileEx,Append,\Windows\SysWOW64\MsCtfMonitor.dll
+  RequireFileEx,Append,\Windows\SysWOW64\MsctfuiManager.dll
+  RequireFileEx,Append,\Windows\SysWOW64\msutb.dll
+  RequireFileEx,Append,\Windows\SysWOW64\MSWB7.dll
+  RequireFileEx,Append,\Windows\SysWOW64\MTF.dll
+  RequireFileEx,Append,\Windows\SysWOW64\NOISE.DAT
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\netprofm.dll
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\npmproxy.dll
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\TextInputMethodFormatter.dll
+  RequireFileEx,Append,\Windows\SysWOW64\TextInputFramework.dll
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\umpdc.dll
+  RequireFileEx,Append,\Windows\SysWOW64\Windows.Globalization.dll
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\Windows.Networking.HostName.dll
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\Windows.UI.Core.TextInput.dll
+  If,%SourceVer%,BiggerEqual,10.0.18363,RequireFileEx,Append,\Windows\SysWOW64\Windows.Web.dll
+  RequireFileEx,Append,\Windows\SysWOW64\Winlangdb.dll
+  RequireFileEx,Append,\Windows\SysWOW64\Winsta.dll
+  If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,Append,\Windows\SysWOW64\WordBreakers.dll
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Registry
+
+Echo,"Registering IME common components..."
+
+// Software Reg
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\CTF",HKLM,"Tmp_Software\Microsoft\CTF"
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IME\15.0\Shared",HKLM,"Tmp_Software\Microsoft\IME\15.0\Shared"
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IME\PlugInDict",HKLM,"Tmp_Software\Microsoft\IME\PlugInDict"
+If,%SourceVer%,BiggerEqual,10.0.18363,RegCopy,HKLM,"Tmp_Install_Software\Microsoft\FuzzyDS",HKLM,"Tmp_Software\Microsoft\FuzzyDS"
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\InputMethod",HKLM,"Tmp_Software\Microsoft\InputMethod"
+
+// WoW64
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\CTF",HKLM,"Tmp_Software\WOW6432Node\Microsoft\CTF"
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IME\15.0\Shared",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IME\15.0\Shared"
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IME\PlugInDict",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IME\PlugInDict"
+End
+
+[#Process-ja-JP#]
+// ===============================================================================================================================
+// Name...........: Process-ja-JP
+// Description....: Configure IME for Japanese
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: WARNING: This section is incomplete has not been tested.
+// Related........: Called from [Process]
+// ===============================================================================================================================
+[Process-ja-JP]
+
+Echo,"Registering Japanese IME components..."
+
+// Software Reg
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IME\15.0\IMEJP",HKLM,"Tmp_Software\Microsoft\IME\15.0\IMEJP"
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IMEJP",HKLM,"Tmp_Software\Microsoft\IMEJP"
+
+// WoW64
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IME\15.0\IMEJP",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IME\15.0\IMEJP"
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IMEJP",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IMEJP"
+End
+
+[#Process-ko-KR#]
+// ===============================================================================================================================
+// Name...........: Process-ko-KR
+// Description....: Configure IME for Korean
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: Called from [Process]
+// ===============================================================================================================================
+[Process-ko-KR]
+Echo,"Processing Korean IME components..."
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+// Included in ko-KR Winre.wim: \Windows\Fonts\gulim.ttc, \Windows\Fonts\malgun.ttf
+
+RequireFileEx,Append,\Windows\IME\IMEKR\DICTS\imkrhjd.lex
+RequireFileEx,Append,\Windows\System32\IME\IMEKR\DICTS\imkrhjd.dll
+RequireFileEx,Append,\Windows\System32\IME\IMEKR\imkrapi.dll
+RequireFileEx,Append,\Windows\System32\IME\IMEKR\imkrtip.dll
+
+// Search
+RequireFileEx,Append,\Windows\System32\korwbrkr.lex
+RequireFileEx,Append,\Windows\System32\korwbrkr.dll
+
+// WoW64 
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin  
+  RequireFileEx,Append,\Windows\SysWOW64\IME\IMEKR\DICTS\imkrhjd.dll
+  RequireFileEx,Append,\Windows\SysWOW64\IME\IMEKR\imkrapi.dll
+  RequireFileEx,Append,\Windows\SysWOW64\IME\IMEKR\imkrtip.dll
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Registry
+
+Echo,"Registering Korean IME components..."
+
+// Software Reg
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IME\15.0\IMEKR",HKLM,"Tmp_Software\Microsoft\IME\15.0\IMEKR"
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IMEKR",HKLM,"Tmp_Software\Microsoft\IMEKR"
+
+// WoW64
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IME\15.0\IMEKR",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IME\15.0\IMEKR"
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IMEKR",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IMEKR"
+End
+
+// Set keyboard to ko-KR;en-US - User
+RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000412
+RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",68289554
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",67699721
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000412
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
+
+// Set keyboard to ko-KR;en-US - System
+RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",1,00000412
+RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",68289554
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
+
+[#Process-zh-CN#]
+// ===============================================================================================================================
+// Name...........: Process-zh-CN
+// Description....: Configure IME for Simplified Chinese
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+//                  cobraman v1809 support
+// Remarks........: 
+// Related........: Called from [Process]
+// ===============================================================================================================================
+[Process-zh-CN]
+Echo,"Processing Simplified Chinese IME components..."
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+RequireFileEx,Append,\Windows\InputMethod\CHS\ChsPinyin.lex
+RequireFileEx,Append,\Windows\InputMethod\CHS\ChsPinyin.lm
+RequireFileEx,Append,\Windows\InputMethod\CHS\ChsWubi.lex
+RequireFileEx,Append,\Windows\System32\InputMethod\CHS
+RequireFileEx,Append,\Windows\System32\MSWB70804.dll
+RequireFileEx,Append,\Windows\System32\NL7Data0804.dll
+RequireFileEx,Append,\Windows\System32\NL7Lexicons0804.dll
+RequireFileEx,Append,\Windows\System32\NL7Models0804.dll
+RequireFileEx,Append,\Windows\System32\NOISE.CHS
+RequireFileEx,Append,\Windows\System32\chs_singlechar_pinyin.dat
+RequireFileEx,Append,\Windows\System32\ChsStrokeDS.dll
+
+// WoW64 
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin  
+  RequireFileEx,Append,\Windows\SysWOW64\InputMethod\CHS
+  RequireFileEx,Append,\Windows\SysWOW64\chs_singlechar_pinyin.dat
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Registry
+
+Echo,"Registering Simplified Chinese IME components..."
+
+// Software Reg
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IME\15.0\IMETC",HKLM,"Tmp_Software\Microsoft\IME\15.0\IMETC"
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IMETC",HKLM,"Tmp_Software\Microsoft\IMETC"
+
+// WoW64
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IME\15.0\IMETC",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IME\15.0\IMETC"
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IMETC",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IMETC"
+End
+
+RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000804
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",134481924
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000804,00000804
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",67699721
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID,{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000804
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}\LanguageProfile\0x00000804\{FA550B04-5AD7-411F-A5AC-CA038EC515D7}","Enable",1
+// Not working IME, set enable=0 to hide
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{037B2C25-480C-4D7F-B027-D6CA6B69788A}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{D38EFF65-AA46-4FD5-91A7-67845FB02F5B}","Enable",0
+//-
+RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",1,00000804
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",134481924
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000804,00000804
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}\LanguageProfile\0x00000804\{FA550B04-5AD7-411F-A5AC-CA038EC515D7}","Enable",1
+
+[#Process-zh-TW#]
+// ===============================================================================================================================
+// Name...........: Process-zh-TW
+// Description....: Configure IME for Traditional Chinese
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+//                  cobraman v1809 support
+// Remarks........: 
+// Related........: Called from [Process]
+// ===============================================================================================================================
+[Process-zh-TW]
+
+Echo,"Processing Traditional Chinese IME components..."
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+// Common zh-TW
+RequireFileEx,Append,\Windows\System32\MSWB70404.dll
+RequireFileEx,Append,\Windows\System32\NL7Data0404.dll
+RequireFileEx,Append,\Windows\System32\NL7Lexicons0404.dll
+RequireFileEx,Append,\Windows\System32\NL7Models0404.dll
+RequireFileEx,Append,\Windows\System32\NOISE.CHT
+
+// Bopomofo, Cangjie, Quick three IME can be used
+// Bopomofo IME, old style, from Win7
+RequireFileEx,Append,\Windows\IME\IMETC
+RequireFileEx,Append,\Windows\System32\IME\IMETC
+RequireFileEx,Append,\Windows\System32\ChtBopomofoDS.dll
+
+// Cangjie, Quick IME, new style
+RequireFileEx,Append,\Windows\InputMethod\CHT
+RequireFileEx,Append,\Windows\System32\InputMethod\CHT
+RequireFileEx,Append,\Windows\System32\ChtCangjieDS.dll
+RequireFileEx,Append,\Windows\System32\ChtQuickDS.dll
+
+// zh-HK Cantonese IME not working
+// RequireFileEx,Append,\Windows\System32\ChtHkStrokeDS.dll
+
+// WoW64 
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin  
+  RequireFileEx,Append,\Windows\SysWOW64\MSWB70404.dll
+  RequireFileEx,Append,\Windows\SysWOW64\NL7Data0404.dll
+  // Bopomofo IME
+  RequireFileEx,Append,\Windows\SysWOW64\IME\IMETC
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Registry
+
+Echo,"Registering Traditional Chinese IME components..."
+
+// Software Reg
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IME\15.0\IMETC",HKLM,"Tmp_Software\Microsoft\IME\15.0\IMETC"
+RegCopy,HKLM,"Tmp_Install_Software\Microsoft\IMETC",HKLM,"Tmp_Software\Microsoft\IMETC"
+
+// WoW64
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IME\15.0\IMETC",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IME\15.0\IMETC"
+  RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IMETC",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IMETC"
+End
+
+// Keyboard
+RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000404
+RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67372036
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000404,00000404
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID",{"00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",67699721
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000404
+//- Default input Mode, eng="0x00000001" cht="0x00000000"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\IME\15.0\IMETC","Default Input Mode","0x00000001"
+//-
+// Bopomofo, Quick, Cangjie IME, these three IMEs can work
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",1
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",1
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",1
+//-
+// Not working IME, set enable=0 to hide
+// "Hong Kong Cantonese","old Quick","old Cangjie","Chinese Traditional DaYi","Chinese Traditional Array" IME
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0AEC109C-7E96-11D4-B2EF-0080C882687E}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0B883BA0-C1C7-11D4-87F9-0080C882687E}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{F3BA907A-6C7E-11D4-97FA-0080C882687E}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{037B2C25-480C-4D7F-B027-D6CA6B69788A}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{D38EFF65-AA46-4FD5-91A7-67845FB02F5B}","Enable",0
+//-
+RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",1,00000404
+RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67372036
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000404,00000404
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",1
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",1
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",1
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0B883BA0-C1C7-11D4-87F9-0080C882687E}","Enable",0
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{F3BA907A-6C7E-11D4-97FA-0080C882687E}","Enable",0
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+bvl_ToolbarOptions="IME Toolbar Settings",1,12,5,50,412,181,8,Bold
+lbl_LangBar="Language Bar:",1,1,15,80,86,16,8,Normal
+cmb_LangBarPos="Docked in the TaskBar",1,4,94,75,155,21,"Docked in the TaskBar","Floating On Desktop",Hidden
+cb_LangBarTransparent="Show the Language bar as transparent when inactive",1,3,15,110,286,18,True
+cb_LangBarShowAdditionalIcons="Show additional Language bar icons in the taskbar",1,3,15,130,271,18,True
+cb_LangBarShowTxtLbls="Show text labels on the Language bar",1,3,15,150,200,18,True
+
+[EncodedFolders]
+Cmd
+
+[Cmd]
+StartCTFMon.cmd=667,644
+
+[EncodedFile-Cmd-StartCTFMon.cmd]
+lines=0
+0=/Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4AKaAVRdAB1gfKRlMf4OqIqmz7NmNeF/nVOEYBDeT7/m1ToE+AFM7aWN5G7aFzST/dodRnLWchTI0gqDytb+TPKdvVkKBkEvZzsinrZv0iBnF17OY7oULkwbEI7hFddfLw/1V22G6UIktpU+lD4eEUyRNavN2Xrxb1Cfu26GARponWItlHsElL08SV75fMFJ21vt4+hX1nvR0wekLN0zB4ng8V39ws+/M5hR3+wyAu9z4Zi4yOZNnAjTAxViZjUe6k3Fy5Hy/23RxjLSfaIDOKGBQskbPj2eDxOOZhiA1K1oN4jhQp7Fu6KHP2FxZxGaZTNvp4s1tgX5cte+pkXsCUW5orddC4GwMb3iojymsEgC7GTLPBiKmQMoabMkbmReU+GqBrjkyaDOUcflrZOrk7R5Ef/UX6j8SUS9cfNS5+m1cABh25gUXaqt75BBwdtcUecHuJnM5FUHYYEAEw8QovxUU+0AAfACmwUAAOo6jcCxxGf7AgAAAAAEWVp4nOMPLkksKnEOcfPNz9NLzk1hGAUjCsxmgtBTGLHLqzQ3ljGxAQDlCQhfgv/NWgEAAAACAAAAKwAAAJQBAAAAAAAAAQAAAAAAAAAAAAAA

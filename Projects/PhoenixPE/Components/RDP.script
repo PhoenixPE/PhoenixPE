@@ -1,0 +1,373 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+// TODO: Define where to copy RDP Profiles (Desktop/StartMenu/Etc..)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Main]
+Title=Remote Desktop Services
+Description=Add the Windows Remote Desktop (RDP) Client/Server.
+Selected=True
+Level=4
+Author=Homes32
+Version=1.0.0.0
+Date=2020-06-12
+Mandatory=False
+
+[Variables]
+%ProgramFolder%="#$pSystemRoot#$p\system32"
+%ProgramExe%="mstsc.exe"
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+
+ExtractAllFiles,%ScriptFile%,Profiles,"%TargetDir%\Users\Default\Documents"
+Run,%ScriptFile%,ExtractFiles
+
+///////////////////////////////////////////////////////////////////////////////////
+// Config
+
+Echo,"Configuring %ScriptTitle%..."
+
+RegHiveLoad,Tmp_Software,%RegSoftware%
+RegHiveLoad,Tmp_System,%RegSystem%
+RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
+RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
+
+If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
+
+  RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Terminal Server Client",HKLM,"Tmp_Software\Microsoft\Terminal Server Client"
+
+  // Register .rdp file extension
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rdp","","RDP.File"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File","","Remote Desktop Connection"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File","AppUserModelId,Microsoft.Windows.RemoteDesktop"
+  RegWrite,HKLM,0x4,"Tmp_Software\Classes\RDP.File","EditFlags",1048576
+  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File","FriendlyTypeName","@#$psystemroot#$p\system32\mstsc.exe,-4004"
+  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File\DefaultIcon","","#$psystemroot#$p\system32\mstsc.exe"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell","","Connect"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Connect","","Connect"
+  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File\shell\Connect","MUIVerb","@#$psystemroot#$p\system32\mstsc.exe,-4002"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Connect\command","","mstsc.exe #$q#$p1#$q"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Edit","","Edit"
+  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File\shell\Edit","MUIVerb","@#$psystemroot#$p\system32\mstsc.exe,-4003"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Edit\command","","mstsc.exe -edit #$q#$p1#$q"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Open","Extended",""
+  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File\shell\Open\command","","#$q#$psystemroot#$p\system32\mstsc.exe#$q #$q#$p1#$q"
+End
+
+// Patch CredDialogController
+If,%cb_PatchCredDialogController%,Equal,True,Run,%ScriptFile%,PatchCredDialogController
+
+// Enable/Disable NLA
+If,%cb_EnableNLA%,Equal,True,Begin
+  TXTReplace,"%TargetDir%\Users\Default\Documents\Default.rdp","enablecredsspsupport:i:0","enablecredsspsupport:i:1"
+End
+Else,Begin
+  TXTReplace,"%TargetDir%\Users\Default\Documents\Default.rdp","enablecredsspsupport:i:1","enablecredsspsupport:i:0"
+End
+
+// Include Additional RDP Profiles
+If,%cb_IncludeProfilesInThisDir%,Equal,True,Begin
+  If,Not,%fb_IncludeProfilesInThisDir%,Equal,"",If,ExistDir,%fb_IncludeProfilesInThisDir%,Begin
+    Echo,"Processing additional include files..."
+    FileCopy,"%fb_IncludeProfilesInThisDir%\*.*","%TargetDir%\Users\Default\Desktop\"
+  End
+End
+
+// Auto-Connect RDP
+If,%cb_AutoConnectRDP%,Equal,True,Begin
+  If,%txt_AutoConnectRDP%,Equal,"",Halt,"ERROR: You must specify the hostname or IP address of the computer to auto-connect."
+  AddAutoRun,HideNoWait,"RDP: Auto-Connecting to %txt_AutoConnectRDP%...","%ProgramFolder%\%ProgramExe%","/v:%txt_AutoConnectRDP%"
+End
+
+// Enable RDP Connections
+If,%cb_EnableTSConnections%,Equal,True,Begin
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\SessionEnv",HKLM,"Tmp_System\ControlSet001\Services\SessionEnv"
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TermService",HKLM,"Tmp_System\ControlSet001\Services\TermService"
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\UmRdpService",HKLM,"Tmp_System\ControlSet001\Services\UmRdpService"
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server","fDenyTSConnections",0
+End
+
+// Require NLA for incoming RDP Connections
+If,%cb_ForceNLA%,Equal,True,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server\WinStations\RDP-Tcp","UserAuthentication",0
+
+RegHiveUnload,Tmp_Software
+RegHiveUnload,Tmp_Install_Software
+RegHiveUnload,Tmp_System
+RegHiveUnload,Tmp_Install_System
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,0,"%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,0,"%ProgramFolder%\%ProgramExe%"
+
+[#ExtractFiles#]
+// ===============================================================================================================================
+// Name...........: ExtractFiles
+// Description....: Builds a list file containing files to extract from install.wim, then uses wimlib to extract to %TargetDir%
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: Called from [Process]
+// ===============================================================================================================================
+[ExtractFiles]
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+RequireFileEx,Append,\Windows\System32\cngcredui.dll
+RequireFileEx,Append,\Windows\System32\CredentialUIBroker.exe
+RequireFileEx,Append,\Windows\System32\credssp.dll
+RequireFileEx,Append,\Windows\System32\credui.dll
+RequireFileEx,Append,\Windows\System32\cryptui.dll
+RequireFileEx,Append,\Windows\System32\d2d1.dll
+RequireFileEx,Append,\Windows\System32\d3d10warp.dll
+RequireFileEx,Append,\Windows\System32\d3d11.dll
+RequireFileEx,Append,\Windows\System32\dcomp.dll
+RequireFileEx,Append,\Windows\System32\DWrite.dll
+RequireFileEx,Append,\Windows\System32\dxgi.dll
+RequireFileEx,Append,\Windows\System32\msacm32.dll
+RequireFileEx,Append,\Windows\System32\msacm32.drv
+RequireFileEx,Append,\Windows\System32\mstsc.exe
+RequireFileEx,Append,\Windows\System32\mstscax.dll
+RequireFileEx,Append,\Windows\System32\ncryptprov.dll
+RequireFileEx,Append,\Windows\System32\ncryptsslp.dll
+RequireFileEx,Append,\Windows\System32\pdh.dll
+RequireFileEx,Append,\Windows\System32\TSpkg.dll
+RequireFileEx,Append,\Windows\System32\Windows.Globalization.dll
+RequireFileEx,Append,\Windows\System32\Windows.Graphics.dll
+RequireFileEx,Append,\Windows\System32\Windows.Internal.UI.Logon.ProxyStub.dll
+RequireFileEx,Append,\Windows\System32\Windows.UI.Cred.dll
+RequireFileEx,Append,\Windows\System32\Windows.UI.CredDialogController.dll
+RequireFileEx,Append,\Windows\System32\Windows.UI.Xaml.Resources.Common.dll
+RequireFileEx,Append,\Windows\System32\wuceffects.dll
+RequireFileEx,Append,\Windows\SystemResources\Windows.UI.Cred
+
+If,%cb_EnableTSConnections%,Equal,True,Begin
+  RequireFileEx,Append,\Windows\System32\SessEnv.dll
+  RequireFileEx,Append,\Windows\System32\termsrv.dll
+  RequireFileEx,Append,\Windows\System32\umrdp.dll
+  
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+[#PatchCredDialogController#]
+// ===============================================================================================================================
+// Name...........: PatchCredDialogController
+// Description....: Patch Windows.UI.CredDialogController.dll to enable using the credential dialog instead of the command line
+//                  entry for Username/Password.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Windows.UI.CredDialogController.dll forces command line entry of username and password when running under WinPE.
+//                  This patch disables the check for the HKLM\SYSTEM\CurrentControlSet\Control\MiniNT reg key so the controller 
+//                  will present the GUI dialog instead of the command line.
+// Related........: cb_PatchCredDialogController
+// ===============================================================================================================================
+[PatchCredDialogController]
+If,ExistFile,"%TargetSystem32%\Windows.UI.CredDialogController.dll",Begin
+  Echo,"Patching Windows.UI.CredDialogController.dll..."
+  ShellExecute,Hide,"%Tools%\%HostArch%\binmay.exe","-u #$q%TargetSystem32%\Windows.UI.CredDialogController.dll#$q -s 5C004D0069006E0069004E0054000000 -r 5C004D0069006E0069004E0058000000"
+  If,Not,#r,Equal,0,Halt,"ERROR: Patching [%TargetSystem32%\Windows.UI.CredDialogController.dll] failed. The error returned was [#r]."
+End
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Productivity"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Remote Desktop Connection"
+WriteInterface,Value,%ScriptFile%,Interface,cb_PatchCredDialogController,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_EnableNLA,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_IncludeProfilesInThisDir,False
+WriteInterface,Value,%ScriptFile%,Interface,fb_IncludeProfilesInThisDir,""
+WriteInterface,Value,%ScriptFile%,Interface,cb_AutoConnectRDP,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_AutoConnectRDP,""
+WriteInterface,Value,%ScriptFile%,Interface,cb_EnableTSConnections,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ForceNLA,False
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%state%
+If,%state%,Equal,False,Begin,
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
+  Else,Set,%Toggle%,False
+End
+Else,Set,%Toggle%,False
+
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_PatchCredDialogController,%Toggle%
+
+System,EndLocal
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"Remote Desktop Services allows a user to remotely log into a networked computer running the terminal services server."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,572,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,603,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_Shortcuts=Shortcuts,1,12,5,50,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,65,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,84,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,103,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,122,122,18,False
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,162,119,21,Productivity
+txt_ShortcutName="Shortcut Name:",1,0,12,204,119,21,"Remote Desktop Connection"
+bvl_AdvancedOptions="Advanced Options",0,12,5,250,133,60,8,Bold
+cb_PatchCredDialogController="Enable Cred Dialog",0,3,15,265,116,18,True,"__Patch CredDialogController to allow GUI authentication."
+bvl_Options="Client Options",1,12,150,50,377,184,8,Bold
+cb_EnableNLA="Enable Network Level Authentication",1,3,160,64,200,18,False,"__If enabled the RDP client will attempt to use NLA when connecting to the server."
+cb_IncludeProfilesInThisDir="Include Additional RDP Profiles",1,3,160,86,235,18,False,__
+fb_IncludeProfilesInThisDir=,1,13,160,107,358,20,file,"__Specify the directory containing additional RDP profiles to include in your build."
+cb_AutoConnectRDP="Auto Connect to this computer on Startup",1,3,160,134,235,18,False
+txt_AutoConnectRDP="Hostname/IP Address",1,0,160,174,358,20,,"__Enter the hostname or IP address of the computer you wish to auto-connect on startup."
+bvl_ServerOptions="Server Options (Experimental)",0,12,150,250,377,60,8,Bold
+cb_EnableTSConnections="Enable Remote Desktop Connections to this computer",0,3,160,265,287,18,False
+cb_ForceNLA="Require Network Layer Authentication",0,3,160,285,250,18,False
+
+[AuthorEncoded]
+remote_desktop_connection_80.png=8328,11228
+Logo=remote_desktop_connection_80.png
+
+[InterfaceEncoded]
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFolders]
+Profiles
+
+[Profiles]
+Default.rdp=2296,1020
+
+[EncodedFile-Profiles-Default.rdp]
+lines=0
+0=/Td6WFoAAATm1rRGBMDwBPgRIQEWAAAAAAAAAMV9mjXgCPcCaF0Af7+J7QL+f4tKRcBlgYV60i+J5joHw4yb/eP+fp8psoBOHNZ0pf72JWNc8yaXwZGrh1B/4tf8TrlA5TIzyUoDttN2xCSURcnCYNS8gk3V3XxofPojQcY1RVIia+UUip2X7Nxxx6GquYF6gZ6CE+yVloimG7B+MUhzmaaydS54D2y//ptLmg2QvYzqPEB0ofIXAqzqo6tgfn0AGye3+61enBepLWpNxnKukjJE+iCgidlNgd/6ESHM7vJIyLLnAX9lKdaFw9slWsiGzW8dJwN3uQUwrTI1ZTulrZUTB+5JYdXCHqUn+5zbRcs18l1fEsUv4v2bzAabPTerFe8SX8ZcoGQ/hJgBMgOuFxiAT6rxpr6Sb8YKRrXwkGWIjipuKVehcAMBEQI10FWex9FYKxXLsteIr5HAL01w7xpiQqwwePltiwNABy+sNiKINLncfyGz6+CjNtPQaYfV9ZyLAj9kMBNJ05wxmgwwQyiKUEzryLma3iNSlZQlsAHbs3xh3fGnyjj55+pwLITiLJAXWpEpFAvL7UAIun9T1igvXxWk3pmS5LwbFz6+9cLZfOUayBNFB82nrhY08SelV4fAH+NtHHtvRl4ZAJBF0+owhdr5Ilb1q7+h33Gm0abR0URk22+Ui82M5YO9wcUKpN8XClFs7Rj5clkj5N19cTLABpl45j8brr4BbIsHHJ85ZUViE0pC8XsT8ovW2BDq+x5HqBi8yknyMRX8T4pbkQC5jltz9R6f/DcIDlZZe8Il3vN491SVi6r9tJKHcIwiARIkeiJbIkC30gVzXxMaGsxXDrJ5ssey491R9YvDAAC6Ge22d/WzOgABjAX4EQAAAXjxPLHEZ/sCAAAAAARZWnic43ZJTUsszSnRK0opYBgFIw784IDQG5iwy4cePiHFxAYAVvEH+VA0juABAAAAAgAAACcAAACwAgAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-remote_desktop_connection_80.png]
+lines=2
+0=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
+1=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
+2=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

@@ -1,0 +1,296 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2019 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=Windows Features
+Description=Enable additional Windows features.#$x#$xWarning: This script will permanently modify your source files!
+Author=Homes32
+Level=10
+Selected=None
+Mandatory=False
+Version=1.0.0.0
+Date=2019-03-18
+
+[Variables]
+%DismLog%=%ProjectTemp%\Logs\dism.log
+%MountDir%="%ProjectTemp%\Mount"
+
+[Process]
+Echo,"Enabling Additional Features..."
+
+// Setup our DISM Env
+StrFormat,PATH,%DismLog%,%DismLogPath%
+If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
+
+System,GetEnv,PROCESSOR_ARCHITECTURE,%HostArch%
+If,%HostArch%,Equal,x86,Set,%Dism.exe%,"%Tools%\x86\DISM\dism.exe"
+Else,Set,%Dism.exe%,"%Tools%\x64\DISM\dism.exe"
+
+// Make sure our source is Read-Write (ie. not a mounted ISO)
+FileCreateBlank,"%SourceDir%\RW-TEST",NOWARN
+If,Not,ExistFile,"%SourceDir%\RW-TEST",Halt,"ERROR: You cannot modify features on Read-Only media."
+FileDelete,"%SourceDir%\RW-TEST"
+
+If,ExistFile,%Dism.exe%,Begin
+  // Everything is good. let's get to work.
+  StrFormat,PATH,%Dism.exe%,%Dism.exePath%
+  
+  // Mount our install.wim image
+  Echo,"Mounting source image [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
+  DirMake,%MountDir%
+  WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
+  
+  Run,%ScriptFile%,ToggleFx3
+  Run,%ScriptFile%,ToggleFx4
+  Run,%ScriptFile%,ToggleTelentClient
+  Run,%ScriptFile%,ToggleTFTP
+  Run,%ScriptFile%,ToggleLegacyComponents
+  Run,%ScriptFile%,ToggleLinuxSubsystem
+  Run,%ScriptFile%,TogglePrintComponents
+  
+  // Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
+  ShellExecute,Hide,%Tools%\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
+  Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
+  WimUnmount,%MountDir%,COMMIT
+End
+Else,Begin
+  // Dism.exe is missing. Run Pre-Flight Check to download.
+  Message,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools.",Warning
+  Halt,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools."
+End
+
+[ToggleSMB1]
+If,%cb_SMBv1%,Equal,True,Begin
+  Echo,"Enabling feature: Server Message Block v1..."
+  If,Not,ExistFile,"%MountDir%\Windows\System32\drivers\mrxsmb10.sys",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Client /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+	ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Server /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+	ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Deprecation /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+	If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Server Message Block v1 is already enabled!"
+End
+Else,Begin
+  Echo,"Disabling feature: Server Message Block v1..."
+  If,ExistFile,"%MountDir%\Windows\System32\drivers\mrxsmb10.sys",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Client /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+	ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Server /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+	ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Deprecation /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Server Message Block v1 is already disabled!"
+End
+
+[ToggleFx3]
+If,%cb_NetFX3%,Equal,True,Begin
+  Echo,"Enabling feature: .NET Framework 3..."
+  If,Not,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,".NET Framework 3 is already enabled!"
+End
+Else,Begin
+  Echo,"Disabling feature: .NET Framework 3..."
+  If,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx3 /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,".NET Framework 3 is already disabled!"
+End
+
+[ToggleFx4]
+If,%cb_NetFX4%,Equal,True,Begin
+  Echo,"Enabling feature: .NET Framework 4 Extended..."
+  If,Not,ExistDir,"%MountDir%\Windows\Microsoft.NET\Framework\v4.0.30319\Temporary ASP.NET Files",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx4Extended-ASPNET45 /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,".NET Framework 4 Extended is already enabled!"
+End
+Else,Begin
+  Echo,"Disabling feature: .NET Framework 4 Extended..."
+  If,ExistDir,"%MountDir%\Windows\Microsoft.NET\Framework\v4.0.30319\Temporary ASP.NET Files",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx4Extended-ASPNET45 /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,".NET Framework 4 Extended is already disabled!"
+End
+
+[ToggleTelentClient]
+If,%cb_TelentClient%,Equal,True,Begin
+  Echo,"Enabling feature: Telnet Client..."
+  If,Not,ExistFile,"%MountDir%\Windows\System32\telnet.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:TelnetClient /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Telnet Client is already enabled!"
+End
+Else,Begin
+  Echo,"Disabling feature: Telnet Client..."
+  If,ExistFile,"%MountDir%\Windows\System32\telnet.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:TelnetClient /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Telnet Client is already disabled!"
+End
+
+[ToggleTFTP]
+If,%cb_TFTP%,Equal,True,Begin
+  Echo,"Enabling feature: TFTP..."
+  If,Not,ExistFile,"%MountDir%\Windows\System32\tftp.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:TFTP /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"TFTP is already enabled!"
+End
+Else,Begin
+  Echo,"Disabling feature: TFTP Client..."
+  If,ExistFile,"%MountDir%\Windows\System32\tftp.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:TFTP /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"TFTP Client is already disabled!"
+End
+
+[ToggleLegacyComponents]
+If,%cb_Linux%,Equal,True,Begin
+  Echo,"Enabling feature: Legacy Components (DirectPlay)..."
+  If,Not,ExistFile,"%MountDir%\Windows\System32\bash.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:LegacyComponents /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Legacy Components (DirectPlay) are already enabled!"
+End
+Else,Begin
+  Echo,"Disabling feature: Legacy Components (DirectPlay)..."
+  If,ExistFile,"%MountDir%\Windows\System32\bash.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:LegacyComponents /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Legacy Components (DirectPlay) is already disabled!"
+End
+
+[ToggleLinuxSubsystem]
+If,%cb_Linux%,Equal,True,Begin
+  Echo,"Enabling feature: Linux Subsystem..."
+  If,Not,ExistFile,"%MountDir%\Windows\System32\bash.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Linux Subsystem is already enabled!"
+End
+Else,Begin
+  Echo,"Disabling feature: Linux Subsystem..."
+  If,ExistFile,"%MountDir%\Windows\System32\bask.exe",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Linux Subsystem is already disabled!"
+End
+
+[TogglePrintComponents]
+If,%cb_Print%,Equal,True,Begin
+  Echo,"Enabling feature: Print Components..."
+  If,Not,ExistFile,"%MountDir%\Windows\System32\lpdsvc.dll",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Printing-Foundation-LPDPrintService /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Printing-Foundation-LPRPortMonitor /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+	If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Print Components are already installed!"
+End
+Else,Begin
+  Echo,"Disabling feature: Print Components..."
+  If,ExistFile,"%MountDir%\Windows\System32\lpdsvc.dll",Begin
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Printing-Foundation-LPDPrintService /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Printing-Foundation-LPRPortMonitor /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+	If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
+  End
+  Else,Echo,"Print Components are already disabled!"
+End
+
+[Abort]
+Echo,"Aborting operation...#$xDism.exe terminated with error code: [%ExitCode%]. Check the log for details."
+WimUnmount,%MountDir%,DISCARD
+Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
+
+[#ViewDismLog#]
+// ===============================================================================================================================
+// Name...........: ViewDismLog
+// Description....: View the log created by the Deployment Image Servicing and Management (DISM) tool. Useful for troubleshooting
+//                  failed integration.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ViewDismLog
+// ===============================================================================================================================
+[ViewDismLog]
+If,Not,ExistFile,%DismLog%,FileCreateBlank,%DismLog%
+ShellExecuteEx,Open,%DismLog%
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_Launch=Process,1,8,5,5,81,25,Process,play-hot.png,True
+btn_ViewDismLog=" View DISM Log",1,8,305,5,130,25,ViewDismLog,Health.ico,True,"__View the DISM log from the last integration."
+bvl_Features="Available Features",1,12,5,50,230,170,8,Bold
+cb_SMBv1=SMBv1,1,3,17,66,200,18,False
+cb_NetFX3=".NET Framework 3",1,3,17,84,200,18,False
+cb_NetFX4=".NET Framework 4 Extended",1,3,17,101,200,18,False
+cb_TelentClient="Telnet Client",1,3,17,118,158,18,False
+cb_TFTP=TFTP,1,3,17,135,200,18,False
+cb_Legacy="Legacy Components (DirectPlay)",1,3,17,152,200,18,False
+cb_Linux="Linux Subsystem",1,3,17,169,200,18,False
+cb_Print="Print Components",1,3,17,186,200,18,False
+
+[InterfaceEncoded]
+Health.ico=1150,896
+play-hot.png=841,1220
+
+[EncodedFile-InterfaceEncoded-Health.ico]
+lines=0
+0=eJxjYGAEQgEBBiCpwJDBwsAgxsDAoAHEQCGgCEQcBBxYGDCAltZkJi4uFZBSaRKxpKCgG7e4eH2hqenKL0D8lRRsYrLiKwuLUZGISHtvWNi1/1ZWJ/8bG58gGru6Xv7PymrXIyLS0xsScvW/k9OJ/yYmR/6rqx8kCjs6XgDqdwDqn9QbEXHjv5fXOTB2cjrz38jo+H8Dg+P/37//9f/Fix//9fWPY2BX1ytA/c49wsIzemNj7/wPCroCx/7+l8Hmg8DPn3//W1icw8De3jf/s7C4AfXP601OfvA/Ovo2GMfG3v7//fvf/+jg48ff/52dr8FxYOA9oH4voP4lvVlZz/6npDwC47S0x0A7/2Ho//Ll738/v/twHBHx+D8zsy9Q/6re/PxX/3NzX8Jxfv7L/0VFr8D6fv3697+g4OX/xMQXQD3P4Tgu7gVQf0CPkNCG3pKSd/9LSz9g4O/f//3//PkvnJ+T8x5ozjswTk5+85+JKRiof2tvRcXH/9XVX4nCFRVf/mdnf/mfkfEeqD+sS0BgZ09v75f/M2d+IxrPmPHtf1PT5/+ior3N9vanzERF97ZJSu5rExZe3M3Hl/Wfjy/zv4DA9HYgHyi2pA3I7ufnz/rPy5v5R1R0FVgtUE+rnd1xXeS8pKmZzikuLv5fWVn5v5iY8mYxMY1N4uKam8TEVHaqqan9FxER+Y6ZA1GBqKjoamNj478mJib/kbGRkdEfISGhOYT0g4CubjSLkpINm5KSJRBbsCkrW7Pp6kZiyf3kgQf8DAwfgPiHPAMDABDk7XV4nOPySE3MKcnQy0zOZxgFIw/UsUDoECbs8gWfDskysAEAN5kG6TZDaKUBAAAAAgAAACYAAABUAgAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
