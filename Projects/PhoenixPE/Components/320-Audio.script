@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.0.0.0
-Date=2019-10-21
+Version=1.1.0.0
+Date=2020-07-09
 
 [Variables]
 
@@ -145,14 +145,19 @@ RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\wave.inf*,NOMU
 
 RequireFileEx,Append,\Windows\System32\avicap32.dll
 RequireFileEx,Append,\Windows\System32\bdaplgin.ax,NOMUI
+RequireFileEx,Append,\Windows\System32\CapabilityAccessManager.dll
+RequireFileEx,Append,\Windows\System32\CapabilityAccessManagerClient.dll
 RequireFileEx,Append,\Windows\System32\control.exe
 RequireFileEx,Append,\Windows\System32\ddraw.dll
 RequireFileEx,Append,\Windows\System32\ddrawex.dll
 RequireFileEx,Append,\Windows\System32\deviceaccess.dll
+RequireFileEx,Append,\windows\system32\DolbyDecMFT.dll
 RequireFileEx,Append,\Windows\System32\dsound.dll
 RequireFileEx,Append,\Windows\System32\dxtrans.dll
+RequireFileEx,Append,\windows\system32\hevcdecoder.dll
 RequireFileEx,Append,\Windows\System32\iyuv_32.dll
 RequireFileEx,Append,\Windows\System32\l3codeca.acm
+RequireFileEx,Append,\Windows\System32\mfh264enc.dll
 RequireFileEx,Append,\Windows\System32\midimap.dll
 RequireFileEx,Append,\Windows\System32\mmci.dll
 RequireFileEx,Append,\Windows\System32\mmcico.dll
@@ -161,6 +166,7 @@ RequireFileEx,Append,\Windows\System32\mmcshext.dll
 RequireFileEx,Append,\Windows\System32\mmres.dll
 RequireFileEx,Append,\Windows\System32\mmsys.cpl
 RequireFileEx,Append,\Windows\System32\msacm32.drv
+RequireFileEx,Append,\windows\system32\MSAudDecMFT.dll
 RequireFileEx,Append,\Windows\System32\MSDvbNP.ax,NOMUI
 RequireFileEx,Append,\Windows\System32\msrle32.dll
 RequireFileEx,Append,\Windows\System32\msvfw32.dll
@@ -174,6 +180,8 @@ RequireFileEx,Append,\Windows\System32\SndVol.exe
 RequireFileEx,Append,\Windows\System32\SndVolSSO.dll
 RequireFileEx,Append,\Windows\System32\stobject.dll
 RequireFileEx,Append,\Windows\System32\tsbyuv.dll
+RequireFileEx,Append,\Windows\System32\Windows.Media.dll
+RequireFileEx,Append,\Windows\System32\Windows.Media.MediaControl.dll
 If,%SourceVer%,BiggerEqual,10.0.18300.0,RequireFileEx,Append,\Windows\System32\WMALFXGFXDSP.dll
 RequireFileEx,Append,\Windows\System32\WMADMOD.DLL
 RequireFileEx,Append,\Windows\System32\WMADMOE.DLL
@@ -207,10 +215,13 @@ If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows NT\CurrentVersion\MCI32",HKLM,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\MCI32"
 End
 
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\Beep",HKLM,"Tmp_System\ControlSet001\Services\Beep"
+
+// Microphone support requires the Capability Access Manager Service
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\camsvc",HKLM,"Tmp_System\ControlSet001\Services\camsvc"
+
 // Sound Volume Bar
 RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\MTCUVC","EnableMtcUvc",0
-
-RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\Beep",HKLM,"Tmp_System\ControlSet001\Services\Beep"
 
 [#MPG123#]
 // ===============================================================================================================================
