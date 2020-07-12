@@ -668,12 +668,18 @@ If,#1,Equal,"",Halt,"Syntax Error: Directory was not specified."
 
 System,ErrorOff
 If,ExistDir,#1,DirDelete,#1
+//Wait a few seconds to give async tasks time to complete...
+If,ExistDir,#1,Wait,5
 If,ExistDir,#1,Begin
   If,Question,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer.#$x#$xRetry?",Begin
     // User clicked 'Yes'
-	Wait,3
 	System,ErrorOff
-    If,ExistDir,#1,DirDelete,#1
+    If,ExistDir,#1,Begin
+	  DirDelete,#1
+	  // Wait a few seconds to give async tasks time to complete...
+	  Wait,5
+	End
+	
     If,ExistDir,#1,Begin
 	  Message,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer then try building again.",Error
 	  Halt,"Error: The specified folder could not be deleted."

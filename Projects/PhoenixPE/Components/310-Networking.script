@@ -149,6 +149,9 @@ Echo,"Building a list of required files...#$x#$xThis can take awhile, please be 
 // Network List Service
 If,%cb_EnableNetworkListService%,Equal,True,Begin
   // net start: SystemSetupInProgress=0 -> net start netprofm -> SystemSetupInProgress=1. netprofm requires wfplwfs.sys for pnidui icon
+  
+  RequireFileEx,Append,\Windows\System32\networklist\
+  
   RequireFileEx,Append,\Windows\System32\ImplatSetup.dll
   RequireFileEx,Append,\Windows\System32\networklist
   RequireFileEx,Append,\Windows\System32\netprofm.dll
@@ -470,10 +473,11 @@ If,%cb_EnableNetworkListService%,Equal,True,Begin
   RegImport,"%ProjectTemp%\NetworkList-RegSystem.reg"
 
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows NT\CurrentVersion\NetworkList",HKLM,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\NetworkList"
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\netprofm",HKLM,"Tmp_System\ControlSet001\Services\netprofm"
 
   // AllowStart Network List Service
-  //  netprofm requires SystemSetupInProgress=0 > net start netprofm > SystemSetupInProgress=1
+  // netprofm requires SystemSetupInProgress=0 > net start netprofm > SystemSetupInProgress=1
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\netprofm",HKLM,"Tmp_System\ControlSet001\Services\netprofm"
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\netprofm","Start",3
   RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\netprofm"
 
   // NetworkList: Netprofm SID: S-1-5-80-3635958274-2059881490-2225992882-984577281-633327304
@@ -510,11 +514,14 @@ If,%cb_EnableNetworkDiscoveryServices%,Equal,True,Begin
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\fdPHost",HKLM,"Tmp_System\ControlSet001\Services\fdPHost"
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\FDResPub",HKLM,"Tmp_System\ControlSet001\Services\FDResPub"
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\SSDPSRV",HKLM,"Tmp_System\ControlSet001\Services\SSDPSRV"
+  RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Function Discovery",HKLM,"Tmp_Software\Microsoft\Function Discovery"
+  RegCopy,HKLM,"Tmp_Install_Software\Microsoft\UPnP Device Host",HKLM,"Tmp_Software\Microsoft\UPnP Device Host"
+  RegCopy,HKLM,"Tmp_Install_Software\Classes\NetworkExplorerPlugins",HKLM,"Tmp_Software\Classes\NetworkExplorerPlugins"
 
   // Plug n Play Service
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\upnphost",HKLM,"Tmp_System\ControlSet001\Services\upnphost"
 
- // Network Icon in File Explorer Navigation Tree
+  // Network Icon in File Explorer Navigation Tree
   RegCopy,HKLM,"Tmp_Install_Software\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}",HKLM,"Tmp_Software\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}"
 End
 

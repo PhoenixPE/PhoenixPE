@@ -50,13 +50,21 @@ Date=2019-05-03
 Echo,"Preparing to configure International settings..."
 
 // Format Keyboard
-StrFormat,POS,%cmb_InputLocale%,),%Pos%
+StrFormat,POS,%cmb_InputLocale1%,),%Pos%
 If,%Pos%,Bigger,0,Begin
-  StrFormat,LTRIM,%cmb_InputLocale%,1,%InputLocale%
+  StrFormat,LTRIM,%cmb_InputLocale1%,1,%InputLocale1%
   Math,Sub,%Pos%,%Pos%,2
-  StrFormat,LEFT,%InputLocale%,%Pos%,%InputLocale%
+  StrFormat,LEFT,%InputLocale1%,%Pos%,%InputLocale1%
 End
-Else,Set,%InputLocale%,%cmb_InputLocale%
+Else,Set,%InputLocale1%,%cmb_InputLocale1%
+
+StrFormat,POS,%cmb_InputLocale2%,),%Pos%
+If,%Pos%,Bigger,0,Begin
+  StrFormat,LTRIM,%cmb_InputLocale2%,1,%InputLocale2%
+  Math,Sub,%Pos%,%Pos%,2
+  StrFormat,LEFT,%InputLocale2%,%Pos%,%InputLocale2%
+End
+Else,Set,%InputLocale2%,%cmb_InputLocale2%
 
 // Format Date/Time
 StrFormat,POS,%UserLocale%,),%Pos%
@@ -87,7 +95,8 @@ End
 Else,StrFormat,PATH,%Dism.exe%,%Dism.exePath%
 
 // Get HostOS Settings if needed
-If,%cmb_InputLocale%,Equal,HostOS,Run,%ScriptFile%,GetHostInternationalSettings
+If,%cmb_InputLocale1%,Equal,HostOS,Run,%ScriptFile%,GetHostInternationalSettings
+Else,If,%cmb_InputLocale2%,Equal,HostOS,Run,%ScriptFile%,GetHostInternationalSettings
 Else,If,%cmb_UserLocale%,Equal,HostOS,Run,%ScriptFile%,GetHostInternationalSettings
 Else,If,%cmb_TimeZone%,Equal,HostOS,Run,%ScriptFile%,GetHostInternationalSettings
 
@@ -124,11 +133,16 @@ If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Begin
   TXTAddLine,%ProjectTemp%\Get-Intl.ini,[International],Prepend
   TXTReplace,%ProjectTemp%\Get-Intl.ini," : ",=
 
-  If,%cmb_InputLocale%,Equal,HostOS,Begin
-    IniRead,"%ProjectTemp%\Get-Intl.ini","International","Active keyboard(s)",%InputLocale%
-    StrFormat,Replace,%InputLocale%,", ",;,%InputLocale%
+  If,%cmb_InputLocale1%,Equal,HostOS,Begin
+    IniRead,"%ProjectTemp%\Get-Intl.ini","International","Active keyboard(s)",%InputLocale1%
+    StrFormat,Replace,%InputLocale1%,", ",;,%InputLocale1%
   End
-
+  
+  If,%cmb_InputLocale2%,Equal,HostOS,Begin
+    IniRead,"%ProjectTemp%\Get-Intl.ini","International","Active keyboard(s)",%InputLocale2%
+    StrFormat,Replace,%InputLocale2%,", ",;,%InputLocale2%
+  End
+  
   If,%cmb_UserLocale%,Equal,HostOS,Begin
     IniRead,"%ProjectTemp%\Get-Intl.ini","International","User locale for default user",%UserLocale%
     // Fallback to LocaleName from HKCU\Control Panel\International
@@ -137,16 +151,7 @@ If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Begin
 
   If,%cmb_TimeZone%,Equal,HostOS,IniRead,"%ProjectTemp%\Get-Intl.ini","International","Default time zone",%TimeZone%
 End
-
-// Fallback to 'Default' if Get-Intl.ini does not exist or can't be properly read.
-If,%InputLocale%,Equal,HostOS,Set,%InputLocale%,Default
-Else,If,%InputLocale%,Equal,"",Set,%InputLocale%,Default
-
-If,%UserLocale%,Equal,HostOS,Set,%UserLocale%,Default
-Else,If,%UserLocale%,Equal,"",Set,%UserLocale%,Default
-
-If,%TimeZone%,Equal,HostOS,Set,%TimeZone%,Default
-Else,If,%TimeZone%,Equal,"",Set,%TimeZone%,Default
+Else,Halt,"Error: Unable to read International Settings from Dism. Check the log for details."
 
 [#SetInternationalSettings#]
 // ===============================================================================================================================
@@ -161,13 +166,8 @@ Else,If,%TimeZone%,Equal,"",Set,%TimeZone%,Default
 // ===============================================================================================================================
 [SetInternationalSettings]
 Set,%DismArg%,""
-If,Not,%InputLocale%,Equal,Default,Begin
-  // Add en-US keyboard as 2nd keyboard
-  StrFormat,Pos,%InputLocale%,en-US,%Pos%
-  If,%Pos%,Equal,0,StrFormat,Pos,%InputLocale%,0409:00000409,%Pos%
-  If,%Pos%,Equal,0,Set,%InputLocale%,%InputLocale%;en-US
-  Set,%DismArg%,/Set-InputLocale:%InputLocale%
-End
+If,Not,%InputLocale1%,Equal,Default,Set,%DismArg%,"/Set-InputLocale:%InputLocale1%"
+If,Not,%InputLocale2%,Equal,Default,Set,%DismArg%,"%DismArg%;%InputLocale2%"
 If,Not,%UserLocale%,Equal,Default,Set,%DismArg%,"%DismArg% /Set-UserLocale:%UserLocale%"
 If,Not,%TimeZone%,Equal,Default,Set,%DismArg%,"%DismArg% /Set-TimeZone:#$q%TimeZone%#$q"
 
@@ -217,7 +217,8 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Accessibility"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Change Keyboard Layout"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_InputLocale,HostOS
+WriteInterface,Value,%ScriptFile%,Interface,cmb_InputLocale1,HostOS
+WriteInterface,Value,%ScriptFile%,Interface,cmb_InputLocale2,"(en-US) English US"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_UserLocale,HostOS
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TimeZone,HostOS
 System,Cursor,Normal
@@ -234,7 +235,17 @@ System,Cursor,Normal
 // Related........: btn_AdvancedOptions
 // ===============================================================================================================================
 [ToggleAdvancedOptions]
-Message,"There are no advanced options available for this script."
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,btn_ViewDismLog,%state%
+If,%state%,Equal,False,Begin,
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
+  Else,Set,%Toggle%,False
+End
+Else,Set,%Toggle%,False
+
+WriteInterface,Visible,%ScriptFile%,Interface,btn_ViewDismLog,%Toggle%
+
+System,EndLocal
 
 [#ShowScriptInfo#]
 // ===============================================================================================================================
@@ -248,7 +259,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"This script allows you to specify your regional settings. Choose 'HostOS' to use the regional settings defined by your operating system."
+Message,"This script allows you to specify your regional settings.#$x#$xChoose 'HostOS' to use the regional settings defined by your operating system.#$x#$xChoose 'Default' to use the regional settings defined by your source.#$x#$xChoose another value from the list to override the default regional settings."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -262,7 +273,7 @@ Message,"This script allows you to specify your regional settings. Choose 'HostO
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_ViewDismLog=" View DISM Log",1,8,286,5,130,25,ViewDismLog,Health.ico,True,"__View the DISM log from the last integration."
+btn_ViewDismLog=" View DISM Log",0,8,286,5,130,25,ViewDismLog,Health.ico,True,"__View the DISM log from the last integration."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,572,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,603,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
@@ -273,13 +284,15 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,102,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,121,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,161,119,21,Accessibility
 txt_ShortcutName="Shortcut Name:",1,0,12,203,119,21,"Change Keyboard Layout"
-bvl_RegionalSettings="Regional Settings",1,12,145,50,271,100,8,Bold
-lbl_InputLocale=Keyboard,1,1,156,72,56,18,8,Normal
-cmb_InputLocale=HostOS,1,4,221,66,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your keyboard layout. The en-US keyboard will added if it is not already present."
-lbl_UserLocale=Format,1,1,156,99,58,18,8,Normal
-cmb_UserLocale=HostOS,1,4,221,93,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your date and time format."
-lbl_TimeZone=TimeZone,1,1,156,127,58,18,8,Normal
-cmb_TimeZone=HostOS,1,4,221,120,180,21,HostOS,Default,"(UTC-12:00) Dateline Standard Time","(UTC-11:00) UTC-11","(UTC-10:00) Hawaiian Standard Time","(UTC-10:00) Aleutian Standard Time","(UTC-09:30) Marquesas Standard Time","(UTC-09:00) Alaskan Standard Time","(UTC-09:00) UTC-09","(UTC-08:00) Pacific Standard Time (Mexico)","(UTC-08:00) Pacific Standard Time","(UTC-08:00) UTC-08","(UTC-07:00) US Mountain Standard Time","(UTC-07:00) Mountain Standard Time (Mexico)","(UTC-07:00) Mountain Standard Time","(UTC-06:00) Central America Standard Time","(UTC-06:00) Central Standard Time","(UTC-06:00) Central Standard Time (Mexico)","(UTC-06:00) Easter Island Standard Time","(UTC-06:00) Canada Central Standard Time","(UTC-05:00) SA Pacific Standard Time","(UTC-05:00) Eastern Standard Time (Mexico)","(UTC-05:00) Eastern Standard Time","(UTC-05:00) Haiti Standard Time","(UTC-05:00) Cuba Standard Time","(UTC-05:00) Turks And Caicos Standard Time","(UTC-05:00) US Eastern Standard Time","(UTC-04:00) Paraguay Standard Time","(UTC-04:00) Venezuela Standard Time","(UTC-04:00) Central Brazilian Standard Time","(UTC-04:00) SA Western Standard Time","(UTC-04:00) Atlantic Standard Time","(UTC-04:00) Pacific SA Standard Time","(UTC-03:30) Newfoundland Standard Time","(UTC-03:00) Tocantins Standard Time","(UTC-03:00) E. South America Standard Time","(UTC-03:00) Argentina Standard Time","(UTC-03:00) SA Eastern Standard Time","(UTC-03:00) Greenland Standard Time","(UTC-03:00) Montevideo Standard Time","(UTC-03:00) Magallanes Standard Time","(UTC-03:00) Saint Pierre Standard Time","(UTC-03:00) Bahia Standard Time","(UTC-02:00) UTC-02","(UTC-01:00) Cape Verde Standard Time","(UTC-01:00) Azores Standard Time","(UTC) UTC","(UTC+00:00) Morocco Standard Time","(UTC+00:00) GMT Standard Time","(UTC+00:00) Greenwich Standard Time","(UTC+01:00) W. Central Africa Standard Time","(UTC+01:00) W. Europe Standard Time","(UTC+01:00) Central Europe Standard Time","(UTC+01:00) Romance Standard Time","(UTC+01:00) Sao Tome Standard Time","(UTC+01:00) Central European Standard Time","(UTC+02:00) Jordan Standard Time","(UTC+02:00) GTB Standard Time","(UTC+02:00) Middle East Standard Time","(UTC+02:00) E. Europe Standard Time","(UTC+02:00) Syria Standard Time","(UTC+02:00) West Bank Standard Time","(UTC+02:00) South Africa Standard Time","(UTC+02:00) FLE Standard Time","(UTC+02:00) Israel Standard Time","(UTC+02:00) Kaliningrad Standard Time","(UTC+02:00) Sudan Standard Time","(UTC+02:00) Egypt Standard Time","(UTC+02:00) Libya Standard Time","(UTC+02:00) Namibia Standard Time","(UTC+03:00) Arabic Standard Time","(UTC+03:00) Turkey Standard Time","(UTC+03:00) Arab Standard Time","(UTC+03:00) Belarus Standard Time","(UTC+03:00) Russian Standard Time","(UTC+03:00) E. Africa Standard Time","(UTC+03:30) Iran Standard Time","(UTC+04:00) Arabian Standard Time","(UTC+04:00) Astrakhan Standard Time","(UTC+04:00) Azerbaijan Standard Time","(UTC+04:00) Caucasus Standard Time","(UTC+04:00) Russia Time Zone 3","(UTC+04:00) Mauritius Standard Time","(UTC+04:00) Saratov Standard Time","(UTC+04:00) Georgian Standard Time","(UTC+04:30) Afghanistan Standard Time","(UTC+05:00) West Asia Standard Time","(UTC+05:00) Ekaterinburg Standard Time","(UTC+05:00) Pakistan Standard Time","(UTC+05:30) India Standard Time","(UTC+05:30) Sri Lanka Standard Time","(UTC+05:45) Nepal Standard Time","(UTC+06:00) Central Asia Standard Time","(UTC+06:00) Bangladesh Standard Time","(UTC+06:00) Omsk Standard Time","(UTC+06:30) Myanmar Standard Time","(UTC+07:00) SE Asia Standard Time","(UTC+07:00) Altai Standard Time","(UTC+07:00) W. Mongolia Standard Time","(UTC+07:00) North Asia Standard Time","(UTC+07:00) N. Central Asia Standard Time","(UTC+07:00) Tomsk Standard Time","(UTC+08:00) China Standard Time","(UTC+08:00) North Asia East Standard Time","(UTC+08:00) Singapore Standard Time","(UTC+08:00) Ulaanbaatar Standard Time","(UTC+08:00) W. Australia Standard Time","(UTC+08:00) Taipei Standard Time","(UTC+08:30) North Korea Standard Time","(UTC+08:45) Aus Central W. Standard Time","(UTC+09:00) Transbaikal Standard Time","(UTC+09:00) Yakutsk Standard Time","(UTC+09:00) Tokyo Standard Time","(UTC+09:00) Korea Standard Time","(UTC+09:30) Cen. Australia Standard Time","(UTC+09:30) AUS Central Standard Time","(UTC+10:00) E. Australia Standard Time","(UTC+10:00) AUS Eastern Standard Time","(UTC+10:00) West Pacific Standard Time","(UTC+10:00) Tasmania Standard Time","(UTC+10:00) Vladivostok Standard Time","(UTC+10:30) Lord Howe Standard Time","(UTC+11:00) Russia Time Zone 10","(UTC+11:00) Bougainville Standard Time","(UTC+11:00) Norfolk Standard Time","(UTC+11:00) Central Pacific Standard Time","(UTC+11:00) Magadan Standard Time","(UTC+11:00) Sakhalin Standard Time","(UTC+12:00) Russia Time Zone 11","(UTC+12:00) New Zealand Standard Time","(UTC+12:00) Fiji Standard Time","(UTC+12:00) UTC+12","(UTC+12:45) Chatham Islands Standard Time","(UTC+13:00) Tonga Standard Time","(UTC+13:00) Samoa Standard Time","(UTC+13:00) UTC+13","(UTC+14:00) Line Islands Standard Time","__Choose your Time Zone."
+bvl_RegionalSettings="Regional Settings",1,12,145,50,271,141,8,Bold
+lbl_InputLocale1="Keyboard 1",1,1,156,70,56,18,8,Normal
+cmb_InputLocale1=HostOS,1,4,221,66,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your primary keyboard layout.#$x#$xThe en-US keyboard will added as a secondary layout if it is not already the default."
+lbl_InputLocale2="Keyboard 2",1,1,156,98,56,18,8,Normal
+cmb_InputLocale2=HostOS,1,4,221,93,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your primary keyboard layout.#$x#$xThe en-US keyboard will added as a secondary layout if it is not already the default."
+lbl_UserLocale=Format,1,1,156,127,58,18,8,Normal
+cmb_UserLocale=HostOS,1,4,221,121,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your date and time format."
+lbl_TimeZone=TimeZone,1,1,156,154,58,18,8,Normal
+cmb_TimeZone=HostOS,1,4,221,149,180,21,HostOS,Default,"(UTC-12:00) Dateline Standard Time","(UTC-11:00) UTC-11","(UTC-10:00) Hawaiian Standard Time","(UTC-10:00) Aleutian Standard Time","(UTC-09:30) Marquesas Standard Time","(UTC-09:00) Alaskan Standard Time","(UTC-09:00) UTC-09","(UTC-08:00) Pacific Standard Time (Mexico)","(UTC-08:00) Pacific Standard Time","(UTC-08:00) UTC-08","(UTC-07:00) US Mountain Standard Time","(UTC-07:00) Mountain Standard Time (Mexico)","(UTC-07:00) Mountain Standard Time","(UTC-06:00) Central America Standard Time","(UTC-06:00) Central Standard Time","(UTC-06:00) Central Standard Time (Mexico)","(UTC-06:00) Easter Island Standard Time","(UTC-06:00) Canada Central Standard Time","(UTC-05:00) SA Pacific Standard Time","(UTC-05:00) Eastern Standard Time (Mexico)","(UTC-05:00) Eastern Standard Time","(UTC-05:00) Haiti Standard Time","(UTC-05:00) Cuba Standard Time","(UTC-05:00) Turks And Caicos Standard Time","(UTC-05:00) US Eastern Standard Time","(UTC-04:00) Paraguay Standard Time","(UTC-04:00) Venezuela Standard Time","(UTC-04:00) Central Brazilian Standard Time","(UTC-04:00) SA Western Standard Time","(UTC-04:00) Atlantic Standard Time","(UTC-04:00) Pacific SA Standard Time","(UTC-03:30) Newfoundland Standard Time","(UTC-03:00) Tocantins Standard Time","(UTC-03:00) E. South America Standard Time","(UTC-03:00) Argentina Standard Time","(UTC-03:00) SA Eastern Standard Time","(UTC-03:00) Greenland Standard Time","(UTC-03:00) Montevideo Standard Time","(UTC-03:00) Magallanes Standard Time","(UTC-03:00) Saint Pierre Standard Time","(UTC-03:00) Bahia Standard Time","(UTC-02:00) UTC-02","(UTC-01:00) Cape Verde Standard Time","(UTC-01:00) Azores Standard Time","(UTC) UTC","(UTC+00:00) Morocco Standard Time","(UTC+00:00) GMT Standard Time","(UTC+00:00) Greenwich Standard Time","(UTC+01:00) W. Central Africa Standard Time","(UTC+01:00) W. Europe Standard Time","(UTC+01:00) Central Europe Standard Time","(UTC+01:00) Romance Standard Time","(UTC+01:00) Sao Tome Standard Time","(UTC+01:00) Central European Standard Time","(UTC+02:00) Jordan Standard Time","(UTC+02:00) GTB Standard Time","(UTC+02:00) Middle East Standard Time","(UTC+02:00) E. Europe Standard Time","(UTC+02:00) Syria Standard Time","(UTC+02:00) West Bank Standard Time","(UTC+02:00) South Africa Standard Time","(UTC+02:00) FLE Standard Time","(UTC+02:00) Israel Standard Time","(UTC+02:00) Kaliningrad Standard Time","(UTC+02:00) Sudan Standard Time","(UTC+02:00) Egypt Standard Time","(UTC+02:00) Libya Standard Time","(UTC+02:00) Namibia Standard Time","(UTC+03:00) Arabic Standard Time","(UTC+03:00) Turkey Standard Time","(UTC+03:00) Arab Standard Time","(UTC+03:00) Belarus Standard Time","(UTC+03:00) Russian Standard Time","(UTC+03:00) E. Africa Standard Time","(UTC+03:30) Iran Standard Time","(UTC+04:00) Arabian Standard Time","(UTC+04:00) Astrakhan Standard Time","(UTC+04:00) Azerbaijan Standard Time","(UTC+04:00) Caucasus Standard Time","(UTC+04:00) Russia Time Zone 3","(UTC+04:00) Mauritius Standard Time","(UTC+04:00) Saratov Standard Time","(UTC+04:00) Georgian Standard Time","(UTC+04:30) Afghanistan Standard Time","(UTC+05:00) West Asia Standard Time","(UTC+05:00) Ekaterinburg Standard Time","(UTC+05:00) Pakistan Standard Time","(UTC+05:30) India Standard Time","(UTC+05:30) Sri Lanka Standard Time","(UTC+05:45) Nepal Standard Time","(UTC+06:00) Central Asia Standard Time","(UTC+06:00) Bangladesh Standard Time","(UTC+06:00) Omsk Standard Time","(UTC+06:30) Myanmar Standard Time","(UTC+07:00) SE Asia Standard Time","(UTC+07:00) Altai Standard Time","(UTC+07:00) W. Mongolia Standard Time","(UTC+07:00) North Asia Standard Time","(UTC+07:00) N. Central Asia Standard Time","(UTC+07:00) Tomsk Standard Time","(UTC+08:00) China Standard Time","(UTC+08:00) North Asia East Standard Time","(UTC+08:00) Singapore Standard Time","(UTC+08:00) Ulaanbaatar Standard Time","(UTC+08:00) W. Australia Standard Time","(UTC+08:00) Taipei Standard Time","(UTC+08:30) North Korea Standard Time","(UTC+08:45) Aus Central W. Standard Time","(UTC+09:00) Transbaikal Standard Time","(UTC+09:00) Yakutsk Standard Time","(UTC+09:00) Tokyo Standard Time","(UTC+09:00) Korea Standard Time","(UTC+09:30) Cen. Australia Standard Time","(UTC+09:30) AUS Central Standard Time","(UTC+10:00) E. Australia Standard Time","(UTC+10:00) AUS Eastern Standard Time","(UTC+10:00) West Pacific Standard Time","(UTC+10:00) Tasmania Standard Time","(UTC+10:00) Vladivostok Standard Time","(UTC+10:30) Lord Howe Standard Time","(UTC+11:00) Russia Time Zone 10","(UTC+11:00) Bougainville Standard Time","(UTC+11:00) Norfolk Standard Time","(UTC+11:00) Central Pacific Standard Time","(UTC+11:00) Magadan Standard Time","(UTC+11:00) Sakhalin Standard Time","(UTC+12:00) Russia Time Zone 11","(UTC+12:00) New Zealand Standard Time","(UTC+12:00) Fiji Standard Time","(UTC+12:00) UTC+12","(UTC+12:45) Chatham Islands Standard Time","(UTC+13:00) Tonga Standard Time","(UTC+13:00) Samoa Standard Time","(UTC+13:00) UTC+13","(UTC+14:00) Line Islands Standard Time","__Choose your Time Zone."
 
 [InterfaceEncoded]
 Health.ico=1150,896
