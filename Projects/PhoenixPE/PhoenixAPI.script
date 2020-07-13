@@ -2,14 +2,12 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=Scripting interface.
-Version=1.2.1.0
+Version=1.3.0.0
 Level=0
 Selected=None
 
 [Variables]
 %_PhoenixAPI_ConfigMode%=PECMD
-%_PhoenixAPI_RequireFileEx_BulkFileList%=
-%_PhoenixAPI_RequireFileEx_SingleFileList%=
 
 [Macros]
 RegLoadHives=Run,%API%,_PhoenixAPI_RegLoadHives
@@ -24,8 +22,6 @@ DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
 FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 
-IniReadEx=Run,%API%,_PhoenixAPI_IniReadEx
-
 // Experimental - May be changed or removed without notice
 7zExtract=Run,%API%,_PhoenixAPI_7zExtract
 InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
@@ -35,8 +31,6 @@ XMLDelete=Run,%API%,_PhoenixAPI_XMLDelete
 //XMLRead=
 XMLRename=Run,%API%,_PhoenixAPI_XMLRename
 XMLUpdate=Run,%API%,_PhoenixAPI_XMLUpdate
-
-
 
 SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
 SetRegACL=Run,%API%,_PhoenixAPI_SetRegACL
@@ -51,6 +45,7 @@ BitClear=Run,%API%,_PhoenixAPI_BitClear
 BitSet=Run,%API%,_PhoenixAPI_BitSet
 BitToggle=Run,%API%,_PhoenixAPI_BitToggle
 
+// Experimental - May be changed or removed without notice
 [_PhoenixAPI_7zExtract]
 System,SetLocal
 If,#1,Equal,"",Halt,"7zip Error: You must specify the file to decompress."
@@ -63,6 +58,7 @@ ShellExecute,Hide,%Tools%\7z.exe,"x -r -y #$q%SrcArchive%#$q -o#$q%DestDir%#$q"
 
 System,EndLocal
 
+// Experimental - May be changed or removed without notice
 [_PhoenixAPI_InnoExtract]
 System,SetLocal
 If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the file to decompress."
@@ -120,46 +116,6 @@ Else,Begin
 End
 
 System,EndLocal
-
-[#_PhoenixAPI_IniReadEx#]
-// ===============================================================================================================================
-// Name...........: IniReadEx
-// Description....: Reads a value from a standard .ini file.
-//                  If the file or key doesn't exist the specified default value will be returned.
-// Syntax.........: IniReadEx,<FileName>,<Section>,<Key>,<DefaultValue>,<DestVar>
-// Parameters.....: #1 FileName - The full path of the file to read.
-//                  #2 Section - The section containing the value to be read.
-//                  #3 Key - The name of the key to be read.
-//                  #4 DefaultValue - The default value to return if the key cannot be found.
-//                  #5 DestVar - The value will be saved to a variable with this name.
-//                               Note that <DestVar> should NOT be enclosed in percent (%) signs 
-//
-//                  Example: IniReadEx,C:\windows\win.ini,mySection,myKey,Default,myVariable
-//
-// Return values..: Sets <DestVar> to the value returned.
-// Author.........: Homes32
-// Remarks........: The Winbuilder/PEBakery IniRead implementation always returns an empty string if the Key is not found.
-//                  If you don't need to specify a default key value IniRead will execute slightly faster then this macro.
-//
-//                  We need to run this macro in the local scope of the calling script in order to set the return var
-//                  so we must not use System,SetLocal isolation here.
-// Related........:
-// ===============================================================================================================================
-[_PhoenixAPI_IniReadEx]
-If,#1,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the full path of the file to read."
-If,#2,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the section containing the value to be read."
-If,#3,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the key to be read."
-If,#4,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the default value to return if the key cannot be found."
-If,#5,Equal,"",Halt,"IniWriteEx Syntax Error: You must specify the name of the variable where the value will be saved."
-
-If,ExistFile,#1,Begin
-  IniRead,#1,#2,#3,%IniReadEx_Return%
-  If,%IniReadEx_Return%,Equal,"",Set,%#5%,#4
-  Else,Set,%#5%,%IniReadEx_Return%
-End
-Else,Set,%#5%,#4
-
-Set,%IniReadEx_Return%,Nil
 
 [#_PhoenixAPI_SetFileACL#]
 // ===============================================================================================================================
