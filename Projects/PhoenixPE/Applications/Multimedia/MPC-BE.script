@@ -1,0 +1,587 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=MPC-BE
+Author=Homes32
+Level=5
+Version=1.0.0.0
+Description=(v1.5.5.5274) Media Player Classic - BE is a free and open source audio and video player for Windows.
+Date=2020-06-15
+Selected=True
+Mandatory=False
+
+[Variables]
+%ProgramFolder%="MPC-BE"
+%ProgramExe%="mpc-be.exe"
+%ProgramExe64%="mpc-be64.exe"
+%DownloadURLx86%=https://sourceforge.net/projects/mpcbe/files/MPC-BE/Release%20builds/1.5.4/MPC-BE.1.5.4.4969.x86.7z/download
+%DownloadURLx64%=https://sourceforge.net/projects/mpcbe/files/MPC-BE/Release%20builds/1.5.4/MPC-BE.1.5.4.4969.x64.7z/download
+%SetupFile%="MPC-BE.zip"
+%SetupFileFolderx86%="MPC-BE.1.5.4.4969.x86"
+%SetupFileFolderx64%="MPC-BE.1.5.4.4969.x64"
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+If,%SourceArch%,Equal,x64,Set,%ProgramExe%,%ProgramExe64%
+
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+RequireFileEx,Append,\Windows\System32\devenum.dll
+RequireFileEx,Append,\Windows\System32\dsound.dll
+RequireFileEx,Append,\Windows\System32\dxva2.dll
+RequireFileEx,Append,\Windows\System32\evr.dll
+RequireFileEx,Append,\Windows\System32\imaadp32.acm
+RequireFileEx,Append,\Windows\System32\iyuv_32.dll
+RequireFileEx,Append,\Windows\System32\l3codeca.acm
+RequireFileEx,Append,\Windows\System32\l3codecp.acm
+RequireFileEx,Append,\Windows\System32\mfperfhelper.dll
+RequireFileEx,Append,\Windows\System32\mfplat.dll
+RequireFileEx,Append,\Windows\System32\MP3DMOD.DLL
+RequireFileEx,Append,\Windows\System32\MP43DECD.DLL
+RequireFileEx,Append,\Windows\System32\MP4SDECD.DLL
+RequireFileEx,Append,\Windows\System32\Mpeg2Data.ax
+RequireFileEx,Append,\Windows\System32\mpg2splt.ax
+RequireFileEx,Append,\Windows\System32\MPG4DECD.DLL
+RequireFileEx,Append,\Windows\System32\msadp32.acm
+RequireFileEx,Append,\Windows\System32\msdmo.dll
+RequireFileEx,Append,\Windows\System32\msg711.acm
+RequireFileEx,Append,\Windows\System32\msgsm32.acm
+RequireFileEx,Append,\Windows\System32\msimg32.dll
+RequireFileEx,Append,\Windows\System32\msmpeg2adec.dll
+RequireFileEx,Append,\Windows\System32\msmpeg2vdec.dll
+RequireFileEx,Append,\Windows\System32\msrle32.dll
+RequireFileEx,Append,\Windows\System32\msvidc32.dll
+RequireFileEx,Append,\Windows\System32\msyuv.dll
+RequireFileEx,Append,\Windows\System32\oleacc.dll
+RequireFileEx,Append,\Windows\System32\oleaccrc.dll
+RequireFileEx,Append,\Windows\System32\qasf.dll
+RequireFileEx,Append,\Windows\System32\tsbyuv.dll
+RequireFileEx,Append,\Windows\System32\unregmp2.exe
+RequireFileEx,Append,\Windows\System32\WMADMOD.DLL
+RequireFileEx,Append,\Windows\System32\WMADMOE.DLL
+RequireFileEx,Append,\Windows\System32\WMASF.DLL
+RequireFileEx,Append,\Windows\System32\wmdrmsdk.dll
+RequireFileEx,Append,\Windows\System32\wmploc.DLL
+RequireFileEx,Append,\Windows\System32\WMSPDMOD.DLL
+RequireFileEx,Append,\Windows\System32\WMVCORE.DLL
+RequireFileEx,Append,\Windows\System32\WMVDECOD.DLL
+RequireFileEx,Append,\Windows\System32\wmvdspa.dll
+RequireFileEx,Append,\Windows\System32\WMVSDECD.DLL
+
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+RegHiveLoad,Tmp_Default,%RegDefault%
+RegHiveLoad,Tmp_Software,%RegSoftware%
+
+Run,%ScriptFile%,ProgramSettings
+
+Echo,"Configuring media file associations..."
+// Remove Audio and Video Context Menu "Play with Windows Media Player"
+If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\SystemFileAssociations\audio",RegDelete,HKLM,"Tmp_Software\Classes\SystemFileAssociations\audio"
+If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\SystemFileAssociations\video",RegDelete,HKLM,"Tmp_Software\Classes\SystemFileAssociations\video"
+
+// Add to Registered Applications
+RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationDescription","One of the most powerful, configurable multimedia players for the Windows operating system."
+RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationIcon","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q,0"
+RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationName","MPC-BE"
+
+RegWrite,HKLM,0x1,"Tmp_Software\MPC-BE","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
+RegWrite,HKLM,0x1,"Tmp_Software\RegisteredApplications","MPC-BE","Software\Clients\Media\MPC-BE\Capabilities"
+
+// Register File Associations
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\MPC-BE\shell","","Open"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\MPC-BE\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\MPC-BE\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q #$q#$p1#$q"
+
+If,%cb_AudioFileAsso%,Equal,True,Run,%ScriptFile%,Register-AudioAssociations
+If,%cb_VideoFileAsso%,Equal,True,Run,%ScriptFile%,Register-VideoAssociations
+
+RegHiveUnLoad,Tmp_Default
+RegHiveUnLoad,Tmp_Software
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#ProgramSettings#]
+// ===============================================================================================================================
+// Name...........: ProgramSettings
+// Description....: Configure program settings for MPC-BE
+// Syntax.........: Run,%ScriptFile%,ProgramSettings
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ProgramSettings]
+Echo,"Configuring MPC-BE Settings..."
+
+// UI Language
+StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
+StrFormat,RTRIM,%Lang%,1,%Lang%
+RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\MPC-BE\Settings","Language",%Lang%
+
+// DVD Language
+StrFormat,SPLIT,%cmb_DVDLanguage%,"[",2,%DVDLang%
+StrFormat,RTRIM,%DVDLang%,1,%DVDLang%
+RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","MenuLang",%DVDLang%
+RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","SubtitlesLang",%DVDLang%
+RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","AudioLang",%DVDLang%
+
+// Dark Theme
+If,%cb_DarkMode%,Equal,True,Begin
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","UseDarkTheme",1
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","DarkMenu",1
+End
+Else,Begin
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","UseDarkTheme",0
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","DarkMenu",0
+End
+
+// Shell Context Menu
+If,%cb_ContextMenu%,Equal,True,Begin
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextFiles",1
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextDir",1
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowFiles",1
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowDir",1
+  RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","MpcPath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+    
+  // Extract the localized strings from the Lang\mpcresources.<lngCD>.dll resources and update
+  // HKCU\Software\MPC-BE\ShellEx\Add and HKCU\Software\MPC-BE\ShellEx\Play
+  If,Not,%Lang%,Equal,"en",Begin
+    ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\mpcresources.%Lang%.dll#$q 33161 #$q%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini#$q"
+    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+	ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\mpcresources.%Lang%.dll#$q 33162 #$q%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini#$q"
+    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+  End
+  Else,Begin
+    // English doesn't have a resource .dll Use the .exe instead
+    ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 33161 #$q%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini#$q"
+    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+	ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 33162 #$q%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini#$q"
+    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+  End
+  
+  IniRead,"%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini","Strings",33161,%ShellContextMenuAdd%
+  IniRead,"%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini","Strings",33162,%ShellContextMenuPlay%
+  RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","Add",%ShellContextMenuAdd%
+  RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","Play",%ShellContextMenuPlay%
+  
+  // Register ShellExt  
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\MPCBEShellExt","","{A2CF4243-6525-4764-B3F5-2FCDE2F47989}"
+
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}","","MPCBEContextMenu Class"
+  If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","","%PEPrograms%\%ProgramFolder%\MPCBEShellExt64.dll"
+  Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","","%PEPrograms%\%ProgramFolder%\MPCBEShellExt.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","ThreadingModel","Apartment"
+End
+Else,Begin
+  // Disable Shell Context Menu
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextFiles",0
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextDir",0
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowFiles",0
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowDir",0
+End
+
+[#Register-AudioAssociations#]
+// ===============================================================================================================================
+// Name...........: Register-AudioAssociations
+// Description....: Register MPC-BE as the default audio player for these file types.
+// Syntax.........: Run,%ScriptFile%,Register-AudioAssociations
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[Register-AudioAssociations]
+Echo,"Registering MPC-BE as the default audio player..."
+
+// Audio Files
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3ga","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.669","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.a52","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.aac","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ac3","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.adt","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.adts","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIF","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIFC","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIFF","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AU","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.amr","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.aob","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ape","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.caf","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.CDA","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dts","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.flac","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.it","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M4A","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.m4p","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MID","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MKA","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mlp","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MOD","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mp1","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP2","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mp3","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpc","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpga","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.oga","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.oma","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.opus","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.qcp","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ra","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.RMI","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.SND","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.s3m","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.spx","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tta","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.voc","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vqf","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.w64","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wav","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WMA","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wv","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xa","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xm","","MPC-BE"
+
+// Play Lists
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ASX","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.b4s","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.cue","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ifo","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M3U","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.m3u8","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.pls","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ram","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sdp","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vlc","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WVX","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xspf","","MPC-BE"
+
+[#Register-VideoAssociations#]
+// ===============================================================================================================================
+// Name...........: Register-VideoAssociations
+// Description....: Register MPC-BE as the default video player for these file types.
+// Syntax.........: Run,%ScriptFile%,Register-VideoAssociations
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[Register-VideoAssociations]
+Echo,"Registering MPC-BE as the default video player..."
+
+// Video Files 
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3g2","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3gp","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3gp2","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3GPP","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.amv","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ASF","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.avi","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.bik","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.divx","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.drc","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dv","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.f4v","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.flv","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.gvi","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.gxf","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M1V","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2T","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2TS","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2V","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M4V","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MKV","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MOV","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP2V","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP4","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP4V","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpa","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPE","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPEG","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg1","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg2","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg4","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPG","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPV2","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MTS","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mtv","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mxf","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.nsv","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.nuv","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogg","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogm","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogv","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogx","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rec","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rm","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rmvb","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rpl","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.thp","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tod","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vlt","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wsz","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.TS","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.TTS","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vob","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vro","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.webm","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WMV","","MPC-BE"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xesc","","MPC-BE"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
+// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting program files..."
+ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -o#$q#1#$q"
+If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+
+// It's annoying when people create zip files containing a directory with an every changing name
+If,%SourceArch%,Equal,x64,Set,%SetupFileFolder%,%SetupFileFolderx64%
+Else,Set,%SetupFileFolder%,%SetupFileFolderx86%
+FileCopy,"#1\%SetupFileFolder%\*.*",#1
+Wait,1
+DirDeleteEx,"#1\%SetupFileFolder%"
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website and encode them into our script.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: #1 - Arch to download (x86/x64)
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
+Else,Set,%DownloadURL%,%DownloadURLx86%
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+
+[#LaunchProgram#]
+// ===============================================================================================================================
+// Name...........: LaunchProgram
+// Description....: Unpack and launch the program.
+// Syntax.........: Run,%ScriptFile%,LaunchProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_LaunchProgram
+// ===============================================================================================================================
+[LaunchProgram]
+If,%SourceArch%,Equal,x64,Set,%ProgramExe%,%ProgramExe64%
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Multimedia"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"MPC-BE"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [en]"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_DVDLanguage,"English (United States) [1033]"
+WriteInterface,Value,%ScriptFile%,Interface,cb_DarkMode,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_AudioFileAsso,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_VideoFileAsso,True
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options in the script interface.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"Media Player Classic - BE is a free and open source audio and video player for Windows based on the original 'Media Player Classic' project (Gabest) and 'Media Player Classic Home Cinema' project.#$x#$xOn first run this script will download the setup file (~12 MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_LaunchProgram="Launch MPC-BE",1,8,5,5,130,25,LaunchProgram,play-hot.png,True
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://sourceforge.net/projects/mpcbe/
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,Multimedia
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,MPC-BE
+bvl_Options=Options,1,12,150,90,190,184,8,Bold
+lbl_Language=Language,1,1,159,104,153,16,8,Normal
+cmb_Language="English [en]",1,4,160,120,165,21,"Armenian [hy]","Basque [eu]","Belarusian [by]","Catalan [ca]","Chinese (Simplified) [sc]","Chinese (Traditional) [tc]","Czech [cz]","Dutch [nl]","English [en]","French [fr]","German [de]","Greek [el]","Hebrew [he]","Hungarian [hu]","Italian [it]","Japanese [ja]","Korean [kr]","Polish [pl]","Portuguese (Brazil) [br]","Romanian [ro]","Russian [ru]","Slovak [sk]","Spanish [es]","Swedish [sv]","Turkish [tr]","Ukrainian [ua]"
+lbl_DVDLanguage="DVD Navigator Language",1,1,159,150,153,16,8,Normal
+cmb_DVDLanguage="English (United States) [1033]",1,4,160,166,165,21,"Default [0000]","Afrikaans [1078]","Albanian [1052]","Arabic (Saudi Arabia) [1025]","Arabic (Iraq) [2049]","Arabic (Egypt) [3073]","Arabic (Libya) [4097]","Arabic (Algeria) [5121]","Arabic (Morocco) [6145]","Arabic (Tunisia) [7169]","Arabic (Oman) [8193]","Arabic (Yemen) [9217]","Arabic (Syria) [10241]","Arabic (Jordan) [11265]","Arabic (Lebanon) [12289]","Arabic (Kuwait) [13313]","Arabic (U.A.E.) [14337]","Arabic (Bahrain) [15361]","Arabic (Qatar) [16385]","Armenian [1067]","Azeri (Latin) [1068]","Azeri (Cyrillic) [2092]","Basque [1069]","Belarusian [1059]","Bulgarian [1026]","Burmese [1109]","Catalan [1027]","Chinese (Taiwan) [1028]","Chinese (PRC) [2052]","Chinese (Hong Kong SAR, PRC) [3076]","Chinese (Singapore) [4100]","Chinese (Macau SAR) [1404]","Croatian [1050]","Czech [1029]","Danish [1030]","Divehi [1125]","Dutch (Netherlands) [1043]","Dutch (Belgium) [2067]","English (United States) [1033]","English (United Kingdom) [2057]","English (Australian) [3081]","English (Canadian) [4105]","English (New Zealand) [5129]","English (Ireland) [6153]","English (South Africa) [7177]","English (Jamaica) [8201]","English (Caribbean) [9225]","English (Belize) [10249]","English (Trinidad) [11273]","English (Zimbabwe) [12297]","English (Philippines) [13321]","Estonian [1061]","Faeroese [1080]","Farsi [1065]","Finnish [1035]","French (Standard) [1036]","French (Belgian) [2060]","French (Canadian) [3084]","French (Switzerland) [4108]","French (Luxembourg) [5132]","French (Monaco) [6156]","Galician [1110]","Georgian [1079]","German (Standard) [1031]","German (Switzerland) [2055]","German (Austria) [3079]","German (Luxembourg) [4103]","German (Liechtenstein) [5127]","Greek [1032]","Gujarati [1095]","Hebrew [1037]","Hindi [1081]","Hungarian [1038]","Icelandic [1039]","Indonesian [1057]","Italian (Standard) [1040]","Italian (Switzerland) [2064]","Japanese [1041]","Kannada [1099]","Konkani [1111]","Korean [1042]","Korean (Johab) [2066]","Kyrgyz [1088]","Latvian [1062]","Lithuanian [1063]","Lithuanian (Classic) [2087]","FYRO Macedonian [1071]","Malay (Malaysian) [1086]","Malay (Brunei Darussalam) [2110]","Marathi [1102]","Mongolian [1104]","Norwegian (Bokmal) [1044]","Norwegian (Nynorsk) [2068]","Polish [1045]","Portuguese (Brazil) [1046]","Portuguese (Portugal) [2070]","Punjabi [1094]","Romanian [1048]","Russian [1049]","Sanskrit [1103]","Serbian (Cyrillic) [3098]","Serbian (Latin) [2074]","Slovak [1051]","Slovenian [1060]","Spanish (Spain, Traditional Sort) [1034]","Spanish (Mexican) [2058]","Spanish (Spain, International Sort) [3082]","Spanish (Guatemala) [4106]","Spanish (Costa Rica) [5130]","Spanish (Panama) [6154]","Spanish (Dominican Republic) [7178]","Spanish (Venezuela) [8202]","Spanish (Colombia) [9226]","Spanish (Peru) [10250]","Spanish (Argentina) [11274]","Spanish (Ecuador) [12298]","Spanish (Chile) [13322]","Spanish (Uruguay) [14346]","Spanish (Paraguay) [15370]","Spanish (Bolivia) [16394]","Spanish (El Salvador) [17418]","Spanish (Honduras) [18442]","Spanish (Nicaragua) [19466]","Spanish (Puerto Rico) [20490]","Sutu [1072]","Swahili (Kenya) [1089]","Swedish [1053]","Swedish (Finland) [2077]","Syriac [1114]","Tamil [1097]","Tatar (Tatarstan) [1092]","Telugu [1098]","Thai [1054]","Turkish [1055]","Ukrainian [1058]","Urdu (Pakistan) [1056]","Urdu (India) [2080]","Uzbek (Latin) [1091]","Uzbek (Cyrillic) [2115]","Vietnamese [1066]"
+cb_DarkMode="Use Dark Theme",1,3,160,194,112,18,True
+cb_ContextMenu="Add Context Menu",1,3,160,212,143,18,False,"__Add 'Play with MPC-BE' to explorer's context menu."
+cb_AudioFileAsso="Set as the Default Audio Player",1,3,160,230,171,18,True,"__Set MPC-BE as the default audio player."
+cb_VideoFileAsso="Set as the Default Video Player",1,3,160,248,171,18,True,"__Set MPC-BE as the default video player."
+
+[AuthorEncoded]
+MPC-BE_80.png=8315,11184
+Logo=MPC-BE_80.png
+
+[InterfaceEncoded]
+play-hot.png=841,1220
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+Trash.ico=1150,1212
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-MPC-BE_80.png]
+lines=2
+0=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
+1=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
+2=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
