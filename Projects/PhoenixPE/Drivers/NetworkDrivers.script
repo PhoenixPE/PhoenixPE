@@ -1,3 +1,34 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+// Based off work by ChrisR
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 [Main]
 Title=Network Drivers
 Description=Load network drivers included with Windows 10.
@@ -15,7 +46,7 @@ RegAddDriver=Run,%ScriptFile%,RegAddDriver
 [Process]
 Echo,"Preparing for Network driver integration..."
 
-If,%cb_EnableNetworkDriversHiveCache%,Equal,False,Begin
+If,%cb_EnableHiveCache%,Equal,False,Begin
   Echo,"Network Drivers Registry Cache: DISABLED"
   DirDeleteEx,"%ProjectCache%\NetworkDrivers"
 End
@@ -26,11 +57,11 @@ IniRead,%ScriptFile%,"Main","Version",%ScriptVer%
 If,Not,ExistFile,"%ProjectCache%\NetworkDrivers\.Cache",Run,%ScriptFile%,BuildRegistryCache
 
 // Check for stale cache and rebuild if needed
-IniRead,"%ProjectCache%\NetworkDrivers\.Cache","Network Drivers Cache","Version",%RegCacheVer%,"Default=0.0.0.0"
+IniRead,"%ProjectCache%\NetworkDrivers\.Cache","NetworkDrivers","Version",%RegCacheVer%,"Default=0.0.0.0"
 
-If,%RegCacheVer%,Equal,%ScriptVer%,Echo,"Registry Cache: ENABLED (v%RegCacheVer%)"
+If,%RegCacheVer%,Equal,%ScriptVer%,Echo,"Network Drivers Reg Cache: ENABLED (v%RegCacheVer%)"
 Else,Begin
-  Echo,"Registry Cache: STALE (v%RegCacheVer%)#$x#$xRebuilding the registry cache..."
+  Echo,"Registry Cache: STALE (v%RegCacheVer%)#$x#$xRebuilding the Network Drivers registry cache..."
   DirDeleteEx,"%RegistryCache%\NetworkDrivers"
   Run,%ScriptFile%,BuildRegistryCache
 End
@@ -38,20 +69,120 @@ End
 Set,%RegCacheVer%,Nil
 Set,%ScriptVer%,Nil
 
-
-RegHiveLoad,Tmp_Drivers,%RegDrivers%
-RegHiveLoad,Tmp_Install_Drivers,%RegInstallDrivers%
-
+// Extract Drivers
 Run,%ScriptFile%,Drivers%SourceArch%
 
+// Load the Main Drivers Registry Hive and Import from Cache
+RegHiveLoad,Tmp_Drivers,%RegDrivers%
+RegImport,"%ProjectCache%\NetworkDrivers\DRIVERS.reg"
 RegHiveUnload,Tmp_Drivers
-RegHiveUnload,Tmp_Install_Drivers
 
-[Driversx64]
+[#BuildRegistryCache#]
+// ===============================================================================================================================
+// Name...........: BuildRegistryCache
+// Description....: Extract x86 Network Drivers
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[BuildRegistryCache]
+Echo,"Building the Network Driver Database...#$x#$xThis can take awhile, please be patient."
+
+// Create an Empty Drivers Hive.
+FileCreateBlank,"%ProjectTemp%\%ProgramFolder%\DRIVERS"
+RegHiveLoad,Tmp_Drivers,"%ProjectTemp%\%ProgramFolder%\DRIVERS"
+RegHiveLoad,Tmp_Install_Drivers,%RegInstallDrivers%
+
+RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DeviceIds"
+RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DriverFiles"
+RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DriverInfFiles"
+RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DriverPackages"
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Driver Files to Extract
+// Build Driver Database
 
+If,%SourceArch%,Equal,x64,Begin
+  RegAddDriver,athw8x.inf
+  RegAddDriver,netathr10x.inf
+  RegAddDriver,netathrx.inf
+  RegAddDriver,netbc63a.inf
+  RegAddDriver,netbc64.inf
+  RegAddDriver,netrtwlane.inf
+  RegAddDriver,netrtwlane_13.inf
+  RegAddDriver,netrtwlanu.inf
+  RegAddDriver,netwbw02.inf
+  RegAddDriver,netwew00.inf
+  RegAddDriver,netwew01.inf
+  RegAddDriver,netwlv64.inf
+  RegAddDriver,netwns64.inf
+  RegAddDriver,netwsw00.inf
+  RegAddDriver,netwtw04.inf
+
+  If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
+    // Build 1809+
+    RegAddDriver,netwtw02.inf
+    RegAddDriver,netwtw06.inf
+  End
+
+  If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
+    // Build 1903+
+    RegAddDriver,netrtwlane01.inf
+  End
+End
+Else,Begin
+  // x86
+  RegAddDriver,athw8.inf
+  RegAddDriver,netathr.inf
+  RegAddDriver,netathr10.inf
+  RegAddDriver,netbc63.inf
+  RegAddDriver,netbc64.inf
+  RegAddDriver,netrtwlane.inf
+  RegAddDriver,netrtwlane_13.inf
+  RegAddDriver,netrtwlanu.inf
+  RegAddDriver,netwbn02.inf
+  RegAddDriver,netwen00.inf
+  RegAddDriver,netwen01.inf
+  RegAddDriver,netwlv32.inf
+  RegAddDriver,netwns32.inf
+  RegAddDriver,netwsn00.inf
+  RegAddDriver,netwtn04.inf
+
+  If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
+    // Build 1809+
+    RegAddDriver,netwtn02.inf
+  End
+
+  If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
+    // Build 1903+
+    RegAddDriver,netrtwlane01.inf
+  End
+End
+
+// Export the hive to a .reg file
+RegExport,HKLM,"Tmp_Drivers\DriverDatabase","%ProjectCache%\NetworkDrivers\DRIVERS.reg"
+IniWrite,"%ProjectCache%\NetworkDrivers\.Cache","NetworkDrivers","Version",%ScriptVer%
+
+RegHiveunLoad,Tmp_Drivers
+RegHiveUnload,Tmp_Install_Drivers
+
+[#Driversx64#]
+// ===============================================================================================================================
+// Name...........: Driversx64
+// Description....: Extract x64 Network Drivers
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[Driversx64]
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+// Driver Files to Extract
 RequireFileEx,Append,\Windows\INF\athw8x.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netathr10x.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netathrx.inf,NOMUI
@@ -97,45 +228,24 @@ If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
   RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*,NOMUI
 End
 
-///////////////////////////////////////////////////////////////////////////////////
 // Extract
 RequireFileEx,ExtractList
 
-///////////////////////////////////////////////////////////////////////////////////
-// Build Driver Database
-
-RegAddDriver,athw8x.inf
-RegAddDriver,netathr10x.inf
-RegAddDriver,netathrx.inf
-RegAddDriver,netbc63a.inf
-RegAddDriver,netbc64.inf
-RegAddDriver,netrtwlane.inf
-RegAddDriver,netrtwlane_13.inf
-RegAddDriver,netrtwlanu.inf
-RegAddDriver,netwbw02.inf
-RegAddDriver,netwew00.inf
-RegAddDriver,netwew01.inf
-RegAddDriver,netwlv64.inf
-RegAddDriver,netwns64.inf
-RegAddDriver,netwsw00.inf
-RegAddDriver,netwtw04.inf
-
-If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
-  // Build 1809+
-  RegAddDriver,netwtw02.inf
-  RegAddDriver,netwtw06.inf
-End
-
-If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
-  // Build 1903+
-  RegAddDriver,netrtwlane01.inf
-End
-
+[#Driversx86#]
+// ===============================================================================================================================
+// Name...........: Driversx86
+// Description....: Extract x86 Network Drivers
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
 [Driversx86]
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
 
-///////////////////////////////////////////////////////////////////////////////////
 // Driver Files to Extract
-
 RequireFileEx,Append,\Windows\INF\athw8.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netathr.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netathr10.inf,NOMUI
@@ -179,38 +289,8 @@ If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
   RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*,NOMUI
 End
 
-///////////////////////////////////////////////////////////////////////////////////
 // Extract
 RequireFileEx,ExtractList
-
-///////////////////////////////////////////////////////////////////////////////////
-// Build Driver Database
-
-RegAddDriver,athw8.inf
-RegAddDriver,netathr.inf
-RegAddDriver,netathr10.inf
-RegAddDriver,netbc63.inf
-RegAddDriver,netbc64.inf
-RegAddDriver,netrtwlane.inf
-RegAddDriver,netrtwlane_13.inf
-RegAddDriver,netrtwlanu.inf
-RegAddDriver,netwbn02.inf
-RegAddDriver,netwen00.inf
-RegAddDriver,netwen01.inf
-RegAddDriver,netwlv32.inf
-RegAddDriver,netwns32.inf
-RegAddDriver,netwsn00.inf
-RegAddDriver,netwtn04.inf
-
-If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
-  // Build 1809+
-  RegAddDriver,netwtn02.inf
-End
-
-If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
-  // Build 1903+
-  RegAddDriver,netrtwlane01.inf
-End
 
 [#RegAddDriver#]
 // ===============================================================================================================================
@@ -220,7 +300,7 @@ End
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: Uses a modified version of ChrisR's RegAddDriver.cmd as PEBakery does not have a good way to enum/query registry keys yet.
+// Remarks........: Uses a modified version of ChrisR's RegAddDriver.cmd as PEBakery does not have a good way to enum/query registry keys yet...
 //                  Registry hives must be loaded before calling.
 // Related........: 
 // ===============================================================================================================================
@@ -246,6 +326,63 @@ ShellExecute,Hide,"cmd.exe","/D /C RegAddDriver.cmd #$q%RegKey%#$q",%ProjectTemp
 //Echo,"Processing [%RegKey%] DriverPackages..."
 //RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverPackages\%RegKey%*",HKLM,"Tmp_Drivers\DriverDatabase\DriverPackages",WILDCARD
 
+[#PurgeRegCache#]
+// ===============================================================================================================================
+// Name...........: PurgeRegCache
+// Description....: Deletes the registry cache.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeRegCache
+// ===============================================================================================================================
+[PurgeRegCache]
+Echo,"Purging the registry cache..."
+DirDeleteEx,"%ProjectCache%\NetworkDrivers"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+WriteInterface,Value,%ScriptFile%,Interface,cb_EnableHiveCache,True
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options in the script interface.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"This script is responsible for adding network drivers included with Windows 10 and configuring the drivers registry for the included network drivers. The resulting 'Hive' may be cached to speed up future builds."
+
 [#Interface#]
 // ===============================================================================================================================
 // Name...........: Interface
@@ -258,7 +395,17 @@ ShellExecute,Hide,"cmd.exe","/D /C RegAddDriver.cmd #$q%RegKey%#$q",%ProjectTemp
 // Related........:
 // ===============================================================================================================================
 [Interface]
-lbl_NoConfig="No configuration options are available for this script.",1,1,5,50,457,16,8,Bold
+btn_PurgeCache=,1,8,479,5,25,25,PurgeRegCache,Trash.ico,True,"__Remove all cached registry hives. A new registry cache will be created the next time you build the project."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+cb_EnableHiveCache="Cache Registry Hives",1,3,5,50,120,15,True,"__Cache the processed registry hives instead of recreating them at every build.#$x#$xDisabling this option will significantly increase build time."
+
+[InterfaceEncoded]
+Trash.ico=1150,1212
+Advanced_16.png=1722,2396
+SetDefaults_16.png=2197,3036
+Help_16.png=2830,3868
 
 [EncodedFile-AuthorEncoded-kcmpci.png]
 lines=3
@@ -270,6 +417,22 @@ lines=3
 [AuthorEncoded]
 kcmpci.png=11204,15032
 Logo=kcmpci.png
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFHGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMC0yMFQxOTo0MToxNC0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMC0yMFQxOTo0MToxNC0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1YTYzZjFkZC01OTdlLTI3NDQtOGZkZi0yMzE1OGY2ODI0MGQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo1YTYzZjFkZC01OTdlLTI3NDQtOGZkZi0yMzE1OGY2ODI0MGQiIHN0RXZ0OndoZW49IjIwMTktMTAtMjBUMTk6NDA6MTEtMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5IwujTAAABRElEQVQ4EY3BMWsaYQAA0LcFCoFCcQhmC8Vf0UIhkFBSkjFkrjh0SYkOdjBgoXO3DoFkOdcOOmpvKBZp4n0mepXGpfdTIjh4GCx5z3+U0UMHe57gBQ7wzMInDHGDUwsbOEbJii18RoYmDtHGAH1c4DXOMcMVSnLeIkMPCaYISJFignsk6CLDiZzn+IIhYgREqKKKCAExEjSxacUrzBDQQNFSEQ0ETHEkZx9nuMAELRQ8VkALI7RRR9lcBzf4hRQ169WQYoAhuuZ+YIgBUtSsV8Mf/MQ1eubKqKONEVooeKyAFu4Q4QwVOUeYIqCBoqUiGggY470Vm2giQYyACFVUESEgxm98w7acE2ToIsFfjJEixQj3uEUXGSpySrjCDOfYxSX6GOA73uAU/3CJHStKOMaGhY+4xgRfLb3DS0+whw5ifLDGA/VqZBR5sRzSAAAAAElFTkSuQmCCeJzjd0wpS8xLTk2JNzTTK8hLZxgFIwrsYsMvPyXbKYORAQCFSAfJtGHebQEAAAACAAAAJwAAALoGAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMC0yMVQxNzoyMTo0Ny0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMC0yMVQxNzoyMTo0Ny0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowN2Y0M2IwNy0xODU0LWE2NDAtYTAzZS1hNDExMzZhMDQ4MDYiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmYwMzUwODcyLWFiZTEtZTk0MC05MTY0LWRjNGMzN2M4YjA5NSIgc3RFdnQ6d2hlbj0iMjAxOS0xMC0yMVQxNzoyMToxMi0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDowN2Y0M2IwNy0xODU0LWE2NDAtYTAzZS1hNDExMzZhMDQ4MDYiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6NDctMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz6tuiutAAACQUlEQVQ4jaXRy04TURwG8L5Ao6WpXEsslBA6NPScOTMWXoIF3UB0qWvegEU3JaJVqS2LRttCA8HaWqHlTlutxtILxJhGo93BSmK8TFy48PPMAG0N7JjkNzk5/+98mYsOgO4ytBvbYydK3D5rZwfMzRW541NFbU+dlVg9f1HBOCszhcN/Stw+g+ODQ2EVnjlXUGCqMQ7nvGMY3h+G9ZUV5uUu9L/ux0h5ZIzvNxXkmZHDRZwFJwxbBrjiLuy9L+DOxm10ZbrA3jBjvUDMiB4pK2EgOwAhJ0Bdi7si5KyM7kw3ekO9OKwdQr2m1qegf6mHmBU99QJpU6ra1+1wJm9gMC7AsmaBc9sJ+7YdhqgB8XxCO5zOr6Ftvg2OHQfEDbFaL7ClbApdpsjl8hq6QNCx0gFjrAWTsUngC/Cx9BliWERnshPyqgxxRVTqBUJCUAbnBaRTW/iR/4MXiRTMfjOEgA1v02XUdo5wM3QLV6NXICdl0OdU1ShgS6xqiV6H5JewubqLb5XfWIgv4Uksgq/FX5henEHLnAFDz4ZAF+mZxivQMPVIUQnXgiYQL0G5cAD85JPvQKV4AOs9KyxhC1iEgUbomcZHJEFi5CCFJBh9RvS5+1D7VAP+AqO+Uejv6yE9laBmmjR+I5kjOhIgLuInkIMyWr2tkGdkTAQmYL5rBg1S8Hkzl3qmUfCYnPCRcfKIKLJfRo+3B6ZpE6ifP+4sL5glKkXLnOYvKtCRh6SdPCBursgda7za2q3NfER3ruAy/gHl1EFdO9bspgAAAABJRU5ErkJggnicEwpOLXFJTUsszSkpjjc00yvIS2cYBSMHTOXAL9+Ym3KPkQEAQe4JfsPl+JwBAAAAAgAAACoAAACVCAAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
 
 [EncodedFolders]
 cmd

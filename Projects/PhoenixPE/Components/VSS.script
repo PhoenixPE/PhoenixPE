@@ -106,15 +106,7 @@ RegHiveUnLoad,Tmp_Install_System
 ///////////////////////////////////////////////////////////////////////////////////
 // Patch VSS files
 
-Echo,"Patching VSS files..."
-ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u #$q%TargetSystem32%\vssapi.dll#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
-ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetSystem32%\vssapi.dll#$q -s 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730073 -r 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730074"
-ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetSystem32%\VSSVC.exe#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
-
-If,ExistFile,"%TargetWindows%\SysWOW64\vssapi.dll",Begin
-  ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetWindows%\SysWOW64\vssapi.dll#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
-  ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetWindows%\SysWOW64\vssapi.dll#$q -s 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730073 -r 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730074"
-End
+Run,%ScriptFile%,PatchVSS
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts & Autorun
@@ -125,6 +117,30 @@ If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramF
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 
 AddAutoRun,PostShell,HideNoWait,"Starting Volume Shadow Copy Services...","#$pSystemRoot#$p\system32\start_vss.cmd"
+
+
+[#PatchVSS#]
+// ===============================================================================================================================
+// Name...........: PatchVSS
+// Description....: Patch VSS files to disable WinPE check.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: VSS is "PE Aware" and will not run if it detects we are running in PE. For this reason we alter the strings
+//                  "MiniNT and "SystemSetupInProgress" so PE detection is subverted.
+// Related........: 
+// ===============================================================================================================================
+[PatchVSS]
+Echo,"Patching VSS files..."
+ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u #$q%TargetSystem32%\vssapi.dll#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
+ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetSystem32%\vssapi.dll#$q -s 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730073 -r 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730074"
+ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetSystem32%\VSSVC.exe#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
+
+If,ExistFile,"%TargetWindows%\SysWOW64\vssapi.dll",Begin
+  ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetWindows%\SysWOW64\vssapi.dll#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
+  ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetWindows%\SysWOW64\vssapi.dll#$q -s 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730073 -r 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730074"
+End
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================

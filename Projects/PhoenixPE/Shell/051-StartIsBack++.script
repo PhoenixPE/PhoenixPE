@@ -55,7 +55,7 @@ If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 
 Echo,"Extracting files..."
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q * -xr!UpdateCheck.exe -o#$q%TargetPrograms%\%ProgramFolder%#$q"
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q * -xr!UpdateCheck.exe -o#$q%TargetPrograms%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"ERROR: Failed to extract [%SetupExe%]. The error code returned was [#r]."
 
 FileVersion,"%TargetPrograms%\%ProgramFolder%\StartIsBack64.dll",%ExeVer%

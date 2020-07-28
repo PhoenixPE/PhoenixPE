@@ -2,7 +2,7 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=Scripting interface.
-Version=1.3.0.0
+Version=1.3.2.0
 Level=0
 Selected=None
 
@@ -23,8 +23,8 @@ FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 
 // Experimental - May be changed or removed without notice
-7zExtract=Run,%API%,_PhoenixAPI_7zExtract
-InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
+7z=Run,%API%,_PhoenixAPI_7z
+Innounp=Run,%API%,_PhoenixAPI_Innounp
 
 XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
 XMLDelete=Run,%API%,_PhoenixAPI_XMLDelete
@@ -45,30 +45,51 @@ BitClear=Run,%API%,_PhoenixAPI_BitClear
 BitSet=Run,%API%,_PhoenixAPI_BitSet
 BitToggle=Run,%API%,_PhoenixAPI_BitToggle
 
-// Experimental - May be changed or removed without notice
-[_PhoenixAPI_7zExtract]
+[#_PhoenixAPI_7z#]
+// ===============================================================================================================================
+// Name...........: 7z
+// Description....: Execute 7zip with the provided arguments.
+// Syntax.........: 7z,<Args>[,WorkDir]
+// Parameters.....: #1 Args - The arguments to pass to the 7z executable.
+//                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+// Return values..: ExitCode provided by the 7zip application
+// Author.........: Homes32
+// Remarks........:                      *** Experimental - May be changed or removed without notice ***
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_7z]
 System,SetLocal
-If,#1,Equal,"",Halt,"7zip Error: You must specify the file to decompress."
-If,#2,Equal,"",Halt,"7zip Error: You must specify the destination directory."
+If,#1,Equal,"",Halt,"7zip Error: You must specify the program arguments."
 
-GetParam,1,%SrcArchive%
-Getparam,2,%DestDir%
+GetParam,1,%Args%
+Getparam,2,%WorkDir%
 
-ShellExecute,Hide,%Tools%\7z.exe,"x -r -y #$q%SrcArchive%#$q -o#$q%DestDir%#$q"
+ShellExecute,Hide,"%Tools%\%HostArch%\7z.exe",%Args%,%WorkDir%
+Set,#r,%ExitCode%
 
 System,EndLocal
 
-// Experimental - May be changed or removed without notice
-[_PhoenixAPI_InnoExtract]
+[#_PhoenixAPI_Associate#]
+// ===============================================================================================================================
+// Name...........: Innounp
+// Description....: Execute Innounp (Inno Setup Unpacker) with the provided arguments.
+// Syntax.........: Innounp,<Args>[,WorkDir]
+// Parameters.....: #1 Args - The arguments to pass to the Innounp executable.
+//                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+// Return values..: ExitCode provided by the Innounp application
+// Author.........: Homes32
+// Remarks........:                      *** Experimental - May be changed or removed without notice ***
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_Innounp]
 System,SetLocal
-If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the file to decompress."
-If,#2,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the program to associate with the file extension."
+If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the program arguments."
 
 GetParam,1,%SrcArchive%
-Getparam,2,%DestDir%
+Getparam,2,%WorkDir%
 
-ShellExecute,Hide,%Tools%\Innounp.exe,"-x -b -d#$q%DestDir%#$q #$q%SrcArchive%#$q"
-Set,#r,%ReturnCode%
+ShellExecute,Hide,"%Tools%\x86\Innounp.exe",%Args%,%WorkDir%
+Set,#r,%ExitCode%
 
 System,EndLocal
 
@@ -882,10 +903,10 @@ GetParam,2,%XPath%
 If,Not,ExistFile,%XMLFile%,Halt,"XMLDelete Syntax Error: The file [%XMLFile%] does not exist."
 If,%XPath%,Equal,"",Halt,"XMLDelete Syntax Error: You must specify an XPath."
 
-ShellExecute,Hide,"%Tools%\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
 //If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to query [%XPath%] from [%XMLFile%]."
 
-ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
 If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to delete [%XPath%] from [%XMLFile%]."
 
 System,EndLocal
@@ -926,19 +947,19 @@ If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a type [elem|
 If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a name."
 // Value is allowed to be empty. If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a value."
 
-ShellExecute,Hide,"%Tools%\xml.exe","sel --text --template --value-of #$q%XPath%/@%Name%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","sel --text --template --value-of #$q%XPath%/@%Name%#$q #$q%XMLFile%#$q"
 //If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to query [%XPath%/@%Name%] from [%XMLFile%]."
 
 If,%Operation%,Equal,"Insert",Begin
-  ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --insert #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --insert #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
   If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to insert value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,If,%Operation%,Equal,"Append",Begin
-  ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --append #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --append #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
   If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to append value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,If,%Operation%,Equal,"Subnode",Begin
-  ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --subnode #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --subnode #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
   If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to add subnode value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,Halt,"XMLAdd Syntax Error: You must specify an valid operation [insert|append|subnode]."
@@ -969,10 +990,10 @@ If,Not,ExistFile,%XMLFile%,Halt,"XMLRename Syntax Error: The file [%XMLFile%] do
 If,%XPath%,Equal,"",Halt,"XMLRename Syntax Error: You must specify an XPath."
 If,%Value%,Equal,"",Halt,"XMLRename Syntax Error: You must specify a value."
 
-ShellExecute,Hide,"%Tools%\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
 //If,Not,#r,Equal,0,Halt,"XMLRename ERROR: Failed to query [%XPath%] from [%XMLFile%]."
 
-ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --rename #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --rename #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
 If,Not,#r,Equal,0,Halt,"XMLRename ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
 
 System,EndLocal
@@ -1001,10 +1022,10 @@ If,Not,ExistFile,%XMLFile%,Halt,"XMLUpdate Syntax Error: The file [%XMLFile%] do
 If,%XPath%,Equal,"",Halt,"XMLUpdate Syntax Error: You must specify an XPath."
 If,%Value%,Equal,"",Halt,"XMLUpdate Syntax Error: You must specify a value."
 
-ShellExecute,Hide,"%Tools%\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
 //If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to query [%XPath%] from [%XMLFile%]."
 
-ShellExecute,Hide,"%Tools%\xml.exe","ed --inplace --update #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --update #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
 If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
 
 System,EndLocal
