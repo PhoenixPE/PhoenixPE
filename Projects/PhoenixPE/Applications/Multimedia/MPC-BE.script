@@ -390,14 +390,12 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xesc","","MPC-BE"
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting program files..."
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 // It's annoying when people create zip files containing a directory with an every changing name
 If,%SourceArch%,Equal,x64,Set,%SetupFileFolder%,%SetupFileFolderx64%
 Else,Set,%SetupFileFolder%,%SetupFileFolderx86%
 FileCopy,"#1\%SetupFileFolder%\*.*",#1
-Wait,1
 DirDeleteEx,"#1\%SetupFileFolder%"
 
 [#DownloadProgram#]

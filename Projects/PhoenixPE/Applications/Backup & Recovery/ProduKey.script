@@ -73,8 +73,7 @@ Else,Begin
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
   
-  ShellExecute,Hide,"%Tools%\7z.exe","e -r -y #$q%ProgramsCache%\%ProgramFolder%\ProduKey-Lang.zip#$q * -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [ProduKey-Lang.zip]. The error code returned was [#r]."
+  Decompress,"%ProgramsCache%\%ProgramFolder%\ProduKey-Lang.zip","%TargetPrograms%\%ProgramFolder%"
 End
 
 // Prefill data source for offline system
@@ -101,11 +100,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Related........: 
 // ===============================================================================================================================
 [ExtractProgram]
-System,SetLocal
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","e -r -y #$q%ProgramsCache%\%ProgramFolder%\ProduKey-%SourceArch%.zip#$q * -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [ProduKey-%SourceArch%.zip]. The error code returned was [#r]."
-System,EndLocal
+Decompress,"%ProgramsCache%\%ProgramFolder%\ProduKey-%SourceArch%.zip",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================

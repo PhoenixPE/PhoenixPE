@@ -28,9 +28,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-[TODO]
-// Fix launch program to use hostos arch.
-
 [Main]
 Title=7-Zip
 Author=Homes32
@@ -60,7 +57,7 @@ StrFormat,RTRIM,%7zLang%,1,%7zLang%
 
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe",Run,%ScriptFile%,DownloadProgram
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe#$q * -xr!uninstall.exe -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe#$q * -xr!uninstall.exe -o#$q%ProjectTemp%\%ProgramFolder%#$q"
 DirMake,"%TargetPrograms%\%ProgramFolder%"
 If,#r,Equal,0,FileCopy,"%ProjectTemp%\%ProgramFolder%\*.*","%TargetPrograms%\%ProgramFolder%"
 Else,Halt,"Error: Failed to extract files."
@@ -447,7 +444,7 @@ System,GetEnv,PROCESSOR_ARCHITECTURE,%HostArch%
 If,%HostArch%,Equal,AMD64,Set,%SetupFile%,Setup-x64.exe
 Else,Set,%SetupFile%,Setup-x86.exe
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.exe -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.exe -o#$q%ProjectTemp%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 System,EndLocal

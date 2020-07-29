@@ -44,7 +44,7 @@ Date=2020-04-07
 %ProgramIni%="aida64.ini"
 %DownloadURL-Extreme%=http://download.aida64.com/aida64extreme625.zip
 %DownloadURL-Engineer%=http://download.aida64.com/aida64engineer625.zip
-%SetupExe%="aida64.zip"
+%SetupFile%="aida64.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -56,7 +56,7 @@ Else,Halt,"LOGIC ERROR: Invalid Release selected."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -96,8 +96,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupExe%]."
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -115,7 +114,7 @@ Echo,"Downloading %ScriptTitle%..."
 If,%rbtn_Extreme%,Equal,True,Set,%DownloadURL%,%DownloadURL-Extreme%
 Else,If,%rbtn_Engineer%,Equal,True,Set,%DownloadURL%,%DownloadURL-Engineer%
 Else,Halt,"LOGIC ERROR: Invalid Release selected."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [#LaunchProgram#]
@@ -131,7 +130,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // ===============================================================================================================================
 [LaunchProgram]
 Echo,"Launching %ScriptTitle%..."
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 

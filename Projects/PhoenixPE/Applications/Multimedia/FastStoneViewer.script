@@ -171,12 +171,10 @@ TXTAddLine,"%TargetPrograms%\%ProgramFolder%\DBPath.db","*",APPEND
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\FSViewer.zip#$q -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [FSViewer.zip]."
+Decompress,"%ProgramsCache%\%ProgramFolder%\FSViewer.zip",#1
 
 // It's annoying when people create zip files containing a directory with an every changing name
 FileCopy,"#1\FSViewer75\*.*",#1
-Wait,1
 DirDeleteEx,"#1\FSViewer75"
 
 [#DownloadProgram#]
@@ -291,7 +289,7 @@ Message,"FastStone Image Viewer is an image browser, converter and editor that s
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch FSViewer",1,8,5,5,130,25,LaunchProgram,play-hot.png,True
+btn_LaunchProgram="Launch FSViewer",1,8,5,5,130,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
 web_Homepage=Homepage,1,10,377,9,60,18,https://www.faststone.org/FSViewerDetail.htm
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."

@@ -41,13 +41,12 @@ Interface=Interface
 
 [Variables]
 %ProgramFolder%="WinNTSetup"
-%ProgramExe%=""
+%ProgramExe%="WinNTSetup_%SourceArch%.exe"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
-Set,%ProgramExe%,"WinNTSetup_%SourceArch%.exe"
 
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTRIM,%Lang%,1,%Lang%
@@ -61,7 +60,6 @@ Decompress,"%ProjectTemp%\WinNTSetup4.rar","%TargetPrograms%\%ProgramFolder%"
 // Settings
 
 // WinNTSetup .ini file needs to be UTF-8. BOM is not supported.
-//FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\WinNTSetup.ini",UTF8
 
 // Language
 IniWrite,"%TargetPrograms%\%ProgramFolder%\WinNTSetup.ini","Options","Lang",%Lang%

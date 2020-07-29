@@ -55,7 +55,7 @@ RunFromRam
 
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
 DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
-ShellExecute,Hide,"%Tools%\7z.exe","x -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -xr!$PLUGINSDIR -xr!uninst.exe.nsis -o#$q%TargetPrograms%\%ProgramFolder%#$q"
+7z,"x -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -xr!$PLUGINSDIR -xr!uninst.exe.nsis -o#$q%TargetPrograms%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"Extract [%SetupExe%] failed: The code returned was [#r]."
 If,%SourceArch%,Equal,x64,FileRename,"%TargetPrograms%\%ProgramFolder%\$R0","%TargetPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
 Else,FileDelete,"%TargetPrograms%\%ProgramFolder%\$R0"

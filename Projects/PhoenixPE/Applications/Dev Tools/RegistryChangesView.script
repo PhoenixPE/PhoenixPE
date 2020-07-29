@@ -73,8 +73,7 @@ Else,Begin
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
   
-  ShellExecute,Hide,"%Tools%\7z.exe","e -r -y #$q%ProgramsCache%\%ProgramFolder%\RegistryChangesView-Lang.zip#$q * -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [RegistryChangesViewLang.zip]. The error code returned was [#r]."
+  Decompress,"%ProgramsCache%\%ProgramFolder%\RegistryChangesView-Lang.zip","%TargetPrograms%\%ProgramFolder%"
 End
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -97,11 +96,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Related........: 
 // ===============================================================================================================================
 [ExtractProgram]
-System,SetLocal
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","e -r -y #$q%ProgramsCache%\%ProgramFolder%\RegistryChangesView-%SourceArch%.zip#$q * -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [RegistryChangesView-%SourceArch%.zip]. The error code returned was [#r]."
-System,EndLocal
+Decompress,"%ProgramsCache%\%ProgramFolder%\RegistryChangesView-%SourceArch%.zip",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -255,7 +251,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"System Tools"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,RegistryChangesView
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)",Czech,Dutch,English,French,German,Greek,Hungarian,Italian,Japanese,Polish,Russian,Slovak,Spanish,Ukrainian,_DeleteCachedLangFile_,True
+cmb_Language=Arabic,1,4,160,126,150,21,Arabic,"Chinese (Simplified)",Czech,Dutch,English,French,German,Greek,Hungarian,Italian,Japanese,Polish,Russian,Slovak,Spanish,Ukrainian,_DeleteCachedLangFile_,True
 
 [InterfaceEncoded]
 play-hot.png=841,1220

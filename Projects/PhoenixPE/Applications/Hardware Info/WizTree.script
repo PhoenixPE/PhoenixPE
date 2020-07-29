@@ -42,7 +42,7 @@ Date=2020-04-05
 %ProgramFolder%="WizTree"
 %ProgramExe%="WizTree.exe"
 %DownloadURL%=https://antibody-software.com/files/wiztree_3_33_portable.zip
-%SetupExe%="WizTree.zip"
+%SetupFile%="WizTree.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -53,7 +53,7 @@ If,%SourceArch%,Equal,x64,Set,%ProgramExe%,"WizTree64.exe"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -110,8 +110,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupExe%]."
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -126,8 +125,8 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupExe%]."
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupExe%]. The code returned was [#r]."
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -142,7 +141,7 @@ If,Not,#r,Equal,200,Halt,"Failed to download [%SetupExe%]. The code returned was
 // ===============================================================================================================================
 [LaunchProgram]
 Echo,"Launching %ScriptTitle%..."
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 

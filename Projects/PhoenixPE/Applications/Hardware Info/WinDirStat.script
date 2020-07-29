@@ -42,7 +42,7 @@ Date=2020-04-05
 %ProgramFolder%="WinDirStat"
 %ProgramExe%="WinDirStat.exe"
 %DownloadURL%=https://windirstat.net/wds_current_setup.exe
-%SetupExe%="setup.exe"
+%SetupFile%="setup.exe"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -52,7 +52,7 @@ If,%cb_RunFromRam%,Equal,True,RunFromRam
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -103,8 +103,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -xr!$* -xr!shfolder.dll -xr!Uninstall.exe -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupExe%]."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -xr!$* -xr!shfolder.dll -xr!Uninstall.exe -o#$q#1#$q"
+If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -119,8 +119,8 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupExe%]."
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupExe%]. The code returned was [#r]."
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -135,7 +135,7 @@ If,Not,#r,Equal,200,Halt,"Failed to download [%SetupExe%]. The code returned was
 // ===============================================================================================================================
 [LaunchProgram]
 Echo,"Launching %ScriptTitle%..."
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 

@@ -66,7 +66,7 @@ Else,Halt,"Logic Error: The selected release is not defined."
 If,%cb_AlwaysDownload%,Equal,True,FileDeleteEx,"%ProgramsCache%\%ProgramFolder%\%FirefoxEdition%-%FirefoxArch%-%FirefoxLang%.exe"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%FirefoxEdition%-%FirefoxArch%-%FirefoxLang%.exe",Run,%ScriptFile%,DownloadProgram
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%FirefoxEdition%-%FirefoxArch%-%FirefoxLang%.exe#$q core\* -xr!core\browser\features -xr!core\crashreporter* -xr!core\maintenanceservice* -xr!core\minidump-analyzer.exe -xr!core\pingsender.exe -xr!core\precomplete -xr!core\removed-files -xr!core\update* -xr!core\uninstall -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%FirefoxEdition%-%FirefoxArch%-%FirefoxLang%.exe#$q core\* -xr!core\browser\features -xr!core\crashreporter* -xr!core\maintenanceservice* -xr!core\minidump-analyzer.exe -xr!core\pingsender.exe -xr!core\precomplete -xr!core\removed-files -xr!core\update* -xr!core\uninstall -o#$q%ProjectTemp%\%ProgramFolder%#$q"
 DirMake,"%TargetPrograms%\%ProgramFolder%"
 If,#r,Equal,0,FileCopy,"%ProjectTemp%\%ProgramFolder%\core\*.*","%TargetPrograms%\%ProgramFolder%"
 Else,Halt,"Error: Failed to extract files."

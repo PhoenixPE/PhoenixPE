@@ -74,8 +74,7 @@ Else,Begin
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
   
-  ShellExecute,Hide,"%Tools%\7z.exe","e -r -y #$q%ProgramsCache%\%ProgramFolder%\ServiWin-Lang.zip#$q * -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [ServiWin-Lang.zip]. The error code returned was [#r]."
+  Decompress,"%ProgramsCache%\%ProgramFolder%\ServiWin-Lang.zip","%TargetPrograms%\%ProgramFolder%"
 End
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -104,11 +103,8 @@ If,%cb_PinToStartMenu2%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Pro
 // Related........: 
 // ===============================================================================================================================
 [ExtractProgram]
-System,SetLocal
 Echo,"Extracting files..."
-ShellExecute,Hide,"%Tools%\7z.exe","e -r -y #$q%ProgramsCache%\%ProgramFolder%\ServiWin-%SourceArch%.zip#$q * -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [ServiWin-%SourceArch%.zip]. The error code returned was [#r]."
-System,EndLocal
+Decompress,"%ProgramsCache%\%ProgramFolder%\ServiWin-%SourceArch%.zip",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================

@@ -29,43 +29,37 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=CPU-Z
-Description=CPU-Z is a freeware system profiling and monitoring application.
+Title=PCI-Z
+Description=PCI-Z is designed for detecting unknown hardware on your PC. It will help you determine vendor, device and certain details about device even if you don't have drivers installed.
 Author=Homes32
 Level=5
 Selected=True
 Mandatory=False
 Version=1.0.0.0
-Date=2020-04-07
+Date=2020-07-27
 
 [Variables]
-%ProgramFolder%="CPU-Z"
-%ProgramExe%="cpuz_x32.exe"
-%DownloadURL%=http://download.cpuid.com/cpu-z/cpu-z_1.91-en.zip
-%DownloadURL-cn%=http://download.cpuid.com/cpu-z/cpu-z_1.91-cn.zip
-%SetupExe%="cpu-z-en.zip"
-%SetupExe-cn%="cpu-z-cn.zip"
+%ProgramFolder%="PCI-Z"
+%ProgramExe%="PCI-Z.exe"
+%DownloadURLx86%=https://www.pci-z.com/current/PCI-Z.zip
+%DownloadURLx64%=https://www.pci-z.com/current/x64/PCI-Z.zip
+%SetupFile%="PCI-Z_%SourceArch%.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
-If,%SourceArch%,Equal,x64,Set,%ProgramExe%,"cpuz_x64.exe"
-If,%cmb_Language%,Equal,"Chinese",Begin
-  Set,%DownloadURL%,%DownloadURL-cn%
-  Set,%SetupExe%,%SetupExe-cn%
-End
+If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
 Echo,"Configuring %ScriptTitle%..."
-IniWrite,"%TargetPrograms%\%ProgramFolder%\cpuz.ini","CPU-Z","CheckUpdates",0
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -88,9 +82,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-If,%SourceArch%,Equal,x64,Set,%ProgramExe%,"cpuz_x64.exe"
-ShellExecute,Hide,"%Tools%\7z.exe","x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -i!cpuz.ini -i!cpuz_readme.txt -i!%ProgramExe% -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupExe%]."
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -105,11 +97,9 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupExe%]."
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-If,%cmb_Language%,Equal,"Chinese",Begin
-  Set,%DownloadURL%,%DownloadURL-cn%
-  Set,%SetupExe%,%SetupExe-cn%
-End
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",NOERR
+If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
+Else,Set,%DownloadURL%,%DownloadURLx86%
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [#LaunchProgram#]
@@ -125,8 +115,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // ===============================================================================================================================
 [LaunchProgram]
 Echo,"Launching %ScriptTitle%..."
-If,%SourceArch%,Equal,x64,Set,%ProgramExe%,"cpuz_x64.exe"
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
@@ -163,8 +152,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"System Info"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"CPU-Z"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"PCI-Z"
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -193,7 +181,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"CPU-Z is a freeware system profiling and monitoring application.#$x#$xIf you enjoy the software please support the developer.#$x#$xOn first run this script will download the setup file (~3 MB) and cache it for future builds."
+Message,"PCI-Z is designed for detecting unknown hardware on your PC. It will help you determine vendor, device and certain details about device even if you don't have drivers installed.#$x#$xPCI-Z is free for both commercial and non commercial usage. If you enjoy the software please support the developer.#$x#$xOn first run this script will download the setup file (~1 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -207,15 +195,16 @@ Message,"CPU-Z is a freeware system profiling and monitoring application.#$x#$xI
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch CPU-Z",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+btn_LaunchProgram="Launch PCI-Z",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,http://www.cpuid.com/softwares/cpu-z.html
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.pci-z.com/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always include the latest version of PCI-Z and up-to-date device database in your build."
 cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
 bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
 cb_DesktopShc=Desktop,1,3,12,104,122,18,False
@@ -223,10 +212,7 @@ cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"System Info"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,CPU-Z
-bvl_Options=Options,1,12,150,90,197,184,8,Bold
-lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Chinese,English
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,PCI-Z
 
 [InterfaceEncoded]
 play-hot.png=841,1220
@@ -237,8 +223,6 @@ Help_16.png=2830,3868
 VistalcoDownload_16.png=927,1348
 
 [AuthorEncoded]
-cpu-z.svg=6980,3164
-Logo=cpu-z.svg
 
 [EncodedFile-InterfaceEncoded-play-hot.png]
 lines=0
@@ -264,6 +248,3 @@ lines=0
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
 
-[EncodedFile-AuthorEncoded-cpu-z.svg]
-lines=0
-0=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
