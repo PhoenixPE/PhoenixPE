@@ -24,6 +24,8 @@ FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 
 // Experimental - May be changed or removed without notice
 7z=Run,%API%,_PhoenixAPI_7z
+7zExtract=Run,%API%,_PhoenixAPI_7z
+InnoUnpack=Run,%API%,_PhoenixAPI_Innounp
 Innounp=Run,%API%,_PhoenixAPI_Innounp
 
 XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
@@ -45,11 +47,33 @@ BitClear=Run,%API%,_PhoenixAPI_BitClear
 BitSet=Run,%API%,_PhoenixAPI_BitSet
 BitToggle=Run,%API%,_PhoenixAPI_BitToggle
 
+
+[_PhoenixAPI_RegLoadHives]
+Echo,"Loading Registry Hives..."
+RegHiveLoad,Tmp_Default,%RegDefault%
+RegHiveLoad,Tmp_Drivers,%RegDrivers%
+RegHiveLoad,Tmp_Software,%RegSoftware%
+RegHiveLoad,Tmp_System,%RegSystem%
+RegHiveLoad,Tmp_Install_Default,%RegInstallDefault%
+RegHiveLoad,Tmp_Install_Drivers,%RegInstallDrivers%
+RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
+RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
+
+
+[_PhoenixAPI_RegUnloadHives]
+Echo,"Unloading Registry Hives..."
+RegHiveUnload,Tmp_Default
+RegHiveUnload,Tmp_Software
+RegHiveUnload,Tmp_System
+RegHiveUnload,Tmp_Install_Default
+RegHiveUnload,Tmp_Install_Software
+RegHiveUnload,Tmp_Install_System
+
 [#_PhoenixAPI_7z#]
 // ===============================================================================================================================
 // Name...........: 7z
 // Description....: Execute 7zip with the provided arguments.
-// Syntax.........: 7z,<Args>[,WorkDir]
+// Syntax.........: 7z,<Args>[,<WorkDir>]
 // Parameters.....: #1 Args - The arguments to pass to the 7z executable.
 //                  #2 WorkDir - The full path to the working directory. Default is the exe path.
 // Return values..: ExitCode provided by the 7zip application
@@ -69,33 +93,101 @@ Set,#r,%ExitCode%
 
 System,EndLocal
 
-[#_PhoenixAPI_Associate#]
+[#_PhoenixAPI_InnounpEx#]
 // ===============================================================================================================================
-// Name...........: Innounp
+// Name...........: _PhoenixAPI_InnounpEx
 // Description....: Execute Innounp (Inno Setup Unpacker) with the provided arguments.
-// Syntax.........: Innounp,<Args>[,WorkDir]
+// Syntax.........: Innounp,<Args>[,<WorkDir>]
 // Parameters.....: #1 Args - The arguments to pass to the Innounp executable.
 //                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+//
 // Return values..: ExitCode provided by the Innounp application
 // Author.........: Homes32
+// Remarks........: This command is a wrapper for Innounp.exe and passes any arguments directly to the executable. You are
+//                  responsible for checking the return code and handling any errors. Unless you need advanced features such
+//                  extracting using a @filelist or filemask it is recommended to use the Innounp macro instead.
+//                  Innounp Website: http://innounp.sourceforge.net/
+// Related........: Innounp.exe
+// ===============================================================================================================================
+[_PhoenixAPI_InnounpEx]
+System,SetLocal
+If,#1,Equal,"",Halt,"InnoExtractEx Syntax Error: You must specify the program arguments."
+
+GetParam,1,%Args%
+Getparam,2,%WorkDir%
+
+ShellExecute,Hide,"%Tools%\x86\Innounp.exe","%Args%",%WorkDir%
+Set,#r,%ExitCode%
+
+System,EndLocal
+
+[#_PhoenixAPI_Innounp#]
+// ===============================================================================================================================
+// Name...........: _PhoenixAPI_Innounp
+// Description....: Execute Innounp (Inno Setup Unpacker) with the provided arguments.
+// Syntax.........: Innounp,<SetupFile>,<DestDir>[,<Args>]
+// Parameters.....: #1 SetupFile - The inno-setup file to unpack.
+//                  #2 DestDir - The full path to the directory where the files will be unpacked.
+//                  #3-#4 - Additional Arguments:
+//                  PASSWORD=<Password> - Password required to decrypt the setup file. (-p)
+//                  CDIR=<CurrentDir> - Notifies innounp that you are only interested in paths from the current directory and below. (-c)
+// Return values..: 
+// Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
-// Related........:
+// Related........: Innounp.exe
 // ===============================================================================================================================
 [_PhoenixAPI_Innounp]
 System,SetLocal
-If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the program arguments."
+If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the setup file."
+If,#2,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the destination directory."
 
-GetParam,1,%SrcArchive%
-Getparam,2,%WorkDir%
+GetParam,1,%SetupFile%
+Getparam,2,%DestDir%
+Getparam,3,%Arg3%
+Getparam,4,%Arg4%
 
-ShellExecute,Hide,"%Tools%\x86\Innounp.exe",%Args%,%WorkDir%
-Set,#r,%ExitCode%
+Run,%API%,__PhoenixAPI_Innounp_Process_Arg,%Arg3%
+Set,%Param1%,#r
+Run,%API%,__PhoenixAPI_Innounp_Process_Arg,%Arg4%
+Set,%Param2%,#r
+
+ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Param1%%Param2%#$q%SetupFile%#$q"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Failed to unpack setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%]"
+
+System,EndLocal
+
+[#__PhoenixAPI_Innounp_Process_Arg#]
+// ===============================================================================================================================
+// Name...........: __PhoenixAPI_Innounp_Process_Arg
+// Description....: Loop to copy a file's .mui
+// Syntax.........: __PhoenixAPI_Innounp_Process_Arg,<Arg>
+// Parameters.....: #1 Arg - The argument to process
+// Return values..: #r - Command line string to be passed to Innounp.exe
+// Author.........: Homes32
+// Remarks........: Internal Function
+// Related........: _PhoenixAPI_Innounp
+// ===============================================================================================================================
+[__PhoenixAPI_Innounp_Process_Arg]
+System,SetLocal
+
+StrFormat,Split,#1,"=",1,%ArgKey%
+If,Not,%ArgKey%,Equal,"",Begin
+  If,%ArgKey%,Equal,"PASSWORD",Begin
+    StrFormat,Split,#1,"=",2,%Password%
+	Set,#r," -p#$q%Password%#$q "
+  End	
+  Else,If,%ArgKey%,Equal,"CDIR",Begin
+	  StrFormat,Split,#1,"=",2,%CurrentDir%
+	  Set,#r," -c#$q%CurrentDir%#$q "
+  End
+  Else,Halt,"SYNTAX ERROR: Invalid Argument [#1]"
+End
 
 System,EndLocal
 
 [#_PhoenixAPI_Associate#]
 // ===============================================================================================================================
-// Name...........: Associate
+// Name...........: _PhoenixAPI_Associate
 // Description....: Associate a file extension with a program.
 // Syntax.........: Associate,<FileExtension>,<ProgramExe>[,<Icon>]
 // Parameters.....: #1 FileExtension - The file extension to associate.
@@ -155,7 +247,7 @@ If,#1,Equal,"",Halt,"SetFileACL Syntax Error: You must specify the file or direc
 
 Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\SetAcl.exe," -ot #$qfile#$q -on #$q#1#$q -actn ace -actn setprot -op #$qdacl:p_nc#$q -ace #$qn:S-1-1-0;p:full;s:y#$q"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: %ExitCode%"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
 
 System,EndLocal
 
@@ -176,10 +268,10 @@ If,#1,Equal,"",Halt,"SetRegACL Syntax Error: You must specify the Registry Key t
 
 Echo,"Taking ownership of [#1] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
-If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of#$x#$x#1#$x#$xThe command returned: %ExitCode%"
+If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
 Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: %ExitCode%"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
 
 System,EndLocal
 

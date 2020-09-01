@@ -139,11 +139,11 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting Program Files..."
 If,%SourceArch%,Equal,x64,Begin
-  ShellExecute,Hide,"%Tools%\innounp.exe","-x -b -a -d#$q%TargetPrograms%\%ProgramFolder%#$q -c#$q{app}\Winpe64\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q {app}\Winpe64\*.*"
+  Innounp,"-x -b -a -d#$q%TargetPrograms%\%ProgramFolder%#$q -c#$q{app}\Winpe64\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q {app}\Winpe64\*.*"
   If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 End
 Else,Begin
-  ShellExecute,Hide,"%Tools%\innounp.exe","-x -b -a -d#$q%TargetPrograms%\%ProgramFolder%#$q -c#$q{app}\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q"
+  Innounp,"-x -b -a -d#$q%TargetPrograms%\%ProgramFolder%#$q -c#$q{app}\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q"
   If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
   DirDeleteEx,"%TargetPrograms%\%ProgramFolder%\drivers"
   DirDeleteEx,"%TargetPrograms%\%ProgramFolder%\Winpe64"
@@ -151,10 +151,10 @@ End
 
 Echo,"Extracting Driver Files..."
 If,%SourceArch%,Equal,x64,Begin
-  ShellExecute,Hide,"%Tools%\innounp.exe","-x -b -a -d#$q%TargetSystem32%\drivers#$q -c#$q{app}\driver\amd64\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q {app}\driver\amd64\*.sys"
+  Innounp,"-x -b -a -d#$q%TargetSystem32%\drivers#$q -c#$q{app}\driver\amd64\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q {app}\driver\amd64\*.sys"
 End
 Else,Begin
-  ShellExecute,Hide,"%Tools%\innounp.exe","-x -b -a -d#$q%TargetSystem32%\drivers#$q -c#$q{app}\driver\i386\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q {app}\driver\i386\*.sys"
+  Innounp,"-x -b -a -d#$q%TargetSystem32%\drivers#$q -c#$q{app}\driver\i386\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q {app}\driver\i386\*.sys"
 End
 If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
