@@ -1,0 +1,534 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=Google Chrome
+Description=(v85.0.4183.83) Google Chrome is a cross-platform web browser developed by Google.
+Author=Homes32
+Level=5
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2020-10-07
+
+[Variables]
+%ProgramFolder%="Chrome"
+%ProgramExe%="chrome.exe"
+%DownloadURLx86%=https://dl.google.com/release2/chrome/ANoq_PowC_s23Xu1PazKEzg_85.0.4183.83/85.0.4183.83_chrome_installer.exe
+%DownloadURLx64%=https://dl.google.com/release2/chrome/dgzvVjAkTZIkBgMK3tMSHQ_85.0.4183.83/85.0.4183.83_chrome_installer.exe
+%SetupFile%="Chrome_x86.exe"
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+If,%SourceArch%,Equal,"x64",Set,%SetupFile%,"Chrome_x64.exe"
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+
+If,%cb_AlwaysDownload%,Equal,True,FileDeleteEx,"%ProgramsCache%\%ProgramFolder%\%SetupFile%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Echo,"Extracting files..."
+DirMake,"%TargetPrograms%\%ProgramFolder%"
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
+Decompress,"%ProjectTemp%\%ProgramFolder%\chrome.7z","%ProjectTemp%\%ProgramFolder%"
+FileCopy,"%ProjectTemp%\%ProgramFolder%\Chrome-bin\*.*","%TargetPrograms%\%ProgramFolder%"
+
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+Echo,"Configuring %ScriptTitle%..."
+
+RegHiveLoad,Tmp_Software,%RegSoftware%
+
+Run,%ScriptFile%,ConfigurePrefs
+If,%cb_SetAsDefaultBrowser%,Equal,True,Run,%ScriptFile%,RegisterFileExtensions
+
+RegHiveUnLoad,Tmp_Software
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#ConfigurePrefs#]
+// ===============================================================================================================================
+// Name...........: ConfigurePrefs
+// Description....: Config Firefox policies and preferences
+// Syntax.........: Run,%ScriptFile%,ConfigurePrefs
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: %RegSoftware% must be loaded before calling this function.
+//
+//                  Some policies may are only allowed when you are joined to a domain. You may be able to work around these
+//                  restrictions by using the master_preferences file for these settings.
+//                  Docs: https://support.google.com/chrome/a/topic/6242754?hl=en&ref_topic=4386754
+// Related........: 
+// ===============================================================================================================================
+[ConfigurePrefs]
+Echo,"Configuring %ScriptTitle%..."
+
+// Setup the master_preferences file for settings where policy is blocked unless you are joined to a domain
+FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\master_preferences"
+FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\master_preferences"
+StrFormat,CTrim,"%PEPrograms%\%ProgramFolder%","\",%ProgramDirEsc%
+StrFormat,Replace,"%PEPrograms%\%ProgramFolder%","\","\\",%ProgramDirEsc%
+TxtAddLine,"%TargetPrograms%\%ProgramFolder%\master_preferences","{#$qdistribution#$q:{#$qimport_bookmarks_from_file#$q:#$q%ProgramDirEsc%\\bookmarks.html#$q,#$qsuppress_first_run_bubble#$q:true,#$qdo_not_create_desktop_shortcut#$q:true,#$qdo_not_create_quick_launch_shortcut#$q:true,#$qdo_not_launch_chrome#$q:true,#$qdo_not_register_for_update_launch#$q:true,#$qmake_chrome_default#$q:true,#$qmake_chrome_default_for_user#$q:true,#$qsuppress_first_run_default_browser_prompt#$q:true,#$qsystem_level#$q:true},#$qhomepage#$q:#$q${txt_Homepage}#$q,#$qhomepage_is_newtabpage#$q:true,#$qfirst_run_tabs#$q:[#$q${txt_Homepage}#$q]}",APPEND
+
+// App Path
+RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","Path","%PEPrograms%\%ProgramFolder%"
+If,%SourceArch%,Equal,"x64",Begin
+  RegWrite,HKLM,0x2,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,0x2,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","Path","%PEPrograms%\%ProgramFolder%"
+End	
+
+// Active Setup
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","","Google Chrome"
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","IsInstalled",1
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","Localized Name","Google Chrome"
+RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","StubPath","#$q%PEPrograms%\%ProgramFolder%\%ProgramVer%\Installer\chrmstp.exe#$q --configure-user-settings --verbose-logging --system-level --multi-install --chrome"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","Version",%ProgramVer%
+  
+///////////////////////////////////////////////////////////////////////////////////
+// User Config - Script Interface
+	
+// Language (Policy)
+StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
+StrFormat,RTRIM,%Lang%,1,%Lang%
+RegWrite,HKLM,0x1,"Tmp_Software\Policies\Google\Chrome\Recommended","ApplicationLocaleValue","%Lang%"
+
+// Show Home Button (Policy)
+If,%cb_ShowHomeBtn%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowHomeButton",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowHomeButton",0
+
+// ShowBookmarksToolbar (Policy)
+If,%cb_ShowBookmarksToolbar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","BookmarkBarEnabled",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","BookmarkBarEnabled",0
+
+// Show Apps shortcut in bookmark toolbar (Policy)
+If,%cb_ShowAppsShortcutInBookmarkBar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowAppsShortcutInBookmarkBar",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowAppsShortcutInBookmarkBar",0
+
+// Disable Search Suggestions (Policy)
+If,%cb_DisableSearchSuggestions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","SearchSuggestEnabled",0
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","SearchSuggestEnabled",1
+
+// Homepage (master_preferences)
+If,Not,%txt_Homepage%,Equal,"",TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}","%txt_Homepage%"
+Else,TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}",""
+
+// Import Bookmarks
+If,ExistFile,%fb_ImportBookmarks%,Begin
+  StrFormat,EXT,%fb_ImportBookmarks%,%FileExt%
+  If,Not,%FileExt%,Equal,".html",Halt,"ERROR: Bookmarks to import must be in .HTML format."
+  Else,Begin
+    Echo,"Importing user provided bookmarks..."
+    FileCopy,%fb_ImportBookmarks%,"%TargetPrograms%\%ProgramFolder%\bookmarks.html"
+  End
+End
+Else,Begin
+  Echo,"Importing default bookmarks."
+  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","#$qimport_bookmarks_from_file#$q:#$q%ProgramDirEsc%\\bookmarks.html#$q,",""
+  RegWrite,HKLM,0x1,"Tmp_Software\Policies\Google\Chrome","ManagedBookmarks","[{#$qtoplevel_name#$q: #$qWinPE#$q},{#$qname#$q:#$qThe Oven#$q,#$qurl#$q:#$qtheoven.org#$q},{#$qname#$q:#$qReboot#$q,#$qurl#$q:#$qreboot.pro#$q},{#$qname#$q:#$qMSFN#$q,#$qurl#$q:#$qmsfn.org#$q},{#$qname#$q:#$qPhoenixPE#$q,#$qurl#$q:#$qgithub.com/PhoenixPE#$q},{#$qname#$q:#$qPEBakery#$q,#$qurl#$q:#$qgithub.com/pebakery/#$q}]"
+End
+
+Echo,"Configuring Extensions..."
+
+// START: Build JSON string for selected extensions
+// Using force_install as normal_install installs the extension but does not enable it.
+Set,%ExtensionJSON%,"{"
+
+If,%cb_ExtensionuBlockOrgin%,Equal,True,Set,%ExtensionJSON%,"%ExtensionJSON% #$qcjpalhdlnbpafiamejdnhcphjbkeiagm#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+
+If,%cb_ExtensionNoScript%,Equal,True,Begin
+  If,%ExtensionJSON%,Equal,"{",Set,%ExtensionJSON%,"%ExtensionJSON% #$qdoojmbjmlfjjnbmnoijecmcbfeoakpjm#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+  Else,Set,%ExtensionJSON%,"%ExtensionJSON%#$c#$qdoojmbjmlfjjnbmnoijecmcbfeoakpjm#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+End
+
+If,%cb_ExtensionTranslator%,Equal,True,Begin
+  If,%ExtensionJSON%,Equal,"{",Set,%ExtensionJSON%,"%ExtensionJSON% #$qhiidjliailpkjeigakikbfedlfijngih#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+  Else,Set,%ExtensionJSON%,"%ExtensionJSON%#$c#$qhiidjliailpkjeigakikbfedlfijngih#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+End
+
+If,%cb_AdditionalExtension01%,Equal,True,Begin
+  If,%txt_AdditionalExtension01%,Equal,"",Halt,"Error: You must enter an extension ID when enabling additional extensions."
+  If,%ExtensionJSON%,Equal,"{",Set,%ExtensionJSON%,"%ExtensionJSON% #$q%txt_AdditionalExtension01%#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+  Else,Set,%ExtensionJSON%,"%ExtensionJSON%#$c#$q%txt_AdditionalExtension01%#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+End
+
+If,%cb_AdditionalExtension02%,Equal,True,Begin
+  If,%txt_AdditionalExtension02%,Equal,"",Halt,"Error: You must enter an extension ID when enabling additional extensions."
+  If,%ExtensionJSON%,Equal,"{",Set,%ExtensionJSON%,"%ExtensionJSON% #$q%txt_AdditionalExtension02%#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+  Else,Set,%ExtensionJSON%,"%ExtensionJSON%#$c#$q%txt_AdditionalExtension02%#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+End
+
+If,%cb_AdditionalExtension03%,Equal,True,Begin
+  If,%txt_AdditionalExtension02%,Equal,"",Halt,"Error: You must enter an extension ID when enabling additional extensions."
+  If,%ExtensionJSON%,Equal,"{",Set,%ExtensionJSON%,"%ExtensionJSON% #$q%txt_AdditionalExtension03%#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+  Else,Set,%ExtensionJSON%,"%ExtensionJSON%#$c#$q%txt_AdditionalExtension03%#$q: {#$qinstallation_mode#$q: #$qforce_installed#$q,#$qupdate_url#$q: #$qhttps://clients2.google.com/service/update2/crx#$q}"
+End
+
+Set,%ExtensionJSON%,"%ExtensionJSON% }"
+// END: Build JSON string for selected extensions
+
+// ExtensionSettings (Policy)
+RegWrite,HKLM,0x1,"Tmp_Software\Policies\Google\Chrome\","ExtensionSettings","%ExtensionJSON%"
+  
+///////////////////////////////////////////////////////////////////////////////////
+// Other Preferences - Not configured via script interface
+
+// Don't show default browser warning (Policy)
+RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome","DefaultBrowserSettingEnabled",0
+
+[#RegisterFileExtensions#]
+// ===============================================================================================================================
+// Name...........: RegisterFileExtensions
+// Description....: Register Google Chrome file extensions (.html, etc.)
+// Syntax.........: Run,%ScriptFile%,RegisterFileExtensions
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: %RegSoftware% must be loaded before calling this function.
+// Related........: 
+// ===============================================================================================================================
+[RegisterFileExtensions]
+Echo,"Configuring Google Chrome as the Default Browser..."
+
+// File Associations
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.htm","","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.htm\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.html","","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.html\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.shtml","","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.shtml\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xht","","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xht\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xhtml","","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xhtml\OpenWithProgids","ChromeHTML",""
+
+// FTP Protocol
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ftp","URL Protocol",""
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ftp","","URL:File Transfer Protocol"
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\ftp\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\ftp\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+
+// HTTP Protocol
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\http","URL Protocol",""
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\http","","URL:HyperText Transfer Protocol"
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\http\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\http\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+
+// HTTPS Protocol
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\https","URL Protocol",""
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\https","","URL:HyperText Transfer Protocol with Privacy"
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\https\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\https\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+
+// HTML File Associations
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML","","Chrome HTML Document"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML","FriendlyTypeName","Chrome HTML Document"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML","URL Protocol",""
+RegWrite,HKLM,0x4,"Tmp_Software\Classes\ChromeHTML","EditFlags",2
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML\shell","","open"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+
+// URL File Associations
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL","","Chrome URL"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL","FriendlyTypeName","Chrome URL"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL","URL Protocol",""
+RegWrite,HKLM,0x4,"Tmp_Software\Classes\FirefoxURL","EditFlags",2
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL\shell","","open"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+
+// URL Associations
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\InternetShortcut\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\Applications\chrome.exe\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+
+// Open-With Programs List
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.shtml",0
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.xht",0
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.htm",0
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.xhtml",0
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.html",0
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_FTP",0
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_HTTP",0
+RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_HTTPS",0
+
+// Associations
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.htm\UserChoice","ProgId","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice","ProgId","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.shtml\UserChoice","ProgId","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xht\UserChoice","ProgId","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xhtml\UserChoice","ProgId","ChromeHTML"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.htm\UserChoice","ProgId","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.html\UserChoice","ProgId","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.shtml\UserChoice","ProgId","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xht\UserChoice","ProgId","ChromeHTML"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xhtml\UserChoice","ProgId","ChromeHTML"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\FTP\UserChoice","ProgId","ChromeURL"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\http\UserChoice","ProgId","ChromeURL"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\https\UserChoice","ProgId","ChromeURL"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice","ProgId","ChromeURL"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice","ProgId","ChromeURL"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice","ProgId","ChromeURL"
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website and encode them into our script.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+If,%SourceArch%,Equal,"x64",Begin
+  Set,%SetupFile%,"Chrome_x64.exe"
+  Set,%DownlodURL%,%DownloadURLx64%
+End
+Else,Set,%DownlodURL%,%DownloadURLx86%
+WebGet,%DownlodURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,True
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Network"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Chrome"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English (US) [en-US]"
+WriteInterface,Value,%ScriptFile%,Interface,cb_SetAsDefaultBrowser,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHomeBtn,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowBookmarksToolbar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowAppsShortcutInBookmarkBar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DisableSearchSuggestions,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_Homepage,https://www.google.com
+WriteInterface,Value,%ScriptFile%,Interface,fb_ImportBookmarks,""
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtensionuBlockOrgin,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtensionNoScript,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtensionTranslator,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_AdditionalExtension01,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_AdditionalExtension02,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_AdditionalExtension03,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_AdditionalExtension01,"mlomiejdfkolichcflejclcbmpeaniij"
+WriteInterface,Value,%ScriptFile%,Interface,txt_AdditionalExtension02,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_AdditionalExtension03,""
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,bvl_AdditionalExtensions,%state%
+If,%state%,Equal,False,Begin,
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
+  Else,Set,%Toggle%,False
+End
+Else,Set,%Toggle%,False
+
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdditionalExtensions,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,lbl_AdditionalExtensions,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_AdditionalExtension01,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_AdditionalExtension02,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_AdditionalExtension03,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,txt_AdditionalExtension01,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,txt_AdditionalExtension02,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,txt_AdditionalExtension03,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,rtf_ExtIDHelp,%Toggle%
+System,EndLocal
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"Google Chrome is a cross-platform web browser developed by Google.#$x#$xUse the script interface to configure the browser to your personal preferences.#$x#$xThe first time this script is run it will download Google Chrome (~65MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.google.com/chrome/
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,True,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,True
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,True
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,True
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,Network
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,Chrome
+bvl_Options=Options,1,12,150,90,475,184,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language="English (US) [en-US]",1,4,160,126,150,21,"Amharic [am]","Arabic [ar]","Bulgarian [bg]","Bengali [bn]","Catalan [ca]","Chinese (Simplified) [zh-CN]","Chinese (Traditional) [zh-TW]","Croatian [hr]","Czech [cs]","Danish [da]","Dutch [nl]","English (US) [en-US]","English (UK) [en-GB]","Estonian [et]","Filipino [fil]","Finnish [fi]","French [fr]","German [de]","Greek [el]","Gujarati [gu]","Hebrew [he]","Hindi [hi]","Hungarian [hu]","Indonesian [id]","Italian [it]","Japanese [ja]","Korean [ko]","Libyan [lv]","Malayalam [ml]","Marathi [mr]","Malay [ms]","Norwegian (Bokml) [nb]","Persian [fa]","Polish [pl]","Portuguese (Brazil) [pt-BR]","Portuguese (Portugal) [pt-PT]","Romanian [ro]","Russian [ru]","Serbian [sr]","Slovak [sk]","Slovenian [sl]","Spanish [es]","Spanish (Latin) [es-419]","Swahili [sw]","Swedish [sv]","Tamil [ta]","Telugu [te]","Thai [th]","Turkish [tr]","Ukrainian [uk]","Vietnamese [vi]"
+cb_SetAsDefaultBrowser="Set as default browser",1,3,160,154,181,18,False
+cb_ShowHomeBtn="Show the Home button",1,3,160,173,152,18,True
+cb_ShowBookmarksToolbar="Show bookmarks toolbar",1,3,160,192,200,18,True
+cb_ShowAppsShortcutInBookmarkBar="Show Apps Shortcut ",1,3,160,211,148,18,False,"__Show the Apps shortcut in the bookmark bar."
+cb_DisableSearchSuggestions="Disable search suggestions",1,3,160,230,156,18,False,"__Disable search suggestions/auto-complete for those concerned about privacy."
+txt_Homepage=Homepage,1,0,370,126,179,21,https://www.google.com
+lbl_ImportBookmarks="Import Bookmarks",1,1,370,161,200,16,8,Normal
+fb_ImportBookmarks=,1,13,370,178,211,20,file,"__To export your bookmarks from Chrome, choose Menu > Bookmarks > Bookmark Manager.#$xChoose 'Export Bookmarks' from the Organize menu and choose a location to save the file.#$xSelect the resulting .html file here to include the bookmarks in your build."
+cb_ExtensionuBlockOrgin="Extension: uBlock Orgin",1,3,370,211,140,18,True,"__A powerful and efficient blocker with a low memory and CPU footprint."
+cb_ExtensionNoScript="Extension: NoScript",1,3,370,230,200,18,False,"__Allow active content to run only from sites you trust, and protect yourself against XSS other web security exploits."
+cb_ExtensionTranslator="Extension: Translator",1,3,370,250,200,18,False,"__Translate text or an entire webpage using Google Translator."
+bvl_AdditionalExtensions="Additional Extensions",0,12,5,295,621,134,8,Bold
+lbl_AdditionalExtensions="Enter the ID of the extensions you wish to include. They will be downloaded and installed the first time you run Chrome.",0,1,20,315,575,16,8,Normal
+cb_AdditionalExtension01=,0,3,18,341,20,18,False,"__Install extension"
+cb_AdditionalExtension02=,0,3,18,371,20,18,False,"__Install extension"
+cb_AdditionalExtension03=,0,3,18,401,20,18,False,"__Install extension"
+txt_AdditionalExtension01=,0,0,45,340,250,21,mlomiejdfkolichcflejclcbmpeaniij,"__Enter the extension ID of the extension to install."
+txt_AdditionalExtension02=,0,0,45,370,250,21,,"__Enter the extension ID of the extension to install."
+txt_AdditionalExtension03=,0,0,45,400,250,21,,"__Enter the extension ID of the extension to install."
+rtf_ExtIDHelp=ChromeExtIDHelp.rtf,0,6,300,339,320,82
+
+[InterfaceEncoded]
+OpenFolder_16.png=2299,3168
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+ChromeExtIDHelp.rtf=32137,10072
+
+[AuthorEncoded]
+Chrome_80.png=13413,17984
+Logo=Chrome_80.png
+
+[EncodedFile-InterfaceEncoded-OpenFolder_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTA1LTE3VDIxOjQ1OjAzLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpiMmUxM2M3YS01ODljLWQ0NDItOTQ3MC1lZTI4MGIwNDcyM2IiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0ZmIxZDNiYS00OWNhLTI4NDUtYjQ3My1hMjZjZWRlYWZhMDQiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjRmYjFkM2JhLTQ5Y2EtMjg0NS1iNDczLWEyNmNlZGVhZmEwNCIgc3RFdnQ6d2hlbj0iMjAxOS0wNS0xN1QyMTo0NTowMy0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHN0RXZ0OndoZW49IjIwMTktMTAtMjBUMTk6NDc6NTktMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz63gCC6AAACp0lEQVQ4EX3BS2hcVRzA4d//nHMfc28mk45NGo1JpwpFquBKKmh3KggWC6WCbroQVy5EunBTwb0Vl8WKCwUrlEoXPlAkhlqKYqVYFW1jk0jbiXnM3NxJJjP3zn0cKYKL0vH75O33TnMnLQ6hrvLuwmtcbV+jPhLsnaxlvwZ+YbWU3s22fzROnI92VQcX9TMHD3OnkpxQV5mp7GUp+Z2V/vr2+nb5TdQ1HxZ55Y/xID3pKvukq8on5MSpT0jTgVOUpS/8ywJWysFUdSbNyoSL7a/pZB2+jz6j1YuZqHDmoYAj7Uxhsjx/1XWd47XACQUoLSiBbn/QX2wtvFOr1E4eqB1ip3sv6aC3+9utT88FuQnnO/ktpUuRE6dO2xcPPYvxQpIClAKloEgTZufO047iLd/30GJwlFPdSCOk9Ho/RLMvnG2+/52pBe5gYnzM/XwRogSqI5AZaNQdjh55jjilKhqsBS0wauDyz1GQz003xho7vjBJmqUFuI/vgnj9L7T2uE024IZ2sKLBWm7LShitQ9ydp9P++L6XpxYw/ugMq9cvsDR3DMRHtA9YyhIKQAn/sRaWlVDk8PTU6rE0jx82uVVcnX2TB3Y/wsyBtyi3lgBhmMKCF4Qoi3f+7OvPm6h5hWm1yYP7X0GcNbALoCsMVfQheJRB16G/+fefpt/6haDhIyP3wPpXkLRBudydQLYBO/fRal5ja+PGj0b15hmfmAa2yVcugPZBNHdlLeQxBododZ40GfxkArtMfWI/JE3SzeuIN8lQZYo2FUymiJavgHDJ7Kh0pX7/YxBOEjYOg6kxVNGD+j6QGq1blxKl1GUz5nZGSvHJsnFk7CD/z0JlDyu/nSFeay76YaVvunby3JcfvPSUFRcrBqxlKBGwQtZf23Q89w0Q/gH+aSDn8z1ZagAAAABJRU5ErkJggnicE/QvSM1zy89JSS2KNzTTK8hLZxgFIwj85sAvf+m11BRGBgBbPwmoRWA0QwEAAAACAAAAKQAAAPsIAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-Chrome_80.png]
+lines=4
+0=iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAgAElEQVR4nO29d7Qkx3kf+quqTpNnbg67d3PABgC7ICJBIpEEZYJBFEWZpKgjPkmmLb9jS5TfkS3p6TxaiZaP35Po40fr2LIp27IoSiJpSmISSSQihwUWwObde/em3RsnT8eqeuer7rn3YpkAk/RfbxZ1pm93z0z3r7/4+74qMAC49SO/iu/0cvIlrM+cwStf+lNYbg7F4QlUJnfBK9UQ9dpozJ1HcXgSMokBDYxffyuiThOlse0YP3wLuqtXYXkewAVWzr2IlXMnsXjiMfNZDUAree2vsmv+1t/l+Kv2cy7AuIBMItR27sf2m+7G4O5DqEzshIojJKGP0SO3YH36FBaeexRr02fglqtoLkyjNrUPq5dOY+et90ElMV756/+C8vgUGOffEZOtr6unnoP1fc96vS+twYUFp1CC31yHcDwI2zUPgNs27HwRSiXQSkHJhCuthFaKQWsJMJ2CowkoTt+1gRuDyo7TS4DRP8Y445oLIbmwtHAc2F4BwnZg5/KwcwUkjJnfc0sVWK4H/W3P5Ad7/fAA1BrCcc3orl3F9GNfYW6pap5k0Kxj/fIZtK/OCW7bAo6n4zgEpBIAChB80AUbHVRypKrkQJGJqsdYiQM20lvWMbTfU6rZBFuvM77W4OwqwFYU500lRABho+DmmIwCtXbplJJxpILGGnMKZS2jAGe+8hkmQ1/buaJ+LdL1Wl8/NAC5ZSNsN1CfvcBLwxMI2y0t5y6gMXeBta/M8l6vw5HEJA42gNEq59ftcZwbDjvevoOWfXiHxp6KUqUSY5YjBIQQ4Iylqg6NRCskUqIjJZpa+VeVXjqfyNNno+DsmUi9vMB6L3e77Qvd9eXu2txFfuWVZ3S+MiCr2/ehsn2PhlI6bDdY0KozbllKWDa0/sGl8QcGsP8046DLeuvLrDSyjVST7KNoLUzb3VadgKMrndrOxS13lspvvLlQuOOwbe8Z5zxna21uJAIgudFTSAKMVG/L/TGjt0CVAYPQuf1K77xbqZ2JTH6sHoa4GMcLJ+L4leeC8JHnFR6Lk+SVZuB3/MYab8xfiAd2XZcM7jyoC0NjrLN6hTcXZ7SwbM0t6wcC8gcGMOy04BQrvDKxC5bj6ubiNFs5/5LjtxscMqF7PnCb673jvZXq/beUyrdNOjZjcYJuEqMjFaQ2XsBAlMobM4O2FMPGHnOTLLVgymwDWjBAuPAcFzcpNXlrEk/Wo/Btp/3gysNR+M0Hk+RvV33/oSicb7ZXl6z65XPxyMFjsrZjv85Vh9naxVeYv76iyGb+rweQJCRJmFMoserETh10Gph77iG7W1+xdRwZ4O7y8g98ZGDgI2+u1rZbjoN6EGK104WUykguORsLHOAMmnHjOjQhw+nrGbhOATP7MylhWht4yecwpYztjbVESH7Gso0NfkOhMH67H3zo7/vdD3whiL/414n8bEOqbzYWL7e7a1ftxuyFcNvxN6mxwzezxuw5HrYbWjiehlb/CwBkaSQRtZt8YNcB5AdGsHrpZbF26bQbddsE3Mitnvf+f1Ab/Jk7BwYOeLkc1vwAfr0BniRg3ILjuqnU0TDAESAstXZKpxJGQpbdDx0y/pceGgFvJNGCtlPnpSHBZAKdJMZONunjnosR1+X/OArf845u5+99wY+++FdK/VEcBM+vTp/m/vpSPHrklnhg9yFEfo/VZ8+zXLmmuBA/OgBJCjgYwk6T5WpDKI5MYPbpb4jG4mVPRSHPM37Pr9Rq//uHR0bvy5VKWFEKjUYLzPfhCQvCy5uYUNNDIAOXAErG0FKSR85CGw3QOwGp1Ibapr5Ym88aQElqLQYtBLTFwRwBkCragJASKonQVQracTFmO84vu7333dluv/nTsfzPzyb49+31lbXwqW/w3vpyOHH9bbp1ZZYtnnySK5m8CkS6ph8agBRn9ZqrbGT/jcwtV/XC89/ijcUZT0XR4K1e7gO/Mzbxz49UKuV118OyHwCtNjwC3cuBaQadaGgZQRNIiTIgmnBO9yU7u3AOSAZIoZAoBWkC7vRGmFRQWkFL+nwCrRUUgSt4KpGODTgWOA3bMsd7UqKXy+O4bY8c7nZ+9dM9/4Y/kfz3I99/YfnMCyLqtILJY3dKxi3m11d4EoXGLpLAkKm5Nrp/fQDq9MnLODSRa237XpZEgV5+9iHWnLtoqVjmBoW44/dGJ3/3cLWGecuC1Q3gtNspOBDQPWluOLVf9C0cFLcxSxhbx8D7wfJGoNuXOiUJRIlIpqotCDBN2wmUllAkbUoazy99CdXtQDOFhByMa4HnXHDHMXZ2zXbhli38Q0u8fX+7u/cPFD6xksRfqM9d4DIK/G033ZVsu/keNvvU15lWSgvXQ3ViB3gG5usGkC6MviRXGzYXWhgcY35jjS2fe8ENGg2TdABycJi5x4ZGR+GXK/CuXIVaWgEXDsUjYDpJn6KwwAVPnQezyeJnAGtobpKKDECWqWsGpkofYpxo+EmCMJHgWoGR+yFVZwRgbGwjE2QCbEgCV0ZQnQ7iThvaEhCFgtGESFhYL1XxVmHt3ddq/YdfTeTAtNJ/2rgyy/XTD3a33XJPMnLwOFs+c4LSQE122oRq3wtAyiO/k+SRGDv5ItxCCbnqECd7tXbutOc3VwXAb6jsy/98q+s7ncWQY2Kb9Go1EZJx7ybQa3XwnAeKs5jg4NwCYyIblrFhBjSSFCaMCqduJFMYg10aI5Jd5LaCpRREGCOMUtXVTAKUAZrMjh5IBIUETDFI+h1tgSnf5OpxswXd6YC7HkQ+j+VcHtssi/3u+vrv/l4sB09K/LvWyqKae/pBf/LGO+TIwRvZ4ouPa24evEDs9yDj6NtyZIPc2OE3GBXYOujC424HazNnSJyZcD22Nn06FzTXHMu2j+9929in2FD0llYhOLKzum38fXzE8ZJEqEIZdm0ArFGHxTks24bgLizhQggHQtgQtM9y0hzZciEsF9xyjNRagt5dE5IwYZtQB5YNWMKQBg5tCwGp+6rPTQgE82B4ZrOylDqNh8C5BiPAFZmiGEnYg0wS+K6L0XyO3x0Hd55WCouaPR/32pCRn5THpygOYEnQ0/Q5rzJgIg47X4JTKJuxeuHlFMDhfdcbJmLroAtfOnMCK+dPslxtkLUWL7u99eU8gCP3/KNjn/Im+HXnXljAoW034sff8jO5feenRYlZUI4LXizA6nTBuyGEU4TgDoRjG4kWtgfb9sw7t1PwGAFIwG2AmYJHAxmInNvQwoamh0JSzTgUI8nm4OY2WKr+LA2NOIx9SaXbmAqVOqIsOE/iBInfQyAEKvk87kiS259VqreqcDLqtDTjLK5N7dPNxcu8t7ast998D7a/4S4UMkaKxqVH/iZV4dbVua26a1SLJETJiFW37UZ3fcnurS17ACaPvevAx69/6+HrvvTfvw6ZAG86cA+Gdh7CUu5Z7IgVkpwHYQloOweIAJbtps5COKlE8VSS0jjQSpWA1JlzAwD9tkrlyoQQpAmSPLEmFabg2TL22OM2EEQIo4jkJHVMJIGJBSlSp8QRQcgYYI4JKgUFlv1gWcBkQVGzjSuegxHXwa/r8GP/NMFCQyafa8xdlG6h0h3cfRDLZ14gtkgTm0Qm6dtsYOvK5Y0dZJtkFCHstlAYGKV4SnSWrxSUSoZ33Tb28bt++s13e8KDpPjNPFMJFAtYHBuFOnURTn4XECmKQcA9D8z1UpUkG5ipoZEs+rsPYqZ6hrMiW5hlHjqzgVolJjbkBKCMTXzIrDgFERZiApG+JxFQiMEUR5zJoAlCDFtGz4xCn8jwkCa4EOlQYYTFJMYOxvL/kut/9csJvxp1u4+tXniJHEpUHN3OguYq1i+d1mQCttKRBkAKivsvMphRr0MpEd0Gby0teDIK8uVx7wN3/+xt77ZYEYWcjdHRQVx4YQV+3AULE7xSLeM238cuWOioEIIMbq4AbueN+qVSSGopUrXkqS3bBJKljiTzIRSqyCx4Jm+bBtcylSgaFn2PBYdZkBQqxREsi0NSZkOHNTPkRAIFxjQsE3pSBqRMKJQ+GEClgmti0k
+1=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
+2=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
+3=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
+4=J2GwFjaaZ/0u51ZVVaNCW6bxl8M9I5XkaAbGahgeyWN+eQl/9uWrgK7g7jvIS5bAkzykVTBtuma4VTOYVwUjFXUGIUUZtkVlAmcz91ZpLp7mQjxtRRMuyp5CjjWxfupJ/J//7+mFj36q9/D0Ch4HEy9xS7xCc2q0Vg2ayvrtrZU/GgC3zhWgz1omJkhX+tCMMaGk6rVne63enCRt8GLP9zq6hY7fQRIoWNrG8MgoDhzYAZUD/vIbM3jkhTVcv62E8e0krQJJIE1xnmXLqPb9CkETy5xRcWZqLiJjvKn9wjHAkawX3B7scB7zL7+IT/6X0+sf/eTamS+/oJ4F2BnGxWXO2LTWelVrGZhGn81Jmvi2bsvXAMjrPZdlUziovY8a60vZqDHGRkED2K6VGgMwnh91pwq73dHCTrvolAUsbiNvFTBQrqFWqmF9tYWHHz+HfNTBR+8bx8ce2IURmkQSSEhfIUq0KTfCMN8SMRswFJTH64DwTNBuMQWHkWdvAq11PPfSsv7sN+uNv3hcrUyvYpYW3GWc00SAOZCt03oZ0I20O9uMbprOmNHPOl6TRL5eAPtLrHlm8ViApr7Usvditi/HOPXIY0Ar4uM1TUAaEDkxWt6VG85vsyv2kHCFp2HZAuVSGTYsXDy/gqXpFnYMFvDTd+7E379pBEd2uICdMd4RTMcXUxKSD8HRdQi+bHLkYK2Fc5caePJUu/c3z8SNL5/ASqLMzAliZNcYp3fUoXVLa8r5zFSUbgYeHWtlsyr8bFbFZrflDwnArdJnZZ3bBFglmyFayqSRpJJu2TLbjOXBmDlHK1XNwK45FbuWG3Jq7rBVsirMcyuWm6+6Jv1bWvXRbEQY9izcPuni1gmO42McO4pAzSYXE6PRE5iuV+Wl6bnwlekgeHFaNU9M60ajZ8CgltQG47yZzZZoQmtqrYiymRdZ8rwBYh/AVjY5oC+FP1IJdLaAWM7Ay2X7szZxo3dWNoEnB8bMuVqjAq3Km59lJeGKol0UBbvIPadsOcLllh9J0a7HDAHVo7UeEtoft3ToWCK52pDRapt3w5ikRmVqaArebXC0GIGhDTiB1qYE1wdkK4B+BmAnG72svSX5UUjgteeLzA66mTp72bab7e/PGdw6aKa2a1Q8BTOvNYrQOk8Ldm55AE5/mtyWBWBkplrxFlsVAowC+h5FAgYMmnoCHVLLYtY9pPqzxbL3rCnGfD7YMsItx/rA/dAl8Nrz+3OnrGzYW97tDS+9KY39c6n9zoaRTEb9bC40qbt5CH3n1Ae+/3tyy40nW4AMofuA6ljrPg+2MdQ1f8dbgOq/J1vOw+sNZ14vgNd+Vm9R7a3hzVbQtm7zLWaAX3OO2Ueh0MYsOLZlNcYtgKRLC/bnK71q6C1/y+9wPPkO5/9Aq3H/IAB+r+9j32fw73PexkH96u/V14xr96lr9l0L0lZi9IeyqP4PG8DX8nvf7Tdf77VcO8XoWsP/w/2/Dvz/rx/BC8D/B+4zsMROqDzlAAAAAElFTkSuQmCCeJzjdc4oys9Njbcw0CvIS2cYBSMMpJrglz/hljyJkQEA/VMHQ344FGQBAAAAAgAAACUAAABlNAAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-ChromeExtIDHelp.rtf]
+lines=2
+0=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
+1=qDtlUKATVkztJYkSudUyN11CGghq/zECu5RA/x8lyc4Q1s4GrEDicFXEn2A7+LtFwrYizUWmXiajduSiBl60pkoX+dclP5iBllHbE3O5NEFZ7IrmrJieKeOuIQqZo620YpSe8gcXP0Jr9/F3CrcN5jZ8ydcq5dqyNcMDU+t0m2JhXr2NY5J2zQSRkCL3jbJFlbHQnOTAS3TeWMq1UlUIfgEY3lvtzDlwAOlYjSacwUtZTeVabxVou2kgov5KaJrSmzlEtGWRMlHhZRoVAVvQbrlamzq1tZyyrHmshrimoJm5EZOlfSkli1rtlKarJrQpszUYONQmiTyUGyPquQKsiusaRMa0ywXLJo4CR5lZOutI/EdGMr56KRKQpfeSIu2hwH31zjWevrtrXSNjvEaNwBSfoXyMEdQIlK5WH8/t3DozI2EQGJrxpcUXtUYTPBRIHvVUEVfFpHJ+u6FaABzvCEqaksSR+8S95nNDO6DdIZCb5g0TYT12Rg0o3WdUiROCZl/Pt37IcBjgyiFrFxtgJyUtOUoK7BG1fjtyY608iAo4Klhwy4I9nU1o3E4t40JFrMpiUsdYVuQAUxSGREX8WoRLS+AqoqJRO+iLFK5K8hUIA6NKirOjV4s1YtUcZFNoJDhdLNGPtrESNx37qmvwJGyT6jpD1n/2H8/t3xSMu9zVOoiE0CwGsrjc8F3moygrnZalXXgKeo66pxbALQAaai9IEYa2qZbEFQG5tKOPCeiG5rrkaH/UtAaO+sZF4VuVdTEweSgJOSA0faaINfnQ0y4vTsBRZSuKiqwLVWaWY1BGpJSanIVV3Klkwyu9YVL1NTBGslKa/YAwUgkTwYHuuYLEkB0YKDKcaIQwpiUBc42yhHFAD+WTYGPCZsWhmTr5qY65i9Z6+AuyF3GhyEn8m9WkbfeLKKa23dWmdEDrpomix3b62wBTsr0LfyoXG1UOR4bkSTmkBFs61vK1sRBxjDacKylIskiCyQmwRlV+wBz7c6U4JrlQgvYV0uBbN2gepklUNtycWmChLvF7+Q0ZWOra0IjmgVuUyNAhFEkxubjCcUpUBTFaQxkQJIdW7b7GuKpqy5naM+sDPC2AtvvXHJ5jrFFt8FI2vgGlxuyo4qypXDRmRKVEAHNCcWWLcOLKmTp0QUx5RszAXmwW7cW9mWQMIrFoyKdIQtcUDUYEBbA3I1gBIL4FdVqKlYmbrXggRAVHI1LXbAbLBhp4S1Rmbpa50bMs5ZZ3XN3gOY24pQaapNFk0MySLTe0BeiBiaRMEoVzJao0HVUJkar0EMkFmCkZQPF4lCR5jU0Qgc2DIhwWVyI7F9rNlji3YUGP5DF+M9lShrSAv+9JUkeJJ25TdOuKclEGBpxrW2NS6USK4psSmpGh6gmlIbBUbSDvCqJGGaoB6gBRUeikDVJhIMJo6lCBPlraa+4BaXWypYnwwGc4lSwoCUDGXhi4xLWmAeihXFwDmLcRqTqor8J3kwfsigGjVTgwfYPmWdFQST4kpQtcECQAV/a2aXqS1AR14TjkAFhI3bl/KMHAzksibjgI4SSlUWJjbSgOiErAiWVFEt+yIDIGaSS1pXeFxVqlaaIErv30kYnSiYiElDgQ+jSaDWgX6YAKYC5cmFHLaWkCEJIYDYDMuQOWBmqhwhST0ueZ/ZRiMFrmudkmymhnNC1mSixAecUwXKI4hEsdVgAGn8/h2EA0ZlCXo6LmA/RWIqkMYVOOClDljCR0PZrCvKLRSS1dQuQ5BrSS5gXlA6oboiqRXGD41ogeUE8yvUDeCrWkIfxxNSkOpGJQOVMUF5AyKhilFYvHXWNt6zURHq1IIW0NCQyQ9YGlyjZLsm1LiHQzNKoAE7qJYB2lzyQhU4zlI7ygtVrIJPyADnhAQSwJAJR4UjGgtEGcCBfDNZwdapgIa61xgIDdhBHGBfspZaEtkv7mOF8FKRPD5xY+slGhi8A+Eo5QCS2MLiNNUUVTCgIiBcUxVkJ97JUw2bFrWkTsCYoThVJeDrvTnIBYoJ+Sk0trS+lAJSFlYKg6M9IpdhMg1Emcyk9YkakgXKwuQh/9zagzOgLZTLwqmgYhQS3FXoJEzZ+9JOqKaiZgWfJDTZFX4UoBYV4e8wMzbwNqoYW6aXRqNKFalCDwHxjgLt6AuIJ2AGPKfcQ5p6OkwFU7qleGdNsgIKSeVQyl9JIJJTlW6jzWQfVSxkR7jCrBs4N6Y2tqROhKSEwtISkEzwFx5CGYS/OEPVgO7TZkHX6IAsYOBqCiKy+lJJ6RCQw7p8MlTzj3QBJLGAAhyiMVWlDdBTSELEuTGCV4ZyR2nCwob+ojEB1CLlyEYYLroAOY0CPgFsIISEpBxKegpADrCkWcD2BXRbtowlC8FxpGKwsCJKpm/By4pbuFgVlGhATGCLu2CXBv01UeIdoYmfgMmaoiGxLjFFLrSUZwqjgEVZKogXymqjC+tGSU9/U2p3BpWsp+MKFrLLFMpzoq2KQUVOeUn6QAra8imANcB4qZ8QZphvQm9DmUGKUpUTVBNyjDpRKlyEqWKCUEEwaIJ8TSNHZdShHDl0alIV8ZKk60iVBBzANVXaPdq7pAIeqVUNocAnkVKqyfvWFzIIe6DMBnpMQ7yXNkdUDiyByVHV6YbpfgA2koe6AAWpgDlqOtGLCX2xpCarREtBpCBY3KAZApK4vWKrtEbka2kqBNnRQktgxvAr9CEO6WVLB0ehoS0zuJ2O06CYp6LS68G9wDe6Hbp9QpieyVpijKZJMa80xK4uZBBuS6ccnGoKVhCqvBxIQCcPYImaSlSaKJONUKWW123hbwB5ghtRhEpHFnxLnW5JFNoVuAtYFFtgnQSlpYK5V9YVnlhaVLpgm9CY/dGwt6UDJjUdoh1+NLQDoBfBRW0zYBy7bEpxKogEgrSRYkgomuiEBncp4qU3rg3oRZuuQC4acCyCWWSGjcKfYLqAPGaBpbl+R7XDPa5JolF4kDYL6IalQ0Fa+BhupysgxEgvR3coJTUAptn/RpJRtLGCjgPsIo6q8l4A+U7zYkr/RBDJ8qQv3KRwJCKsYCg5R5T6hAZkVYKVlyxBg9Zb1yqQHFtoiHidqWqeEIEXEIHok/ANQEBb7KlLsVROSBtzgUDYFArBvWsDOya2sJ0kUcrbGXAl70q7nlubgDhAhsKhS2UCjGE5NKYko0AVRfMgIGZ9M2moRgmUtYRJtARq/2YCkdpkUXAv2PJp9QA4ZCamgdTQolPsXU2I0VkD/lSmKjRwGuBbqdzUFBVQV4KOxQsGxxAnhYRTL5RITcJJRC5WoNoR4a2l33Chrop2pVAmYAPbUCt8oVtF3arksS/EhbByAHZhjRpGXjetLK0e9CBEuj+yOBa8qRvMQn0jFxQUtylFHaZORCPDlIgjtYkl8COUdI9ZkMIEFOwcmCf4CDNR6IuAOZW3ZXJ5g6dGPZNAj6FTu6bbK3gQZStg7Lv+DsTqe0VVP9/vPXx/5VLnffr+S9+Dq1KpGpPJxoY2kOwsXSIdnRStBHKhtEwDwDCPSQWjoer4FmqTaLwFZFrRhNBj00J6+Ay1DIMTCqWD0VrFRHwBEGQdbUIhPHQD8GGKIsjeQBxppDF2A0vDW95iJIvAhv4EL0cJmWxpWVUD7aLwgxPcTcsWqk0Akui4GDpNqwmOQpSoyo7gJNcMZYTOBApHWEQYT4ZbkTK4s8W6dXkHAHAm9QGcWBUvyLa0WDRLtK2YoSkpCSvO8C7bExlJr0RUgbxV6Q+IqpBo7UFvZ0Ch4CCUELBg4lPel4ImE9+efcf2/bvz79k+97ru/dxLOlx+N++pF+r1c55+p+/SPR+/z0Qu7Pd/9kWqqOey4lImPK9V0eDS+y9PvaK9VqvjOzNPa7K3QbHQJWR46kVxa5/T5GWo0etaiaMFquGr2r2vBUF0+0u7J6P6h037h2vSrVuv58ubiQ60uINkQdfDnWpAvkQvpUcVy2jMAWkhkm2Javgxo7pcrYY3bMjMMqMGZ3uNy/dQJGBZZtVtiXtk0bnCB1z5bAAg0OxBlV7MyhpHDTqQLZprsqyD2xr+0UIRwRmt9M4y5Lwq75f0Ou3WWVtsWK6Z3dXS
+2=P6MtP2VdDzr3u8yFt/PPcrVYuLwzkvodskIPd6bKsPOyJ1M3u3MGbikP89RhnjrMU4d5/TlkF517BNjJODlznIMGwzn1aNZjSfrRHP1ojnk0xzyaUz2aUz2aYx/Nsf2cpry3hkX94Kf9UX8NT9hgTmd8dY55xMIuJheuPMU0PPQ6XWzjtpvfuo/YuBwsVuHHFGPKor90eAowlkfqOHN8FHB/ZvdA6X7J/pFQjtv281Fk+hjSupucShWTU5nD8U6inDyUN1waZB2eWC2fj79QXnsirzzwVJJTfjtygRq7QI9dYHa7HLGkGnsPO3ZBPXZBM3ZBu9v2fpY+ndatws5Zz0xQlyboSxPMpQnVpQn20oT68kabSzLa89bV1cns4NbdfLX89sV5I08T8ft5t0gn6smT62eeC39F4srTG/zlzncHHV4kUKlTgd1mtbx5hbhTA/3udj1z2/n2yi3vpVSnTu6ft57842Yev31q1X7an/bPrqbN5Pv0sXuFm7+C28lf1i6QlyO3YU/1+0N5XmXyl1mf4lcpdxAknxD0h/n2ui0epKgnpPRWHbktfSLnjynO7273+9rh0tWyzHOy1DhZ1VOyiplQauQW7VlRI3WqnxJUjD7WUM1ZQWrs5tqzovQonerT+P6t2/w4Pirr09j+TekZ8t3ikCfj9larp6WNV0s/LeiAQm8BApO/DwE2Oj48z+HBUeCbAMMLxT2PDy/e9PNQ8UJdn8GMU4nnqs6f04d5eb70NVVdm68csH3AGV5RjE8T/V/vVt0rmII+3ffvy6+DbNNO6tvB6wv9+AzOvlDiM4D74hB+BnlfpuU5CH6htOex+KXbfg6UX6joM+j8QndfAdOjC+0lmB7JJS7B9Ehx18H06E1fB9NvR+1eKPEKCBq99StAaKSWV4DQSIlXQNDYfV8CoXEaXglCI4VeAUGjt30FCI10zhUgNI6iX4QgPTbGL4HQSP2uA6GRQq+DoNFbvwKERip6BQiNlHgFBI3e9xUgNFLLK0DobVrRl+75ShAaqeQVIDRS4hUQNNrdV4CQeVsQGinuEgSZt31D64VaXgdCI4VeAUGjd38FCI3U8goQGinxCggave8rQGiclpdAaKS06yBo7LavAaGRil4BQiPdfQUEVW/djFVvC0IjxV0HQaM3fR0IjdT1ChAaKfEKCBq99StAaKSWV4DQSIlXQNDYfV8CoXEaXglCI4VeAUGjt30FCI10zhUgZN+WB9m3bsZG6ncdCI0Ueh0Ejd76FSA0UtErQGikxCsgaPS+rwChkVpeAULjJF6CoLF7vhKERip5BQiNlHgFBF279acfSzj1VHn4Y5GOz1i8WK46te/+k52RD288/aHR4+dVUPnPKadNWobXfBqlntT5KPk1Sp868rvV6scnHvXRp9n93dwv5qv+E7tPzzyQ9NWTLf/rN5N/Gp75+nb4u0Hlr3sMf5hGyP4RWzE8ViyE3D2i/P6dKX8noH8QVSuVKm3KX5ltTCy/MWYrK60ZHuHVtjxO++TLDpKiKL9SmYSTXkqX5PmHioeXTqJ/5juX/81iu5fzxEt+9fOrC2V9Pjzs/vj4cP4nfL1/91NK/8/++tvu//u+nth93P1M/7Ga/P94/c33/31ff9v9868KrmHz8FWbgXoYWIhNw3HNibq9xBJe/up/wao6X/dFsC62TdOqLMvvyztboakR5c+PVDJV5+QmEcsfDPMpCNnGaIU8xzj+s7zOWuCFr/0vlf3Xeb2lBf7r7b683soCL9j9vvfYvb58+X/ciPVseJwTds4oys9Nda0o8XTxSM0p0CsqSWMYBSMGdNZCaD1Z7PLS/9Y/YWADAGtHCzY8tcoxAQAAAAIAAAAvAAAALh0AAAAAAAABAAAAAAAAAAAAAAA
