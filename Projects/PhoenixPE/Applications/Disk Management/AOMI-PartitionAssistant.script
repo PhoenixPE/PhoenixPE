@@ -1,0 +1,475 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=AOMEI Partition Assistant
+Description=AOMEI Partition Assistant is a highly-efficient and user friendly partition management software.
+Author=Homes32
+Level=5
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2020-03-31
+Interface=Interface
+
+[Variables]
+%ProgramFolder%="AOMEI Partition Assistant"
+%ProgramExe%="PartAssist.exe"
+%SetupFile%="PAssist_Std.exe"
+%DownloadURL%=https://www2.aomeisoftware.com/download/pa/PAssist_Std.exe
+%aLangMap%=Arabic|lang\ar.txt;66|Catalan|lang\ca.txt;3|Chinese (Traditional)|lang\zh-tw.txt;999|Dutch (Belgium)|lang\nl-be.txt;77|Dutch (Netherlands)|lang\nl.txt;19|English|lang\en.txt;9|French|lang\fr.txt;12|German|lang\de.txt;7|Hungarian|lang\hu.txt;14|Italian|lang\it.txt;16|Japanese|lang\ja.txt;17|Polish|lang\pl.txt;21|Portuguese (Brazil)|lang\pt-br.txt;22|Russian|lang\ru.txt;25|Spanish|lang\es.txt;10|Turkish|lang\tr.txt;31|Vietnamese|lang\vi.txt;42
+%aSoftwareEditon%=Standard|2|Professional|4|Server|5|Unlimited|6|Technician|7
+%aDDMSoftwareEditon%=Standard|1|Professional|2|Server|3|Unlimited|4|Technician|5
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram
+
+///////////////////////////////////////////////////////////////////////////////////
+// Copy Files
+
+// Common
+DirCopy,"%ProjectTemp%\%ProgramFolder%\{app}\doc","%TargetPrograms%\%ProgramFolder%"
+DirCopy,"%ProjectTemp%\%ProgramFolder%\{app}\html","%TargetPrograms%\%ProgramFolder%"
+
+// Arch Specific
+If,%SourceArch%,Equal,x64,Begin
+  DirCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\lang","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\2Gpt_BCD","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\2Mbr_BCD","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\7z#$c2.dll","%TargetPrograms%\%ProgramFolder%\7z.dll"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\7z#$c2.exe","%TargetPrograms%\%ProgramFolder%\7z.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\AMBooter.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\bcdboot#$c2.exe","%TargetPrograms%\%ProgramFolder%\bcdboot.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\exfat.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\GptBcd.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\language.ini","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\mfc80#$c2.dll","%TargetPrograms%\%ProgramFolder%\mfc80.dll"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\mfc80u#$c2.dll","%TargetPrograms%\%ProgramFolder%\mfc80u.dll"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\mfcm80#$c2.dll","%TargetPrograms%\%ProgramFolder%\mfcm80.dll"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\mfcm80u#$c2.dll","%TargetPrograms%\%ProgramFolder%\mfcm80u.dll"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\Microsoft.VC80.CRT#$c2.manifest","%TargetPrograms%\%ProgramFolder%\Microsoft.VC80.CRT.manifest"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\Microsoft.VC80.MFC#$c2.manifest","%TargetPrograms%\%ProgramFolder%\Microsoft.VC80.MFC.manifest"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\msvcm80#$c2.dll","%TargetPrograms%\%ProgramFolder%\msvcm80.dll"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\msvcp80#$c2.dll","%TargetPrograms%\%ProgramFolder%\msvcp80.dll"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\msvcr80#$c2.dll","%TargetPrograms%\%ProgramFolder%\msvcr80.dll"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\PartAssist.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\PE.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\ScanPartition.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\SetupGreen64.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\UpgradeShow.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\VhdMgr.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\wimgapi.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\WimMgr.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\Winchk.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\x64\WinToGo.exe","%TargetPrograms%\%ProgramFolder%"
+  
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{win}\ampa#$c4.exe","%TargetWindows%\ampa.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{win}\system32\ampa#$c4.sys","%TargetSystem32%\ampa.sys"
+  If,ExistFile,"%TargetSystem32%\wow64.dll",FileCopy,"%ProjectTemp%\%ProgramFolder%\{win}\system32\ampa#$c2.sys","%TargetWindows%\SysWOW64\ampa.sys"
+
+End
+Else,Begin
+  // x86
+  DirCopy,"%ProjectTemp%\%ProgramFolder%\{app}\lang","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\2Gpt_BCD","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\2Mbr_BCD","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\7z.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\7z.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\AMBooter.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\bcdboot#$c1.exe","%TargetPrograms%\%ProgramFolder%\bcdboot.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\botva2.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\CallbackCtrl.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\DyndiskConverter.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\EPW.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\exfat.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\GptBcd.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\Help.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\iconv.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\language.ini","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\libgcc_s_sjlj-1.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\libwim-15.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\libxml2-2.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\mfc80.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\mfc80u.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\mfcm80.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\mfcm80u.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\Microsoft.VC80.CRT.manifest","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\Microsoft.VC80.MFC.manifest","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\msvcm80.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\msvcp80.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\msvcr80.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\Ntfs2Fat32.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\PartAssist.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\PathFormat.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\PE.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\pthreadGC2.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ScanPartition.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\SetupGreen32.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\SetupGreen64.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\SSDSecurityErase.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\UpgradeShow.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\VhdMgr.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\webctrl.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\wimgapi.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\wimlib-imagex.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\WimMgr.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\Winchk.exe","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\winpeshl.ini","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\WinToGo.exe","%TargetPrograms%\%ProgramFolder%"
+  
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{win}\ampa#$c2.exe","%TargetWindows%\ampa.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{win}\system32\ampa#$c2.sys","%TargetSystem32%\ampa.sys"
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Config
+
+Echo,"Configuring %ScriptTitle%..."
+
+RegHiveLoad,Tmp_Software,%RegSoftware%
+RegHiveLoad,Tmp_System,%RegSystem%
+
+// Include DDM?
+If,%cb_IncludeDDM%,Equal,True,Run,%ScriptFile%,IncludeDynamicDiskManager
+
+// Register Drivers
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\services\ampa","Type",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\services\ampa","Start",3
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\services\ampa","ErrorControl",0
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\services\ampa","ImagePath","\??\X:\WINDOWS\system32\ampa.sys"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\services\ampa","DisplayName","ampa"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\services\ampa\Enum",0,"Root\LEGACY_AMPA\0000"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\services\ampa\Enum","Count",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\services\ampa\Enum","NextInstance",1
+
+// Language
+List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+If,Not,%LangPos%,Equal,0,Begin
+  Math,Add,%LangPos%,%LangPos%,1
+  List,Get,%aLangMap%,%LangPos%,%LangCode%
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\cfg.ini","Language","LANGUAGE","%LangCode%"
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\cfg.ini","Language","LANGCHANGED",1
+End
+Else,Halt,"LOGIC ERROR: The specified language is not defined."
+
+// Product Registration
+List,Pos,%aSoftwareEditon%,%cmb_RegEdition%,%RegEditionCodePos%
+Math,Add,%RegEditionCodePos%,%RegEditionCodePos%,1
+List,Get,%aSoftwareEditon%,%RegEditionCodePos%,%RegEditionCode%
+
+IniWrite,"%TargetPrograms%\%ProgramFolder%\cfg.ini","VERSION","VERSION",%RegEditionCode%
+IniWrite,"%TargetPrograms%\%ProgramFolder%\cfg.ini","CONFIG","KEY",%txt_RegKey%
+IniWrite,"%TargetPrograms%\%ProgramFolder%\cfg.ini","CONFIG","Count",1
+IniWrite,"%TargetPrograms%\%ProgramFolder%\cfg.ini","PA","POPUPMESSAGE",1
+
+RegHiveUnLoad,Tmp_Software
+RegHiveUnLoad,Tmp_System
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#IncludeDynamicDiskManager#]
+// ===============================================================================================================================
+// Name...........: IncludeDynamicDiskManager
+// Description....: Include DynamicDiskManager in the build
+// Syntax.........: Run,%ScriptFile%,IncludeDynamicDiskManager
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cb_IncludeDDM
+// ===============================================================================================================================
+[IncludeDynamicDiskManager]
+
+// DDM Files
+DirCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm","%TargetPrograms%\%ProgramFolder%"
+
+// Remove files that need renamed so we get can copy the correct arch
+FileDelete,"%TargetPrograms%\%ProgramFolder%\ddm\ddmdrv#$c*.sys"
+FileDelete,"%TargetPrograms%\%ProgramFolder%\ddm\ddmmain#$c*.exe"
+FileDelete,"%TargetPrograms%\%ProgramFolder%\ddm\loaddrv#$c*.exe"
+
+// Copy arch specific files
+If,%SourceArch%,Equal,x64,Begin
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmdrv#$c4.sys","%TargetPrograms%\%ProgramFolder%\ddm\ddmdrv.sys"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmmain#$c4.exe","%TargetPrograms%\%ProgramFolder%\ddm\ddmmain.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\loaddrv#$c2.exe","%TargetPrograms%\%ProgramFolder%\ddm\loaddrv.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmdrv#$c4.sys","%TargetSystem32%\ddmdrv.sys"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmmain#$c4.exe","%TargetWindows%\ddmmain.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmdrv#$c2.sys","%TargetWindows%\SysWOW64\ddmdrv.sys"
+End
+Else,If,%SourceArch%,Equal,x86,Begin
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmdrv#$c2.sys","%TargetPrograms%\%ProgramFolder%\ddm\ddmdrv.sys"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmmain#$c2.exe","%TargetPrograms%\%ProgramFolder%\ddm\ddmmain.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\loaddrv#$c1.exe","%TargetPrograms%\%ProgramFolder%\ddm\loaddrv.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmdrv#$c2.sys","%TargetSystem32%\ddmdrv.sys"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\ddm\ddmmain#$c2.exe","%TargetWindows%\ddmmain.exe"
+End
+Else,Halt,"ERROR: [%SourceArch%] is not supported."
+  
+// DDM Driver
+If,%cb_IncludeDDM%,Equal,True,Begin
+  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\SystemCertificates\AuthRoot\Certificates\4EB6D578499B1CCF5F581EAD56BE3D9B6744A5E5","Blob",19,00,00,00,01,00,00,00,10,00,00,00,d8,b5,fb,36,84,68,62,02,75,d1,42,ff,d2,aa,de,37,03,00,00,00,01,00,00,00,14,00,00,00,4e,b6,d5,78,49,9b,1c,cf,5f,58,1e,ad,56,be,3d,9b,67,44,a5,e5,1d,00,00,00,01,00,00,00,10,00,00,00,c6,cb,ca,fa,17,95,5c,4c,fd,41,ec,a0,c6,54,c3,61,0b,00,00,00,01,00,00,00,12,00,00,00,56,00,65,00,72,00,69,00,53,00,69,00,67,00,6e,00,00,00,14,00,00,00,01,00,00,00,14,00,00,00,7f,d3,65,a7,c2,dd,ec,bb,f0,30,09,f3,43,39,fa,02,af,33,31,33,62,00,00,00,01,00,00,00,20,00,00,00,9a,cf,ab,7e,43,c8,d8,80,d0,6b,26,2a,94,de,ee,e4,b4,65,99,89,c3,d0,ca,f1,9b,af,64,05,e4,1a,b7,df,09,00,00,00,01,00,00,00,2a,00,00,00,30,28,06,08,2b,06,01,05,05,07,03,01,06,08,2b,06,01,05,05,07,03,02,06,08,2b,06,01,05,05,07,03,04,06,08,2b,06,01,05,05,07,03,03,53,00,00,00,01,00,00,00,46,00,00,00,30,44,30,21,06,0b,60,86,48,01,86,f8,45,01,07,17,06,30,12,30,10,06,0a,2b,06,01,04,01,82,37,3c,01,01,03,02,00,c0,30,1f,06,09,60,86,48,01,86,fd,6c,02,01,30,12,30,10,06,0a,2b,06,01,04,01,82,37,3c,01,01,03,02,00,c0,0f,00,00,00,01,00,00,00,14,00,00,00,e9,1e,1e,97,2b,8f,46,7a,b4,e0,59,8f,a9,22,85,38,7d,ee,94,c9,20,00,00,00,01,00,00,00,d7,04,00,00,30,82,04,d3,30,82,03,bb,a0,03,02,01,02,02,10,18,da,d1,9e,26,7d,e8,bb,4a,21,58,cd,cc,6b,3b,4a,30,0d,06,09,2a,86,48,86,f7,0d,01,01,05,05,00,30,81,ca,31,0b,30,09,06,03,55,04,06,13,02,55,53,31,17,30,15,06,03,55,04,0a,13,0e,56,65,72,69,53,69,67,6e,2c,20,49,6e,63,2e,31,1f,30,1d,06,03,55,04,0b,13,16,56,65,72,69,53,69,67,6e,20,54,72,75,73,74,20,4e,65,74,77,6f,72,6b,31,3a,30,38,06,03,55,04,0b,13,31,28,63,29,20,32,30,30,36,20,56,65,72,69,53,69,67,6e,2c,20,49,6e,63,2e,20,2d,20,46,6f,72,20,61,75,74,68,6f,72,69,7a,65,64,20,75,73,65,20,6f,6e,6c,79,31,45,30,43,06,03,55,04,03,13,3c,56,65,72,69,53,69,67,6e,20,43,6c,61,73,73,20,33,20,50,75,62,6c,69,63,20,50,72,69,6d,61,72,79,20,43,65,72,74,69,66,69,63,61,74,69,6f,6e,20,41,75,74,68,6f,72,69,74,79,20,2d,20,47,35,30,1e,17,0d,30,36,31,31,30,38,30,30,30,30,30,30,5a,17,0d,33,36,30,37,31,36,32,33,35,39,35,39,5a,30,81,ca,31,0b,30,09,06,03,55,04,06,13,02,55,53,31,17,30,15,06,03,55,04,0a,13,0e,56,65,72,69,53,69,67,6e,2c,20,49,6e,63,2e,31,1f,30,1d,06,03,55,04,0b,13,16,56,65,72,69,53,69,67,6e,20,54,72,75,73,74,20,4e,65,74,77,6f,72,6b,31,3a,30,38,06,03,55,04,0b,13,31,28,63,29,20,32,30,30,36,20,56,65,72,69,53,69,67,6e,2c,20,49,6e,63,2e,20,2d,20,46,6f,72,20,61,75,74,68,6f,72,69,7a,65,64,20,75,73,65,20,6f,6e,6c,79,31,45,30,43,06,03,55,04,03,13,3c,56,65,72,69,53,69,67,6e,20,43,6c,61,73,73,20,33,20,50,75,62,6c,69,63,20,50,72,69,6d,61,72,79,20,43,65,72,74,69,66,69,63,61,74,69,6f,6e,20,41,75,74,68,6f,72,69,74,79,20,2d,20,47,35,30,82,01,22,30,0d,06,09,2a,86,48,86,f7,0d,01,01,01,05,00,03,82,01,0f,00,30,82,01,0a,02,82,01,01,00,af,24,08,08,29,7a,35,9e,60,0c,aa,e7,4b,3b,4e,dc,7c,bc,3c,45,1c,bb,2b,e0,fe,29,02,f9,57,08,a3,64,85,15,27,f5,f1,ad,c8,31,89,5d,22,e8,2a,aa,a6,42,b3,8f,f8,b9,55,b7,b1,b7,4b,b3,fe,8f,7e,07,57,ec,ef,43,db,66,62,15,61,cf,60,0d,a4,d8,de,f8,e0,c3,62,08,3d,54,13,eb,49,ca,59,54,85,26,e5,2b,8f,1b,9f,eb,f5,a1,91,c2,33,49,d8,43,63,6a,52,4b,d2,8f,e8,70,51,4d,d1,89,69,7b,c7,70,f6,b3,dc,12,74,db,7b,5d,4b,56,d3,96,bf,15,77,a1,b0,f4,a2,25,f2,af,1c,92,67,18,e5,f4,06,04,ef,90,b9,e4,00,e4,dd,3a,b5,19,ff,02,ba,f4,3c,ee,e0,8b,eb,37,8b,ec,f4,d7,ac,f2,f6,f0,3d,af,dd,75,91,33,19,1d,1c,40,cb,74,24,19,21,93,d9,14,fe,ac,2a,52,c7,8f,d5,04,49,e4,8d,63,47,88,3c,69,83,cb,fe,47,bd,2b,7e,4f,c5,95,ae,0e,9d,d4,d1,43,c0,67,73,e3,14,08,7e,e5,3f,9f,73,b8,33,0a,cf,5d,3f,34,87,96,8a,ee,53,e8,25,15,02,03,01,00,01,a3,81,b2,30,81,af,30,0f,06,03,55,1d,13,01,01,ff,04,05,30,03,01,01,ff,30,0e,06,03,55,1d,0f,01,01,ff,04,04,03,02,01,06,30,6d,06,08,2b,06,01,05,05,07,01,0c,04,61,30,5f,a1,5d,a0,5b,30,59,30,57,30,55,16,09,69,6d,61,67,65,2f,67,69,66,30,21,30,1f,30,07,06,05,2b,0e,03,02,1a,04,14,8f,e5,d3,1a,86,ac,8d,8e,6b,c3,cf,80,6a,d4,48,18,2c,7b,19,2e,30,25,16,23,68,74,74,70,3a,2f,2f,6c,6f,67,6f,2e,76,65,72,69,73,69,67,6e,2e,63,6f,6d,2f,76,73,6c,6f,67,6f,2e,67,69,66,30,1d,06,03,55,1d,0e,04,16,04,14,7f,d3,65,a7,c2,dd,ec,bb,f0,30,09,f3,43,39,fa,02,af,33,31,33,30,0d,06,09,2a,86,48,86,f7,0d,01,01,05,05,00,03,82,01,01,00,93,24,4a,30,5f,62,cf,d8,1a,98,2f,3d,ea,dc,99,2d,bd,77,f6,a5,79,22,38,ec,c4,a7,a0,78,12,ad,62,0e,45,70,64,c5,e7,97,66,2d,98,09,7e,5f,af,d6,cc,28,65,f2,01,aa,08,1a,47,de,f9,f9,7c,92,5a,08,69,20,0d,d9,3e,6d,6e,3c,0d,6e,d8,e6,06,91,40,18,b9,f8,c1,ed,df,db,41,aa,e0,96,20,c9,cd,64,15,38,81,c9,94,ee,a2,84,29,0b,13,6f,8e,db,0c,dd,25,02,db,a4,8b,19,44,d2,41,7a,05,69,4a,58,4f,60,ca,7e,82,6a,0b,02,aa,25,17,39,b5,db,7f,e7,84,65,2a,95,8a,bd,86,de,5e,81,16,83,2d,10,cc,de,fd,a8,82,2a,6d,28,1f,0d,0b,c4,e5,e7,1a,26,19,e1,f4,11,6f,10,b5,95,fc,e7,42,05,32,db,ce,9d,51,5e,28,b6,9e,85,d3,5b,ef,a5,7d,45,40,72,8e,b7,0e,6b,0e,06,fb,33,35,48,71,b8,9d,27,8b,c4,65,5f,0d,86,76,9c,44,7a,f6,95,5c,f6,5d,32,08,33,a4,54,b6,18,3f,68,5c,f2,42,4a,85,38,54,83,5f,d1,e8,2c,f2,ac,11,d6,a8,ed,63,6a
+  If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x3,"Tmp_Software\WOW6432Node\Microsoft\SystemCertificates\AuthRoot\Certificates\4EB6D578499B1CCF5F581EAD56BE3D9B6744A5E5","Blob",19,00,00,00,01,00,00,00,10,00,00,00,d8,b5,fb,36,84,68,62,02,75,d1,42,ff,d2,aa,de,37,03,00,00,00,01,00,00,00,14,00,00,00,4e,b6,d5,78,49,9b,1c,cf,5f,58,1e,ad,56,be,3d,9b,67,44,a5,e5,1d,00,00,00,01,00,00,00,10,00,00,00,c6,cb,ca,fa,17,95,5c,4c,fd,41,ec,a0,c6,54,c3,61,0b,00,00,00,01,00,00,00,12,00,00,00,56,00,65,00,72,00,69,00,53,00,69,00,67,00,6e,00,00,00,14,00,00,00,01,00,00,00,14,00,00,00,7f,d3,65,a7,c2,dd,ec,bb,f0,30,09,f3,43,39,fa,02,af,33,31,33,62,00,00,00,01,00,00,00,20,00,00,00,9a,cf,ab,7e,43,c8,d8,80,d0,6b,26,2a,94,de,ee,e4,b4,65,99,89,c3,d0,ca,f1,9b,af,64,05,e4,1a,b7,df,09,00,00,00,01,00,00,00,2a,00,00,00,30,28,06,08,2b,06,01,05,05,07,03,01,06,08,2b,06,01,05,05,07,03,02,06,08,2b,06,01,05,05,07,03,04,06,08,2b,06,01,05,05,07,03,03,53,00,00,00,01,00,00,00,46,00,00,00,30,44,30,21,06,0b,60,86,48,01,86,f8,45,01,07,17,06,30,12,30,10,06,0a,2b,06,01,04,01,82,37,3c,01,01,03,02,00,c0,30,1f,06,09,60,86,48,01,86,fd,6c,02,01,30,12,30,10,06,0a,2b,06,01,04,01,82,37,3c,01,01,03,02,00,c0,0f,00,00,00,01,00,00,00,14,00,00,00,e9,1e,1e,97,2b,8f,46,7a,b4,e0,59,8f,a9,22,85,38,7d,ee,94,c9,20,00,00,00,01,00,00,00,d7,04,00,00,30,82,04,d3,30,82,03,bb,a0,03,02,01,02,02,10,18,da,d1,9e,26,7d,e8,bb,4a,21,58,cd,cc,6b,3b,4a,30,0d,06,09,2a,86,48,86,f7,0d,01,01,05,05,00,30,81,ca,31,0b,30,09,06,03,55,04,06,13,02,55,53,31,17,30,15,06,03,55,04,0a,13,0e,56,65,72,69,53,69,67,6e,2c,20,49,6e,63,2e,31,1f,30,1d,06,03,55,04,0b,13,16,56,65,72,69,53,69,67,6e,20,54,72,75,73,74,20,4e,65,74,77,6f,72,6b,31,3a,30,38,06,03,55,04,0b,13,31,28,63,29,20,32,30,30,36,20,56,65,72,69,53,69,67,6e,2c,20,49,6e,63,2e,20,2d,20,46,6f,72,20,61,75,74,68,6f,72,69,7a,65,64,20,75,73,65,20,6f,6e,6c,79,31,45,30,43,06,03,55,04,03,13,3c,56,65,72,69,53,69,67,6e,20,43,6c,61,73,73,20,33,20,50,75,62,6c,69,63,20,50,72,69,6d,61,72,79,20,43,65,72,74,69,66,69,63,61,74,69,6f,6e,20,41,75,74,68,6f,72,69,74,79,20,2d,20,47,35,30,1e,17,0d,30,36,31,31,30,38,30,30,30,30,30,30,5a,17,0d,33,36,30,37,31,36,32,33,35,39,35,39,5a,30,81,ca,31,0b,30,09,06,03,55,04,06,13,02,55,53,31,17,30,15,06,03,55,04,0a,13,0e,56,65,72,69,53,69,67,6e,2c,20,49,6e,63,2e,31,1f,30,1d,06,03,55,04,0b,13,16,56,65,72,69,53,69,67,6e,20,54,72,75,73,74,20,4e,65,74,77,6f,72,6b,31,3a,30,38,06,03,55,04,0b,13,31,28,63,29,20,32,30,30,36,20,56,65,72,69,53,69,67,6e,2c,20,49,6e,63,2e,20,2d,20,46,6f,72,20,61,75,74,68,6f,72,69,7a,65,64,20,75,73,65,20,6f,6e,6c,79,31,45,30,43,06,03,55,04,03,13,3c,56,65,72,69,53,69,67,6e,20,43,6c,61,73,73,20,33,20,50,75,62,6c,69,63,20,50,72,69,6d,61,72,79,20,43,65,72,74,69,66,69,63,61,74,69,6f,6e,20,41,75,74,68,6f,72,69,74,79,20,2d,20,47,35,30,82,01,22,30,0d,06,09,2a,86,48,86,f7,0d,01,01,01,05,00,03,82,01,0f,00,30,82,01,0a,02,82,01,01,00,af,24,08,08,29,7a,35,9e,60,0c,aa,e7,4b,3b,4e,dc,7c,bc,3c,45,1c,bb,2b,e0,fe,29,02,f9,57,08,a3,64,85,15,27,f5,f1,ad,c8,31,89,5d,22,e8,2a,aa,a6,42,b3,8f,f8,b9,55,b7,b1,b7,4b,b3,fe,8f,7e,07,57,ec,ef,43,db,66,62,15,61,cf,60,0d,a4,d8,de,f8,e0,c3,62,08,3d,54,13,eb,49,ca,59,54,85,26,e5,2b,8f,1b,9f,eb,f5,a1,91,c2,33,49,d8,43,63,6a,52,4b,d2,8f,e8,70,51,4d,d1,89,69,7b,c7,70,f6,b3,dc,12,74,db,7b,5d,4b,56,d3,96,bf,15,77,a1,b0,f4,a2,25,f2,af,1c,92,67,18,e5,f4,06,04,ef,90,b9,e4,00,e4,dd,3a,b5,19,ff,02,ba,f4,3c,ee,e0,8b,eb,37,8b,ec,f4,d7,ac,f2,f6,f0,3d,af,dd,75,91,33,19,1d,1c,40,cb,74,24,19,21,93,d9,14,fe,ac,2a,52,c7,8f,d5,04,49,e4,8d,63,47,88,3c,69,83,cb,fe,47,bd,2b,7e,4f,c5,95,ae,0e,9d,d4,d1,43,c0,67,73,e3,14,08,7e,e5,3f,9f,73,b8,33,0a,cf,5d,3f,34,87,96,8a,ee,53,e8,25,15,02,03,01,00,01,a3,81,b2,30,81,af,30,0f,06,03,55,1d,13,01,01,ff,04,05,30,03,01,01,ff,30,0e,06,03,55,1d,0f,01,01,ff,04,04,03,02,01,06,30,6d,06,08,2b,06,01,05,05,07,01,0c,04,61,30,5f,a1,5d,a0,5b,30,59,30,57,30,55,16,09,69,6d,61,67,65,2f,67,69,66,30,21,30,1f,30,07,06,05,2b,0e,03,02,1a,04,14,8f,e5,d3,1a,86,ac,8d,8e,6b,c3,cf,80,6a,d4,48,18,2c,7b,19,2e,30,25,16,23,68,74,74,70,3a,2f,2f,6c,6f,67,6f,2e,76,65,72,69,73,69,67,6e,2e,63,6f,6d,2f,76,73,6c,6f,67,6f,2e,67,69,66,30,1d,06,03,55,1d,0e,04,16,04,14,7f,d3,65,a7,c2,dd,ec,bb,f0,30,09,f3,43,39,fa,02,af,33,31,33,30,0d,06,09,2a,86,48,86,f7,0d,01,01,05,05,00,03,82,01,01,00,93,24,4a,30,5f,62,cf,d8,1a,98,2f,3d,ea,dc,99,2d,bd,77,f6,a5,79,22,38,ec,c4,a7,a0,78,12,ad,62,0e,45,70,64,c5,e7,97,66,2d,98,09,7e,5f,af,d6,cc,28,65,f2,01,aa,08,1a,47,de,f9,f9,7c,92,5a,08,69,20,0d,d9,3e,6d,6e,3c,0d,6e,d8,e6,06,91,40,18,b9,f8,c1,ed,df,db,41,aa,e0,96,20,c9,cd,64,15,38,81,c9,94,ee,a2,84,29,0b,13,6f,8e,db,0c,dd,25,02,db,a4,8b,19,44,d2,41,7a,05,69,4a,58,4f,60,ca,7e,82,6a,0b,02,aa,25,17,39,b5,db,7f,e7,84,65,2a,95,8a,bd,86,de,5e,81,16,83,2d,10,cc,de,fd,a8,82,2a,6d,28,1f,0d,0b,c4,e5,e7,1a,26,19,e1,f4,11,6f,10,b5,95,fc,e7,42,05,32,db,ce,9d,51,5e,28,b6,9e,85,d3,5b,ef,a5,7d,45,40,72,8e,b7,0e,6b,0e,06,fb,33,35,48,71,b8,9d,27,8b,c4,65,5f,0d,86,76,9c,44,7a,f6,95,5c,f6,5d,32,08,33,a4,54,b6,18,3f,68,5c,f2,42,4a,85,38,54,83,5f,d1,e8,2c,f2,ac,11,d6,a8,ed,63,6a
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ddmdrv","Type",1
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ddmdrv","Start",3
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ddmdrv","ErrorControl",0
+  RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\ddmdrv","ImagePath","\??\X:\Windows\system32\ddmdrv.sys"
+  RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ddmdrv","DisplayName","ddmdrv"
+End
+
+// Product Registration
+List,Pos,%aDDMSoftwareEditon%,%cmb_RegEdition%,%RegEditionCodePos%
+Math,Add,%RegEditionCodePos%,%RegEditionCodePos%,1
+List,Get,%aDDMSoftwareEditon%,%RegEditionCodePos%,%RegEditionCode%
+
+IniWrite,"%TargetPrograms%\%ProgramFolder%\ddm\config.ini","Config",1,%RegEditionCode%
+IniWrite,"%TargetPrograms%\%ProgramFolder%\ddm\config.ini","Config",2,%txt_RegKey%
+IniWrite,"%TargetPrograms%\%ProgramFolder%\ddm\config.ini","Config","UpdateCheck",0
+IniWrite,"%TargetPrograms%\%ProgramFolder%\ddm\config.ini","Config","RegPrompt",0
+IniWrite,"%TargetPrograms%\%ProgramFolder%\ddm\config.ini","Config","NeedtoUpgrade",0
+
+// Shortcuts
+If,%cb_DesktopShc2%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName2%,"%PEPrograms%\%ProgramFolder%\ddm\DDM.exe"
+If,%cb_StartMenuShc2%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder2%,%txt_ShortcutName2%,"%PEPrograms%\%ProgramFolder%\ddm\DDM.exe"
+If,%cb_PinToTaskbar2%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\ddm\DDM.exe"
+If,%cb_PinToStartMenu2%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\ddm\DDM.exe"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting files..."
+InnoUnpack,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website and encode them into our script.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+
+[#ToggleRegKey#]
+// ===============================================================================================================================
+// Name...........: ToggleRegKey
+// Description....: Toggle the visibility of the registration key textbox.
+// Syntax.........: Run,%ScriptFile%,ToggleRegKey
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_RegEdition
+// ===============================================================================================================================
+[ToggleRegKey]
+If,Not,%cmb_RegEdition%,Equal,"Standard",WriteInterface,Visible,%ScriptFile%,Interface,txt_RegKey,True
+Else,WriteInterface,Visible,%ScriptFile%,Interface,txt_RegKey,False
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
+// ===============================================================================================================================
+[SetDefaultOptions]
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Disk Tools"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"AOMEI Partition Assistant"
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc2,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc2,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar2,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu2,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder2,"Disk Tools"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName2,"AOMEI Dynamic Disk Manager"
+WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
+WriteInterface,Value,%ScriptFile%,Interface,cb_IncludeDDM,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_RegEdition,"Standard"
+WriteInterface,Value,%ScriptFile%,Interface,txt_RegKey,""
+Run,%ScriptFile%,ToggleRegKey
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options in the script interface.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"AOMEI Partition Assistant is a highly-efficient and user friendly partition management software.#$x#$xThe Standard version is free for personal use.#$x#$xOn first run this script will download the setup file (~25 MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.diskpart.com/free-partition-manager.html
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Disk Tools"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"AOMEI Partition Assistant"
+bvl_Shortcuts2="Dynamic Disk Mgr",1,12,145,90,133,184,8,Bold
+cb_DesktopShc2=Desktop,1,3,152,104,122,18,False
+cb_StartMenuShc2="Start Menu",1,3,152,123,122,18,True
+cb_PinToTaskbar2="Pin to Taskbar",1,3,152,142,122,18,False
+cb_PinToStartMenu2="Pin to Start Menu",1,3,152,161,122,18,False
+txt_StartMenuFolder2="Start Menu Folder:",1,0,152,201,119,21,"Disk Tools"
+txt_ShortcutName2="Shortcut Name:",1,0,152,243,119,21,"AOMEI Dynamic Disk Manager"
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of AOMEI Partition Assistant in your build."
+bvl_Options=Options,1,12,285,90,197,184,8,Bold
+lbl_Language=Language,1,1,294,110,153,16,8,Normal
+cmb_Language=English,1,4,295,126,150,21,Arabic,Catalan,"Chinese (Traditional)","Dutch (Belgium)","Dutch (Netherlands)",English,French,German,Hungarian,Italian,Japanese,Polish,"Portuguese (Brazil)",Russian,Spanish,Turkish,Vietnamese
+cb_IncludeDDM="Include Dynamic Disk Manager",1,3,295,154,177,18,True
+lbl_RegEdition="Software Edition",1,1,295,185,153,16,8,Normal
+cmb_RegEdition=Standard,1,4,295,200,153,21,Standard,Professional,Server,Unlimited,Technician,_ToggleRegKey_,True
+txt_RegKey="Registration Key",0,0,295,243,174,21,
+
+[InterfaceEncoded]
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+
+[AuthorEncoded]
+AOMIpm_48.png=3730,5072
+Logo=AOMIpm_48.png
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-AOMIpm_48.png]
+lines=1
+0=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
+1=LKxndzFRAo7WNcF3+mhB5VAC/IsJA/WmjrvP1Rse3us3Xv/MRy0nCJxYizkl5/A4PuWrr9LYw6y3cCuxuin1/4Espr6/yy6wvc5vQCC7yV0bey28iwtLGlmLfN3D0LK+E6Fon2sBwHZ6hEWObmsJAfmpuvOh+xL737j812YBiASbmEw8GZHPW3MOysYsRZibbEg41XgNt/3csmQKbSDkE2OEnoQk8vFFkHWFiJuXvfAvBcQZikSMdlakdqAA8zN+GGhfwsbZ23fzX1pbsX00u/u5YRZyWh8B4EtgMHgUNhIZ+8y7ZwgrQkk/HeJvid2T1VRd7eA1LauK6FnvBJnh3GKG4NC/mQhSuGsJD/54NtnS+TXXsBsBd4Iyzky7/jQOSmM5JsNjil2LlKOI5AiLfb6533SmkTTjs8dcdi4rHkb8JC/oH5Up80mhTyexoWea/hpNIOmUwwb4eFGbVtgbQF0rFP6fc60Fu9M9zl8aNvpJk+Lr4RFvJ/d5JXP6CNEyeddcnlAmzbeocdTs70OzM/J16Fkhcf9Hjxey4q5sawkH/oHc32AQG4mZxDJqOxRX2EmctqfYh867z+ebKFoopk748kO34gGesV3wa+FRby06ccLd5v5V5bp20Jc04m55LJLMzuqZr2rcxjBOO9Dr96xObg04LSmPVPwH2/YbT7QCoghQ1Lljtks/IUHq+f10o200OS4nGbIy8J3nxFMNFvYQy3AY+GhfzIu/qzDwBAGW1x9OnFZFvqSwa0IAkF1ZKgPCYY7xNMDVlUitZrjY2/J4HngZ6wkP+tFjPWB9EAXlvnMuC2xk6lBmJgtrFTOdTYqewLC/nJDzeKP4wP473F/wDBZNw9GBYmaAAAAABJRU5ErkJggnic43X09/UsyI03sdAryEtnGAUjDEziwy8v1sqQz8gAAD+HBfo+2lzHAQAAAAIAAAAlAAAAkg4AAAAAAAABAAAAAAAAAAAAAAA
