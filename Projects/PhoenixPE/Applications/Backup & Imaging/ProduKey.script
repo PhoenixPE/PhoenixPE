@@ -41,20 +41,22 @@ Date=2020-03-01
 [Variables]
 %ProgramFolder%="ProduKey"
 %ProgramExe%="ProduKey.exe"
-%DownloadURL32%=https://www.nirsoft.net/utils/produkey.zip
-%DownloadURL64%=https://www.nirsoft.net/utils/produkey-x64.zip
+%DownloadURLx86%=https://www.nirsoft.net/utils/produkey.zip
+%DownloadURLx64%=https://www.nirsoft.net/utils/produkey-x64.zip
+%SetupFile%="ProduKey-%SourceArch%.zip"
 %aLangMap%=Arabic|produkey_arabic.zip|Azerbaijani|produkey_azerbaijani.zip|Bahasa Indonesia|produkey_bahasa_indonesia.zip|Belarussian|produkey_belarussian.zip|Bulgarian|produkey_bulgarian.zip|Catalan|produkey_catalan.zip|Chinese (Simplified)|produkey_schinese2.zip|Chinese (Traditional)|produkey_tchinese.zip|Czech|produkey_czech.zip|Danish|produkey_danish.zip|Dutch|produkey_dutch.zip|Estonian|produkey_estonian.zip|Finnish|produkey_finnish.zip|French|produkey_french1.zip|Galician|produkey_galician.zip|German|produkey_german.zip|Greek|produkey_greek.zip|Hangul|produkey_hangul.zip|Hebrew|produkey_hebrew.zip|Hungarian|produkey_hungarian.zip|Italian|produkey_italian.zip|Japanese|produkey_japanese1.zip|Korean|produkey_korean.zip|Latvian|produkey_latvian.zip|Lithuanian|produkey_lithuanian.zip|Mongolian|produkey_mongolian.zip|Norwegian|produkey_norwegian.zip|Persian|produkey_persian.zip|Polish|produkey_polish.zip|Portuguese (Brazil)|produkey_brazilian_portuguese3.zip|Portuguese (Portugal)|produkey_portuguese.zip|Romanian|produkey_romanian.zip|Russian|produkey_russian1.zip|Slovak|produkey_slovak.zip|Slovenian|produkey_slovenian.zip|Spanish|produkey_spanish.zip|Swedish|produkey_swedish1.zip|Taiwanese|produkey_taiwanese.zip|Thai|produkey_thai.zip|Turkish|produkey_turkish1.zip|Ukrainian|produkey_ukrainian.zip|Valencian|produkey_valencian.zip
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
+Run,%ScriptFile%,SetProgramArch
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\ProduKey-%SourceArch%.zip",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +103,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\ProduKey-%SourceArch%.zip",#1
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -115,15 +117,29 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\ProduKey-%SourceArch%.zip",#1
 // Related........: 
 // ===============================================================================================================================
 [DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramArch
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#SetProgramArch#]
+// ===============================================================================================================================
+// Name...........: SetProgramArch
+// Description....: Configure the script for the correct source architecture.
+// Syntax.........: Run,%ScriptFile%,SetProgramArch
+// Parameters.....: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
-  Echo,"Downloading %ScriptTitle% x64..."
-  WebGet,%DownloadURL64%,"%ProgramsCache%\%ProgramFolder%\ProduKey-x64.zip",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
-End
+  Set,%DownloadURL%,%DownloadURLx64%
+End  
 Else,Begin
-  Echo,"Downloading %ScriptTitle% x86..."
-  WebGet,%DownloadURL32%,"%ProgramsCache%\%ProgramFolder%\ProduKey-x86.zip",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+  Set,%DownloadURL%,%DownloadURLx86%
 End
 
 [#LaunchProgram#]
@@ -138,9 +154,10 @@ End
 // Related........: btn_LaunchProgram
 // ===============================================================================================================================
 [LaunchProgram]
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\ProduKey-%SourceArch%.zip",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%\%SourceArch%
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%SourceArch%\%ProgramExe%"
+Run,%ScriptFile%,SetProgramArch
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================
@@ -251,7 +268,7 @@ cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Backup & Recovery"
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Backup & Imaging"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,ProduKey
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
@@ -299,8 +316,6 @@ lines=0
 [EncodedFile-AuthorEncoded-ProduKey.ico]
 lines=0
 0=eJy1UbFKxEAQnVyUDXgQK8HqDivLgB8QP2m7BVe4RYvYBb/AX7BLkSLb2fgRljZC4IqNXLhxJonc3Imdvtm3szPzdmdgASKy5TXQfgTvM4AzALgkLomUHvIMN4Nf4IYFzo2OjQ7ee/KcwWEB4ujYOMXbP8AYLUNVVZUIY0vQoECrMQ6aFMaayg7X4k3eWlszpjiDukH8njbeJKZeXzHGB/OkbjLZILHrvXmyB6cORipCEGFx2+mVEBRPL3MlBOWnfgUhKMPx/F4Iyvb8tH42u7h7vDtJd/okwI2WDUt9kcqBkuBkmQS4Ny+/sA8HfwM8hELcxoh99NF0AAtiOpHPeR9RHRb0FymiI7EnsaekB+ZqIuIb5VqqdaTpSbulO5j/aPcFyEG1mXic4wkoyk8p9U6t1MtMzmcYBSMN/GOC0OqM2OW3vpj1jYENAB6bCQRuFS7cAQAAAAIAAAAoAAAAJwEAAAAAAAABAAAAAAAAAAAAAAA
-
-
 
 [EncodedFile-InterfaceEncoded-FalsePositives.rtf]
 lines=3

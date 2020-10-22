@@ -35,22 +35,22 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
+Version=1.1.0.0
 Date=2020-03-01
 
 [Variables]
 %ProgramFolder%="Procexp"
-%ProgramExe%="Procexp.exe"
-%DownloadURL32%=https://live.sysinternals.com/Procexp.exe
-%DownloadURL64%=https://live.sysinternals.com/Procexp64.exe
+%ProgramExex86%="Procexp.exe"
+%ProgramExex64%="Procexp64.exe"
+%DownloadURLx32%=https://live.sysinternals.com/Procexp.exe
+%DownloadURLx64%=https://live.sysinternals.com/Procexp64.exe
 %DownloadURLCHM%=https://live.sysinternals.com/procexp.chm
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
-
-If,%SourceArch%,Equal,x64,Set,%ProgramExe%,"Procexp64.exe"
+Run,%ScriptFile%,SetProgramArch
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
@@ -87,21 +87,38 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Related........: 
 // ===============================================================================================================================
 [DownloadProgram]
-If,%SourceArch%,Equal,x64,Begin
-  Echo,"Downloading %ScriptTitle% x64..."
-  WebGet,%DownloadURL64%,"%ProgramsCache%\%ProgramFolder%\Procexp64.exe",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
-End
-Else,Begin
-  Echo,"Downloading %ScriptTitle% x86..."
-  WebGet,%DownloadURL32%,"%ProgramsCache%\%ProgramFolder%\Procexp.exe",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
-End
+Echo,"Downloading %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramArch
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 Echo,"Downloading %ScriptTitle% Help files..."
 WebGet,%DownloadURLCHM%,"%ProgramsCache%\%ProgramFolder%\Procexp.chm",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   
+[#SetProgramArch#]
+// ===============================================================================================================================
+// Name...........: SetProgramArch
+// Description....: Configure the script for the correct source architecture.
+// Syntax.........: Run,%ScriptFile%,SetProgramArch
+// Parameters.....: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
+//                  %ProgramExe%     - The x86 or x64 program name.
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[SetProgramArch]
+If,%SourceArch%,Equal,x64,Begin
+  Set,%DownloadURL%,%DownloadURLx64%
+  Set,%ProgramExe%,%ProgramExex64%
+End  
+Else,Begin
+  Set,%DownloadURL%,%DownloadURLx86%
+  Set,%ProgramExe%,%ProgramExex86%
+End
+ 
 [#LaunchProgram#]
 // ===============================================================================================================================
 // Name...........: LaunchProgram
@@ -114,7 +131,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Related........: btn_LaunchProgram
 // ===============================================================================================================================
 [LaunchProgram]
-If,%HostArch%,Equal,x64,Set,%ProgramExe%,"Procexp64.exe"
+Run,%ScriptFile%,SetProgramArch
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",Run,%ScriptFile%,DownloadProgram
 ShellExecuteEx,Open,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%"
 
@@ -151,7 +168,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"System Tools"
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Developer Tools"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Process Explorer"
 System,Cursor,Normal
 
@@ -211,7 +228,7 @@ cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"System Tools"
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Developer Tools"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Process Explorer"
 
 [InterfaceEncoded]

@@ -41,19 +41,21 @@ Date=2020-09-22
 [Variables]
 %ProgramFolder%="Prime95"
 %ProgramExe%="prime95.exe"
-%ProgramIni%="prime.txt"
+%ConfigFile%="prime.txt"
 %DownloadURLx86%=http://www.mersenne.org/ftp_root/gimps/p95v303b6.win32.zip
 %DownloadURLx64%=http://www.mersenne.org/ftp_root/gimps/p95v303b6.win64.zip
-%SetupFile%="prime95_x86.zip"
+%SetupFilex86%="prime95_x86.zip"
+%SetupFilex64%="prime95_x64.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
-Run,%ScriptFile%,CheckArch
+Run,%ScriptFile%,SetProgramArch
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
+
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
@@ -63,7 +65,7 @@ Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 Echo,"Configuring %ScriptTitle%..."
 
 // Configure Prime95 in stress testing mode.
-TxtAddLine,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","StressTester=1",Append
+TxtAddLine,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","StressTester=1",Append
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -72,14 +74,6 @@ If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEProgra
 If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-
-[#CheckArch#]
-[CheckArch]
-If,%SourceArch%,Equal,x64,Begin
-  Set,%SetupFile%,"prime95_x64.zip"
-  Set,%DownloadURL%,%DownloadURLx64%
-End
-Else,Set,%DownloadURL%,%DownloadURLx86%
 
 [#ExtractProgram#]
 // ===============================================================================================================================
@@ -109,9 +103,32 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-Run,%ScriptFile%,CheckArch
+Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#SetProgramArch#]
+// ===============================================================================================================================
+// Name...........: SetProgramArch
+// Description....: Configure the script for the correct source architecture.
+// Syntax.........: Run,%ScriptFile%,SetProgramArch
+// Parameters.....: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
+//                  %SetupFile%      - The x86 or x64 name of the setup file.
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[SetProgramArch]
+If,%SourceArch%,Equal,x64,Begin
+  Set,%DownloadURL%,%DownloadURLx64%
+  Set,%SetupFile%,%SetupFilex64%
+End  
+Else,Begin
+  Set,%DownloadURL%,%DownloadURLx86%
+  Set,%SetupFile%,%SetupFilex86%
+End
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -126,7 +143,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // ===============================================================================================================================
 [LaunchProgram]
 Echo,"Launching %ScriptTitle%..."
-Run,%ScriptFile%,CheckArch
+Run,%ScriptFile%,SetProgramArch
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
@@ -163,7 +180,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"System Info"
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Benchmarking"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Prime95"
 System,Cursor,Normal
 
@@ -222,7 +239,7 @@ cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"System Info"
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,Benchmarking
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,Prime95
 
 [InterfaceEncoded]
@@ -260,11 +277,6 @@ lines=0
 [EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
-
-
-
-
-
 
 [EncodedFile-AuthorEncoded-1024px-Prime95_icon_(green).svg.png]
 lines=0
