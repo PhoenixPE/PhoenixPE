@@ -24,8 +24,8 @@ FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 
 // Experimental - May be changed or removed without notice
 7z=Run,%API%,_PhoenixAPI_7z
-7zExtract=Run,%API%,_PhoenixAPI_7z
-InnoUnpack=Run,%API%,_PhoenixAPI_Innounp
+//7zExtract=Run,%API%,_PhoenixAPI_7z
+InnoUnpack=Run,%API%,_PhoenixAPI_InnoUnpack
 Innounp=Run,%API%,_PhoenixAPI_Innounp
 
 XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
@@ -49,7 +49,6 @@ BitToggle=Run,%API%,_PhoenixAPI_BitToggle
 
 
 [_PhoenixAPI_RegLoadHives]
-Echo,"Loading Registry Hives..."
 RegHiveLoad,Tmp_Default,%RegDefault%
 RegHiveLoad,Tmp_Drivers,%RegDrivers%
 RegHiveLoad,Tmp_Software,%RegSoftware%
@@ -61,11 +60,12 @@ RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
 
 
 [_PhoenixAPI_RegUnloadHives]
-Echo,"Unloading Registry Hives..."
 RegHiveUnload,Tmp_Default
+RegHiveUnload,Tmp_Drivers
 RegHiveUnload,Tmp_Software
 RegHiveUnload,Tmp_System
 RegHiveUnload,Tmp_Install_Default
+RegHiveUnload,Tmp_Install_Drivers
 RegHiveUnload,Tmp_Install_Software
 RegHiveUnload,Tmp_Install_System
 
@@ -95,7 +95,7 @@ System,EndLocal
 
 [#_PhoenixAPI_InnounpEx#]
 // ===============================================================================================================================
-// Name...........: _PhoenixAPI_InnounpEx
+// Name...........: _PhoenixAPI_Innounp
 // Description....: Execute Innounp (Inno Setup Unpacker) with the provided arguments.
 // Syntax.........: Innounp,<Args>[,<WorkDir>]
 // Parameters.....: #1 Args - The arguments to pass to the Innounp executable.
@@ -109,7 +109,7 @@ System,EndLocal
 //                  Innounp Website: http://innounp.sourceforge.net/
 // Related........: Innounp.exe
 // ===============================================================================================================================
-[_PhoenixAPI_InnounpEx]
+[_PhoenixAPI_Innounp]
 System,SetLocal
 If,#1,Equal,"",Halt,"InnoExtractEx Syntax Error: You must specify the program arguments."
 
@@ -121,11 +121,11 @@ Set,#r,%ExitCode%
 
 System,EndLocal
 
-[#_PhoenixAPI_Innounp#]
+[#_PhoenixAPI_InnoUnpack#]
 // ===============================================================================================================================
-// Name...........: _PhoenixAPI_Innounp
+// Name...........: _PhoenixAPI_InnoUnpack
 // Description....: Execute Innounp (Inno Setup Unpacker) with the provided arguments.
-// Syntax.........: Innounp,<SetupFile>,<DestDir>[,<Args>]
+// Syntax.........: InnoUnpack,<SetupFile>,<DestDir>[,<Args>]
 // Parameters.....: #1 SetupFile - The inno-setup file to unpack.
 //                  #2 DestDir - The full path to the directory where the files will be unpacked.
 //                  #3-#4 - Additional Arguments:
@@ -136,7 +136,7 @@ System,EndLocal
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
 // Related........: Innounp.exe
 // ===============================================================================================================================
-[_PhoenixAPI_Innounp]
+[_PhoenixAPI_InnoUnpack]
 System,SetLocal
 If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the setup file."
 If,#2,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the destination directory."
@@ -146,9 +146,9 @@ Getparam,2,%DestDir%
 Getparam,3,%Arg3%
 Getparam,4,%Arg4%
 
-Run,%API%,__PhoenixAPI_Innounp_Process_Arg,%Arg3%
+Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg3%
 Set,%Param1%,#r
-Run,%API%,__PhoenixAPI_Innounp_Process_Arg,%Arg4%
+Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg4%
 Set,%Param2%,#r
 
 ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Param1%%Param2%#$q%SetupFile%#$q"
@@ -156,18 +156,18 @@ If,Not,%ExitCode%,Equal,0,Halt,"Error: Failed to unpack setup file#$x#$x[%SetupF
 
 System,EndLocal
 
-[#__PhoenixAPI_Innounp_Process_Arg#]
+[#__PhoenixAPI_InnoUnpack_Process_Arg#]
 // ===============================================================================================================================
-// Name...........: __PhoenixAPI_Innounp_Process_Arg
+// Name...........: __PhoenixAPI_InnoUnpack_Process_Arg
 // Description....: Loop to copy a file's .mui
-// Syntax.........: __PhoenixAPI_Innounp_Process_Arg,<Arg>
+// Syntax.........: __PhoenixAPI_InnoUnpack_Process_Arg,<Arg>
 // Parameters.....: #1 Arg - The argument to process
 // Return values..: #r - Command line string to be passed to Innounp.exe
 // Author.........: Homes32
 // Remarks........: Internal Function
 // Related........: _PhoenixAPI_Innounp
 // ===============================================================================================================================
-[__PhoenixAPI_Innounp_Process_Arg]
+[__PhoenixAPI_InnoUnpack_Process_Arg]
 System,SetLocal
 
 StrFormat,Split,#1,"=",1,%ArgKey%
@@ -953,9 +953,9 @@ GetParam,2,%BitGroup%
 GetParam,3,%BitPosition%
 GetParam,4,%BitSize%
 
-If,%BitArray%,Equal,"",Halt,"BitFlip Syntax Error: You must specify a bit array."
-If,%BitGroup%,Equal,"",Halt,"BitFlip Syntax Error: You must specify the bit group in order to toggle a bit."
-If,%BitPosition%,Equal,"",Halt,"BitFlip Syntax Error: You must specify the position of the bit to toggle."
+If,%BitArray%,Equal,"",Halt,"BitToggle Syntax Error: You must specify a bit array."
+If,%BitGroup%,Equal,"",Halt,"BitToggle Syntax Error: You must specify the bit group in order to toggle a bit."
+If,%BitPosition%,Equal,"",Halt,"BitToggle Syntax Error: You must specify the position of the bit to toggle."
 If,%BitSize%,Equal,"",Begin
   Echo,"BitToggle Warning: BitSize was not specified. Assuming it's a 32bit integer.",WARN
   Set,%BitSize%,32
