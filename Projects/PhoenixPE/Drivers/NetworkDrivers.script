@@ -34,13 +34,16 @@ Title=Network Drivers
 Description=Load network drivers included with Windows 10.
 Author=Homes32
 Level=6
-Selected=True
+Selected=False
 Mandatory=False
 Version=1.0.0.0
 Date=2019-08-12
 
 [Variables]
 %Debug%=False
+%NetworkDriverRegCache%="%ProjectCache%\NetworkDrivers"
+
+// Macros
 RegAddDriver=Run,%ScriptFile%,RegAddDriver
 
 [Process]
@@ -48,21 +51,21 @@ Echo,"Preparing for Network driver integration..."
 
 If,%cb_EnableHiveCache%,Equal,False,Begin
   Echo,"Network Drivers Registry Cache: DISABLED"
-  DirDeleteEx,"%ProjectCache%\NetworkDrivers"
+  DirDeleteEx,%NetworkDriverRegCache%
 End
 
 // We need this to compare with the .Cache version. This way we can force a rebuild if this script changes.
 IniRead,%ScriptFile%,"Main","Version",%ScriptVer%
 
-If,Not,ExistFile,"%ProjectCache%\NetworkDrivers\.Cache",Run,%ScriptFile%,BuildRegistryCache
+If,Not,ExistFile,"%NetworkDriverRegCache%\.Cache",Run,%ScriptFile%,BuildRegistryCache
 
 // Check for stale cache and rebuild if needed
-IniRead,"%ProjectCache%\NetworkDrivers\.Cache","NetworkDrivers","Version",%RegCacheVer%,"Default=0.0.0.0"
+IniRead,"%NetworkDriverRegCache%\.Cache","NetworkDrivers","Version",%RegCacheVer%,"Default=0.0.0.0"
 
 If,%RegCacheVer%,Equal,%ScriptVer%,Echo,"Network Drivers Reg Cache: ENABLED (v%RegCacheVer%)"
 Else,Begin
-  Echo,"Registry Cache: STALE (v%RegCacheVer%)#$x#$xRebuilding the Network Drivers registry cache..."
-  DirDeleteEx,"%RegistryCache%\NetworkDrivers"
+  Echo,"Network Drivers Registry Cache: STALE (v%RegCacheVer%)#$x#$xRebuilding the Network Drivers registry cache..."
+  DirDeleteEx,%NetworkDriverRegCache%
   Run,%ScriptFile%,BuildRegistryCache
 End
 
@@ -74,13 +77,15 @@ Run,%ScriptFile%,Drivers%SourceArch%
 
 // Load the Main Drivers Registry Hive and Import from Cache
 RegHiveLoad,Tmp_Drivers,%RegDrivers%
-RegImport,"%ProjectCache%\NetworkDrivers\DRIVERS.reg"
+RegImport,"%NetworkDriverRegCache%\DRIVERS.reg"
 RegHiveUnload,Tmp_Drivers
 
 [#BuildRegistryCache#]
 // ===============================================================================================================================
 // Name...........: BuildRegistryCache
-// Description....: Extract x86 Network Drivers
+// Description....: Build a registry cache for network drivers.
+//                  for each driver we copy the database entries from Tmp_Installer_Drivers into a temporary hive, then
+//                  export the temp hive to a .reg file that can be quickly imported on subsequent builds.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -92,8 +97,9 @@ RegHiveUnload,Tmp_Drivers
 Echo,"Building the Network Driver Database...#$x#$xThis can take awhile, please be patient."
 
 // Create an Empty Drivers Hive.
-FileCreateBlank,"%ProjectTemp%\%ProgramFolder%\DRIVERS"
-RegHiveLoad,Tmp_Drivers,"%ProjectTemp%\%ProgramFolder%\DRIVERS"
+DirMake,%NetworkDriverRegCache%
+FileCreateBlank,"%ProjectTemp%\NetworkDrivers\DRIVERS"
+RegHiveLoad,Tmp_Drivers,"%ProjectTemp%\NetworkDrivers\DRIVERS"
 RegHiveLoad,Tmp_Install_Drivers,%RegInstallDrivers%
 
 RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DeviceIds"
@@ -162,10 +168,10 @@ Else,Begin
 End
 
 // Export the hive to a .reg file
-RegExport,HKLM,"Tmp_Drivers\DriverDatabase","%ProjectCache%\NetworkDrivers\DRIVERS.reg"
-IniWrite,"%ProjectCache%\NetworkDrivers\.Cache","NetworkDrivers","Version",%ScriptVer%
+RegExport,HKLM,"Tmp_Drivers\DriverDatabase","%NetworkDriverRegCache%\DRIVERS.reg"
+IniWrite,"%NetworkDriverRegCache%\.Cache","NetworkDrivers","Version",%ScriptVer%
 
-RegHiveunLoad,Tmp_Drivers
+RegHiveUnLoad,Tmp_Drivers
 RegHiveUnload,Tmp_Install_Drivers
 
 [#Driversx64#]
@@ -340,7 +346,7 @@ ShellExecute,Hide,"cmd.exe","/D /C RegAddDriver.cmd #$q%RegKey%#$q",%ProjectTemp
 // ===============================================================================================================================
 [PurgeRegCache]
 Echo,"Purging the registry cache..."
-DirDeleteEx,"%ProjectCache%\NetworkDrivers"
+DirDeleteEx,%NetworkDriverRegCache%
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
