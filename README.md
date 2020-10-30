@@ -13,7 +13,7 @@ No. Winbuilder is no longer developed an contains numerous bugs that have not be
 
 Is PhoenixPE a clone of Win10PE_SE/Win10XPE/ETC...
 
-No. PhoenixPE development started around 2014 and was originally envisioned as a replacement for the Win10PE_SE project, which had become bloated and hard to maintain. PhoenixPE was written from the ground up in 2016 for use with the PEBakery engine.
+No. PhoenixPE development started around 2014 as a Winbuilder project and was originally envisioned as a replacement for the Win10PE_SE project, which had become bloated and hard to maintain. In 2016 PhoenixPE was re-written from the ground up for use with the PEBakery engine.
 
 Is PhoenixPE a replacement for Win10XPE?
 
@@ -21,4 +21,4 @@ No. In my option the 2 projects have different goals. Win10XPE states that _it's
 PhoenixPE on the other hand targets advanced users and developers that what more control over how and what goes into their PE.
 
  Win10XPE does great at providing a simple, pre-packaged experience, however it's core codebase is cumbersome and inconsistent and in an effort to provide a simple user experience, it loses the flexibility and ease of customization advanced users crave. 
- PhoenixPE strives to be simple for both users to build, and developers to contribute to, however there is a trade off, with customization come additional complexaty. 
+ PhoenixPE strives to be simple for both users to build, and developers to contribute to, however there is a trade off, with customization comes additional complexity. 
