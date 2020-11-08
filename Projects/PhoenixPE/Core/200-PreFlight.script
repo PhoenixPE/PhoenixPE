@@ -211,36 +211,42 @@ If,Not,ExistFile,"%Tools%\x64\Oscdimg\oscdimg.exe",Halt,"Error downloading requi
 //                  1803     10.0.17134   04/30/2018     Redstone 4 - Spring Creators Update
 //                  1809     10.0.17763   11/13/2018     Redstone 5 - October 2018 Update
 //                  1903     10.0.18362   04/21/2019     19H1       - May 2019 Update
-//                  1906     10.0.18363   11/12/2019     20H1       - November 2019 Update
+//                  1909     10.0.18363   11/12/2019     19H2       - November 2019 Update
 //                  2004     10.0.19041   05/28/2020     20H1       - May 2020 Update
+//                  2009     10.0.19042   10/20/2020     20H2       - October 2020 Update
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: As a general rule PhoenixPE will attempt to support the 2 most recent builds.
+// Remarks........: As a general rule PhoenixPE will attempt to support the 2 most recent verified builds.
 // Related........: Called by [Process]
 // ===============================================================================================================================
 [KnownBuilds]
 System,SetLocal
+
+// Minimum supported version
+Set,%MinimumSourceVer%,"10.0.16299.0"
+
+// Supported Sources
+Set,%aSupportedVersions%,10.0.17634|10.0.17763|10.0.18362|10.0.18363|10.0.19041
+
+// Latest Verified Source - This string is used in the warning message if the user is attempting to use an unverified source.
+Set,%MostRecentVerifiedSource%,"10.0.19041 - May 2020 Update (20H1) 2004"
+
 Echo,"Checking source version against known working builds..."
-If,%SourceVer%,Smaller,10.0.16299.0,Begin
+If,%SourceVer%,Smaller,%MinimumSourceVer%,Begin
   Message,"Unsupported Source!#$x#$xBuilding with Windows version [%SourceVer%] sources are not supported.#$x#$xPlease select a valid Windows 10 Source.",Error,10
   Halt,"Unsupported Windows source version [%SourceVer%]"
 End
-
-Set,%MostRecentVerifiedSource%,"10.0.18362 - May 2019 Update (19H1) 1906"
 
 // Remove the SPBuild for this comparison
 StrFormat,NTrim,%SourceVer%,%tmp_SourceVer%
 StrFormat,CTrim,%tmp_SourceVer%,".",%tmp_SourceVer%
 
-Set,%Unsupported%,True
-If,%tmp_SourceVer%,Equal,10.0.17634,Set,%Unsupported%,False
-Else,If,%tmp_SourceVer%,Equal,10.0.17763,Set,%Unsupported%,False
-Else,If,%tmp_SourceVer%,Equal,10.0.18362,Set,%Unsupported%,False
-If,%Unsupported%,Equal,True,Begin
+List,Pos,%aSupportedVersions%,%tmp_SourceVer%,%VerPos%
+If,%VerPos%,Equal,0,Begin
   Echo,"Warning: This Windows source version [%SourceVer%] has not been tested.",Warn
-  Message,"This Windows source version [%SourceVer%] has not been tested. This doesn't necessarily mean the build will fail, but if you run into problems you will be on your own. If possible please use the most recent verified source - #$x#$x  * %MostRecentVerifiedSource%#$x#$xas some project scripts might not work with an untested/unknown source!",Warning,10
+  Message,"This Windows source version [%SourceVer%] has not been tested. This doesn't necessarily mean the build will fail, but if you run into problems you will be on your own.#$x#$xSome project scripts might not work with an untested/unknown source!#$x#$xIf possible please use the most recent verified source - #$x#$x  * %MostRecentVerifiedSource%",Warning,10
 End
 
 System,EndLocal

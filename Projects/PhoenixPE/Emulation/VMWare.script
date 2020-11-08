@@ -46,6 +46,9 @@ Date=2019-05-05
 [Process]
 Echo,"Preparing the %ProjectTitle% Virtual Machine..."
 
+// Sanity Check
+If,Not,ExistFile,%ISOFile%,Halt,"The ISO file [%ISOFile%] does not exist. Please rebuild the project."
+
 // We need to rebuild the .vmx each time in order to make sure interface changes are taken into account.
 If,ExistDir,%VMPath%,DirDeleteEx,%VMPath%
 DirMake,%VMPath%

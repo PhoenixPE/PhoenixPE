@@ -38,8 +38,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.0.2.0
-Date=2020-01-25
+Version=1.1.0.0
+Date=2020-11-02
 
 [Variables]
 
@@ -82,7 +82,8 @@ If,%cmb_DriversHive%,Equal,Install.wim,FileCopy,%RegistryCache%\Install\DRIVERS,
 // Description....: Builds the registry cache.
 //                  1 - Extract  Hive files from Install.wim and copy hives from BaseWim
 //                  2 - Take full ownership (Everyone) of all hive keys
-//                  3 - RegCopy and config various essential registry keys from Install.wim to our BaseWim
+//                  3 - Ensure the system drive letter is set to X:\
+//                  4 - RegCopy and config various essential registry keys from Install.wim to our BaseWim
 //
 //                      WE ONLY CACHE CONFIGURATION THAT IS TIME CONSUMING AND/OR SHOULD NEVER CHANGE.
 //                      Any tweaking is to be done by 'Core Config' and other scripts.
@@ -112,6 +113,7 @@ RegHiveLoad,Tmp_Install_Software,%RegistryCache%\Install\SOFTWARE
 RegHiveLoad,Tmp_Install_System,%RegistryCache%\Install\SYSTEM
 
 Run,%ScriptFile%,TakeOwnership-Hives
+Run,%ScriptFile%,SetSystemDriveLetter
 Run,%ScriptFile%,Config-BaseWim-SoftwareHive
 Run,%ScriptFile%,Config-InstallWim-SoftwareHive
 Run,%ScriptFile%,Config-BaseWim-SystemHive
@@ -315,6 +317,40 @@ RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Session Manager\KnownDLLs
 [Config-InstallWim-SystemHive]
 Echo,"Configuring [ Install.wim - SYSTEM ] hive..."
 
+[#SetSystemDriveLetter#]
+// ===============================================================================================================================
+// Name...........: SetSystemDriveLetter
+// Description....: Some ISO files have C:\ set as the system drive letter instead of X:\. This can cause errors, boot issues,
+//                  black screen on startup, and other strange behavior when you boot into PE. Here we check the path of a
+//                  well known CLSID in the source hive to verify the system drive letter is set to X:\ as our PE environment
+//                  expects it to be. If not then we scan and update the entire registry.
+// Syntax.........: Run,%ScriptFile%,SetSystemDriveLetter
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: %Tools%\x86\RegFind.exe
+// ===============================================================================================================================
+[SetSystemDriveLetter]
+Echo,"Verifying the system drive letter..."
+RegRead,HKLM,"Tmp_Software\Classes\CLSID\{0000002F-0000-0000-C000-000000000046}\InprocServer32","","%Path%"
+StrFormat,LEFT,%Path%,3,%DriveLetter%
+If,Not,%DriveLetter%,Equal,"X:\",Begin
+  Echo,"Configuring [X:\] as the system drive letter..."
+  // Software Hive
+  ShellExecute,Hide,"%Tools%\x86\RegFind.exe","-p HKEY_LOCAL_MACHINE\Tmp_Software -y C:\ -r X:\"
+  If,Not,#r,Equal,0,Halt,"RegFind failed: The code returned was [#r]."
+  // System Hive
+  ShellExecute,Hide,"%Tools%\x86\RegFind.exe","-p HKEY_LOCAL_MACHINE\Tmp_System -y C:\ -r X:\"
+  If,Not,#r,Equal,0,Halt,"RegFind failed: The code returned was [#r]."
+  // Install Software Hive
+  ShellExecute,Hide,"%Tools%\x86\RegFind.exe","-p HKEY_LOCAL_MACHINE\Tmp_Install_Software -y C:\ -r X:\"
+  If,Not,#r,Equal,0,Halt,"RegFind failed: The code returned was [#r]."
+  // Install System Hive
+  ShellExecute,Hide,"%Tools%\x86\RegFind.exe","-p HKEY_LOCAL_MACHINE\Tmp_Install_System -y C:\ -r X:\"
+  If,Not,#r,Equal,0,Halt,"RegFind failed: The code returned was [#r]."
+End
+
 [#Cleanup-TransactionLogs#]
 // ===============================================================================================================================
 // Name...........: Cleanup-TransactionLogs
@@ -436,7 +472,7 @@ Message,"This script is responsible for configuring the base registry for our PE
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_PurgeCache=,1,8,479,5,25,25,PurgeRegCache,Trash.ico,True,"__Remove all cached registry hives. A new registry cache will be created the next time you build the project."
+btn_PurgeCache=,1,8,479,5,25,25,PurgeRegCache,Trash.ico,True,"__Remove all cached registry hives.#$xA new registry cache will be created the next time you build the project."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
