@@ -321,7 +321,7 @@ Echo,"Configuring [ Install.wim - SYSTEM ] hive..."
 // ===============================================================================================================================
 // Name...........: SetSystemDriveLetter
 // Description....: Some ISO files have C:\ set as the system drive letter instead of X:\. This can cause errors, boot issues,
-//                  black screen on startup, and other strange behavior when you boot into PE. Here we check the path of a
+//                  black/blue screen on startup, and other strange behavior when you boot into PE. Here we check the path of a
 //                  well known CLSID in the source hive to verify the system drive letter is set to X:\ as our PE environment
 //                  expects it to be. If not then we scan and update the entire registry.
 // Syntax.........: Run,%ScriptFile%,SetSystemDriveLetter
@@ -333,7 +333,7 @@ Echo,"Configuring [ Install.wim - SYSTEM ] hive..."
 // ===============================================================================================================================
 [SetSystemDriveLetter]
 Echo,"Verifying the system drive letter..."
-RegRead,HKLM,"Tmp_Software\Classes\CLSID\{0000002F-0000-0000-C000-000000000046}\InprocServer32","","%Path%"
+RegRead,HKLM,"Tmp_Install_Software\Classes\CLSID\{0000002F-0000-0000-C000-000000000046}\InprocServer32","","%Path%"
 StrFormat,LEFT,%Path%,3,%DriveLetter%
 If,Not,%DriveLetter%,Equal,"X:\",Begin
   Echo,"Configuring [X:\] as the system drive letter..."

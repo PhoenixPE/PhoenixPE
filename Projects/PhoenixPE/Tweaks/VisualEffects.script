@@ -1,0 +1,313 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=Visual Effects
+Description=Select the settings you want to use for the appearance and performance of PhoenixPE.
+Author=Homes32
+Level=4
+Selected=True
+Mandatory=False
+Version=1.0.0.0
+Date=2020-11-08
+
+[Variables]
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+RegLoadHives
+
+// VisualFXSetting
+StrFormat,Left,%cmb_VisualFXSetting%,1,%VisualFXSetting%
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects","VisualFXSetting",%VisualFXSetting%
+
+// ControlAnimations
+If,%cb_ControlAnimations%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ControlAnimations","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ControlAnimations","DefaultValue",0
+
+// AnimateMinMax
+If,%cb_AnimateMinMax%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\AnimateMinMax","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\AnimateMinMax","DefaultValue",0
+
+// TaskbarAnimations
+If,%cb_TaskbarAnimations%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TaskbarAnimations","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TaskbarAnimations","DefaultValue",0
+
+// DWMAeroPeekEnabled
+If,%cb_DWMAeroPeekEnabled%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMAeroPeekEnabled","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMAeroPeekEnabled","DefaultValue",0
+
+// MenuAnimation
+If,%cb_MenuAnimation%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\MenuAnimation","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\MenuAnimation","DefaultValue",0
+
+// TooltipAnimation
+If,%cb_TooltipAnimation%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TooltipAnimation","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TooltipAnimation","DefaultValue",0
+
+// SelectionFade
+If,%cb_SelectionFade%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\SelectionFade","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\SelectionFade","DefaultValue",0
+
+// DWMSaveThumbnailEnabled
+If,%cb_DWMSaveThumbnailEnabled%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMSaveThumbnailEnabled","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMSaveThumbnailEnabled","DefaultValue",0
+
+// CursorShadow
+If,%cb_CursorShadow%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\CursorShadow","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\CursorShadow","DefaultValue",0
+
+// DropShadow
+If,%cb_DropShadow%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DropShadow","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DropShadow","DefaultValue",0
+
+// ThumbnailsOrIcon
+If,%cb_ThumbnailsOrIcon%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ThumbnailsOrIcon","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ThumbnailsOrIcon","DefaultValue",0
+
+// ListviewAlphaSelect
+If,%cb_ListviewAlphaSelect%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewAlphaSelect","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewAlphaSelect","DefaultValue",0
+
+// DragFullWindows
+If,%cb_DragFullWindows%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DragFullWindows","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DragFullWindows","DefaultValue",0
+
+// ComboBoxAnimation
+If,%cb_ComboBoxAnimation%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ComboBoxAnimation","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ComboBoxAnimation","DefaultValue",0
+
+// FontSmoothing
+If,%cb_FontSmoothing%,Equal,True,begin
+  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","FontSmoothing","2"
+  RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","FontSmoothingType",2
+  RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\FontSmoothing","DefaultValue",1
+End
+Else,Begin
+  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","FontSmoothing","0"
+  RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","FontSmoothingType",1
+  RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\FontSmoothing","DefaultValue",0
+End
+
+// ListBoxSmoothScrolling
+If,%cb_ListBoxSmoothScrolling%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListBoxSmoothScrolling","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListBoxSmoothScrolling","DefaultValue",0
+
+// ListviewShadow
+If,%cb_ListviewShadow%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewShadow","DefaultValue",1
+Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewShadow","DefaultValue",0
+
+RegUnloadHives
+
+[#ToggleVisualFX#]
+// ===============================================================================================================================
+// Name...........: ToggleVisualFX
+// Description....: Configures VisualFx options based on the value of cmb_VisualFXSetting
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: cmb_VisualFXSetting
+// ===============================================================================================================================
+[ToggleVisualFX]
+If,%cmb_VisualFXSetting%,Equal,"0 - Let Windows choose what's best for my computer",Begin
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ControlAnimations,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_AnimateMinMax,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_TaskbarAnimations,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DWMAeroPeekEnabled,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_MenuAnimation,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_TooltipAnimation,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_SelectionFade,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DWMSaveThumbnailEnabled,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_CursorShadow,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DropShadow,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ThumbnailsOrIcon,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListviewAlphaSelect,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DragFullWindows,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ComboBoxAnimation,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_FontSmoothing,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListBoxSmoothScrolling,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListviewShadow,True
+End
+Else,If,%cmb_VisualFXSetting%,Equal,"1 - Adjust for best appearance",Begin
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ControlAnimations,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_AnimateMinMax,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_TaskbarAnimations,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DWMAeroPeekEnabled,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_MenuAnimation,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_TooltipAnimation,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_SelectionFade,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DWMSaveThumbnailEnabled,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_CursorShadow,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DropShadow,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ThumbnailsOrIcon,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListviewAlphaSelect,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DragFullWindows,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ComboBoxAnimation,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_FontSmoothing,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListBoxSmoothScrolling,True
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListviewShadow,True
+End
+Else,If,%cmb_VisualFXSetting%,Equal,"2 - Adjust for best performance",Begin
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ControlAnimations,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_AnimateMinMax,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_TaskbarAnimations,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DWMAeroPeekEnabled,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_MenuAnimation,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_TooltipAnimation,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_SelectionFade,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DWMSaveThumbnailEnabled,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_CursorShadow,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DropShadow,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ThumbnailsOrIcon,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListviewAlphaSelect,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_DragFullWindows,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ComboBoxAnimation,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_FontSmoothing,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListBoxSmoothScrolling,False
+  WriteInterface,Value,%ScriptFile%,Interface,cb_ListviewShadow,False
+End
+
+[#SetCustomVisualFX#]
+// ===============================================================================================================================
+// Name...........: SetCustomVisualFX
+// Description....: Sets cmb_VisualFXSetting to custom when a checkbox is toggled.
+// Syntax.........: Run,%ScriptFile%,SetCustomVisualFX
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: cmb_VisualFXSetting
+// ===============================================================================================================================
+[SetCustomVisualFX]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cmb_VisualFXSetting,"3 - Custom"
+System,Cursor,Normal
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cmb_VisualFXSetting,"0 - Let Windows choose what's best for my computer"
+Run,%ScriptFile%,ToggleVisualFX
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"Select the settings you want to use for the appearance and performance of PhoenixPE."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_VisualEffects="Performance Options/Visual Effects",1,12,5,50,353,395,8,Bold
+cmb_VisualFXSetting="0 - Let Windows choose what's best for my computer",1,4,15,68,330,21,"0 - Let Windows choose what's best for my computer","1 - Adjust for best appearance","2 - Adjust for best performance","3 - Custom",_ToggleVisualFX_,True
+cb_ControlAnimations="Animate controls and elements inside windows",1,3,15,100,270,18,True,_SetCustomVisualFX_,True
+cb_AnimateMinMax="Animate windows when minimizing and maximizing",1,3,15,120,270,18,True,_SetCustomVisualFX_,True
+cb_TaskbarAnimations="Animations in the taskbar",1,3,15,140,270,18,True,_SetCustomVisualFX_,True
+cb_DWMAeroPeekEnabled="Enable Peek",1,3,15,160,270,18,True,_SetCustomVisualFX_,True
+cb_MenuAnimation="Fade or slide menus into view",1,3,15,180,270,18,True,_SetCustomVisualFX_,True
+cb_TooltipAnimation="Fade or slide ToolTips into view",1,3,15,200,270,18,True,_SetCustomVisualFX_,True
+cb_SelectionFade="Fade out menu items after clicking",1,3,15,220,270,18,True,_SetCustomVisualFX_,True
+cb_DWMSaveThumbnailEnabled="Save Taskbar thumbnail previews",1,3,15,240,270,18,False,_SetCustomVisualFX_,True
+cb_CursorShadow="Show shadows under mouse pointer",1,3,15,260,270,18,False,_SetCustomVisualFX_,True
+cb_DropShadow="Show shadows under windows",1,3,15,280,270,18,True,_SetCustomVisualFX_,True
+cb_ThumbnailsOrIcon="Show thumbnails instead of icons",1,3,15,300,270,18,True,_SetCustomVisualFX_,True
+cb_ListviewAlphaSelect="Show translucent selection rectangle",1,3,15,320,270,18,True,_SetCustomVisualFX_,True
+cb_DragFullWindows="Show windows contents while dragging",1,3,15,340,270,18,True,_SetCustomVisualFX_,True
+cb_ComboBoxAnimation="Slide open combo boxes",1,3,15,360,270,18,True,_SetCustomVisualFX_,True
+cb_FontSmoothing="Smooth edges of screen fonts",1,3,15,380,270,18,True,_SetCustomVisualFX_,True
+cb_ListBoxSmoothScrolling="Smooth-scroll list boxes",1,3,15,400,270,18,True,_SetCustomVisualFX_,True
+cb_ListviewShadow="Use drop shadows for icon labels on the desktop",1,3,15,420,270,18,True,_SetCustomVisualFX_,True
+
+[InterfaceEncoded]
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[AuthorEncoded]
