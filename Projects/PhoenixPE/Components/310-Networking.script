@@ -116,10 +116,24 @@ TXTReplace,"%TargetSystem32%\Pecmd.ini","_END NetInit","#$xEXEC %ProgramFiles%\P
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
+
 If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%",,,,,,,"Configure Network Settings"
 If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%",,,,,,,"Configure Network Settings"
 If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+If,%cb_DesktopShc_InitNetwork%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName_InitNetwork%,"cmd.exe","/C @Echo InitializeNetwork... & wpeutil.exe InitializeNetwork & pause",,"#$pSystemRoot#$p\system32\imageres.dll",170,,,"Initialize Network Settings"
+If,%cb_StartMenuShc_InitNetwork%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder_InitNetwork%,%txt_ShortcutName_InitNetwork%,"cmd.exe","/C @Echo InitializeNetwork... & wpeutil.exe InitializeNetwork & pause",,"#$pSystemRoot#$p\system32\imageres.dll",170,,,"Initialize Network Settings"
+
+If,%cb_DesktopShc_Firewall%,Equal,True,Begin
+  AddShortcut,Desktop,,%txt_ShortcutName_FirewallEnable%,"cmd.exe","/C @Echo Enable Firewall... & wpeutil.exe EnableFirewall & pause",,"#$pSystemRoot#$p\system32\imageres.dll",101,,,"Enable the Windows Firewall"
+  AddShortcut,Desktop,,%txt_ShortcutName_FirewallDisable%,"cmd.exe","/C @Echo Disable Firewall... & wpeutil.exe DisableFirewall & pause",,"#$pSystemRoot#$p\system32\imageres.dll",100,,,"Disable the Windows Firewall"
+End
+
+If,%cb_StartMenuShc_Firewall%,Equal,True,Begin
+  AddShortcut,StartMenu,%txt_StartMenuFolder_Firewall%,%txt_ShortcutName_FirewallEnable%,"cmd.exe","/C @Echo Enable Firewall... & wpeutil.exe EnableFirewall & pause",,"#$pSystemRoot#$p\system32\imageres.dll",101,,,"Enable the Windows Firewall"
+  AddShortcut,StartMenu,%txt_StartMenuFolder_Firewall%,%txt_ShortcutName_FirewallDisable%,"cmd.exe","/C @Echo Disable Firewall... & wpeutil.exe DisableFirewall & pause",,"#$pSystemRoot#$p\system32\imageres.dll",100,,,"Disable the Windows Firewall"
+End  
 
 RegHiveUnload,Tmp_Default
 RegHiveUnload,Tmp_Drivers
@@ -193,6 +207,31 @@ If,%cb_EnableNetworkDiscoveryServices%,Equal,True,Begin
   RequireFileEx,Append,\Windows\System32\upnp.dll
   RequireFileEx,Append,\Windows\System32\upnpcont.exe
   RequireFileEx,Append,\Windows\System32\upnpui.dll
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Remote Network Driver Interface Specification (RNDIS)
+If,%cb_EnableRNDIS%,Equal,True,Begin
+  RequireFileEx,Append,\Windows\System32\drivers\RNDISMP.sys
+  RequireFileEx,Append,\Windows\System32\drivers\usb8023.sys
+  
+  RequireFileEx,Append,\Windows\INF\netrndis*
+  RequireFileEx,Append,\Windows\System32\netrndis*
+  RequireFileEx,Append,\Windows\System32\Drivers\netrndis*
+  RequireFileEx,Append,\Windows\System32\Driverstore\??-??\netrndis.inf_loc
+  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrndis.inf*
+  
+  RequireFileEx,Append,\Windows\INF\rndiscmp*
+  RequireFileEx,Append,\Windows\System32\rndiscmp*
+  RequireFileEx,Append,\Windows\System32\Drivers\rndiscmp*
+  RequireFileEx,Append,\Windows\System32\Driverstore\??-??\rndiscmp.inf_loc
+  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\rndiscmp.inf*
+  
+  RequireFileEx,Append,\Windows\INF\wceisvista*
+  RequireFileEx,Append,\Windows\System32\wceisvista*
+  RequireFileEx,Append,\Windows\System32\Drivers\wceisvista*
+  RequireFileEx,Append,\Windows\System32\Driverstore\??-??\wceisvista.inf_loc
+  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\wceisvista.inf*
 End
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -510,6 +549,7 @@ End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Network Discovery Services
+
 If,%cb_EnableNetworkDiscoveryServices%,Equal,True,Begin
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\fdPHost",HKLM,"Tmp_System\ControlSet001\Services\fdPHost"
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\FDResPub",HKLM,"Tmp_System\ControlSet001\Services\FDResPub"
@@ -526,6 +566,33 @@ If,%cb_EnableNetworkDiscoveryServices%,Equal,True,Begin
 End
 
 // End Network Discovery Services
+///////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////
+// Remote Network Driver Interface Specification (RNDIS)
+
+If,%cb_EnableRNDIS%,Equal,True,Begin
+
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DeviceIds\netrndis.inf",HKLM,"Tmp_Drivers\DriverDatabase\DeviceIds"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverFiles\netrndis.inf",HKLM,"Tmp_Drivers\DriverDatabase\DriverFiles"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverInfFiles\netrndis.inf",HKLM,"Tmp_Drivers\DriverDatabase\DriverInfFiles"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverPackages\netrndis.inf*",HKLM,"Tmp_Drivers\DriverDatabase\DriverPackages",WILDCARD
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\netrndis.inf",HKLM,"Tmp_System\ControlSet001\Services"
+
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DeviceIds\rndiscmp.inf",HKLM,"Tmp_Drivers\DriverDatabase\DeviceIds"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverFiles\rndiscmp.inf",HKLM,"Tmp_Drivers\DriverDatabase\DriverFiles"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverInfFiles\rndiscmp.inf",HKLM,"Tmp_Drivers\DriverDatabase\DriverInfFiles"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverPackages\rndiscmp.inf*",HKLM,"Tmp_Drivers\DriverDatabase\DriverPackages",WILDCARD
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\rndiscmp.inf",HKLM,"Tmp_System\ControlSet001\Services"
+
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DeviceIds\wceisvista.inf",HKLM,"Tmp_Drivers\DriverDatabase\DeviceIds"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverFiles\wceisvista.inf",HKLM,"Tmp_Drivers\DriverDatabase\DriverFiles"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverInfFiles\wceisvista.inf",HKLM,"Tmp_Drivers\DriverDatabase\DriverInfFiles"
+  RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverPackages\wceisvista.inf*",HKLM,"Tmp_Drivers\DriverDatabase\DriverPackages",WILDCARD
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wceisvista.inf",HKLM,"Tmp_System\ControlSet001\Services"
+End
+
+// End Remote Network Driver Interface Specification (RNDIS)
 ///////////////////////////////////////////////////////////////////////////////////
 
 If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
@@ -952,17 +1019,31 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // ===============================================================================================================================
 [SetDefaultOptions]
 System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_DownloadLatestPENetwork,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_EnableNetworkListService,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_EnableNetworkDiscoveryServices,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_EnableRNDIS,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_AutoConnectWifi,False
+WriteInterface,Value,%ScriptFile%,Interface,fb_WifiConfig,""
+
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,True
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"."
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Networking"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"PENetwork"
-WriteInterface,Value,%ScriptFile%,Interface,cb_DownloadLatestPENetwork,False
-WriteInterface,Value,%ScriptFile%,Interface,cb_EnableNetworkListService,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_EnableNetworkDiscoveryServices,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_AutoConnectWifi,False
-WriteInterface,Value,%ScriptFile%,Interface,fb_WifiConfig,""
+
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc_InitNetwork,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc_InitNetwork,True
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder_InitNetwork,"Networking"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName_InitNetwork,"Initialize Network"
+
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc_Firewall,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc_Firewall,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder_Firewall,"Networking"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName_FirewallEnable,"Enable Firewall"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName_FirewallDisable,"Disable Firewall"
+
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -977,7 +1058,20 @@ System,Cursor,Normal
 // Related........: btn_AdvancedOptions
 // ===============================================================================================================================
 [ToggleAdvancedOptions]
-Message,"There are no advanced options available for this script."
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,btn_PENMExportWifi,%state%
+If,%state%,Equal,False,Begin,
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
+  Else,Set,%Toggle%,False
+End
+Else,Set,%Toggle%,False
+
+WriteInterface,Visible,%ScriptFile%,Interface,btn_PENMExportWifi,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_WifiConfig,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_AutoConnectWifi,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,fb_WifiConfig,%Toggle%
+
+System,EndLocal
 
 [#ShowScriptInfo#]
 // ===============================================================================================================================
@@ -1007,26 +1101,43 @@ Message,"This script provides network support for WinPE and utilizes Holger's PE
 // ===============================================================================================================================
 [Interface]
 btn_PENMEditor=" PENetwork Config Editor",1,8,5,5,160,25,PENetwork-ConfigEditor,"Icon Entry_239.ico",True,"__Configure PENetwork's settings."
-btn_PENMExportWifi=" Export Wireless Config",1,8,171,5,160,25,PENetwork-ExportWifi,PENetwork.png,True,"__Use PENetwork's WiFi Export tool to save a WiFi profile from your PC as an .xml file that can be included in your build."
+btn_PENMExportWifi=" Export Wireless Config",0,8,171,5,160,25,PENetwork-ExportWifi,PENetwork.png,True,"__Use PENetwork's WiFi Export tool to save a WiFi profile from your PC as an .xml file that can be included in your build."
 btn_DownloadPENetwork=,1,8,448,5,25,25,DownloadPENetwork,VistalcoDownload_16.png,False,"__Download PENetwork."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_BrowseCache=,1,8,510,5,25,25,BrowseCache,OpenFolder.ico,True,"__Browse the PENetwork Cache.#$xUseful if you need to make manual changes to your config."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,572,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,603,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
-bvl_Shortcuts="PENetwork Shortcuts",1,12,5,50,133,184,8,Bold
-cb_DesktopShc=Desktop,1,3,12,64,122,18,True
-cb_StartMenuShc="Start Menu",1,3,12,83,122,18,True
-cb_PinToTaskbar="Pin to Taskbar",1,3,12,102,122,18,True
-cb_PinToStartMenu="Pin to Start Menu",1,3,12,122,122,18,True
-txt_StartMenuFolder="Start Menu folder:",1,0,12,161,119,21,.
-txt_ShortcutName="Shortcut Name:",1,0,12,203,119,21,PENetwork
-cb_DownloadLatestPENetwork="Always download PENetwork",1,3,150,50,200,18,False,"__Always download the latest version of PENetwork."
-cb_EnableNetworkListService="Enable the Network List Service",1,3,150,70,200,18,True,"__This service Identifies the networks to which the computer has connected,#$xcollects and stores properties for these networks,#$xand notifies applications when these properties change."
-cb_EnableNetworkDiscoveryServices="Enable Network Discovery Services",1,3,150,90,200,18,True,"__Enable Network Discovery, SSDP, and Universal PnP services."
-bvl_WifiConfig="Wifi Config",1,12,150,174,377,60,8,Bold
-cb_AutoConnectWifi="Auto Connect to this Wifi Profile on Startup",1,3,160,186,235,18,False,"__Auto connect to a pre-configured SSID.#$x#$xUse the 'Export Wireless Config' button above to export#$xa wireless profile from your host OS for use with this option.#$x#$xAlternatly, leave this option unchecked and configure wireless profiles and automatic startup#$xdirectly from the 'PENetwork Config Editor'."
-fb_WifiConfig=,1,13,160,208,358,20,file
+
+cb_DownloadLatestPENetwork="Always download PENetwork",1,3,5,50,200,18,False,"__Always download the latest version of PENetwork."
+cb_EnableNetworkListService="Enable the Network List Service",1,3,5,70,200,18,True,"__This service Identifies the networks to which the computer has connected,#$xcollects and stores properties for these networks,#$xand notifies applications when these properties change."
+cb_EnableNetworkDiscoveryServices="Enable Network Discovery Services",1,3,5,90,200,18,True,"__Enable Network Discovery, SSDP, and Universal PnP services."
+cb_EnableRNDIS="Enable Remote Network Driver Interface Specification (RNDIS)",1,3,5,110,319,18,False,"__RNDIS can provide a virtual Ethernet link over USB, allowing you to use a mobile device as a modem/hotspot."
+bvl_WifiConfig="Wifi Config",0,12,5,174,423,60,8,Bold
+cb_AutoConnectWifi="Auto Connect to this Wifi Profile on Startup",0,3,15,186,235,18,False,"__Auto connect to a pre-configured SSID.#$x#$xUse the 'Export Wireless Config' button above to export#$xa wireless profile from your host OS for use with this option.#$x#$xAlternatly, leave this option unchecked and configure wireless profiles and automatic startup#$xdirectly from the 'PENetwork Config Editor'."
+fb_WifiConfig=,0,13,15,208,404,20,file
+TextLabel01="NOT FINISHED!",1,1,320,113,139,16,14,Bold
+
+bvl_Shortcuts=PENetwork,1,12,5,250,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,264,122,18,True
+cb_StartMenuShc="Start Menu",1,3,12,283,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,302,122,18,True
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,322,122,18,True
+txt_StartMenuFolder="Start Menu folder:",1,0,12,361,119,21,Networking
+txt_ShortcutName="Shortcut Name:",1,0,12,403,119,21,PENetwork
+
+bvl_Shortcuts_InitNetwork="Initialize Network",1,12,150,250,133,184,8,Bold
+cb_DesktopShc_InitNetwork=Desktop,1,3,157,263,122,18,False
+cb_StartMenuShc_InitNetwork="Start Menu",1,3,157,282,122,18,True
+txt_StartMenuFolder_InitNetwork="Start Menu folder:",1,0,157,361,119,21,Networking
+txt_ShortcutName_InitNetwork="Shortcut Name:",1,0,157,403,119,21,"Initialize Network"
+
+bvl_Shortcuts_Firewall=Firewall,1,12,295,250,133,184,8,Bold
+cb_DesktopShc_Firewall=Desktop,1,3,302,263,122,18,False
+cb_StartMenuShc_Firewall="Start Menu",1,3,302,282,122,18,False
+txt_StartMenuFolder_Firewall="Start Menu folder:",1,0,302,319,119,21,Networking
+txt_ShortcutName_FirewallEnable="Shortcut Name (Enable):",1,0,302,361,119,21,"Enable Firewall"
+txt_ShortcutName_FirewallDisable="Shortcut Name (Disable):",1,0,302,403,119,21,"Disable Firewall"
 
 [InterfaceEncoded]
 PENetwork.png=807,1176
