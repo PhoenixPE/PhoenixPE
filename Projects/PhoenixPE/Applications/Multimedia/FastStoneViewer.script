@@ -32,9 +32,9 @@
 Title=FastStone Image Viewer
 Author=Homes32
 Level=5
-Version=1.0.0.1
+Version=1.0.1.0
 Description=(v7.5 x86) An image browser, converter and editor that supports all major graphic formats.
-Date=2020-06-15
+Date=2020-11-22
 Selected=False
 Mandatory=False
 
@@ -148,13 +148,13 @@ TXTAddLine,"%TxtDB%","end",APPEND
 
 // Convert to binary file
 ShellExecute,Hide,"%ProjectTemp%\%ProgramFolder%\dfmconvert.exe","--to-binary %TxtDB% --output %ProjectTemp%\%ProgramFolder%\FSSettings.db"
-ShellExecute,Hide,"%Tools%\gsar.exe","%ProjectTemp%\%ProgramFolder%\FSSettings.db -s:xFF:x0A:x00:x54:x50:x52:x4F:x47:x52:x41:x4D:x53:x45:x54:x54:x49:x4E:x47:x53:x00:x30:x10:x2F:x00:x00:x00 -r -o#$q"
+ShellExecute,Hide,"%Tools%\%HostArch%\binmay.exe","-u %ProjectTemp%\%ProgramFolder%\FSSettings.db -s FF0A005450524F4752414D53455454494E47530030102F000000 -r #$q#$q"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\FSSettings.db","%TargetPrograms%\%ProgramFolder%\FSSettings.db"
 
 Set,%TxtDB%,Nil
 
 // Disable Thumbnail cache (defaults to the program directory and we don't know if that will be writable or not)
-// and asterisks (*) at the beginning of the file indicates disable.
+// add asterisks (*) at the beginning of the file indicates disable.
 FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\DBPath.db"
 TXTAddLine,"%TargetPrograms%\%ProgramFolder%\DBPath.db","*",APPEND
 
