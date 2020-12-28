@@ -47,6 +47,7 @@ Echo,"Starting Pre-Flight Check..."
 Run,%ScriptFile%,CheckEngine
 Run,%ScriptFile%,CheckTools
 If,%cb_CheckForSupportedBuildVer%,Equal,True,Run,%ScriptFile%,KnownBuilds
+Run,%ScriptFile%,CheckWinREVersion
 
 [#CheckEngine#]
 // ===============================================================================================================================
@@ -151,20 +152,18 @@ If,Not,ExistFile,"%Tools%\%HostArch%\BcastEnvChg.exe",Run,%ScriptFile%,MissingTo
 If,Not,ExistFile,"%Tools%\%HostArch%\binmay.exe",Run,%ScriptFile%,MissingTool,binmay.exe
 If,Not,ExistFile,"%Tools%\GetBinaryResource.exe",Run,%ScriptFile%,MissingTool,GetBinaryResource.exe
 If,Not,ExistFile,"%Tools%\GetStringResource.exe",Run,%ScriptFile%,MissingTool,GetStringResource.exe
-If,Not,ExistFile,"%Tools%\gsar.exe",Run,%ScriptFile%,MissingTool,gsar.exe
 If,Not,ExistFile,"%Tools%\%HostArch%\GWT.exe",Run,%ScriptFile%,MissingTool,GWT.exe
 If,Not,ExistFile,"%Tools%\hiderun.exe",Run,%ScriptFile%,MissingTool,hiderun.exe
 If,Not,ExistFile,"%Tools%\HiveUnload.exe",Run,%ScriptFile%,MissingTool,HiveUnload.exe
 If,Not,ExistFile,"%Tools%\x86\innounp.exe",Run,%ScriptFile%,MissingTool,innounp.exe
-If,Not,ExistFile,"%Tools%\mkISOfs.exe",Run,%ScriptFile%,MissingTool,mkISOfs.exe
-If,Not,ExistFile,"%Tools%\SetACL.exe",Run,%ScriptFile%,MissingTool,SetACL.exe
+If,Not,ExistFile,"%Tools%\x86\mkISOfs.exe",Run,%ScriptFile%,MissingTool,mkISOfs.exe
+If,Not,ExistFile,"%Tools%\x86\SetACL.exe",Run,%ScriptFile%,MissingTool,SetACL.exe
 If,Not,ExistFile,"%Tools%\x86\xml.exe",Run,%ScriptFile%,MissingTool,xml.exe
 
 // WaikTools
 If,Not,ExistFile,"%Tools%\%HostArch%\BCDBoot\bcdedit.exe",Run,%ScriptFile%,GetWaikTools
 If,Not,ExistFile,"%Tools%\%HostArch%\DISM\dism.exe",Run,%ScriptFile%,GetWaikTools
 If,Not,ExistFile,"%Tools%\%HostArch%\Oscdimg\oscdimg.exe",Run,%ScriptFile%,GetWaikTools
-
 
 [#MissingTool#]
 // ===============================================================================================================================
@@ -201,19 +200,19 @@ If,Not,ExistFile,"%Tools%\x64\Oscdimg\oscdimg.exe",Halt,"Error downloading requi
 // ===============================================================================================================================
 // Description....: Verify if the source is a known working version. If not warn the user that there may be issues.
 //
-//                  Version  OS Build     Release Date  Description
-//                  -------  -----------  ------------  ---------------------------------------
-//                  1507     10.0.10240   07/29/2015     Threshold 1 - RTM
-//                  1511     10.0.15086   07/29/2015     Threshold 2 - November Update
-//                  1607     10.0.14393   08/02/2016     Redstone 1 - Anniversary Update
-//                  1703     10.0.15063   04/05/2017     Redstone 2 - Creators Update
-//                  1709     10.0.16299   10/17/2017     Redstone 3 - Fall Creators Update
-//                  1803     10.0.17134   04/30/2018     Redstone 4 - Spring Creators Update
-//                  1809     10.0.17763   11/13/2018     Redstone 5 - October 2018 Update
-//                  1903     10.0.18362   04/21/2019     19H1       - May 2019 Update
-//                  1909     10.0.18363   11/12/2019     19H2       - November 2019 Update
-//                  2004     10.0.19041   05/28/2020     20H1       - May 2020 Update
-//                  2009     10.0.19042   10/20/2020     20H2       - October 2020 Update
+//                  Version  OS Build     Release Date  Codename      Marketing Name
+//                  -------  -----------  ------------  ------------- -------------------------
+//                  1507     10.0.10240   07/29/2015     Threshold 1   RTM
+//                  1511     10.0.15086   07/29/2015     Threshold 2   November Update
+//                  1607     10.0.14393   08/02/2016     Redstone 1    Anniversary Update
+//                  1703     10.0.15063   04/05/2017     Redstone 2    Creators Update
+//                  1709     10.0.16299   10/17/2017     Redstone 3    Fall Creators Update
+//                  1803     10.0.17134   04/30/2018     Redstone 4    Spring Creators Update
+//                  1809     10.0.17763   11/13/2018     Redstone 5    October 2018 Update
+//                  1903     10.0.18362   04/21/2019     19H1          May 2019 Update
+//                  1909     10.0.18363   11/12/2019     19H2          November 2019 Update
+//                  2004     10.0.19041   05/28/2020     20H1          May 2020 Update
+//                  2009     10.0.19042   10/20/2020     20H2          October 2020 Update
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -250,6 +249,35 @@ If,%VerPos%,Equal,0,Begin
 End
 
 System,EndLocal
+
+[#CheckWinREVersion#]
+// ===============================================================================================================================
+// Name...........: CheckWinREVersion
+// Description....: Make sure WinRE.wim version matches install.wim version or we can run into trouble.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: Also called by 210-Core.script after WinRE.wim is extracted from install.wim (This only happens if WinRE.wim
+//                  has not yet been cached).
+// ===============================================================================================================================
+[CheckWinREVersion]
+// If we are using boot.wim or WinRE.wim hasn't been extracted yet skip the version check.
+If,ExistFile,"%ProjectCache%\WinRE.wim",Begin
+  Echo,"Verifying WinRE version..."
+  WimInfo,"%ProjectCache%\WinRE.wim",1,WINDOWS/VERSION/MAJOR,%imgVerMaj%
+  WimInfo,"%ProjectCache%\WinRE.wim",1,WINDOWS/VERSION/MINOR,%imgVerMin%
+  WimInfo,"%ProjectCache%\WinRE.wim",1,WINDOWS/VERSION/BUILD,%imgVerBld%
+  WimInfo,"%ProjectCache%\WinRE.wim",1,WINDOWS/VERSION/SPBUILD,%imgVerSPBld%
+
+  Set,%WinREVer%,%imgVerMaj%.%imgVerMin%.%imgVerBld%.%imgVerSPBld%
+
+  If,Not,%WinREVer%,Equal,%SourceVer%,Begin
+    Echo,"Warning: Version mismatch. WinRE is not the same version as the source image. This could result in build failures.",Warn
+    Message,"Warning: Version Mismatch#$x#$xThe WinRE image is not the same version as the Windows source (install.wim).#$xThis doesn't necessarily mean the build will fail, but the resulting PE environment may be unstable.#$x#$xProceed at your own risk.#$x#$xInstall.wim:  %SourceVer%#$xWinRE.wim: %WinREVer%",Warning,10
+  End
+End
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
