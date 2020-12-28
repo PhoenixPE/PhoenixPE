@@ -36,8 +36,8 @@ Author=Homes32
 Level=6
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2019-08-12
+Version=1.1.0.0
+Date=2020-12-01
 
 [Variables]
 %Debug%=False
@@ -112,12 +112,22 @@ RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DriverPackages"
 
 If,%SourceArch%,Equal,x64,Begin
   RegAddDriver,athw8x.inf
+  RegAddDriver,mrvlpcie8897.inf
+  RegAddDriver,net8185.inf
+  RegAddDriver,net8187bv64.inf
+  RegAddDriver,net8187se64.inf
+  RegAddDriver,net8192se64.inf
+  RegAddDriver,net8192su64.inf
   RegAddDriver,netathr10x.inf
   RegAddDriver,netathrx.inf
   RegAddDriver,netbc63a.inf
   RegAddDriver,netbc64.inf
+  RegAddDriver,netr28x.inf
+  RegAddDriver,netr28ux.inf
+  RegAddDriver,netr7364.inf
   RegAddDriver,netrtwlane.inf
   RegAddDriver,netrtwlane_13.inf
+  RegAddDriver,netrtwlane01.inf
   RegAddDriver,netrtwlanu.inf
   RegAddDriver,netwbw02.inf
   RegAddDriver,netwew00.inf
@@ -125,28 +135,29 @@ If,%SourceArch%,Equal,x64,Begin
   RegAddDriver,netwlv64.inf
   RegAddDriver,netwns64.inf
   RegAddDriver,netwsw00.inf
+  RegAddDriver,netwtw02.inf
   RegAddDriver,netwtw04.inf
-
-  If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
-    // Build 1809+
-    RegAddDriver,netwtw02.inf
-    RegAddDriver,netwtw06.inf
-  End
-
-  If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
-    // Build 1903+
-    RegAddDriver,netrtwlane01.inf
-  End
+  RegAddDriver,netwtw06.inf
+  RegAddDriver,netwtw08.inf
 End
 Else,Begin
   // x86
   RegAddDriver,athw8.inf
+  RegAddDriver,net8185.inf
+  RegAddDriver,net8187bv32.inf
+  RegAddDriver,net8187se86.inf
+  RegAddDriver,net8192se32.inf
+  RegAddDriver,net8192su32.inf
   RegAddDriver,netathr.inf
   RegAddDriver,netathr10.inf
   RegAddDriver,netbc63.inf
   RegAddDriver,netbc64.inf
+  RegAddDriver,netr28.inf
+  RegAddDriver,netr28u.inf
+  RegAddDriver,netr73.inf
   RegAddDriver,netrtwlane.inf
   RegAddDriver,netrtwlane_13.inf
+  RegAddDriver,netrtwlane01.inf
   RegAddDriver,netrtwlanu.inf
   RegAddDriver,netwbn02.inf
   RegAddDriver,netwen00.inf
@@ -154,17 +165,8 @@ Else,Begin
   RegAddDriver,netwlv32.inf
   RegAddDriver,netwns32.inf
   RegAddDriver,netwsn00.inf
+  RegAddDriver,netwtn02.inf
   RegAddDriver,netwtn04.inf
-
-  If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
-    // Build 1809+
-    RegAddDriver,netwtn02.inf
-  End
-
-  If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
-    // Build 1903+
-    RegAddDriver,netrtwlane01.inf
-  End
 End
 
 // Export the hive to a .reg file
@@ -190,12 +192,22 @@ Echo,"Building a list of required files...#$x#$xThis can take awhile, please be 
 
 // Driver Files to Extract
 RequireFileEx,Append,\Windows\INF\athw8x.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\mrvlpcie8897.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8185.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8187bv64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8187se64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8192se64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8192su64.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netathr10x.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netathrx.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netbc63a.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netbc64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netr28x.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netr28ux.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netr7364.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netrtwlane.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netrtwlane_13.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netrtwlane01.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netrtwlanu.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwbw02.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwew00.inf,NOMUI
@@ -203,14 +215,27 @@ RequireFileEx,Append,\Windows\INF\netwew01.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwlv64.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwns64.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwsw00.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwtw02.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwtw04.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwtw06.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwtw08.inf,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\athw8x.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\mrvlpcie8897.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8185.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8187bv64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8187se64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8192se64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8192su64.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netathr10x.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netathrx.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netbc63a.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netbc64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netr28x.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netr28ux.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netr7364.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane_13.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlanu.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwbw02.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwew00.inf*,NOMUI
@@ -218,21 +243,10 @@ RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwew01.inf*,
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwlv64.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwns64.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwsw00.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw02.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw04.inf*,NOMUI
-
-If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
-  // Build 1809+
-  RequireFileEx,Append,\Windows\INF\netwtw02.inf,NOMUI
-  RequireFileEx,Append,\Windows\INF\netwtw06.inf,NOMUI
-  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw02.inf*,NOMUI
-  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw06.inf*,NOMUI
-End
-
-If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
-  // Build 1903+
-  RequireFileEx,Append,\Windows\INF\netrtwlane01.inf,NOMUI
-  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*,NOMUI
-End
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw06.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtw08.inf*,NOMUI
 
 // Extract
 RequireFileEx,ExtractList
@@ -253,12 +267,21 @@ Echo,"Building a list of required files...#$x#$xThis can take awhile, please be 
 
 // Driver Files to Extract
 RequireFileEx,Append,\Windows\INF\athw8.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8185.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8187bv32.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8187se86.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8192se32.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\net8192su32.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netathr.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netathr10.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netbc63.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netbc64.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netr28.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netr28u.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netr73.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netrtwlane.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netrtwlane_13.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netrtwlane01.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netrtwlanu.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwbn02.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwen00.inf,NOMUI
@@ -266,14 +289,24 @@ RequireFileEx,Append,\Windows\INF\netwen01.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwlv32.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwns32.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwsn00.inf,NOMUI
+RequireFileEx,Append,\Windows\INF\netwtn02.inf,NOMUI
 RequireFileEx,Append,\Windows\INF\netwtn04.inf,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\athw8.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8185.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8187bv32.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8187se86.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8192se32.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\net8192su32.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netathr.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netathr10.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netbc63.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netbc64.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netr28.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netr28u.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netr73.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane_13.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlanu.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwbn02.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwen00.inf*,NOMUI
@@ -282,18 +315,8 @@ RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwlv32.inf*,
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwns32.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwsn00.inf*,NOMUI
 RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtn04.inf*,NOMUI
-
-If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
-  // Build 1809+
-  RequireFileEx,Append,\Windows\INF\netwtn02.inf,NOMUI
-  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtn02.inf*,NOMUI
-End
-
-If,%SourceVer%,BiggerEqual,10.0.18362.0,Begin
-  // Build 1903+
-  RequireFileEx,Append,\Windows\INF\netrtwlane01.inf,NOMUI
-  RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*,NOMUI
-End
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtn02.inf*,NOMUI
+RequireFileEx,Append,\Windows\System32\DriverStore\FileRepository\netwtn04.inf*,NOMUI
 
 // Extract
 RequireFileEx,ExtractList
@@ -406,7 +429,7 @@ btn_PurgeCache=,1,8,479,5,25,25,PurgeRegCache,Trash.ico,True,"__Remove all cache
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
-cb_EnableHiveCache="Cache Registry Hives",1,3,5,50,120,15,True,"__Cache the processed registry hives instead of recreating them at every build.#$x#$xDisabling this option will significantly increase build time."
+cb_EnableHiveCache="Cache Driver Database",1,3,5,50,140,15,True,"__Cache the processed driver database registry hives instead of recreating them at every build.#$x#$xDisabling this option will significantly increase build time."
 
 [InterfaceEncoded]
 Trash.ico=1150,1212
