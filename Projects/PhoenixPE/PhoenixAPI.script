@@ -210,6 +210,10 @@ GetParam,1,%FileExt%
 Getparam,2,%Program%
 Set,%ExeExtList%,".exe|.cmd|.bat|.com|.js|.vbs|.wsf"
 
+// Are hives already loaded? - We don't want to unload them if they were loaded by a script
+If,ExistRegSubKey,HKLM,"Tmp_Software",Set,%RegHivesLoaded%,True
+Else,Set,%RegHivesLoaded%,False
+
 // Remove . from the file extension if present.
 StrFormat,CTRIM,%FileExt%,".",%FileExt%
 
@@ -219,12 +223,12 @@ List,Pos,%ExeExtList%,%ProgramExt%,%IsExecutable%
 If,%IsExecutable%,Equal,0,Halt,"Associate Error: [%Program%] is not an executable file (%ExeExtList%)." 
 Else,Begin
   Echo,"Associating file extension [.%FileExt%] with [%Program%]..."
-  RegHiveLoad,Tmp_Software,%RegSoftware%
+  If,%RegHivesLoaded%,Equal,False,RegHiveLoad,Tmp_Software,%RegSoftware%
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\.%FileExt%","","%FileExt%file"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\%FileExt%file","","%FileExt% File"
   RegWrite,HKLM,0x2,"Tmp_Software\Classes\%FileExt%file\DefaultIcon","","#$q%Program%#$q"
   RegWrite,HKLM,0x2,"Tmp_Software\Classes\%FileExt%file\shell\open\command","","#$q%Program%#$q #$q#$p1#$q"
-  RegHiveUnLoad,Tmp_Software
+  If,%RegHivesLoaded%,Equal,False,RegHiveUnLoad,Tmp_Software
   Echo,""
 End
 

@@ -1,0 +1,513 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2020 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=Acronis True Image 2021
+Description=Acronis True Image is a popular and easy to use backup software for personal use.
+Author=Homes32
+Level=5
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2020-03-31
+Interface=Interface
+
+[Variables]
+%ProgramFolder%="TrueImage2021"
+%ProgramExe%="TrueImage_starter.exe"
+%SetupFile%="AcronisTrueImage2021.exe"
+%DownloadURL%=https://download.acronis.com/AcronisTrueImage2021.exe
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\WinPE.zip",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram
+// Write the .exe version to the log to aid in debugging
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
+
+///////////////////////////////////////////////////////////////////////////////////
+// Config
+
+Echo,"Configuring %ScriptTitle%..."
+
+RegLoadHives
+
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\GlobalComponents","snapapi.dll","x:\Windows\system32\snapapi.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\GlobalComponents","volume_tracker_driver_api.dll","x:\Windows\system32\volume_tracker_driver_api.dll"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","resource.dll","%PEPrograms%\%ProgramFolder%\resource.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","icu38.dll","%PEPrograms%\%ProgramFolder%\icu38.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","libcrypto10.dll","%PEPrograms%\%ProgramFolder%\libcrypto10.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","thread_pool.dll","%PEPrograms%\%ProgramFolder%\thread_pool.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","libssl10.dll","%PEPrograms%\%ProgramFolder%\libssl10.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","kb_link.dll","%PEPrograms%\%ProgramFolder%\kb_link.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","rpc_client.dll","%PEPrograms%\%ProgramFolder%\rpc_client.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","tib_api.dll","%PEPrograms%\%ProgramFolder%\tib_api.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","tib_mounter.dll","%PEPrograms%\%ProgramFolder%\tib_mounter.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","oem_doc_source.dll","%PEPrograms%\%ProgramFolder%\oem_doc_source.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","ulxmlrpcpp.dll","%PEPrograms%\%ProgramFolder%\ulxmlrpcpp.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","expat.dll","%PEPrograms%\%ProgramFolder%\expat.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","logging.dll","%PEPrograms%\%ProgramFolder%\logging.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","boot_assist.dll","%PEPrograms%\%ProgramFolder%\boot_assist.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","mspack.dll","%PEPrograms%\%ProgramFolder%\mspack.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","backup_worker.exe","%PEPrograms%\%ProgramFolder%\backup_worker.exe"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","archive3.dll","%PEPrograms%\%ProgramFolder%\archive3.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","archive3_adapter.dll","%PEPrograms%\%ProgramFolder%\archive3_adapter.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","astor_client.dll","%PEPrograms%\%ProgramFolder%\astor_client.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","disk_backup.dll","%PEPrograms%\%ProgramFolder%\disk_backup.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","file_backup.dll","%PEPrograms%\%ProgramFolder%\file_backup.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","onig.dll","%PEPrograms%\%ProgramFolder%\onig.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","pcs_io.dll","%PEPrograms%\%ProgramFolder%\pcs_io.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","re2.dll","%PEPrograms%\%ProgramFolder%\re2.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","winpthreads4.dll","%PEPrograms%\%ProgramFolder%\winpthreads4.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","zstd.dll","%PEPrograms%\%ProgramFolder%\zstd.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","auto_reactivate.bin","%PEPrograms%\%ProgramFolder%\auto_reactivate.bin"
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","auto_reactivate64.bin","%PEPrograms%\%ProgramFolder%\auto_reactivate64.bin"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\TrueImageHome\Settings","ServiceDir","%PEPrograms%\%ProgramFolder%"
+
+System,ErrorOff,3
+RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Class\{4d36e967-e325-11ce-bfc1-08002be10318}","UpperFilters",Append,"PartMgr"
+RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Class\{4d36e967-e325-11ce-bfc1-08002be10318}","UpperFilters",Append,"fltsrv"
+RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Class\{71a27cdd-812a-11d0-bec7-08002be2092f}","UpperFilters",Append,"fltsrv"
+
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\fltsrv","DisplayName","Acronis Storage Filter Management"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\fltsrv","ErrorControl",1
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\fltsrv","Group","PnP Filter"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\fltsrv","ImagePath","System32\Drivers\fltsrv.sys"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\fltsrv","Start",0
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\fltsrv","Tag",8
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\fltsrv","Type",1
+//--
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\snapman","DisplayName","Acronis Snapshot Manager"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\snapman","ErrorControl",1
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\snapman","ImagePath","System32\Drivers\snapman.sys"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\snapman","Start",0
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\snapman","Type",1
+//--
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\volume_tracker","DisplayName","Acronis Volume Tracker"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\volume_tracker","ErrorControl",1
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\volume_tracker","ImagePath","System32\Drivers\volume_tracker.sys"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\volume_tracker","Start",0
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\volume_tracker","Type",1
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\volume_tracker","Group","PnP Filter"
+
+// File Associations
+Associate,".tibx","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+// Language
+StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
+StrFormat,RTRIM,%Lang%,1,%Lang%
+RegWrite,HKLM,0x1,"Tmp_Software\Acronis\Global","language","%Lang%"
+
+// iSCSI
+If,%cb_Include_iSCSI_Drivers%,Equal,True,Run,%ScriptFile%,iSCSIsupport
+
+// License
+If,%cmb_SoftwareLicense%,Equal,"Use Host License",Begin
+  If,ExistRegSubKey,HKLM,"Software\Acronis\TrueImage",RegCopy,HKLM,"Software\Acronis\TrueImage",HKLM,"Tmp_Software\Acronis\TrueImage"
+  Else,Echo,"Warning: The software license was not found in the Host registry. Acronis True Image will run in Evaluation Mode.",Warn
+End
+Else,If,%cmb_SoftwareLicense%,Equal,"License from .reg file",Begin
+  If,Not,%fb_SoftwareLicense%,Equal,"",If,ExistFile,%fb_SoftwareLicense%,Begin
+    // Find/Replace Software hive with our mounted PE Software hive
+	FileCopy,%fb_SoftwareLicense%,"%ProjectTemp%\ATI2021Reg.reg"
+    TXTReplace,"%ProjectTemp%\ATI2021Reg.reg","HKEY_LOCAL_MACHINE\SOFTWARE\","HKEY_LOCAL_MACHINE\Tmp_Software\"
+    // Not checking for a valid .reg file at the moment. Just being lazy and letting RegImport fail if there is an error.
+    RegImport,"%ProjectTemp%\ATI2021Reg.reg"
+  End
+  Else,Echo,"Warning: The .reg file specified for the software license does not exist. Acronis True Image will run in Evaluation Mode.",Warn
+End
+
+RegUnLoadHives
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+
+[#iSCSIsupport#]
+// ===============================================================================================================================
+// Name...........: iSCSIsupport
+// Description....: Include support and drivers for iSCSI disks
+// Syntax.........: Run,%ScriptFile%,iSCSIsupport
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Expects RegHives to be loaded by [Process]
+// Related........: 
+// ===============================================================================================================================
+[iSCSIsupport]
+Echo,"Adding iSCSI Support..."
+
+If,%SourceArch%,Equal,x64,Begin
+  // System32
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\iSCSI\iscsicli.exe Files64\iSCSI\iscsicpl.cpl Files64\iSCSI\iscsidip.dll Files64\iSCSI\iscsidsc.dll Files64\iSCSI\iscsiexe.exe Files64\iSCSI\iscsilog.dll Files64\iSCSI\iscsipp.dll Files64\iSCSI\iscsium.dll Files64\iSCSI\iscsiwip.dll Files64\iSCSI\iscsiwmi.dll Files64\iSCSI\iscsixip.dll -o#$q%TargetSystem32%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // Drivers
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\iSCSI\iscsiprt.sys Files64\iSCSI\msiscsi.sys -o#$q%TargetSystem32%\Drivers\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // INF
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\iSCSI\iscsi.inf -o#$q%TargetWindows%\INF\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // Windows\iSCSI
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\iSCSI\iscsi.cat Files64\iSCSI\iscsi.inf Files64\iSCSI\iscsidsc.mof Files64\iSCSI\iscsievt.mof Files64\iSCSI\iscsihba.mof Files64\iSCSI\iscsilog.dll Files64\iSCSI\iscsiprf.mof Files64\iSCSI\iscsiprt.sys Files64\iSCSI\iscsirem.mof Files64\iSCSI\mpdev.inf Files64\iSCSI\mpdev.sys Files64\iSCSI\mpio.cat Files64\iSCSI\mpio.inf Files64\iSCSI\mpio.sys Files64\iSCSI\mpspfltr.sys Files64\iSCSI\msiscdsm.inf Files64\iSCSI\msiscdsm.sys Files64\iSCSI\msiscsi.sys -o#$q%TargetWindows%\iSCSI\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+End
+Else,Begin
+  // System32
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\iSCSI\iscsicli.exe Files32\iSCSI\iscsicpl.cpl Files32\iSCSI\iscsidip.dll Files32\iSCSI\iscsidsc.dll Files32\iSCSI\iscsiexe.exe Files32\iSCSI\iscsilog.dll Files32\iSCSI\iscsipp.dll Files32\iSCSI\iscsium.dll Files32\iSCSI\iscsiwip.dll Files32\iSCSI\iscsiwmi.dll Files32\iSCSI\iscsixip.dll -o#$q%TargetSystem32%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // Drivers
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\iSCSI\iscsiprt.sys Files32\iSCSI\msiscsi.sys -o#$q%TargetSystem32%\Drivers\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // INF
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\iSCSI\iscsi.inf -o#$q%TargetWindows%\INF\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // Windows\iSCSI
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\iSCSI\iscsi.cat Files32\iSCSI\iscsi.inf Files32\iSCSI\iscsidsc.mof Files32\iSCSI\iscsievt.mof Files32\iSCSI\iscsihba.mof Files32\iSCSI\iscsilog.dll Files32\iSCSI\iscsiprf.mof Files32\iSCSI\iscsiprt.sys Files32\iSCSI\iscsirem.mof Files32\iSCSI\mpdev.inf Files32\iSCSI\mpdev.sys Files32\iSCSI\mpio.cat Files32\iSCSI\mpio.inf Files32\iSCSI\mpio.sys Files32\iSCSI\mpspfltr.sys Files32\iSCSI\msiscdsm.inf Files32\iSCSI\msiscdsm.sys Files32\iSCSI\msiscsi.sys -o#$q%TargetWindows%\iSCSI\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+End
+  
+// iScsiPrt Service
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\iScsiPrt","ImagePath","system32\DRIVERS\msiscsi.sys"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt","Type",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt","Start",3
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt","ErrorControl",1
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\iScsiPrt","DisplayName","iScsiPort Driver"
+RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\iScsiPrt,Owners","iscsi.inf"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt","BootFlags",1
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\iScsiPrt","Group","iSCSI"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum",0,"ROOT\ISCSIPRT\0000"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","Count",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","NextInstance",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","INITSTARTFAILED",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt\Parameters","BusType",9
+
+// MSiSCSI Service
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI","ErrorControl",1
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","ImagePath","system32\iscsiexe.exe"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI","Start",2
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI","Type",16
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","Description","Manages Internet SCSI (iSCSI) sessions from this computer to remote iSCSI target devices. If this service is stopped, this computer will not be able to login or access iSCSI targets. If this service is disabled, any services that explicitly depend on it will fail to start."
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","DisplayName","Microsoft iSCSI Initiator Service"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","Objectname","LocalSystem"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","Group","iSCSI"
+RegWrite,HKLM,0x3,"Tmp_System\ControlSet001\Services\MSiSCSI","FailureActions",80,51,01,00,00,00,00,00,00,00,00,00,03,00,00,00,14,00,00,00,02,00,00,00,60,ea,00,00,02,00,00,00,60,ea,00,00,02,00,00,00,60,ea,00,00
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","Count",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","NextInstance",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","INITSTARTFAILED",1
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum",0,"ROOT\LEGACY_MSISCSI\0000"
+RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\MSiSCSI"
+
+// Microsoft iSCSI Initiator
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","ClassGUID","{4D36E97B-E325-11CE-BFC1-08002BE10318}"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Class","SCSIAdapter"
+RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","HardwareID","Root\iSCSIPrt"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Driver","{4D36E97B-E325-11CE-BFC1-08002BE10318}\0000"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Mfg","Microsoft"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Service","iScsiPrt"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","DeviceDesc","Microsoft iSCSI Initiator"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","ConfigFlags",0
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Capabilities",0
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000\Control","ActiveService","iScsiPrt"
+RegWrite,HKLM,0x0,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000\LogConf"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI","NextInstance",1
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Service","MSiSCSI"
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Legacy",1
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","ConfigFlags",0
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Class","LegacyDriver"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","ClassGUID","{8ECC055D-047F-11D1-A537-0000F8753ED1}"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","DeviceDesc","Microsoft iSCSI Initiator Service"
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000\Control","ActiveService","MSiSCSI"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting Program Files..."
+If,%SourceArch%,Equal,x64,Begin
+  // x64 Program Files
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\auto_reactivate64.bin Files\bootwiz64.efi -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."  
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\* -x!Files64\Drivers\ -x!Files64\IScsi\ -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // VC Runtime
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\Drivers\Microsoft.VC120.CRT\* -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // Drivers
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\Drivers\snapapi.dll Files64\Drivers\volume_tracker_driver_api.dll -o#$q%TargetSystem32%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\Drivers\* -x!Files64\Drivers\Microsoft.VC120.CRT\ -x!Files64\Drivers\snapapi.dll -x!Files64\Drivers\volume_tracker_driver_api.dll -o#$q%TargetSystem32%\Drivers\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\Drivers\snapapint64.bin -o#$q%TargetSystem32%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  FileRename,"%TargetSystem32%\snapapint64.bin","%TargetSystem32%\snapapint64.dll"
+End
+Else,Begin
+  // x86 Program Files
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\* -x!Files32\Drivers\ -x!Files32\IScsi\ -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // VC Runtime
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\Drivers\Microsoft.VC120.CRT\* -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  
+  // Drivers
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\Drivers\snapapi.dll Files32\Drivers\volume_tracker_driver_api.dll -o#$q%TargetSystem32%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\Drivers\* -x!Files32\Drivers\Microsoft.VC120.CRT\ -x!Files32\Drivers\snapapi.dll -x!Files32\Drivers\volume_tracker_driver_api.dll -o#$q%TargetSystem32%\Drivers\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\Drivers\snapapint.bin -o#$q%TargetSystem32%\#$q"
+  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  FileRename,"%TargetSystem32%\snapapint.bin","%TargetSystem32%\snapapint.dll"
+End
+
+// x86/x64 Common Files
+7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\auto_reactivate.bin Files\bootmenu.bin Files\bootwiz.bin Files\bootwiz32.efi -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
+If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+FileCopy,"%TargetPrograms%\%ProgramFolder%\bootmenu.bin","%TargetPrograms%\%ProgramFolder%\gen_bootmenu.bin"
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: ATI is downloaded as a compressed.exe that contains a .msi installer, that contains a WinPE.zip file that contains the exe.
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+
+// Extract the .msi installer
+Echo,"Extracting installer..."
+7z,"e -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q AcronisTrueImage.msi -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+If,Not,#r,Equal,0,Halt,"Failed to extract .msi from [%SetupFile%]: The code returned was [#r]."
+
+// Extract compressed WinPE.zip from .msi installer
+Echo,"Extracting WinPE.zip from installer..."
+7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\AcronisTrueImage.msi#$q _56_52D78812FFC93DDE133DECBB0875BCA0 -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+If,Not,#r,Equal,0,Halt,"Failed to extract from [AcronisTrueImage.msi]: The code returned was [#r]."
+
+// Unpack compressed WinPE.zip
+Echo,"Decompressing WinPE.zip..."
+7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\_56_52D78812FFC93DDE133DECBB0875BCA0#$q WinPE.zip -o#$q%ProgramsCache%\%ProgramFolder%#$q"
+If,Not,#r,Equal,0,Halt,"Failed to extract from [_56_52D78812FFC93DDE133DECBB0875BCA0]: The code returned was [#r]."
+
+// Cleanup
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
+FileDeleteEx,"%ProgramsCache%\%ProgramFolder%\%SetupFile%"
+
+[#ToggleLicenseReg#]
+// ===============================================================================================================================
+// Name...........: ToggleLicenseReg
+// Description....: Show/Hide the file box for specifying a .reg file for the software license.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_SoftwareLicense
+// ===============================================================================================================================
+[ToggleLicenseReg]
+If,%cmb_SoftwareLicense%,Equal,"License from .reg file",WriteInterface,Visible,%ScriptFile%,Interface,fb_SoftwareLicense,True
+Else,WriteInterface,Visible,%ScriptFile%,Interface,fb_SoftwareLicense,False
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
+// ===============================================================================================================================
+[SetDefaultOptions]
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Backup & Imaging"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Acronis True Image 2021"
+WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [en]"
+WriteInterface,Value,%ScriptFile%,Interface,cb_Include_iSCSI_Drivers,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_SoftwareLicense,"Evaluation license"
+WriteInterface,Value,%ScriptFile%,Interface,fb_SoftwareLicense,""
+Run,%ScriptFile%,ToggleLicenseReg
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options in the script interface.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"Acronis True Image is an easy to use backup software for personal use.#$x#$xOn first run this script will download the setup file (~1 GB) and cache it (~100 MB) for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.acronis.com/en-us/products/true-image/
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Backup & Imaging"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Acronis True Image 2021"
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of Acronis True Image in your build.#$x#$xWARNING: 1 GB Download"
+bvl_Options=Options,1,12,150,90,220,184,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language="English [en]",1,4,160,126,150,21,"Chinese (Traditional) [zh-TW]","Chinese (Simplified) [zh-CN]","Dutch (Belgium) [nl-be]","Dutch (Netherlands) [nl]","English [en]","French [fr]","German [de]","Italian [it]","Japanese [jp]","Portuguese (Brazil) [pt]","Spanish [es]","Turkish [tr]"
+cb_Include_iSCSI_Drivers="Include iSCSI Drivers",1,3,160,155,151,18,True
+lbl_SoftwareLicense="Software License:",1,1,160,185,149,16,8,Normal
+cmb_SoftwareLicense="License from .reg file",1,4,160,200,175,21,"Evaluation license","Use Host license","License from .reg file",_ToggleLicenseReg_,True,"__Acronis True Image is not free software. A valid license is required for full functionality.#$x#$xEvaluation license - ATI will operate in a limited Evaluation Mode#$x#$xUse Host license - If you have ATI installed and licensed on your host (build) computer this option will#$ximport the license to your PE.#$x#$xLicense from .reg file - If you have ATI installed and licensed on another computer you can export the#$xregistry key containing the license code (HKLM\Software\Acronis\TrueImage) and import the .reg file into your PE."
+fb_SoftwareLicense=P:\Profile.txt,1,13,160,228,200,20,file,"__Please select a .reg file containing the exported license key.#$xHKLM\Software\Acronis\TrueImage"
+
+[InterfaceEncoded]
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+
+[AuthorEncoded]
+AcronisTI_80.png=6075,8204
+Logo=AcronisTI_80.png
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-AcronisTI_80.png]
+lines=2
+0=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
+1=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
+2=AAAAAAEAAAAAAAAAAAAAAA

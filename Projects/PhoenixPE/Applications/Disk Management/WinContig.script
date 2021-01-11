@@ -29,34 +29,52 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=Linux Reader
-Description=DiskInternals Linux Reader for Windows allows you read-only access to Ext2/Ext3/Ext4, HFS/HFS+, and ReiserFS file systems in a Windows environment.
+Title=WinContig
 Author=Homes32
 Level=5
+Version=1.0.0.0
+Description=WinContig is an easy-to-use stand-alone defragmentation tool. Its purpose is to quickly defragment files without the need to defragment the whole disk.
+Date=2021-01-11
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2019-11-11
 
 [Variables]
-%ProgramFolder%="LinuxReader"
-%DownloadURL%=https://eu.diskinternals.com/download/Linux_Reader.exe
+%ProgramFolder%="WinContig"
+%ProgramExex32%="WinContig.exe"
+%ProgramExex64%="WinContig64.exe"
+%DownloadURLx86%=http://www.mdtzone.it/Files/WContig.zip
+%DownloadURLx64%=http://www.mdtzone.it/Files/WContig.zip
+%SetupFile%="WinContig.zip"
+%ConfigFile%="%TargetPrograms%\%ProgramFolder%\WinContig.ini"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
+Run,%ScriptFile%,SetProgramArch
 
-If,%SourceArch%,Equal,x64,Set,%ProgramExe%,"LinuxReader64.exe"
-Else,Set,%ProgramExe%,"LinuxReader.exe"
-
-// Extract
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\LinuxReader.exe",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 // Write the .exe version to the log to aid in debugging
 FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
 
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+// Language
+StrFormat,SPLIT,%cmb_Language%,"[",2,%lng%
+StrFormat,RTRIM,%lng%,1,%lng%
+IniWrite,%ConfigFile%,"Options","Language",%lng%
+
+// Drive Temp Degrees
+If,%cmb_DriveTemp%,Equal,"Celsius (Â°C)",IniWrite,%ConfigFile%,"Options","ShowTemperatureInCelsius",1
+Else,IniWrite,%ConfigFile%,"Options","ShowTemperatureInCelsius",0
+
+///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
@@ -76,8 +94,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\LinuxReader.exe#$q * -xr!$PLUGINSDIR -xr!uninstall.exe* -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [LinuxReader.exe]."
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -91,9 +108,33 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [LinuxReader.exe]."
 // Related........: 
 // ===============================================================================================================================
 [DownloadProgram]
-Echo,"Downloading DiskInternals Linux Reader for Windows..."
-WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\LinuxReader.exe",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+Echo,"Downloading %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramArch
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+
+[#SetProgramArch#]
+// ===============================================================================================================================
+// Name...........: SetProgramArch
+// Description....: Configure the script for the correct source architecture.
+// Syntax.........: Run,%ScriptFile%,SetProgramArch
+// Parameters.....: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
+//                  %ProgramExe%     - The x86 or x64 program exe.
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[SetProgramArch]
+If,%SourceArch%,Equal,x64,Begin
+  Set,%DownloadURL%,%DownloadURLx64%
+  Set,%ProgramExe%,%ProgramExex64%
+End  
+Else,Begin
+  Set,%DownloadURL%,%DownloadURLx86%
+  Set,%ProgramExe%,%ProgramExex86%
+End
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -107,12 +148,10 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Related........: btn_LaunchProgram
 // ===============================================================================================================================
 [LaunchProgram]
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\LinuxReader.exe",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
-
-If,%HostArch%,Equal,x64,Set,%ProgramExe%,"LinuxReader64.exe"
-Else,Set,%ProgramExe%,"LinuxReader.exe"
-
+Echo,"Launching %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramArch
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
 [#ClearDownloadCache#]
@@ -137,23 +176,27 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: Called by btn_SetDefaultOptions
-// Related........: 
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
 // ===============================================================================================================================
 [SetDefaultOptions]
+System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Disk Management"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Linux Reader"
-WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"WinContig"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [en-US]"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_DriveTemp,"Celsius (°C)"
+
+System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
 // ===============================================================================================================================
 // Name...........: ToggleAdvancedOptions
-// Description....: Show/Hide advanced options in the script interface.
+// Description....: Show/Hide advanced options.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -176,7 +219,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"DiskInternals Linux Reader for Windows allows you read-only access to Ext2/Ext3/Ext4, HFS/HFS+, and ReiserFS file systems in a Windows environment.#$x#$xOn first run this script will download the setup file (~50 MB) and cache it for future builds."
+Message,"WinContig has been designed specifically to meet the needs of users who focus mainly on files and folders rather than an entire disk.#$x#$xOn first run this script will download the setup file (~1 MB) and cache it for future builds.#$x#$xWinContig is released as freeware for personal and commercial use. If you find this program useful and would like to support this project, please consider making a donation to the author."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -190,9 +233,9 @@ Message,"DiskInternals Linux Reader for Windows allows you read-only access to E
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch Linux Reader",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+btn_LaunchProgram="Launch WinContig",1,8,5,5,130,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://www.diskinternals.com/linux-reader/
+web_Homepage=Homepage,1,10,377,9,60,18,https://wincontig.mdtzone.it
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
@@ -205,36 +248,30 @@ cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Disk Management"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Linux Reader"
-cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of LinuxReader in your build."
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"Disk Management"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,WinContig
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,True,"__Enable this option to ensure you always included the latest version of WinContig in your build."
+bvl_Options=Options,1,12,150,90,197,184,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language="English [en-US]",1,4,160,126,155,21,"Afrikaans [af-ZA]","Bulgarian [bg-BG]","Chinese Simplified [zh-CN]","Chinese Traditional [zh-TW]","Czech [cs-CZ]","Dutch [nl-NL]","English [en-US]","Finnish [fi-FI]","French [fr-FR]","Georgian [ka-GE]","German [de-DE]","Greek [el-GR]","Hungarian [hu-HU]","Italian [it-IT]","Japanese [ja-JP]","Korean [ko-KR]","Polish [pl-PL]","Portuguese - Brazil [pt-BR]","Portuguese - Portugal [pt-PT]","Romanian [ro-RO]","Russian [ru-RU]","Slovak [sk-SK]","Slovenian [sl-SL]","Spanish [es-ES]","Swedish [sv-SE]","Turkish [tr-TR]","Vietnamese [vi-VN]"
+lbl_ShowTemp="Show tempature in",1,1,161,165,101,16,8,Normal
+cmb_DriveTemp="Celsius (°C)",1,4,160,181,125,21,"Fahrenheit (°F)","Celsius (°C)"
+
+[AuthorEncoded]
+WinContig.png=4137,5616
+Logo=WinContig.png
 
 [InterfaceEncoded]
 play-hot.png=841,1220
-Trash.ico=1150,1212
 SetDefaults_16.png=2475,3404
 Advanced_16.png=2000,2768
 Help_16.png=2830,3868
 VistalcoDownload_16.png=927,1348
-
-[AuthorEncoded]
-LinuxReader.png=6243,8424
-Logo=LinuxReader.png
+Trash.ico=1150,1212
 
 [EncodedFile-InterfaceEncoded-play-hot.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
-
-
-[EncodedFile-AuthorEncoded-LinuxReader.png]
-lines=2
-0=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
-1=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
-2=7LG3uNVuPvHeMZdh50/lzMI+9A8EycQDQkXSoij1tVRt3Mz2/3qQcrss3mH3vvi2zAKdz+C3Y4PX7p2uKphdyVVsyxonAem2/9Zr/7tzIGh2DqCdzPL/H3ZOMdd5anvhAAAAAElFTkSuQmCCeJzj98nMK60ISk1MSS3SK8hLZxgFIwokS+CXjzbh/MfIAACWvAf4AEH3LQEAAAACAAAAJwAAAGMYAAAAAAAAAQAAAAAAAAAAAAAA
-
-[EncodedFile-InterfaceEncoded-Trash.ico]
-lines=0
-0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
 
 [EncodedFile-InterfaceEncoded-SetDefaults_16.png]
 lines=0
@@ -251,3 +288,12 @@ lines=0
 [EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-WinContig.png]
+lines=1
+0=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
+1=6GR191k9NBluFb1zYwd/kN6IqzpD1WJS9tKiJHjc2Ee/kqBvr7SfSd5mfvLqLSOocHNh6i1jp0kf8RQnDweJztz7sYjI2WNtcvdbPhT76GbplFObK1stV8zXqWBn8lUX81g+3HGYoO8/Brq1haE+Kv1xzBJI22jfQEEzzwgoUP2kf9SGO1mZs3r8XgW1UWg5yl7MXwCrI4GmczlBUE21o43OfhL1/ZyE1LTvPHQJpfvu0GwG5RuG3zIjxzrkNI5e5qBVVQ8pbri5AQeA3gWryMwUiccPtRXjnS8MX9LRvnsPzqa9FVT4l7NcdHCB11yOr7M2s28bw1myzqbwfyQRU5aissuJevpr+3G4/LxXWbNlFTYSnrazOW9Ei0K5uJfUc9vuueN4CaBY889aAtE9tpymVM5VbGIrI01lTx9euvK/fSX6BlU6n0SOTB+rXv/wzGtIG07r7vX6Nmtytsdr2Uk5TL8inlcqDnsnoyEfjPRKzfedYocIHzbdt51whw67wdzz5s1lJ77ZnYsi9BMaEkCKGTToU/1LLJmxrWfXhRHjHuqdS26+6TwPIrdjz9dVsm8YxFS034G8ivIpl0bCCTjt3ecM3B1ycac8kv5cd33bsvbqrwhyye3RnZ8JX/jqJlR9KJWP8/1Vz1RvWljAJ5tJq17bxLb9393R0Ri8cbMbmadakI/eplRtc1kUoE9ibjA+76te8/ls+cvAO8tp13RYEb5+14psmipV62ZeLzv2z+R1wQkQkhSI+EW7RM4uaGdR8eL0RWwU0nbbvuaTn8+PcXhCzebSnVHBUS6FZnl2qyvlmorGLzsbz1DYtZ7gTIpOOhZKzvG3Ur31pSqFFgGl2bx3bf+2Lc5HSnjbZNwZ8/VK/IBKcqq1iEqRm6/u5Ig81iWB8a/Mxbf83BV6Yqa1q5UtvOu3TgTQBdUg7pSLfIlyWIh0xOkM6JQwBX/nn7O9OVV7T+rdbd9z0WsnpXxQ32jmLJzJf2aLr9g8HEyt9sW5+XY82HkvjP+Y88fZ8tE3vSnEsX1CdWaEowmMomOmKZ7Xu3bXi6oIl5UJKOv2O7730qZna5hs3upzVpgia7aRDP5nKHgqlfvNuXcJbCKFCGisO8Hc/WmHIjex3p2NrJ2lgn2zGaLjgRSb8XGNFuar5jY34/k5siZQtFrtjxzEZLNvmiLZuonWjMpQzTGcv0dCey2/bdvuGtkih4AWWP0RY88tT9tkzsMVMuc1G/+3iGCY5oI+3RzMMvb1v/ZFkUPEN5u4qB1t33PRk1u91hs/tXlypvJDVdHB5KvfDBYLKi3EaBy7BjxjJvx7ONZm1krz0TXSExumNyQnAykv54IKXd3HzHxo7LpduXIt25Ysczm62ZxHMb1qykM56989XbN7x2uXX6f+UClFaqOq+IAAAAAElFTkSuQmCCeJzjDc/Mc87PK8lM1yvIS2cYBSMMaArgl99xdbUtIwMA2FwHwpoCFoMBAAAAAgAAACUAAAApEAAAAAAAAAEAAAAAAAAAAAAAAA
