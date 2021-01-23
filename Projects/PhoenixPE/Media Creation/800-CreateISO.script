@@ -64,6 +64,7 @@ TxtReplace,"%ProjectTemp%\ISO.ini","{Date}",%Date%
 TxtReplace,"%ProjectTemp%\ISO.ini","{Time}",%Time%
 TxtReplace,"%ProjectTemp%\ISO.ini","{TimeStamp}",%TimeStamp%
 TxtReplace,"%ProjectTemp%\ISO.ini","{SourceArch}",%SourceArch%
+TxtReplace,"%ProjectTemp%\ISO.ini","{SourceLang}",%SourceLang%
 // Strip illegal chars
 TxtReplace,"%ProjectTemp%\ISO.ini","\",""
 TxtReplace,"%ProjectTemp%\ISO.ini","/",""
@@ -149,7 +150,7 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to create ISO image."
 System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cmb_ISOTool,oscdimg
 WriteInterface,Value,%ScriptFile%,Interface,in_VolName,%ProjectTitle%
-WriteInterface,Value,%ScriptFile%,Interface,in_ISOFilename,"{ProjectTitle}_{SourceArch}_{TimeStamp}"
+WriteInterface,Value,%ScriptFile%,Interface,in_ISOFilename,"{ProjectTitle}_{SourceLang}_{SourceArch}"
 WriteInterface,Value,%ScriptFile%,Interface,in_MkISOfsSwitch,"-iso-level 4 -udf -r -force-uppercase -duplicates-once"
 WriteInterface,Value,%ScriptFile%,Interface,in_OscdimgSwitch,"-h -m -o -u1 -udfver102"
 System,Cursor,Normal
@@ -230,7 +231,7 @@ bvl_Options="ISO Options",1,12,5,50,535,71,8,Bold
 lbl_ISOTool="Create ISO Using ",1,1,21,72,92,21,8,Normal
 cmb_ISOTool=oscdimg,1,4,19,85,98,21,mkISOfs,oscdimg
 in_VolName="Volume name",1,0,132,85,150,21,PhoenixPE
-in_ISOFilename="File name",1,0,296,85,205,21,{ProjectTitle}_{SourceArch}_{TimeStamp},"__The name of the ISO file to be created.#$xThe following text macros may be used to include additional information:#$x  {ProjectTitle} - Project Title#$x  {ProjectVer} - Project Version#$x  {Date} - Current Date (YYYY-MM-DD)#$x  {Time} Current Time (HHNN)#$x  {TimeStamp} - Current Date/Time (YYYYMMDDHHNNSS)#$x  {SourceArch} - Source Architecture (x86/x64)#$x#$xeg. {ProjectTitle} v{ProjectVer} {TimeStamp} --> PhoenixPE v1.0.0.0 20201227200405"
+in_ISOFilename="File name",1,0,296,85,205,21,{ProjectTitle}_{SourceLang}_{SourceArch},"__The name of the ISO file to be created.#$xThe following text macros may be used to include additional information:#$x  {ProjectTitle} - Project Title#$x  {ProjectVer} - Project Version#$x  {Date} - Current Date (YYYY-MM-DD)#$x  {Time} Current Time (HHNN)#$x  {TimeStamp} - Current Date/Time (YYYYMMDDHHNNSS)#$x  {SourceArch} - Source Architecture (x86/x64)#$x  {SourceLang} - Source Language#$x#$xeg. {ProjectTitle} v{ProjectVer} {TimeStamp} --> PhoenixPE v1.0.0.0 20201227200405"
 lbl_ISOName=.iso,1,1,504,90,28,21,12,Normal
 bvl_AdvancedOptions="Advanced Options",0,12,5,142,535,150,8,Bold
 in_MkISOfsSwitch="MkISOfs Switches",0,0,17,179,515,21,"-iso-level 4 -udf -r -force-uppercase -duplicates-once"

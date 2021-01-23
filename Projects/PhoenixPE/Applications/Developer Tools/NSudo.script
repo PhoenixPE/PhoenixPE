@@ -30,19 +30,19 @@
 
 [Main]
 Title=NSudo
-Description=(v8.0.0) NSudo is a system management tool for advanced users to launch programs with full privileges.
+Description=(v8.0.1) NSudo is a system management tool for advanced users to launch programs with full privileges.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-05-27
+Version=1.0.0.1
+Date=2021-01-22
 
 [Variables]
 %ProgramFolder%="NSudo"
 %ProgramExe%="NSudoLG.exe"
 %SetupFile%="NSudo.zip"
-%DownloadURL%=https://github.com/M2Team/NSudo/releases/download/8.0/NSudo_8.0_All_Components.zip
+%DownloadURL%=https://github.com/M2Team/NSudo/releases/download/8.0.1/NSudo_8.0.1_All_Components.zip
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -55,8 +55,8 @@ If,%cb_RunFromRam%,Equal,True,RunFromRam
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 
-If,%SourceArch%,Equal,x64,Set,%ExtractFile%,"#$qNSudo_8.0_All_Components\NSudo Launcher\x64\NSudoLG.exe#$q"
-Else,Set,%ExtractFile%,"#$qNSudo_8.0_All_Components\NSudo Launcher\Win32\NSudoLG.exe#$q"
+If,%SourceArch%,Equal,x64,Set,%ExtractFile%,"#$qNSudo_8.0.1_All_Components\NSudo Launcher\x64\NSudoLG.exe#$q"
+Else,Set,%ExtractFile%,"#$qNSudo_8.0.1_All_Components\NSudo Launcher\Win32\NSudoLG.exe#$q"
 
 7z,"e -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q %ExtractFile% -o#$q%TargetPrograms%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."

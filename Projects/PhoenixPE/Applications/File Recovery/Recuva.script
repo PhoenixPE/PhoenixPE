@@ -84,7 +84,7 @@ If,%cb_ShellExt%,Equal,True,Begin
   // Extract the localized strings from the Lang\lang-<lcid>.dll resources and update
   // HKCU\Software\Piriform\Recuva\ShellStringRecoverRecycleBin and HKCU\Software\Piriform\Recuva\ShellStringScanFolder
   If,Not,%LCID%,Equal,1033,Begin
-    ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\lang-%LCID%.dll#$q 563 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
+    ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\lang-%LCID%.dll#$q 563 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
     If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",563,%ShellContextMenuTxt%
 	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","ShellStringRecoverRecycleBin",%ShellContextMenuTxt%
@@ -92,7 +92,7 @@ If,%cb_ShellExt%,Equal,True,Begin
   End
   Else,Begin
     // English doesn't have a resource .dll Use the .exe instead
-    ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 563 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
+    ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 563 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
     If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",563,%ShellContextMenuTxt%
 	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","ShellStringRecoverRecycleBin",%ShellContextMenuTxt%

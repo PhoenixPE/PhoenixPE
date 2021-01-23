@@ -77,7 +77,17 @@ BitClear=Run,%API%,_PhoenixAPI_BitClear
 BitSet=Run,%API%,_PhoenixAPI_BitSet
 BitToggle=Run,%API%,_PhoenixAPI_BitToggle
 
-
+[#_PhoenixAPI_RegLoadHives#]
+// ===============================================================================================================================
+// Name...........: RegLoadHives
+// Description....: Mount Source and Build registry hives.
+// Syntax.........: RegLoadHives
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: 
+// ===============================================================================================================================
 [_PhoenixAPI_RegLoadHives]
 RegHiveLoad,Tmp_Default,%RegDefault%
 RegHiveLoad,Tmp_Drivers,%RegDrivers%
@@ -88,16 +98,35 @@ RegHiveLoad,Tmp_Install_Drivers,%RegInstallDrivers%
 RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
 RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
 
-
+[#_PhoenixAPI_RegUnloadHives#]
+// ===============================================================================================================================
+// Name...........: RegUnloadHives
+// Description....: UnMount Source and Build registry hives.
+// Syntax.........: RegUnLoadHives,[FORCE]
+// Parameters.....: #1 Force - Force hive unload using HiveUnload.exe
+// Return values..: ExitCode provided by the HiveUnload.exe application
+// Author.........: Homes32
+// Remarks........: 
+// Related........: 
+// ===============================================================================================================================
 [_PhoenixAPI_RegUnloadHives]
-RegHiveUnload,Tmp_Default
-RegHiveUnload,Tmp_Drivers
-RegHiveUnload,Tmp_Software
-RegHiveUnload,Tmp_System
-RegHiveUnload,Tmp_Install_Default
-RegHiveUnload,Tmp_Install_Drivers
-RegHiveUnload,Tmp_Install_Software
-RegHiveUnload,Tmp_Install_System
+
+If,#1,Equal,"Force",Begin
+  If,ExistFile,"%Tools%\x86\HiveUnload.exe",ShellExecute,Hide,"%Tools%\x86\HiveUnload.exe","/HKLM /Target:ALL"
+  If,%ExitCode%,Equal,0,Echo,"HiveUnload: All registry hives unloaded successfully."
+  If,%ExitCode%,Equal,1,Echo,"HiveUnload: Warning: Not all registry hives could be unloaded! Please verify that regedit is not running and try again.",Warn
+  If,%ExitCode%,Equal,2,Echo,"HiveUnload: No loaded registry hives were found."
+End
+Else,Begin
+  RegHiveUnload,Tmp_Default
+  RegHiveUnload,Tmp_Drivers
+  RegHiveUnload,Tmp_Software
+  RegHiveUnload,Tmp_System
+  RegHiveUnload,Tmp_Install_Default
+  RegHiveUnload,Tmp_Install_Drivers
+  RegHiveUnload,Tmp_Install_Software
+  RegHiveUnload,Tmp_Install_System
+End
 
 [#_PhoenixAPI_7z#]
 // ===============================================================================================================================

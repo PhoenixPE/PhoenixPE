@@ -69,8 +69,8 @@ If,%cb_AutoRunProcMon%,Equal,True,AddAutoRun,PreShell,NoWait,"Launching %ScriptT
 // Enable Boot Logging
 If,%cb_EnableBootLogging%,Equal,True,Begin
   Echo,"Boot Logging: ENABLED"
-  ShellExecute,Hide,"%Tools%\GetBinaryResource","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q BINRES RCDRIVERNT #$q%TargetSystem32%\drivers\Procmon.sys#$q"
-  If,Not,#r,Equal,0,Halt,"ERROR: Unable to extract procmon driver. GetBinaryResource returned [#r]"
+  ShellExecute,Hide,"%Tools%\%HostArch%\GetBinaryResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q BINRES RCDRIVERNT #$q%TargetSystem32%\drivers\Procmon.sys#$q"
+  If,Not,#r,Equal,0,Halt,"ERROR: Unable to extract procmon driver. GetBinaryResource.exe returned [#r]"
   
   RegHiveLoad,Tmp_System,%RegSystem%
   RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Procmon","SupportedFeatures",3

@@ -73,9 +73,9 @@ If,%cb_ShellExt%,Equal,True,Begin
   // Extract the localized strings from the Lang\lang-<lcid>.dll resources and update
   // HKCU\Software\Piriform\Defraggler\AnalyzeContextString and HKCU\Software\Piriform\Defraggler\DefragContextString
   If,Not,%LCID%,Equal,1033,Begin
-    ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\lang-%LCID%.dll#$q 504 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
+    ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\lang-%LCID%.dll#$q 504 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
 	If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
-	ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\lang-%LCID%.dll#$q 505 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
+	ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\lang-%LCID%.dll#$q 505 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
     If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",504,%DefragContextString%
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",505,%AnalyzeContextString%
@@ -84,9 +84,9 @@ If,%cb_ShellExt%,Equal,True,Begin
   End
   Else,Begin
     // English doesn't have a resource .dll Use the .exe instead
-    ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 504 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
+    ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 504 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
 	If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
-	ShellExecute,Hide,"%Tools%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 505 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
+	ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 505 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
     If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",504,%DefragContextString%
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",505,%AnalyzeContextString%
