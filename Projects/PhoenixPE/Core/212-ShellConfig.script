@@ -80,6 +80,8 @@ RegHiveUnload,Tmp_Install_System
 // Related........: Called from [Process]
 // ===============================================================================================================================
 [Personalize]
+// UserPreferencesMask defaults are not present in the DEFAULT hive, but we need it to be available for scripts that need to tweak it (IME, Mouse, etc).
+If,Not,ExistRegValue,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask","9E#$c3E#$c07#$c80#$c12#$c00#$c00#$c00"
 RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","AutoColorization",1
 RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","DesktopDPIOverride",-2
 RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","LogPixels",96
@@ -140,7 +142,7 @@ RegWrite,HKLM,0x4,"Tmp_software\Microsoft\Windows NT\CurrentVersion\WinPE","SetC
 
 // OEM Info
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Manufacturer","PhoenixPE"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportURL","https://github.com/homes32/PhoenixPE"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportURL","https://github.com/PhoenixPE/PhoenixPE"
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","X:\Windows\System32\oobe\Logo\Logo.bmp"
 
 // Open with Notepad context Menu option for all files
@@ -214,9 +216,8 @@ RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\services\Tcpip\Parameters","Hostname
 RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\Session Manager\Environment","ComputerName",%ProjectTitle%,NoWarn
 
 // Start Services in Redstone 5+
-If,%SourceBuild%,Bigger,17700,Begin
-  RegHiveLoad,Tmp_System,%RegSystem%
-  System,ERROROFF
+If,%SourceVer%,Bigger,"10.0.17700.0",Begin
+  // Fix Base Filtering Engine startup (Firewalls) 
   RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\BFE","ImagePath","#$psystemroot#$p\system32\svchost.exe -k LocalServiceNoNetworkFirewall -p"
   RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\BFE","SvcHostSplitDisable",1
   RegWrite,HKLM,0x3,"Tmp_System\ControlSet001\Services\BFE\Security","Security",01,00,14,80,90,00,00,00,9c,00,00,00,14,00,00,00,30,00,00,00,02,00,1c,00,01,00,00,00,02,80,14,00,ff,00,0f,00,01,01,00,00,00,00,00,01,00,00,00,00,02,00,60,00,04,00,00,00,00,00,14,00,85,00,02,00,01,01,00,00,00,00,00,05,0b,00,00,00,00,00,14,00,9f,00,0e,00,01,01,00,00,00,00,00,05,12,00,00,00,00,00,18,00,9d,00,0e,00,01,02,00,00,00,00,00,05,20,00,00,00,20,02,00,00,00,00,18,00,85,00,00,00,01,02,00,00,00,00,00,05,20,00,00,00,21,02,00,00,01,01,00,00,00,00,00,05,12,00,00,00,01,01,00,00,00,00,00,05,12,00,00,00
@@ -224,7 +225,6 @@ If,%SourceBuild%,Bigger,17700,Begin
   RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\LanmanWorkstation"
   RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\DNSCache"
   RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\NlaSvc"
-  RegHiveUnLoad,Tmp_System
 End
 
 [#Config-FBWF#]

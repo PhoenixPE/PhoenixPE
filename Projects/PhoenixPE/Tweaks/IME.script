@@ -90,8 +90,7 @@ RegHiveUnload,Tmp_Install_Software
 Echo,"Configuring the Language Toolbar..."
 
 // Show/Hide The IME Toolbar
-If,ExistRegValue,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
-Else,Set,%PrefMask%,"93#$c3e#$c03#$c80#$c12#$c00#$c00#$c00"
+RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cmb_LangBarPos%,Equal,"Hidden",ApplyBitMask,%PrefMask%,6,0x000000,8
 Else,ApplyBitMask,%PrefMask%,6,0x000001,8
 RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
