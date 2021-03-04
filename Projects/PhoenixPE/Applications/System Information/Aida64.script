@@ -30,20 +30,20 @@
 
 [Main]
 Title=AIDA64
-Description=(v6.25.5400) AIDA64 Extreme is an industry-leading system information tool. It provides extremely detailed information about both hardware and installed software, but also helps users diagnose issues and offers benchmarks to measure the performance of the computer.
+Description=(v6.32.5600) AIDA64 Extreme is an industry-leading system information tool. It provides extremely detailed information about both hardware and installed software, but also helps users diagnose issues and offers benchmarks to measure the performance of the computer.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-04-07
+Version=1.1.0.0
+Date=2020-12-16
 
 [Variables]
 %ProgramFolder%="Aida64"
 %ProgramExe%="aida64.exe"
 %ProgramIni%="aida64.ini"
-%DownloadURL-Extreme%=http://download.aida64.com/aida64extreme625.zip
-%DownloadURL-Engineer%=http://download.aida64.com/aida64engineer625.zip
+%DownloadURL-Extreme%=http://download.aida64.com/aida64extreme632.zip
+%DownloadURL-Engineer%=http://download.aida64.com/aida64engineer632.zip
 %SetupFile%="aida64.zip"
 
 [Process]
@@ -73,7 +73,10 @@ IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Generic","Language",%L
 IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Generic","NetUpdateFreq",0
 
 // License Key
-If,ExistFile,"%fb_pKey%",FileCopy,"%fb_pKey%","%TargetPrograms%\%ProgramFolder%"
+If,%cmb_SoftwareLicense%,Equal,"License from file",Begin
+  If,Not,%fb_SoftwareLicense%,Equal,"",If,ExistFile,%fb_SoftwareLicense%,FileCopy,"%fb_SoftwareLicense%","%TargetPrograms%\%ProgramFolder%"
+  Else,Echo,"Warning: The file specified for the software license does not exist. AIDA64 will run in Evaluation Mode.",Warn
+End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -116,6 +119,21 @@ Else,If,%rbtn_Engineer%,Equal,True,Set,%DownloadURL%,%DownloadURL-Engineer%
 Else,Halt,"LOGIC ERROR: Invalid Release selected."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#ToggleLicenseReg#]
+// ===============================================================================================================================
+// Name...........: ToggleLicenseReg
+// Description....: Show/Hide the file box for specifying a .reg file for the software license.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_SoftwareLicense
+// ===============================================================================================================================
+[ToggleLicenseReg]
+If,%cmb_SoftwareLicense%,Equal,"License from file",WriteInterface,Visible,%ScriptFile%,Interface,fb_SoftwareLicense,True
+Else,WriteInterface,Visible,%ScriptFile%,Interface,fb_SoftwareLicense,False
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -171,7 +189,9 @@ WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"AIDA64"
 WriteInterface,Value,%ScriptFile%,Interface,rbtn_Extreme,True
 WriteInterface,Value,%ScriptFile%,Interface,rbtn_Engineer,False
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [en]"
-WriteInterface,Value,%ScriptFile%,Interface,fb_pKey,""
+WriteInterface,Value,%ScriptFile%,Interface,cmb_SoftwareLicense,"Evaluation license"
+WriteInterface,Value,%ScriptFile%,Interface,fb_SoftwareLicense,""
+Run,%ScriptFile%,ToggleLicenseReg
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -238,8 +258,9 @@ rbtn_Engineer=Engineer,1,11,276,53,68,20,False,_ClearDownloadCache_,True,"__AIDA
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
 cmb_Language="English [en]",1,4,160,126,150,21,"Albanian [al]","Arabic [aa]","Belarusian [by]","Bosnian [bs]","Bulgarian [bg]","Catalan [ca]","Chinese (Simplified) [cn]","Chinese (Traditional) [tw]","Croatian [hr]","Czech [cz]","Danish [dk]","Dutch [nl]","Estonian [ee]","English [en]","Finnish [fi]","French [fr]","German [de]","Hungarian [hu]","Indonesian [id]","Italian [it]","Japanese [jp]","Korean [kr]","Latvian [lv]","Lithuanian [lt]","Macedonian [mk]","Norwegian [no]","Polish [pl]","Portuguese (Brazil) [br]","Portuguese(Portugal) [pt]","Romanian [ro]","Russian [ru]","Serbian(Cyrillic) [src]","Serbian(Latin) [srl]","Slovak [sk]","Slovenian [si]","Spanish [es]","Swedish [se]","Turkish [tr]","Ukrainian [ua]"
-lbl_Pkey="License File:",1,1,160,230,178,16,8,Normal
-fb_pKey=,1,13,160,243,178,21,file,"__Select the path to your 'pkey.txt' license file.#$xIf you own a registered version of AIDA64 this file can be found in your local AIDA64 program folder.#$x#$xIf you do not provide a license file AIDA64 will run in 30-day trial mode."
+lbl_SoftwareLicense="Software License:",1,1,160,200,149,16,8,Normal
+cmb_SoftwareLicense="Evaluation license",1,4,160,215,178,21,"Evaluation license","License from file",_ToggleLicenseReg_,True,"__Evaluation license - AIDA64 will operate as a 30 day trial in a limited Evaluation Mode#$x#$xLicense from file - Provide your pkey.txt license file."
+fb_SoftwareLicense=,0,13,160,243,178,21,file,"__Select the path to your 'pkey.txt' license file.#$xIf you own a registered version of AIDA64 this file can be found in your local AIDA64 program folder.#$x#$xIf you do not provide a license file AIDA64 will run in 30-day trial mode."
 
 [InterfaceEncoded]
 play-hot.png=841,1220

@@ -45,8 +45,8 @@ Echo,"Configuring source, images, and output directories..."
 
 // Sanity Check
 If,Not,ExistDir,%SourceDir%,Begin
-  Message,"Error: Invalid source directory.#$x#$x%SourceDir%#$x#$xdoes not exist!",Error
-  Halt,"Error: Invalid source directory.#$x#$x%SourceDir%#$x#$xdoes not exist!"
+  Message,"Error:#$x#$xYou must select a valid source directory.#$x#$x%SourceDir%#$x#$xdoes not exist!",Error
+  Halt,"Error: Invalid source directory. [%SourceDir%] does not exist!"
 End
 
 // Set Output Directories
@@ -421,13 +421,13 @@ Message,"Configure the source directory and Wim images used for building the pro
 // ===============================================================================================================================
 [Interface]
 btn_GetISOFido="Download Win10 ISO",1,8,5,5,140,25,DownloadWithFido,VistalcoDownload_16.png,False,"__Download Win10 ISO Images with FIDO"
-btn_ExtractISO="Extract Win10 ISO",1,8,150,5,125,25,ExtractISO,Images_Iso_16.png,False,"__Extract a downloaded Win10 ISO file to use as source."
+btn_ExtractISO="Extract Win10 ISO",1,8,151,5,125,25,ExtractISO,Images_Iso_16.png,False,"__Extract a downloaded Win10 ISO file to use as source."
 btn_SetDefaultOptions=,1,8,452,5,25,25,SetDefaultOptions,SetDefaults_16.png,False,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,482,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
-btn_ScriptInfo=,1,8,512,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+btn_ScriptInfo=,1,8,513,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_SourceCfg="Configure Source",1,12,5,50,532,81,8,Bold
 lbl_Source="Source Files",1,1,17,74,83,18,8,Bold
-fb_SrcPath=,1,13,94,68,433,20,dir
+fb_SrcPath=,1,13,94,68,433,20,dir,Title=Select the directory containing your extracted ISO image
 bvl_Homepage=bvl_Homepage,1,12,302,5,121,25
 web_TechBench="Techbench ISO Images",1,10,309,9,113,18,https://tb.rg-adguard.net/public.php
 bvl_ImageCfg="Configure Source Image",1,12,5,146,532,130,8,Bold
@@ -441,9 +441,9 @@ lbl_ImageInfo="Image Info:",1,1,64,251,60,16,8,Normal
 lbl_ImgInfo=,1,1,131,251,393,16,8,Bold
 btn_SrcSave=" Save",1,8,421,96,80,25,SaveSource,Disquette_16.png,False
 bvl_DestCfg="Configure Destination",0,12,5,290,532,112,8,Bold
-fb_OutputDir=%BaseDir%\Output\%ProjectTitle%\,0,13,94,340,433,20,dir,"__The directory where the final build will be saved. (eg. ISO, USB files)"
+fb_OutputDir=%BaseDir%\Output\%ProjectTitle%\,0,13,94,340,433,20,dir,Title=Select the directory where the final build will be saved,"__The directory where the final build will be saved. (eg. BOOT.WIM, Programs, etc.)"
 lbl_OutputDir="Output Dir",0,1,17,346,70,16,8,Bold
-fb_IsoOutputDir=%BaseDir%\Output\,0,13,94,371,433,20,dir,"__The directory where the final build will be saved. (eg. ISO, USB files)"
+fb_IsoOutputDir=%BaseDir%\Output\,0,13,94,371,433,20,dir,Title=Select the directory where the final ISO file will be saved,"__The directory where the final ISO file will be saved."
 lbl_IsoOutputDir="ISO Dir",0,1,17,377,70,16,8,Bold
 cb_RunFromWim="Run all programs from RAM (Boot.wim)",0,3,16,309,215,18,False,"__Select this option to pack all programs into Boot.wim regardless of individual script settings.#$x#$xRequired for PXE/Network boot."
 lbl_ClickSave="Select the directory containing your extracted ISO image  and click 'Save'.",1,1,55,104,354,16,8,Normal
