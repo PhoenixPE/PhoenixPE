@@ -104,7 +104,7 @@ Run,%ScriptFile%,Config-Network
 If,%cb_EnableNetworkListService%,Equal,True,Begin
   // Net Start: SystemSetupInProgress=0 -> Net Start netprofm -> SystemSetupInProgress=1
   // netprofm needs wfplwfs.sys for pnidui icon
-  TXTReplace,"%TargetSystem32%\Pecmd.ini","_END NetInit","#$xREGI #HKLM\SYSTEM\Setup\SystemSetupInProgress=0#$xEXEC !=#$pWinDir#$p\System32\Net.exe Start netprofm#$xREGI #HKLM\SYSTEM\Setup\SystemSetupInProgress=1#$x#$x_END NetInit"
+  TXTReplace,"%TargetSystem32%\Pecmd.ini","_END NetInit","TEXT Starting Network List Service...#0xFFFFFF L59 T39 $20#$xREGI #HKLM\SYSTEM\Setup\SystemSetupInProgress=0#$xEXEC !=#$pWinDir#$p\System32\Net.exe Start netprofm#$xREGI #HKLM\SYSTEM\Setup\SystemSetupInProgress=1#$x#$x_END NetInit"
 End
 
 TXTReplace,"%TargetSystem32%\Pecmd.ini","_END NetInit","#$xEXEC %ProgramFiles%\PENetwork\PENetwork.exe#$x#$x_END NetInit"

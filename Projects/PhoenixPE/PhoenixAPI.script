@@ -211,7 +211,10 @@ Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg4%
 Set,%Param2%,#r
 
 ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Param1%%Param2%#$q%SetupFile%#$q"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Failed to unpack setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%]"
+If,Not,%ExitCode%,Equal,0,Begin,
+  FileVersion,"%Tools%\x86\Innounp.exe",%InnounpVer%
+  Halt,"Error: Failed to unpack setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using Innounp.exe version [%InnounpVer%]."
+End
 
 System,EndLocal
 
@@ -251,7 +254,6 @@ System,EndLocal
 // Syntax.........: Associate,<FileExtension>,<ProgramExe>[,<Icon>]
 // Parameters.....: #1 FileExtension - The file extension to associate.
 //                  #2 ProgramExe - The full path to the executable to which the file extension will be associated with.
-//                  #3 Icon - NOT IMPLIMENTED
 //
 //                  Example: Associate,.ini,"C:\Windows\System32\notepad.exe"
 //

@@ -1,0 +1,416 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2021 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=UltraISO
+Description=UltraISO is an tool for creating/editing/converting ISO image files and bootable CD/DVD images.
+Author=Homes32
+Level=5
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2021-03-05
+Interface=Interface
+
+[Variables]
+%ProgramFolder%="UltraISO"
+%ProgramExe%="UltraISO.exe"
+%SetupFile%="uiso9_pe.exe"
+%DownloadURL%=http://dw.ezbsystems.com/uiso9_pe.exe
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
+
+///////////////////////////////////////////////////////////////////////////////////
+// Config
+
+Echo,"Configuring %ScriptTitle%..."
+
+RegLoadHives
+
+// Language
+StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
+StrFormat,RTRIM,%Lang%,1,%Lang%
+RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","Language",%Lang%
+
+// ShellExt
+RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","","%PEPrograms%\%ProgramFolder%"
+If,%cb_RegisterShellExt%,Equal,True,Begin
+  Run,%ScriptFile%,RegisterShellExtension
+  RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","ShellExt","1"
+End
+ 
+// FileExt
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO","","UltraISO File"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q,0"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\shell\open","","Open with &UltraISO"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+
+StrFormat,REPLACE,%txt_RegisterFileExt%,#$s,"",%txt_RegisterFileExt%
+List,Count,%txt_RegisterFileExt%,%ExtCount%,Delim=#$c
+Loop,%ScriptFile%,RegisterFileExtensions_Loop,1,%ExtCount%
+
+// License
+If,%cmb_SoftwareLicense%,Equal,"Use Host License",Begin
+  If,ExistRegValue,HKCU,"Software\EasyBoot Systems\UltraISO\5.0","Registration",Begin
+    RegRead,HKCU,"Software\EasyBoot Systems\UltraISO\5.0","UserName",%RegUserName%
+	RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","UserName",%RegUserName%
+    RegRead,HKCU,"Software\EasyBoot Systems\UltraISO\5.0","Registration",%RegRegistration%
+	RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","Registration",%RegRegistration%
+  End
+  Else,Echo,"Warning: The software license was not found in the Host registry. UltraISO will run in Evaluation Mode.",Warn
+End
+Else,If,%cmb_SoftwareLicense%,Equal,"Provide registration info",Begin
+  // No input checking here. The user is expected to enter license info correctly or face the consequences.
+  // Create a license file. UltraISO will check for this file at startup and import the license.
+  FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\uikey.ini"
+  TxtAddLine,"%TargetPrograms%\%ProgramFolder%\uikey.ini","Username='%txt_UserName%'",Append
+  TxtAddLine,"%TargetPrograms%\%ProgramFolder%\uikey.ini","Registration='%txt_RegKey%'",Append
+End
+
+RegUnLoadHives
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#RegisterShellExtension#]
+// ===============================================================================================================================
+// Name...........: RegisterShellExtension
+// Description....: Register the UltraISO Shell Extension
+// Syntax.........: Run,%ScriptFile%,RegisterShellExtension
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: 
+// ===============================================================================================================================
+[RegisterShellExtension]
+
+If,%SourceArch%,Equal,x86,Set,%ShellExtDll%,"%PEPrograms%\%ProgramFolder%\isoshell.dll"
+Else,Set,%ShellExtDll%,"%PEPrograms%\%ProgramFolder%\isoshl64.dll"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}","","UIContextMenu Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\InprocServer32","",%ShellExtDll%
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\ProgID","","ISOShell.UIContextMenu.1"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\VersionIndependentProgID","","ISOShell.UIContextMenu"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}","","IUIContextMenu"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","Version","1.0"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu","","UIContextMenu Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu\CLSID","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu\CurVer","","ISOShell.UIContextMenu.1"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu.1","","UIContextMenu Class"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu.1\CLSID","","{AD392E40-428C-459F-961E-9B147782D099}"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0","","ISOShell 1.0 Type Library"
+If,%SourceArch%,Equal,x86,RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\0\win32","",%ShellExtDll%
+Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\0\win64","",%ShellExtDll%
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\FLAGS","","0"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%\"
+
+// We did the UltraISO Class in the File Assoco Config so we just need the ContextMenuHandler
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\shellex\ContextMenuHandlers\ISOShell","","{AD392E40-428C-459F-961E-9B147782D099}"
+
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}","","IUIContextMenu"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","Version","1.0"
+
+// .bin
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage","","BIN File"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q,0"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shell\Convert to ISO\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -bin2iso #$q#$p1#$q"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shellex\ContextMenuHandlers\ISOShell","","{AD392E40-428C-459F-961E-9B147782D099}"
+
+[#RegisterFileExtensions_Loop#]
+// ===============================================================================================================================
+// Name...........: RegisterFileExtensions_Loop
+// Description....: Register each file extension in %txt_RegisterFileExt%.
+// Syntax.........: Loop,%ScriptFile%,RegisterFileExtensions_Loop,1,%ExtCount%
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Internal Function
+// Related........: %txt_RegisterFileExt%
+// ===============================================================================================================================
+[RegisterFileExtensions_Loop]
+List,Get,%txt_RegisterFileExt%,#c,%Ext%,Delim=#$c
+
+// Remove . from the file extension if present.
+StrFormat,CTRIM,%Ext%,".",%FileExt%
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.%FileExt%","","UltraISO"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram
+// Parameters.....: #1 - Destination Directory
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting Program Files..."
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
+InnoUnpack,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
+// Remove Duplicates
+FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\isoshell,2.dll"
+FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\isoshl64,2.dll"
+If,%SourceArch%,Equal,x86,Begin
+  FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\isoshl64,1.dll"
+  FileRename,"%ProjectTemp%\%ProgramFolder%\{App}\isoshell,1.dll","%ProjectTemp%\%ProgramFolder%\{App}\isoshell.dll"
+End
+Else,Begin
+  FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\isoshell,1.dll"
+  FileRename,"%ProjectTemp%\%ProgramFolder%\{App}\isoshl64,1.dll","%ProjectTemp%\%ProgramFolder%\{App}\isoshl64.dll"
+End
+
+FileCopy,"%ProjectTemp%\%ProgramFolder%\{App}\*.*",#1
+FileCopy,"%ProjectTemp%\%ProgramFolder%\{cf32}\EZB Systems\lame_enc.dll",#1
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.ezbsystems.com/ultraiso/download.htm,NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+
+[#ToggleLicenseReg#]
+// ===============================================================================================================================
+// Name...........: ToggleLicenseReg
+// Description....: Show/Hide the file box for specifying a .reg file for the software license.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_SoftwareLicense
+// ===============================================================================================================================
+[ToggleLicenseReg]
+If,%cmb_SoftwareLicense%,Equal,"Provide registration info",Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_UserName,True
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_RegKey,True
+End
+Else,Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_UserName,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_RegKey,False
+End
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
+// ===============================================================================================================================
+[SetDefaultOptions]
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Backup & Imaging"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"UltraISO"
+WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [1033]"
+WriteInterface,Value,%ScriptFile%,Interface,cb_RegisterShellExt,True
+WriteInterface,Value,%ScriptFile%,Interface,txt_RegisterFileExt,".iso,.isz,.bin"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_SoftwareLicense,"Evaluation license"
+WriteInterface,Value,%ScriptFile%,Interface,txt_UserName,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_RegKey,""
+Run,%ScriptFile%,ToggleLicenseReg
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options in the script interface.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,txt_RegisterFileExt,%state%
+If,%state%,Equal,False,Begin,
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
+  Else,Set,%Toggle%,False
+End
+Else,Set,%Toggle%,False
+
+WriteInterface,Visible,%ScriptFile%,Interface,txt_RegisterFileExt,%Toggle%
+System,EndLocal
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"UltraISO is an tool for creating/editing/converting ISO image files and bootable CD/DVD images..#$x#$xOn first run this script will download the setup file (~10 MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,http://www.ezbsystems.com/ultraiso/
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Backup & Imaging"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,UltraISO
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of UltraISO in your build."
+bvl_Options=Options,1,12,150,90,373,184,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language="English [1033]",1,4,160,126,150,21,"Arabic [10241]","Belarusian [1059]","Bulgarian [1026]","Catalan [1027]","Chinese (Simplified) [2052]","Chinese (Traditional) [1028]","Croatian [1050]","Czech [1029]","Danish [1030]","Dutch [1043]","English [1033]","Estonian [1061]","Farsi [1065]","Finnish [1035]","French [1036]","German [1031]","Greek [1032]","Hebrew [1037]","Hungarian [1038]","Indonesian [1057]","Italian [1040]","Japanese [1041]","Korean [1042]","Latvian [1062]","Lithuanian [1257]","Macdonian [1071]","Malaysian [1086]","Norwegian [1044]","Polish [1045]","Portuguese (Brazil) [1046]","Portuguese [2070]","Romanian [1048]","Russian [1049]","Serbian (Cyrillic) [2075]","Serbian (Latin) [2074]","Slovak [1051]","Slovenian [1060]","Spanish [1034]","Swedish [1053]","Turkish [1055]","Ukrainian [1058]","Vietnamese [1066]"
+cb_RegisterShellExt="Register shell extension",1,3,160,155,151,18,True
+txt_RegisterFileExt="Register file extensions:",0,0,159,243,354,21,".iso,.isz,.bin","__Comma separated list of file extensions to associate with UltraISO"
+lbl_SoftwareLicense="Software License:",1,1,335,111,149,16,8,Normal
+cmb_SoftwareLicense="Evaluation license",1,4,335,126,175,21,"Evaluation license","Use Host license","Provide registration info",_ToggleLicenseReg_,True,"__UltraISO is not free software. A valid license is required for full functionality.#$x#$xEvaluation license - UltraISO will operate in a limited Evaluation Mode#$x#$xUse Host license - If you have UltraISO installed and licensed on your host (build) computer this option will#$ximport the license to your PE.#$x#$xProvide registration info - Provide your UserName and Registration number supplied to you when you registered the product."
+txt_UserName="User Name",0,0,335,167,176,21,,"__Enter your registered user name"
+txt_RegKey="Registration Key:",0,0,335,208,176,21,,"__Enter your registration key (xxxx-xxxx-xxxx-xxxx)"
+
+[InterfaceEncoded]
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+
+[AuthorEncoded]
+UltraISO_80.png=13606,18244
+Logo=UltraISO_80.png
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-UltraISO_80.png]
+lines=4
+0=iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAgAElEQVR4nL29B5Rl1XUm/J1z44uVuzpW50Q31d2khiaIHBoZCWwlgxKSBhDyjMaW7dF47LE99qw1wf4XtoIN+kfSbyEhBIgoJGxEEGqSmyZ20910rO7KVa9evvGcf+1zzq0qvCQhyXhqrcurfqnu/e4O3/72Pge2+6Xd+GV+0jRFzs9h7bq1iKMY+/btw+rVq5AKAQaG6elp9Z7Fixej2WyiXC7DsmykaYKRkRH1HL2Wy+XQarZw7NgxnDx5Itdo1E9LWbS5Uhlb2tNXfm+pq7S6XqvCsxxYFoeQEkJIBFEMv1CAiOT48NDofX19i4+73N+Xzxd39/T0zKxZswau56HRaKDeqKNYKKJUKsGyLPi+j8nJSQRhCM91EQQBFi1aNHvOdG4bN27ExMQE9u7bB9d10dnRASHEOyJj/1Lo/Zo/Ukp1Mt3d3XAdB5PjE3hz/5tnjY6fvDJfts/1i9Zg70DnQiG6sW7j2UhbedSaHIs6yii6HfBsG4xunhRoJXVEqMJ3otLqlcnvT1QOg6GJWnO0Mn382Gtv7N/zXFep/4fLB1bs6l/YH/b29oI+TDf73/Ln3wRAAi6fz4NzjtpMFc/uevb0YycO/Va52/5QR1dx5cYlG1HOLQeLF2N6uIjRI8DhMaBaAcIWIFMgkQA44HDAdTn8XAc8rwNOHih3AB1dG1DqA/p70SUXj11QD9+6oN48+gf7h/555MWX4weX9A/ctf2ss59cvHTx7DnR8W7/vGsAZidHLloqFjExNo5du3Z98OTkoU8uXNp55eAZgyg4pyKu9eLkm8Ce/QnGTwKNGfow4DqA7QO2DVg2kHcBywVsC7AsgFkA2VLQBOozwLFDAHmYawMdff1YsrofA6vPhT8QLJpuvHzTiZG9N93z8Lef78r3feOSiy+9Y2F/fzo+NQWRJO8qhO8KgAQexZqOjg7UqjX84AePfGiyeuwLA6sXnXHueb8BHmzA4VeBp/4ZmJ5IYbscrmvDdoCOBQBPFIbKXTkHGAMYB7gBjjPzO9Ovcw/IMf1vAlhw4NBB4MAbZJ0+1m4+G9s3nY1w09D2Nw4+vf2uB775+0W397Yd23f8zZp1azA6OvquWeO/GkA6ka6ubri2g/u//8B5Y5Xjf7l648ILTtvxMcRTK7D7AeDQXn3hhTLQu8hSLpoK7apSaADokRAUErAIHKFBlQyQXD8y7dWABUDM/c4cIJ/TVkxvOrgPOPQGsGRgGbZuux5bNkyueu3Aj2579In7b+l+YdEfX3bpZfcUi0XMzMz8q4H8tQEUUsBxHHR39+CVPa/4//Tjx/53z2L71vdd/kGImfX46T3AkX2AXwB6+rW1EEbkdgQIjzWIqdQWpkAiPKR+r7JIoUHLDvoPZ/rvqweuf2HGamEsNV/SFzY9CTz1CLCwvxdnnnM9tm0Z2fDE0/d/7zv33HnfZRde/vn1GzcMVWs1lYX/rwJI6T2fK8D3fNx/7/0X79m7645L33vhqjXLduK5HwCvPg/kPaB/KdEfY0l0fWRdBFQCpFxbZWqsjxlDkAY8BYw0zxvQMsDUyxnoXD/N+RzAWQjwHCBXBJpt4MmHgeWrF+Hay27B4ckXrvvB/Q9etmfPnpuvu+66bxeKhV8bQP6rfoBMnjgeueyX/vbLXzg+9cbjN//7z6/qSHfi7r8BDu8FFi4F8p3aGrgBKotndGHIHrl5bp5VZWBjnuUxNmdhLAOWv93yWPZ3mA4B3CQjm4DMAZ09wMQI8NS9QGd0Fm659Q9KKEV3fvXvvvpXjWpDMYZfJ1P/ShZIlkdW12o0ced3/uGOzdtXfvqqy/8jnr4X2L8b6OgBeAeQJhqkNItrQsc2W4cuBZw0AHJh4hvTjzzVCErzb1hzAGbPWeZ8sptDVm3Nv1m2Ti7cgEsg0q9+UX/u1V1A//ECPnTtZ/HU8/f97t333nVqV2fX+xcuWdj6ldCjr/9lK5E4jrFy5Uq0Gy325b//0g8vff+Oy3dsuw4PfQ2YmQRKXYBINGgEFiUI+ndCj5kbC5M0hAaZGEUSYTap0Oe4cVnuzFEbx4AjDKWx5r2HEohD73M1BSKwLPqsAdDKrD27AXQjmf67jg+ccyXw2rGf4P47H9p/9eXXXNzd1zNMFUpXZ+cvVYmwZ376zDu+SUJiYf9C1CpV5657vvP0b3zosrO3rbsCj3wTiAMochvHBjQDEBFhinUEnrJICQimTVABTeDF+kJS81zmPYqe2IDjAZY3xwVnXZ5cmMByNDgEHr2XSLfikdYc6OTGjM99b/ZIIKtYHAOnXQyMBq/h23d8e2Tb5jO3b9y0cYjKPSrzWPahnwcg1X8/HzhtNn4uh2OHj7Gvf/P/ff76mz5w5rolO/DDOyUsMHWyYQRExqpgrIyyq3LhWFsWASnMd4p4DkARAXFqko0wmZdrEu352sqU1dnz4h60m/IMLNcclnFfcwMIJIq9hL3k8xLMvJhJNyMOgc3nA1W8ha/ddsf4xeddtvXMs88cqVQq72iF7BcGTeMqSRTjv/zJH/3TFb95ySVnDV6BH3yrrZKI7VhII6ZACIUGQsbGTaUGkYBDaqwTc+5Ndz6ix1CDmAh9cJOplVX5GrgsrpG7ZhmXGWvjrnZ1xyQNAsxl+gZkYMIkMAtzZFyBaG4KfWfYkNi0g2Es2ksgHv29z/3+xkXLFge/ED36vrfeeuvnvkgqRpKkuP32v7/9rIu2fubKiz6AH3031CdhScjEgkwcBRJZE1khuSQBlgGYxTzluvSlyVwMJLeP43kApvoiCQQV1zyTUa15AJqYRmApi3M1eJmb06NtboCVub6jLS37LDcgInNzQ7HCNnDq+cBLh57Go9995Ccfv+GTFwysWI5arfZzszMnyednHURVuru68MD93//8yk0Dn7nm0g/guUcS+Dbg5xi4uXWMC313LX23Z+lJ5jIZhbHnqMysRWQXaGlrV7Gez6t/TfWR8UFmXldZ11iWAgNzlCYr+5BZmmXe7+hzmA0Htnk+CwvEGUvA/heBswcvwFkXn33+Xd+9644oDFXB8HMtMIqin/kCfeje791z5mtv7XnhT774F3jtWYapcQnLlYhjoeKYzrBMpUdyxTgBomQuaWSuLOcdYl4ZlxgLTAIdh+jHNtalLtjQEMuAyjxdBysQmP5dWZxtjnmxzzZJhhuwZt3efN9sXTgvNip6lOr3rT8b+Puv/y2swPnEzbfc/M2fByAnoH7WcfTwEf6TZ5966N/d/FkMH2WozVAtyxThtCx9+yzOzd2Ws7EkC/TZCWbuwo11KDBMHFMXajicxefFJswr+xJDf7I7nv1izX3nfGtnGWGfFxOz1515yo4SKSwJm0tYTMJh5tGTKg6P7Aeu/+incGL8+Dd2PbNrGeZJYvMP+/Dhw29HlHN0lDvwrTu/9eUr33dFf29pCXY9C+QL2nrmyCtXZRiDAGMS3GL6TseabwlTailAUlN2ERCGhhA46o7b2pIVuabszOYqN7LSrDYWtv6c+g45d5PYPNAtY4mcEzBstuJRFkeft6R6TXKmqRLo34wyqb755v3kse0qQ3eQx7XXfxgPf+f73+nr6z2vHQYgj51Pbfh8NIn35At5PPzQQ1tynfbNl77nvXj9BSCXN/RDKgufzc76D7I5y2FzVmHOX1uGNc8SzYkqFzRCQlbj0vcTmESL4qZ2bWGoDbLsbcJB5mowSUNZMN1InsAmoKy5ElJXJiS5aU/JeKJtM9i2VBSI+KbmnRKWJ5DrFBg7luK0NYMYWDtw7g8fffQjC/oXoFgqolAozB72wMDA2+Jes9HAwSMH/89Hbrwe06NAq5HCz3OkgukgbtzJMhcuBVMVAk/nXDCrsLkJ/sI8r4i1qQZmvyvV5VwWo9Jkjg/aKn5Jzfk4my3PLMMBs3jJmQC3Uh3vyKIspjO5bW4qtHtydbOZioPqvZY+Sct8L5tnhZyT2sRRnwIuueq9+NZX/+4rzXrz7hWrVqX1Wn2WlHMi0nRQ04VI4z333Hv1klWLT9s4sAHH9ifIF4yFQr7NwjC/iIdOhXxeLO
+1=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
+2=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
+3=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
+4=lgvm5tSSWN/h6sg7DGJ8GAVH4uNfvgPee67CN/7ujjd/6/LLT7v6mmteJLf9VXZws26++eZ3fBNlKzJnSueu7WJgxYpw5bKl3/inhx9avLcSnb79/R9BtwUMvfIi2nGoFj7TdBSVb0o2yvTBRJptULI1wMZBpBmhNSvjs71S9GCnVAo41bk0XeqrBdEEv1oFosfjLGtuFTXnerSTKVKjtED6HnJvGjmpDR3ByrMuwI4//mu8Wk/w9AMP3bfz4osu33bG6RMz1RmMDI+odcjE+X4ZIH+l/QNZNgJG87W+h8/c+MmbCs3aTbf9n+/Ex1btwDmf/WP0dvWgcuSAasYrdi+1iqMoTAYQsm4/mxsDM/WVNNWHdltNrFXlYfbXSiSbK/mUkGteV4nIUnQm5WZfJ+5A2h6k5SCcOomiA5z/u/8NnZ/4T7jriecx9NKeP/rMxz/+m4uWLlNbPMlsceWv8PMrb8CY/dDGC6TPXf+xj95+1fYzT338wUceu3fvGPo//LvYcf2tcNIUlaHDiIK2tjSJ2dqUmVJMVxJzm1DMTjkavQXQq6BUyWcIcCK1+yZUnajnLAgqxbheHKm0c2Z235EcUWWasgXW/MYNWPj5v8UT1ip897v37d6yqP/cW2/97H/njo1qdebXheHX30OV4hWpEbRZxbkXXLB/+cqVVzx4/wOf/M7RY/9t87YtSzbf+meI9z6P1x97CKPHDsErdcEtlJXlGTnFLOUUxlKNERoks7m9bK5HialU9QgLIuXqtUjNL6v1UBCmilYN8ihUI265fBGLLrga7ZWnY9c0w2v/9HLDbVT+/EM7r/pfGzadovbEIhHlV7W6dwVAzFv+RRsW0kqkD1//218fGx6564lnfvKHB2B9bt36zT2bbtmGTcfexLHnn8aRV19V7/M6usBp5FdZl7FOqa3tbcvGMmoj5awKFMcWItphyCzwoexLooFFHIU2CeMSvStWo+O8KzDZuQpPjQd44+l9odWs3X7uaVv/cutp145NV6qoNxq/1P6A/6YAzgeSyr/pSoW2Hm7f+PFP/OnhQ2/9za4XXrzlUJLeOLByxaql134a518yhfD4Wzjx2m4MH30LzWpduZpNTSXKmCQpSe2uszv7yLkWKUn+IfVpVP85BqMyzrOQ6+5F5/I16FrzHqQLVuCoLODxiRZO7N0/7sfB1y8/8/Svrlu/4RjN+1RmKmgHATo6O96NS3/3djJnpldMdSPd2fUbN06fsnnzXx47cvR/7Hr22fc9d7j20Y6+/is7lw96PatPxZKoBTk1jvrwccycOIH6xBRqFVrS30IS0BZLtGJcL4amJpvv2mAFDzlBczjdSm4qLluBwtK1kD2LMSo8vNiUqBwP5dTo3id6ffcfrt5+5n3rT9lYo/MjetJsNtS4HXtHevzL/7zre+lnLkHCLEljSweWJZeViveODI/cW63OLDp87NilJ4PoqkJX12mF7uXrC4vXoHhqiAVUjgVtNCtTEGkEn7aHZ3roPZYpArJEx0FnVy/t1YJKkGDcKaDSjtAaio62ZsZfKrn8H5cvXvTo9nPPObZoyWK9s3q9Bs/1VPn3r3XXn/Xzb/Z/czDLVFWQ1v8rigDr1q8fOXVw8B9mZmb+YejYcYxNjA8OD8+cbrne2noYLuvr6T0nv2T1glYUqHmbUq6g1rU1wwC1oA3HtlFJZG3k0PBP8657jMXTh3Ku89LKBQt2rz1jUHR0dqr/1QV1GalyUpXEu4/Z3A+A/x+R1c2ByzXyVgAAAABJRU5ErkJggnic4w/NKSlK9Az2j7cw0CvIS2cYBSMKqJnil8+7dMGekQEAMYgH6FKHgaIBAAAAAgAAACcAAAAmNQAAAAAAAAEAAAAAAAAAAAAAAA
