@@ -35,31 +35,31 @@ Author=Homes32
 Level=8
 Selected=None
 Mandatory=False
-Version=1.0.2.0
+Version=1.0.3.0
 Date=2020-12-27
 
 [Variables]
-%Rufus.exe%=%Tools%\Rufus.exe
-%Rufus.ini%=%Tools%\Rufus.ini
-%EncodedRufusVer%=3.11.1678.0
+%Rufus.exe%=%Tools%\x86\Rufus.exe
+%Rufus.ini%=%Tools%\x86\Rufus.ini
+%EncodedRufusVer%=3.13.1730.0
 
 [Process]
 Echo,"Launching Rufus..."
 
-If,Not,ExistFile,%Rufus.exe%,ExtractFile,%ScriptFile%,Rufus,Rufus.exe,%Tools%
+If,Not,ExistFile,%Rufus.exe%,ExtractFile,%ScriptFile%,Rufus,Rufus.exe,"%Tools%\x86"
 
 FileVersion,%Rufus.exe%,%RufusVer%
-If,%RufusVer%,Smaller,%EncodedRufusVer%,ExtractFile,%ScriptFile%,Rufus,Rufus.exe,%Tools%
+If,%RufusVer%,Smaller,%EncodedRufusVer%,ExtractFile,%ScriptFile%,Rufus,Rufus.exe,"%Tools%\x86"
 
 If,Not,ExistFile,%Rufus.ini%,Begin
   // Rufus ignores section headers and using TXTAddLine/TXTReplace is annoying, sooo lets use IniWrite instead...
   FileCreateBlank,%Rufus.ini%
-  IniWrite,%Rufus.ini%,Rufus,UpdateCheckInterval,-1
+  IniWrite,%Rufus.ini%,"Rufus","UpdateCheckInterval",-1
 End
 
 // User Pref
-If,%cb_RufusDualBoot%,Equal,True,IniWrite,%Rufus.ini%,Rufus,EnableWindowsDualUefiBiosMode,1
-Else,IniWrite,%Rufus.ini%,Rufus,EnableWindowsDualUefiBiosMode,0
+If,%cb_RufusDualBoot%,Equal,True,IniWrite,%Rufus.ini%,"Rufus","EnableWindowsDualUefiBiosMode",1
+Else,IniWrite,%Rufus.ini%,"Rufus","EnableWindowsDualUefiBiosMode",0
 
 If,ExistFile,%ISOFile%,ShellExecuteEx,Open,%Rufus.exe%,"--gui --filesystem %cmb_Filesystem% --iso=%ISOFile%",%Tools%
 Else,Begin

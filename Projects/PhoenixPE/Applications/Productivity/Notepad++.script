@@ -30,20 +30,20 @@
 
 [Main]
 Title=Notepad++
-Description=(v7.9.3) Notepad++ is a free and open source code editor and Notepad replacement that supports multiple languages.
+Description=(v7.9.4) Notepad++ is a free and open source code editor and Notepad replacement that supports multiple languages.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.2.2.0
-Date=2021-02-15
+Version=1.2.3.0
+Date=2021-03-22
 
 [Variables]
 %ProgramFolder%="Notepad++"
 %ProgramExe%="notepad++.exe"
 %ShellExtDll%="NppShell_06.dll"
-%DownloadURLx32%=https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.9.3/npp.7.9.3.portable.7z
-%DownloadURLx64%=https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.9.3/npp.7.9.3.portable.7z
+%DownloadURLx32%=https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.9.4/npp.7.9.4.portable.7z
+%DownloadURLx64%=https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.9.4/npp.7.9.4.portable.7z
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -89,9 +89,9 @@ List,Count,%txt_RegisterFileExt%,%ExtCount%,Delim=#$c
 Loop,%ScriptFile%,RegisterFileExtensions_Loop,1,%ExtCount%
 
 // doLocalConf is ignored if running from Program Files
-// the notepad++ author's decided that they know better then us when the ProgramDir is writable.
-// as such, this will only be used if notepadd++ is running from cd/usb. otherwise we
-// will need to copy config.xml to %AppData%.
+// the notepad++ author's decided that they know better then us when the ProgramDir is writable,
+// so unless we want to patch the .exe we can only use doLocalConf if notepadd++ is running from cd/usb.
+// otherwise we will need to copy config.xml to %AppData% if using Run From Ram.
 If,%cb_RunFromRam%,Equal,True,Begin
  Set,%config.xml%,"%TargetAppData%\%ProgramFolder%\config.xml"
  FileCopy,"%TargetPrograms%\%ProgramFolder%\config.xml",%config.xml%

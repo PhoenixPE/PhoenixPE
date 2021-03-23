@@ -29,52 +29,53 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=DesktopInfo
-Description=(v2.10.1 x86) A lightweight application that displays real-time system information on your desktop.
+Title=OCCT
+Description=OCCT is an all-in-one stability check & stress test tool, great at generating heavy loads on your components (CPU, GPU, Memory, GPU Memory & Power supply).
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
 Version=1.0.0.0
-Date=2021-03-10
+Date=2020-07-27
+Interface=Interface
 
 [Variables]
-%ProgramFolder%="DesktopInfo"
-%ProgramExe%="DesktopInfo.exe"
-%DownloadURL%=https://www.glenn.delahoy.com/downloads/desktopinfo/DesktopInfo2101.zip
-%SetupFile%="DesktopInfo.zip"
+%ProgramFolder%="OCCT"
+%ProgramExe%="OCCT.exe"
+%DownloadURL%=https://www.ocbase.com/download
+%ConfigFile%="OCCT.config.json"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
+If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",Run,%ScriptFile%,DownloadProgram
+FileCopy,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%","%TargetPrograms%\%ProgramFolder%\%ProgramExe%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
+
+// Dependencies
+RequireFileEx,Append,\windows\System32\amsi.dll
+RequireFileEx,Append,\Windows\System32\dinput.dll
+RequireFileEx,Append,\Windows\System32\dpnet.dll
+RequireFileEx,Append,\windows\System32\dxdiagn.dll
+RequireFileEx,Append,\windows\System32\mpg2splt.ax
+RequireFileEx,Append,\windows\System32\ResourcePolicyClient.dll
+RequireFileEx,ExtractList
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
 Echo,"Configuring %ScriptTitle%..."
-
-// Custom Config
-If,%cb_UseCustomCfg%,Equal,True,Begin
-  If,Not,%fb_CustomCfg%,Equal,"",If,ExistFile,%fb_CustomCfg%,Begin
-    // Copy or Extract
-    StrFormat,Ext,%fb_CustomCfg%,%FileExt%
-	If,%FileExt%,Equal,"ini",FileCopy,%fb_CustomCfg%,"%TargetPrograms%\%ProgramFolder%"
-	Else,Decompress,%fb_CustomCfg%,"%TargetPrograms%\%ProgramFolder%"
-	// Let Decompress handle any failures resulting from the unpack or unsupported file type.
-  End
-  Else,Halt,"ERROR: The custom configuration file [%fb_CustomCfg%] does not exist."
-End
-Else,ExtractAllFiles,%ScriptFile%,config,"%TargetPrograms%\%ProgramFolder%"
-
-// AutoRun
-If,%cb_AutoRun%,Equal,True,AddAutoRun,PostShell,NoWait,"Starting DesktopInfo...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-
+FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%"
+TxtAddLine,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","{",Append
+TxtAddLine,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","#$qLanguage#$q: #$qAuto#$q,",Append
+TxtAddLine,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","#$qAutoUpdate#$q: true",Append
+TxtAddLine,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","}",Append
+  
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 
@@ -82,21 +83,6 @@ If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEProgra
 If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-
-[#ExtractProgram#]
-// ===============================================================================================================================
-// Name...........: ExtractProgram
-// Description....: Extract program files from script/setup files.
-// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: 
-// ===============================================================================================================================
-[ExtractProgram]
-Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -111,23 +97,8 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
-
-[#ExtractSampleCfg#]
-// ===============================================================================================================================
-// Name...........: ExtractSampleCfg
-// Description....: Remove all downloaded setup and program files.
-// Syntax.........: 
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: btn_ExtractSampleCfg
-// ===============================================================================================================================
-[ExtractSampleCfg]
-ExtractAllFiles,%ScriptFile%,config,"%ProjectTemp%\%ProgramFolder%"
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\DesktopInfo.ini"
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -142,9 +113,8 @@ ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\DesktopInfo.ini"
 // ===============================================================================================================================
 [LaunchProgram]
 Echo,"Launching %ScriptTitle%..."
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",Run,%ScriptFile%,DownloadProgram
+ShellExecuteEx,Open,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%"
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================
@@ -178,11 +148,8 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"System Information"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"DesktopInfo"
-WriteInterface,Value,%ScriptFile%,Interface,cb_AutoRun,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_UseCustomCfg,False
-WriteInterface,Value,%ScriptFile%,Interface,fb_CustomCfg,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Benchmarking"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"OCCT"
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -211,7 +178,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"A lightweight, fully customizable application that displays real-time system information on your desktop.#$x#$xDesktopInfo is freeware. If you enjoy the software please support the developer.#$x#$xOn first run this script will download the setup file (~1 MB) and cache it for future builds."
+Message,"OCCT is an all-in-one stability check & stress test tool, great at generating heavy loads on your components (CPU, GPU, Memory, GPU Memory & Power supply).#$x#$xOCCT is free for personal use. Commercial use requires you to purchases a license. If you enjoy the software please support the developer.#$x#$xOn first run this script will download the program (~20 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -225,10 +192,9 @@ Message,"A lightweight, fully customizable application that displays real-time s
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch DesktopInfo",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
-btn_ExtractSampleCfg="Sample Config",1,8,255,5,100,25,ExtractSampleCfg,Log.ico,True
+btn_LaunchProgram="Launch OCCT",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://www.glenn.delahoy.com/desktopinfo/
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.ocbase.com/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
@@ -241,13 +207,10 @@ cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"System Information"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,DesktopInfo
-bvl_Options=Options,1,12,154,90,284,184,8,Bold
-cb_AutoRun="Run on Startup",1,3,163,108,167,18,True
-cb_UseCustomCfg="Use custom configuration",1,3,163,170,200,18,False
-fb_CustomCfg=,1,13,163,192,264,20,file,Title=Select your DesktopInfo.ini file or an 7z/rar/zip archive containing your custom config
-lbl_CfgInfo="DesktopInfo is fully cuztomizable.#$xSelect your personalized DesktopInfo.ini file or a .7z/.zip file containing DesktopInfo.ini and any custom scripts/templates you wish to include.",1,1,163,220,266,49,8,Normal
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,Benchmarking
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,OCCT
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always include the latest version of OCCT in your build."
+lbl_RuntimeNote="Note: OCCT requires the PhoenixPE > Components > .Net Framework script to be enabled.",1,1,5,295,563,16,8,Bold
 
 [InterfaceEncoded]
 play-hot.png=841,1220
@@ -256,11 +219,10 @@ SetDefaults_16.png=2475,3404
 Advanced_16.png=2000,2768
 Help_16.png=2830,3868
 VistalcoDownload_16.png=927,1348
-Log.ico=1150,832
 
 [AuthorEncoded]
-DesktopInfo_80.png=3654,4976
-Logo=DesktopInfo_80.png
+OCCT_80.png=1124,1596
+Logo=OCCT_80.png
 
 [EncodedFile-InterfaceEncoded-play-hot.png]
 lines=0
@@ -286,20 +248,6 @@ lines=0
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
 
-[EncodedFile-InterfaceEncoded-Log.ico]
+[EncodedFile-AuthorEncoded-OCCT_80.png]
 lines=0
-0=eJyVk8tu00AUhqc0CARIdMWaDVLfIRuUPAiktE2EhIQAiWUKWSFeh9IFTerEt9wKiNA4wAoJCRHHduzYieNcDmeOL6CmEcLW77FG8/n/z/gMYxt4b20xfN5mhRRjtxhj2yicwplwnl93U2ztVSqVHmez2VeZTOb1v5ROp5+/fHFwOWaPj9+lNE2D5XIJi8Ui0hzm80izGcxIAQRBAKIoQu7+vRsxLwgnxPO1fB1fEwRTmE6n4Ps+TCYTmIzHMPY88DyX+Ae5XMJXqwLxnP3aVuBLS0ZJ0ONqiqBxNWo0uqMR8bs7OwkviSLx3DPkL2AjOY5NfH5vN+EbdZX4KWb1fcw6wayY1+N5XZc8R44Djm2DPRxCrVaDh4XC9YRXQ57X2WtKiVe3UYVuvQpndQHOVK4qDC2L+Pz+3rWYrysK8dyzF+WN2a4asUo4Wqaxlud767qYdeRQnY49xLwWeVqmCaZhgGEM1vK8TsobeX5WTkLJFehEGug68YX8/grPPWM+YVHc0xjoyPZB7/dXeDXibcw7xLyWZVKdZsLpVAvtvx3u/7OnT67+4WXieZ3cL87akco0cs+PH97D6WkbOp1PcHj45rsiS5fO8+c9w7y/oI9qt1vUG0dHb39UyuU7f5+9bz1tM/x/HvV43Oe8d6h/8J/o+D08Zz/rqrJ90fnFPI9kSSxyKShcV1RlGd8lmhOESrHVbKywwgZjB/+rTdQVZG8y9hv23cDJeJxj98lP18tMzmcYBSMS1LFAaA0m7PIXFpueYWADAKEdBblZFdWqAQAAAAIAAAAjAAAAKAIAAAAAAAABAAAAAAAAAAAAAAA
-
-[EncodedFolders]
-config
-
-[config]
-desktopinfo.ini=5506,2576
-
-[EncodedFile-config-desktopinfo.ini]
-lines=0
-0=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
-[EncodedFile-AuthorEncoded-DesktopInfo_80.png]
-lines=1
-0=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
-1=jxxx+rGRSS7MXFRV61GNx7Q6P6zZBA6sRD+iSiyIvVvkr71ltv4ejRoyyMeuONN5j3HxkZYdLEN4Mk6SOiiDBOFk27Pv/8c3z33XdVUrkUB6QTcUMbTeBmSGCBLy+nzq12VBR3EqE0PyVy6H8Kckka6SBVJeJJKkn1uZQSSbRtab0ZRQBvo8lDmwSuvfB89Q1kWT1y5EiYJun1vDwFtJSHI2IowCUyKRuSTCarO+cSeaSatIMuD2KJzMOHD7Np2WoEW3aGL168eNJxnFacyPlaB9EM2lHhs2suPK+DU6dOMamiIH01ePRPBFISk9SQPolU+s4dBKk+DQJXf1J1Ipls4WqQ1JJ3/uCDD1rt2z8B/KWVC9qRQLbwnDrHG892xgh2fuQqxs9Rp4k4TlA98HrCYbY2C729vdWt59bKxxGJRP5qkFrTPWnDWDINtVg9SaDvNWag5UX1bdtAsld37txho03e9dq1a0ydXn/9dUYWnSOVpHIUpzU7qyGJpKwwZYRJ2siJtDMvJ2KOHDlS/c134r106VJ1h2Ka29IAnDlz5jGim0XbBFIDKGtLOHDgAJMe+k0Sx8+RipHdooY383wBQVJj79691d8vv/wyk9xG29DVgk/+qS38nnQ91UOSyevjqt5oj8A1eWj3QrJRJ06cYLaJRpE8Io3o7t27WYPoXO0soVmQOpG9rHUizWyE2Ag8JUVen9fHpXKzp7Cnajax2mrHqVbJaEcCs5sRX/1MoL41DwD/B8AlAimJ9r4+AAAAAElFTkSuQmCCeJwTckktzi7JL/DMS8uPtzDQK8hLZxgFIwe48eGXXxcwqZyRAQA+DwkPL7kZ4QEAAAACAAAAKgAAAEYOAAAAAAAAAQAAAAAAAAAAAAAA
+0=iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAEK0lEQVR4nO2cS2gdVRiAvzOP2ybXJJbSh60VKdIiiFCyEUTcCK5c+EBXCt0p2J1246buW6HUpVvtTtu66EasilBc6ErEZ5WqWEq1mJibyc085Jyci0EyczP5k8m90/+DgZszczLzf/M4zD/nHMMaFL7oFPDmys9X/Z+7gH/WqjPmBMBdwEfAK8CP6w0nGrJ+D3AZmO0Yw0NxzLQx02nL7EXGcC1NuZ6mTwA/ACeAt9dVd63CM8Ak8MnKP5k9HEW80O1yJIqwIrNND2H7sLegjWcuz7mSJFzo9ewdeA74ekVBNWvewp6ngffviyJOTk8zFQTcyjLSIZXGlUlj2BOGXOr1eHdhwUZxFTgJfF4VUlhS/ixwHDjyUrfL4TjmRpa5Z2Mb5Vn6QFIUPBDH/JJl3MyyQz7ci1X1gpLyHcDOQ2HI0Tjmdp63VtwA4wXaR9SxOB4U7xhWr0zgykpjCI0hLYqqzVqD8YuNe71UCsztA7YoWn/1/Z+8xraVAu9U6txvKlCIChSiAoWoQCEqUIgKFKIChahAISpQSGVC1a68JwxZApZH/H148B57K89dUqAszbTZVAq0ScbLSeKSCaOeRC38O+zRKGImCOg3dMIrBf6Z57wzP9/IgWwWJ6amOBiG/LXNAj8GvgXuBXqNHImMn4GXgdea3nGZwBt++arh45HwzXbsVFthISpQiAoUogKFqEAhKlCIChSiAoWoQCFlbyJPAk8BzwHXBbuwJ2g/8CJwpfHoGqBM4G6b2NhpzL77o2hfXvNjsyU2hr/znN9T15tw16iL2CiV2Zj9YcgbMzMuH1i3f8zeMOTTJOHs3Nw2hNUclQJtDnA+z11urW6v1AljSPI6vUzGk2FdfF2SMq/Z4QYvv/36tBUWowKFqEAhKlCIChSiAoWoQCEqUIgKFKIChahAISpQiAoUogKFqEAhKlCIChQyNCO9STwC/OY7bG4F9svhbJsFvu6X1rFlAu0nzYNRxPFu14163+pB24NO5nbiiPkGRxRsmUA71MD2ln98YqKRj0uDE3R7lIY5SAj92JKbWfMDJJqSh7bCclSgEBUoRAUKUYFCVKAQFShEBQpRgUJUoBAVKKRSoGnxjJVV1LmqKrctNtA7f9xxMddIh1UKtD3zbSoqrDGj4zhT+ExOUiOGMoHuRPyRZfyapnbu6NZfiTa+jk/B/bS8vLq4kjKBl4D37I8PFxfdEIfdQdDa52HhZ5s9EEV80e/zZd/O6evmkT4/rO4wJ58Bjx3rdHh+ctKl6NdTaZwYxLJYFFxdWuL8woL7DTwDfCAV+KCfzXvv3UHAw52Ou8wngsBdum24rW0cS0XhpoL/7r9b97ToI5htM1a1G3Yfb61qlNu8fA88WstVmcABq1r0A34QYn/DZ2Z0Mf5CuVazES4VOCh3+u6QebjrA/wL+0o+tyM4jHAAAAAASUVORK5CYIJ4nOP2d3YOibcw0CvIS2cYBSMOpLDgly/MlHjMyAAAYosFrXFuxSkBAAAAAgAAACMAAABkBAAAAAAAAAEAAAAAAAAAAAAAAA

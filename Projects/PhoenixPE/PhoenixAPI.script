@@ -31,7 +31,7 @@
 [Main]
 Title=PhoenixPE API
 Author=Homes32
-Description=Scripting interface.
+Description=PhoenixPE scripting support library.
 Version=1.4.0.0
 Level=0
 Selected=None
@@ -42,6 +42,7 @@ Selected=None
 [Macros]
 RegLoadHives=Run,%API%,_PhoenixAPI_RegLoadHives
 RegUnloadHives=Run,%API%,_PhoenixAPI_RegUnloadHives
+RegCopyDriver=Run,%API%,_PhoenixAPI_RegCopyDriver
 
 RunFromRam=Run,%API%,_PhoenixAPI_RunFromRam
 AddAutoRun=Run,%API%,_PhoenixAPI_AddAutoRun
@@ -128,6 +129,34 @@ Else,Begin
   RegHiveUnload,Tmp_Install_System
 End
 
+[#_PhoenixAPI_RegCopyDriver#]
+// ===============================================================================================================================
+// Name...........: RegCopyDriver
+// Description....: Copy the driver entries from the INSTALL.WIM driver database to the target registry to the driver database
+//                  of our target DRIVERS hive.
+// Syntax.........: RegCopyDriver,<filename.inf>
+// Parameters.....: InfFile - The name of the driver's .inf file
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: This function uses a modified version of ChrisR's RegAddDriver.cmd as PEBakery does not have a good way
+//                  to enum/query registry keys yet...
+//                  Registry hives must be loaded before calling.
+// Related........: Depends on %Tools%\RegCopyDriver.cmd
+// ===============================================================================================================================
+[_PhoenixAPI_RegCopyDriver]
+System,SetLocal
+Set,%Debug%,False
+
+If,#1,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to register."
+GetParam,1,%InfFile%
+
+Echo,"Processing [%InfFile%] registration..."
+If,%Debug%,Equal,True,TXTReplace,"%Tools%\RegCopyDriver.cmd",":::",""
+
+ShellExecute,Hide,"cmd.exe","/D /C RegCopyDriver.cmd #$q%InfFile%#$q",%Tools%
+
+System,EndLocal
+
 [#_PhoenixAPI_7z#]
 // ===============================================================================================================================
 // Name...........: 7z
@@ -187,9 +216,10 @@ System,EndLocal
 // Syntax.........: InnoUnpack,<SetupFile>,<DestDir>[,<Args>]
 // Parameters.....: #1 SetupFile - The inno-setup file to unpack.
 //                  #2 DestDir - The full path to the directory where the files will be unpacked.
-//                  #3-#4 - Additional Arguments:
+//                  #3-#5 - Additional Arguments:
 //                  PASSWORD=<Password> - Password required to decrypt the setup file. (-p)
 //                  CDIR=<CurrentDir> - Notifies innounp that you are only interested in paths from the current directory and below. (-c)
+//                  LIST=<FileList.txt> - Instructs innounp to use a list file to determine the files to extract (@listfile)
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
@@ -204,13 +234,17 @@ GetParam,1,%SetupFile%
 Getparam,2,%DestDir%
 Getparam,3,%Arg3%
 Getparam,4,%Arg4%
+Getparam,5,%Arg5%
+
+Set,%Password%,""
+Set,%CurrentDir%,""
+Set,%ListFile%,""
 
 Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg3%
-Set,%Param1%,#r
 Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg4%
-Set,%Param2%,#r
+Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg5%
 
-ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Param1%%Param2%#$q%SetupFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Password%%CurrentDir%#$q%SetupFile%#$q%ListFile%"
 If,Not,%ExitCode%,Equal,0,Begin,
   FileVersion,"%Tools%\x86\Innounp.exe",%InnounpVer%
   Halt,"Error: Failed to unpack setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using Innounp.exe version [%InnounpVer%]."
@@ -227,25 +261,27 @@ System,EndLocal
 // Return values..: #r - Command line string to be passed to Innounp.exe
 // Author.........: Homes32
 // Remarks........: Internal Function
-// Related........: _PhoenixAPI_Innounp
+//                  Do not call System,SetLocal here. We need this function to run in the same scope as PhoenixAPI_InnoUnpack
+// Related........: _PhoenixAPI_InnoUnpack
 // ===============================================================================================================================
 [__PhoenixAPI_InnoUnpack_Process_Arg]
-System,SetLocal
 
 StrFormat,Split,#1,"=",1,%ArgKey%
 If,Not,%ArgKey%,Equal,"",Begin
   If,%ArgKey%,Equal,"PASSWORD",Begin
     StrFormat,Split,#1,"=",2,%Password%
-	Set,#r," -p#$q%Password%#$q "
+	Set,%Password%," -p#$q%Password%#$q "
   End	
   Else,If,%ArgKey%,Equal,"CDIR",Begin
 	  StrFormat,Split,#1,"=",2,%CurrentDir%
-	  Set,#r," -c#$q%CurrentDir%#$q "
+	  Set,%CurrentDir%," -c#$q%CurrentDir%#$q "
+  End
+  Else,If,%ArgKey%,Equal,"LIST",Begin
+	  StrFormat,Split,#1,"=",2,%ListFile%
+	  Set,%ListFile%," #$q@%ListFile%#$q"
   End
   Else,Halt,"SYNTAX ERROR: Invalid Argument [#1]"
 End
-
-System,EndLocal
 
 [#_PhoenixAPI_Associate#]
 // ===============================================================================================================================
@@ -522,6 +558,7 @@ System,EndLocal
 //                     PreShell - Run before the shell (ie. Explorer) is loaded.
 //                     PostShell - Run after the shell is loaded.
 //                     RunOnce - Run during startup via HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+//                     AfterNetwork - Run after network connectivity has been established by PENetwork.
 //                  #2 Mode
 //                     NoWait     - Do not wait for the program to terminate.
 //                     Wait       - Wait for the program to terminate before moving on.
@@ -533,7 +570,6 @@ System,EndLocal
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: PECMD: EXEC {[-hide] [-wait]} <ProgramExe> [Parameters]
-//                  PECMD <MODE> needs testing. Wait/HideWait is not working properly?
 // Related........: 
 // ===============================================================================================================================
 [_PhoenixAPI_AddAutoRun]
@@ -558,6 +594,7 @@ If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
   If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\pecmd.ini","_END Preshell","TEXT %Title%##0xFFFFFF L59 T39 $20#$xEXEC %ExecMode%%ProgramExe% %Parameters%#$x#$x_END Preshell"
   Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\pecmd.ini","_END PostShell","TEXT %Title%##0xFFFFFF L59 T39 $20#$xEXEC %ExecMode%%ProgramExe% %Parameters%#$x#$x_END PostShell"
   Else,If,%RunGroup%,Equal,"RunOnce",Run,%API%,__PhoenixAPI_AddAutoRun_RunOnce
+  Else,If,%RunGroup%,Equal,"AfterNetwork",Run,%API%,__PhoenixAPI_AddAutoRun_AfterNetwork
   Else,Halt,"AddAutoRun Syntax Error: [%RunGroup%] is not a supported Run method."
 End
 Else,Begin
@@ -574,6 +611,7 @@ System,EndLocal
 // ===============================================================================================================================
 // Name...........: PhoenixAPI_AddAutoRun_RunOnce
 // Description....: Run a program during startup via HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce
+//                  RunOnce entries are always processed synchronously by Windows. NoWait and HideNoWait modes are not supported.                 
 // Syntax.........: PhoenixAPI_AddAutoRun_RunOnce
 // Parameters.....: 
 // Return values..: 
@@ -590,14 +628,41 @@ Else,Set,%RegHivesLoaded%,False
 
 If,%RegHivesLoaded%,Equal,False,RegHiveLoad,Tmp_Default,%RegDefault%
 
-// RunOnce entries are always processed synchronously, so we ignore the Wait parameter and just run hidden if that's what the user wants
 Set,%ExecMode%,""
-If,%Mode%,Equal,HideWait,Set,%ExecMode%,"hiderun.exe "
-If,%Mode%,Equal,HideNoWait,Set,%ExecMode%,"hiderun.exe "
+If,%Mode%,Equal,NoWait,Halt,"AddAutoRun Error: RunOnce does not support [%Mode%]."
+Else,If,%Mode%,Equal,Wait,Set,%ExecMode%,""
+Else,If,%Mode%,Equal,HideWait,Set,%ExecMode%,"hiderun.exe "
+Else,If,%Mode%,Equal,HideNoWait,Halt,"AddAutoRun Error: RunOnce does not support [%Mode%]."
+Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
 
 RegWrite,HKLM,0x2,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Run","%Title%","#$q%ExecMode%%ProgramExe%#$q #$q%Parameters%#$q"
 
 If,%RegHivesLoaded%,Equal,False,RegHiveUnload,Tmp_Default
+
+[#__PhoenixAPI_AddAutoRun_AfterNetwork#]
+// ===============================================================================================================================
+// Name...........: PhoenixAPI_AddAutoRun_AfterNetwork
+// Description....: Run a program after PENetwork has established connectivity.
+// Syntax.........: PhoenixAPI_AddAutoRun_AfterNetwork
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Internal Function
+//                  Requires hiderun.exe to exist in %SystemRoot% for run hidden.
+//                  Requires PENetwork to be configured to execute System32\RunAfterNetwork.cmd
+//                  Do not call System,SetLocal here. We need this function to run in the same scope as PhoenixAPI_AddAutoRun
+// Related........: PhoenixAPI_AddAutoRun
+// ===============================================================================================================================
+[__PhoenixAPI_AddAutoRun_AfterNetwork]
+
+Set,%ExecMode%,""
+
+If,%Mode%,Equal,NoWait,Set,%ExecMode%,"/WAIT "
+Else,If,%Mode%,Equal,Wait,Set,%ExecMode%,""
+Else,If,%Mode%,Equal,HideWait,Set,%ExecMode%,"/WAIT hiderun.exe "
+Else,If,%Mode%,Equal,HideNoWait,Set,%ExecMode%,"hiderun.exe "
+
+TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","Echo %Title%#$xSTART %ExecMode%#$q%ProgramExe%#$q #$q%Parameters%#$q",Append
 
 [#_PhoenixAPI_AddShortcut#]
 // ===============================================================================================================================
@@ -801,7 +866,7 @@ System,EndLocal
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: 
+// Remarks........: Do not use System,SetLocal here. For this macro to work it must run in the scope of the calling script.
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_RunFromRam]
@@ -826,7 +891,7 @@ If,#1,Equal,"",Halt,"Syntax Error: Directory was not specified."
 
 System,ErrorOff
 If,ExistDir,#1,DirDelete,#1
-// If Dir still exists wait a few more seconds to give async tasks time to complete...
+// If Dir still exists wait a few more seconds to give async tasks time to complete before we bother the user...
 If,ExistDir,#1,Wait,5
 If,ExistDir,#1,Begin
   If,Question,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer.#$x#$xRetry?",Begin

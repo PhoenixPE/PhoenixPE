@@ -55,7 +55,6 @@ If,%cb_RunFromRam%,Equal,True,RunFromRam
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\WinPE.zip",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram
-// Write the .exe version to the log to aid in debugging
 FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -336,6 +335,9 @@ Echo,"Downloading %ScriptTitle%..."
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
 
+// The name of the CAB file inside the .msi to extract. This occasionally changes with new releases and needs to be updated.
+Set,%CAB%,"_57_52D78812FFC93DDE133DECBB0875BCA0"
+
 // Extract the .msi installer
 Echo,"Extracting installer..."
 7z,"e -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q AcronisTrueImage.msi -o#$q%ProjectTemp%\%ProgramFolder%#$q"
@@ -343,13 +345,13 @@ If,Not,#r,Equal,0,Halt,"Failed to extract .msi from [%SetupFile%]: The code retu
 
 // Extract compressed WinPE.zip from .msi installer
 Echo,"Extracting WinPE.zip from installer..."
-7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\AcronisTrueImage.msi#$q _56_52D78812FFC93DDE133DECBB0875BCA0 -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\AcronisTrueImage.msi#$q %CAB% -o#$q%ProjectTemp%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"Failed to extract from [AcronisTrueImage.msi]: The code returned was [#r]."
 
 // Unpack compressed WinPE.zip
 Echo,"Decompressing WinPE.zip..."
-7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\_56_52D78812FFC93DDE133DECBB0875BCA0#$q WinPE.zip -o#$q%ProgramsCache%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Failed to extract from [_56_52D78812FFC93DDE133DECBB0875BCA0]: The code returned was [#r]."
+7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\%CAB%#$q WinPE.zip -o#$q%ProgramsCache%\%ProgramFolder%#$q"
+If,Not,#r,Equal,0,Halt,"Failed to extract from [%CAB%]: The code returned was [#r]."
 
 // Cleanup
 DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
