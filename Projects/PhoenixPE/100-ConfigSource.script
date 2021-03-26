@@ -157,28 +157,40 @@ End
 If,%cmb_BaseWim%,Equal,"Boot.wim",Begin
   // Get the number of images in the wim file.
   WimInfo,%SourceBaseWim%,0,ImageCount,%imgCount%
-  Set,%indexList%,""
+  Set,%imgIndexList%,""
+  Set,%imgNameList%,""
   // Loop through each image and get the information.
   Loop,%ScriptFile%,GetImgInfo_Loop,1,%imgCount%,%SourceBaseWim%
-  StrFormat,LTrim,%indexList%,1,%indexList%
+  // Populate cmb_SrcBaseImage
+  WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcBaseImage,%imgIndexList%
   // Select the highest number image as the default.
-  List,Count,%indexList%,%splitCount%
-  StrFormat,Split,%indexList%,|,%splitCount%,%indexSelected%
-  WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcBaseImage,%indexList%
+  List,Count,%imgIndexList%,%SrcBaseImageCount%
+  List,Get,%imgIndexList%,%SrcBaseImageCount%,%indexSelected%
   WriteInterface,Value,%ScriptFile%,Interface,cmb_SrcBaseImage,%indexSelected%
 End
 
 // Install.wim
 // Get the number of images in the wim file.
 WimInfo,%SourceInstallWim%,0,ImageCount,%imgCount%
-Set,%indexList%,""
+Set,%imgIndexList%,""
+Set,%imgNameList%,""
+
 // Loop through each image and get the information.
 Loop,%ScriptFile%,GetImgInfo_Loop,1,%imgCount%,%SourceInstallWim%
-// Select the highest number image as the default.
-List,Count,%indexList%,%splitCount%
-StrFormat,Split,%indexList%,|,%splitCount%,%indexSelected%
-WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcInstallImage,%indexList%
+
+// Populate cmb_SrcInstallImage
+WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcInstallImage,%imgIndexList%
+
+// Select the Windows 10 Pro image as default.
+List,Pos,%imgNameList%,"Windows 10 Pro",%ProPos%
+If,%ProPos%,Equal,0,Begin
+  // Could not find Windows 10 Pro index. Just select the highest numbered image.
+  List,Count,%imgIndexList%,%SrcInstallImageCount%
+  List,Get,%imgIndexList%,%SrcInstallImageCount%,%indexSelected%
+End
+Else,List,Get,%imgIndexList%,%ProPos%,%indexSelected%
 WriteInterface,Value,%ScriptFile%,Interface,cmb_SrcInstallImage,%indexSelected%
+
 // Populate ImgInfo for the selected image
 Run,%ScriptFile%,GetSourceWimImage
 
@@ -202,7 +214,10 @@ System,Cursor,Normal
 //                  %imgArch% - Arch (x86/x64)
 //                  %imgLang% - Default Language
 //                  %imgName% - Image Name
-//                  %indexList% - String containing a pipe separated list of all images in <WimFile> formatted for use in cmb_SrcBaseImage and cmb_SrcInstallImage
+//                  %imgIndexList% - String containing a pipe delimited list of all images in <WimFile> formatted for use in 
+//                                   cmb_SrcBaseImage and cmb_SrcInstallImage (Index - Name). 
+//                  %imgNameList - String containing a pipe delimited list of names for all images in <WimFile>
+//                                 Useful for selecting a specific/default image name.
 // Author.........: Homes32
 // Remarks........:
 // Related........:
@@ -230,7 +245,8 @@ StrFormat,CTrim,%imgFallbackLang%,|,%imgFallbackLang%
 If,%imgArch%,Equal,0,Set,%imgArch%,"x86"
 Else,Set,%imgArch%,"x64"
 
-List,Append,%indexList%,"#c - %imgName%"
+List,Append,%imgIndexList%,"#c - %imgName%"
+List,Append,%imgNameList%,"%imgName%"
 
 [#GetSourceWimImage#]
 // ===============================================================================================================================
@@ -295,7 +311,7 @@ Set,%imgTemp%,Nil
 [DownloadWithFido]
 Set,%FidoURL%,"https://github.com/pbatard/Fido/releases/latest/download/Fido.ps1.lzma"
 If,QUESTION,"This option will download and run the open source Fido powershell script which will allow you to choose which ISO images to download from Microsoft's servers.#$x#$xFor more info please visit [https://github.com/pbatard/Fido].#$x#$xAre you sure you want to continue?",Begin
-  WebGet,%FidoURL%,%ProjectTemp%
+  WebGet,%FidoURL%,"%ProjectTemp%\Fido.ps1.lzma"
   7z,"x -y #$q%ProjectTemp%\Fido.ps1.lzma#$q -o#$q%ProjectTemp%#$q"
   ShellExecuteEx,Open,"powershell.exe","-noexit –ExecutionPolicy Bypass & #$q%ProjectTemp%\Fido.ps1#$q"
 End
@@ -432,7 +448,7 @@ bvl_Homepage=bvl_Homepage,1,12,302,5,121,25
 web_TechBench="Techbench ISO Images",1,10,309,9,113,18,https://tb.rg-adguard.net/public.php
 bvl_ImageCfg="Configure Source Image",1,12,5,146,532,130,8,Bold
 lbl_BaseWim="Base Wim:",0,1,69,166,54,18,8,Normal
-cmb_BaseWim=WinRE.wim,0,4,130,162,100,21,Boot.wim,WinRE.wim,_SaveSource_,False
+cmb_BaseWim=Boot.wim,0,4,130,162,100,21,Boot.wim,WinRE.wim,_SaveSource_,False
 lbl_SrcBaseImg="'Base' Image:",1,1,56,193,92,18,8,Normal
 cmb_SrcBaseImage="[Please select a valid source]",1,4,130,188,395,21,"[Please select a valid source]",_UpdateBaseWimLabel_,True
 lbl_SrcInstallImage="'install.wim' Image:",1,1,29,221,94,18,8,Normal

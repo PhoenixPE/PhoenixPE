@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-31
+Version=1.1.0.0
+Date=2021-03-22
 Interface=Interface
 
 [Variables]
@@ -103,17 +103,18 @@ IniWrite,"%TargetPrograms%\%ProgramFolder%\BackupRecovery.ini","BackupSetting","
 IniWrite,"%TargetPrograms%\%ProgramFolder%\other.ini","UserExperience","ExperienceValue",0
 
 // Product Registration
+If,%HostArch%,Equal,x86,Set,%WOW6432Node%,""
+Else,Set,%WOW6432Node%,"WOW6432Node\"
+
 If,%cmb_RegEdition%,Equal,"Standard",RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",08,77,2f,f2,ca,c7,37,a1,1e,e2,3e,e2,ef,7b,18,b5,1d,d3,4d,d2,1c,9b,19,92,31,93,64,f6,5a,f0,61,92,2c,85,3f,80,56,eb,1b,ee,2a,97,9e,a4,89,a9,b5,51,b2,88,c8,df,d1,df,64,a9,21,d1,a1,b5,85,b9,71,d4,5c,41,8a,26,8e,45,01,2b,16,6a,b6,62,c6,6d,46,6e,15,5b
 Else,If,%cmb_RegEdition%,Equal,"Import License From Host",Begin
-  If,%HostArch%,Equal,x86,Set,%WOW6432Node%,""
-  Else,Set,%WOW6432Node%,"Wow6432Node\"
   RegRead,HKLM,"Software\%WOW6432Node%Microsoft\Windows\CurrentVersion","ProgramData",%Host_LicKey%
   If,%Host_LicKey%,Equal,"",Halt,"ERROR: Could not retrieve license key from host system."
-  Else,RegWrite,HKLM,0x3,"Tmp_Software\%WOW6432Node%Microsoft\Windows\CurrentVersion","ProgramData",%Host_LicKey%
+  Else,RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",%Host_LicKey%
 End
 Else,Begin
   If,%txt_LicKey%,Equal,"",Halt,"ERROR: You must enter a license key."
-  Else,RegWrite,HKLM,0x3,"Tmp_Software\%WOW6432Node%Microsoft\Windows\CurrentVersion","ProgramData",%txt_LicKey%
+  Else,RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",%txt_LicKey%
 End
 
 IniWrite,"%TargetPrograms%\%ProgramFolder%\Version.ini","VersionInfo","versionCode",2
@@ -293,7 +294,7 @@ lbl_Language=Language,1,1,159,110,153,16,8,Normal
 cmb_Language="English [en]",1,4,160,126,150,21,"Chinese (Traditional) [zh-TW]","Chinese (Simplified) [zh-CN]","Dutch (Belgium) [nl-be]","Dutch (Netherlands) [nl]","English [en]","French [fr]","German [de]","Italian [it]","Japanese [jp]","Portuguese (Brazil) [pt]","Spanish [es]","Turkish [tr]"
 lbl_RegEdition="Software Edition",1,1,160,185,153,16,8,Normal
 cmb_RegEdition=Standard,1,4,160,200,174,21,Standard,"Import License From Host","Enter License Key",_ToggleRegKey_,True
-txt_LicKey="License Key",0,0,160,243,174,21,,"__Enter your license key in HEX. You can export the value from: HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\ProgramData"
+txt_LicKey="License Key",0,0,160,243,174,21,,"__Enter your license key in HEX.#$xYou can export the value from: HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion, ProgramData"
 
 [InterfaceEncoded]
 Trash.ico=1150,1212
