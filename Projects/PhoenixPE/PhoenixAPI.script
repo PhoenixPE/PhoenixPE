@@ -657,12 +657,13 @@ If,%RegHivesLoaded%,Equal,False,RegHiveUnload,Tmp_Default
 
 Set,%ExecMode%,""
 
-If,%Mode%,Equal,NoWait,Set,%ExecMode%,"/WAIT "
-Else,If,%Mode%,Equal,Wait,Set,%ExecMode%,""
+If,%Mode%,Equal,NoWait,Set,%ExecMode%,""
+Else,If,%Mode%,Equal,Wait,Set,%ExecMode%,"/WAIT "
 Else,If,%Mode%,Equal,HideWait,Set,%ExecMode%,"/WAIT hiderun.exe "
 Else,If,%Mode%,Equal,HideNoWait,Set,%ExecMode%,"hiderun.exe "
+Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
 
-TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","Echo %Title%#$xSTART %ExecMode%#$q%ProgramExe%#$q #$q%Parameters%#$q",Append
+TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","START #$q%Title%#$q %ExecMode%#$q%ProgramExe%#$q %Parameters%",Append
 
 [#_PhoenixAPI_AddShortcut#]
 // ===============================================================================================================================

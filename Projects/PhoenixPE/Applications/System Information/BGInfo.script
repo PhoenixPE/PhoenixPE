@@ -29,74 +29,75 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=DesktopInfo
-Description=(v2.10.1 x86) A lightweight application that displays real-time system information on your desktop.
+Title=BGInfo
+Description=BGInfo can display relevant information on the desktop's background, such as the computer name, OS version, memory, free space, IP address, and more.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
 Version=1.0.0.0
-Date=2021-03-10
+Date=2020-03-01
 
 [Variables]
-%ProgramFolder%="DesktopInfo"
-%ProgramExe%="DesktopInfo.exe"
-%DownloadURL%=https://www.glenn.delahoy.com/downloads/desktopinfo/DesktopInfo2101.zip
-%SetupFile%="DesktopInfo.zip"
+%ProgramFolder%="BgInfo"
+%ProgramExex86%="BgInfo.exe"
+%ProgramExex64%="BgInfo64.exe"
+%DownloadURLx32%=http://live.sysinternals.com/Bginfo.exe
+%DownloadURLx64%=http://live.sysinternals.com/Bginfo64.exe
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
+Run,%ScriptFile%,SetProgramArch
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
+
+If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",Run,%ScriptFile%,DownloadProgram
+FileCopy,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%","%TargetPrograms%\%ProgramFolder%\%ProgramExe%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
-Echo,"Configuring %ScriptTitle%..."
+RegLoadHives
+
+// Accept License
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Sysinternals\BGInfo","EulaAccepted",1
+
+// .bgi File Handler
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.bgi","","BGInfo.Config.1"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\BGInfo.Config.1","","BGInfo Configuration File"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\BGInfo.Config.1\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q,0"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\BGInfo.Config.1\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 // Custom Config
 If,%cb_UseCustomCfg%,Equal,True,Begin
   If,Not,%fb_CustomCfg%,Equal,"",If,ExistFile,%fb_CustomCfg%,Begin
     // Copy or Extract
     StrFormat,Ext,%fb_CustomCfg%,%FileExt%
-	If,%FileExt%,Equal,".ini",FileCopy,%fb_CustomCfg%,"%TargetPrograms%\%ProgramFolder%"
+	If,%FileExt%,Equal,".bgi",FileCopy,%fb_CustomCfg%,"%TargetPrograms%\%ProgramFolder%\bginfo.bgi"
 	Else,Decompress,%fb_CustomCfg%,"%TargetPrograms%\%ProgramFolder%"
 	// Let Decompress handle any failures resulting from the unpack or unsupported file type.
   End
   Else,Halt,"ERROR: The custom configuration file [%fb_CustomCfg%] does not exist."
 End
-Else,ExtractAllFiles,%ScriptFile%,config,"%TargetPrograms%\%ProgramFolder%"
+Else,ExtractAllFiles,%ScriptFile%,Config,"%TargetPrograms%\%ProgramFolder%"
 
-// AutoRun
-If,%cb_AutoRun%,Equal,True,AddAutoRun,PostShell,NoWait,"Starting DesktopInfo...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+// Autorun
+If,%cmb_AutoRun%,Equal,"Normal",AddAutoRun,PostShell,NoWait,"Launching %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%","#$q%PEPrograms%\%ProgramFolder%\bginfo.bgi#$q /timer:0"
+Else,If,%cmb_AutoRun%,Equal,"Normal (After Network)",AddAutoRun,AfterNetwork,NoWait,"Launching %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%","#$q%PEPrograms%\%ProgramFolder%\bginfo.bgi#$q /timer:0"
+Else,If,%cmb_AutoRun%,Equal,"Taskbar",AddAutoRun,PostShell,NoWait,"Launching %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%","#$q%PEPrograms%\%ProgramFolder%\bginfo.bgi#$q /taskbar"
+Else,Echo,"BgInfo Autorun is disabled."
+
+RegUnloadHives
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 
-If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-
-[#ExtractProgram#]
-// ===============================================================================================================================
-// Name...........: ExtractProgram
-// Description....: Extract program files from script/setup files.
-// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: 
-// ===============================================================================================================================
-[ExtractProgram]
-Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%","#$q%PEPrograms%\%ProgramFolder%\bginfo.bgi#$q /popup"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%","#$q%PEPrograms%\%ProgramFolder%\bginfo.bgi#$q /popup"
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -111,23 +112,32 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+Run,%ScriptFile%,SetProgramArch
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
-[#ExtractSampleCfg#]
+[#SetProgramArch#]
 // ===============================================================================================================================
-// Name...........: ExtractSampleCfg
-// Description....: Remove all downloaded setup and program files.
-// Syntax.........: 
+// Name...........: SetProgramArch
+// Description....: Configure the script for the correct source architecture.
+// Syntax.........: Run,%ScriptFile%,SetProgramArch
 // Parameters.....: 
-// Return values..: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
+//                  %ProgramExe%     - The x86 or x64 program name.
 // Author.........: Homes32
 // Remarks........:
-// Related........: btn_ExtractSampleCfg
+// Related........: 
 // ===============================================================================================================================
-[ExtractSampleCfg]
-ExtractAllFiles,%ScriptFile%,config,"%ProjectTemp%\%ProgramFolder%"
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\DesktopInfo.ini"
+[SetProgramArch]
+If,%SourceArch%,Equal,x64,Begin
+  Set,%DownloadURL%,%DownloadURLx64%
+  Set,%ProgramExe%,%ProgramExex64%
+End  
+Else,Begin
+  Set,%DownloadURL%,%DownloadURLx86%
+  Set,%ProgramExe%,%ProgramExex86%
+End
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -137,14 +147,14 @@ ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\DesktopInfo.ini"
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........:
+// Remarks........: /timer: of 300 or greater disables the timer
 // Related........: btn_LaunchProgram
 // ===============================================================================================================================
 [LaunchProgram]
-Echo,"Launching %ScriptTitle%..."
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+Run,%ScriptFile%,SetProgramArch
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",Run,%ScriptFile%,DownloadProgram
+ExtractAllFiles,%ScriptFile%,Config,"%ProjectTemp%"
+ShellExecuteEx,Open,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%","%ProjectTemp%\BgInfo.bgi /timer:300"
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================
@@ -168,19 +178,19 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: 
-// Related........: btn_SetDefaultOptions
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
 // ===============================================================================================================================
 [SetDefaultOptions]
 System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
-WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"System Information"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"DesktopInfo"
-WriteInterface,Value,%ScriptFile%,Interface,cb_AutoRun,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"BgInfo"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_AutoRun,"Normal (After Network)"
 WriteInterface,Value,%ScriptFile%,Interface,cb_UseCustomCfg,False
 WriteInterface,Value,%ScriptFile%,Interface,fb_CustomCfg,""
 System,Cursor,Normal
@@ -188,7 +198,7 @@ System,Cursor,Normal
 [#ToggleAdvancedOptions#]
 // ===============================================================================================================================
 // Name...........: ToggleAdvancedOptions
-// Description....: Show/Hide advanced options.
+// Description....: Show/Hide advanced options in the script interface.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -211,7 +221,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"A lightweight, fully customizable application that displays real-time system information on your desktop.#$x#$xDesktopInfo is freeware. If you enjoy the software please support the developer.#$x#$xOn first run this script will download the setup file (~1 MB) and cache it for future builds."
+Message,"BGInfo can display relevant information on the desktop's background, such as the computer name, OS version, memory, free space, IP address, and more.#$x#$xBecause BgInfo writes information to the desktop background and then terminates, it is ideal for low resource environments.#$x#$xOn first run this script will download the setup file (~3.5 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -225,10 +235,9 @@ Message,"A lightweight, fully customizable application that displays real-time s
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch DesktopInfo",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
-btn_ExtractSampleCfg="Sample Config",1,8,255,5,100,25,ExtractSampleCfg,Log.ico,True
+btn_LaunchProgram="Launch BgInfo",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://www.glenn.delahoy.com/desktopinfo/
+web_Homepage=Homepage,1,10,377,9,60,18,https://docs.microsoft.com/en-us/sysinternals/downloads/bginfo
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
@@ -236,18 +245,18 @@ btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
 cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of BgInfo in your build."
 bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
 cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
-cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
-cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"System Information"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,DesktopInfo
-bvl_Options=Options,1,12,154,90,284,184,8,Bold
-cb_AutoRun="Run on Startup",1,3,163,108,167,18,True
-cb_UseCustomCfg="Use custom configuration",1,3,163,170,200,18,False
-fb_CustomCfg=,1,13,163,192,264,20,file,Title=Select your DesktopInfo.ini file or an 7z/rar/zip archive containing your custom config
-lbl_CfgInfo="DesktopInfo is fully cuztomizable.#$xSelect your personalized DesktopInfo.ini file or a 7z/rar/zip file containing DesktopInfo.ini and any custom scripts/templates you wish to include.",1,1,163,220,266,49,8,Normal
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"System Information"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,BgInfo
+bvl_Options=Options,1,12,154,90,330,184,8,Bold
+lbl_AutoRun="Run on Startup:",1,1,163,108,167,18,8,Normal
+cmb_AutoRun="Normal (After Network)",1,4,164,125,160,21,Disabled,Normal,"Normal (After Network)",Taskbar,"__Disabled - Do not autostart BgInfo. You can run BgInfo in popup mode from the Start Menu.#$xNormal - Display BgInfo on desktop.#$xNormal (After Network) - Display BgInfo on desktop after network services have been started. (Use if you display network information such as IP Address, etc.)#$xTaskbar - Start BgInfo in the systray."
+cb_UseCustomCfg="Use custom configuration",1,3,163,160,200,18,False
+fb_CustomCfg=,1,13,163,182,310,20,file,Title=Select your .bgi file or an 7z/rar/zip archive containing your custom config
+lbl_CfgInfo="BgInfo is fully cuztomizable.#$xSelect your personalized .bgi file or a 7z/rar/zip file containing bginfo.bgi and any custom scripts you wish to include.#$xNote: You must name your .bgi file 'bginfo.bgi' if you choose to pack your config in a 7z/rar/zip file.",1,1,163,210,311,56,8,Normal
 
 [InterfaceEncoded]
 play-hot.png=841,1220
@@ -256,11 +265,10 @@ SetDefaults_16.png=2475,3404
 Advanced_16.png=2000,2768
 Help_16.png=2830,3868
 VistalcoDownload_16.png=927,1348
-Log.ico=1150,832
 
 [AuthorEncoded]
-DesktopInfo_80.png=3654,4976
-Logo=DesktopInfo_80.png
+BgInfo_80.png=5607,7576
+Logo=BgInfo_80.png
 
 [EncodedFile-InterfaceEncoded-play-hot.png]
 lines=0
@@ -286,20 +294,16 @@ lines=0
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
 
-[EncodedFile-InterfaceEncoded-Log.ico]
-lines=0
-0=eJyVk8tu00AUhqc0CARIdMWaDVLfIRuUPAiktE2EhIQAiWUKWSFeh9IFTerEt9wKiNA4wAoJCRHHduzYieNcDmeOL6CmEcLW77FG8/n/z/gMYxt4b20xfN5mhRRjtxhj2yicwplwnl93U2ztVSqVHmez2VeZTOb1v5ROp5+/fHFwOWaPj9+lNE2D5XIJi8Ui0hzm80izGcxIAQRBAKIoQu7+vRsxLwgnxPO1fB1fEwRTmE6n4Ps+TCYTmIzHMPY88DyX+Ae5XMJXqwLxnP3aVuBLS0ZJ0ONqiqBxNWo0uqMR8bs7OwkviSLx3DPkL2AjOY5NfH5vN+EbdZX4KWb1fcw6wayY1+N5XZc8R44Djm2DPRxCrVaDh4XC9YRXQ57X2WtKiVe3UYVuvQpndQHOVK4qDC2L+Pz+3rWYrysK8dyzF+WN2a4asUo4Wqaxlud767qYdeRQnY49xLwWeVqmCaZhgGEM1vK8TsobeX5WTkLJFehEGug68YX8/grPPWM+YVHc0xjoyPZB7/dXeDXibcw7xLyWZVKdZsLpVAvtvx3u/7OnT67+4WXieZ3cL87akco0cs+PH97D6WkbOp1PcHj45rsiS5fO8+c9w7y/oI9qt1vUG0dHb39UyuU7f5+9bz1tM/x/HvV43Oe8d6h/8J/o+D08Zz/rqrJ90fnFPI9kSSxyKShcV1RlGd8lmhOESrHVbKywwgZjB/+rTdQVZG8y9hv23cDJeJxj98lP18tMzmcYBSMS1LFAaA0m7PIXFpueYWADAKEdBblZFdWqAQAAAAIAAAAjAAAAKAIAAAAAAAABAAAAAAAAAAAAAAA
-
 [EncodedFolders]
-config
+Config
 
-[config]
-desktopinfo.ini=5506,2576
+[Config]
+BGInfo.bgi=1937,1284
 
-[EncodedFile-config-desktopinfo.ini]
+[EncodedFile-Config-BgInfo.bgi]
 lines=0
-0=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
-[EncodedFile-AuthorEncoded-DesktopInfo_80.png]
+0=/Td6WFoAAATm1rRGBMC2BpEPIQEWAAAAAAAAAJ3NxqXgB5ADLl0ABYA1AXCFvRQ9wag6qfEBJqfH1pqKefhLdlcE4nerFxF9ZZq5I3KgvGssi0bxXsxjvtpNn/Pb/0nJZbG/ut76zHcFiq6oQuyiO0+icYKJk32M1NMrHie3ZDw5SEbYrpB/RoN3RpLOU24CeEAPFawKuCzi+oLXIgbX7sDpDarKttFUCo0Y1VmfduCX6ny2xpYs1qJaVMxcL+tcyONafVlR1WF2XvZE0VH9cpLEUFpZ1eWHIkJQs/+jKxR/hfvBVgrpl13cmQ1Py5XXznFqJ4hsD05rffJtHpW6bBX9mE5wEbc/fttr51vrb4QKNAw2vWE6vV9H2I3cxFAdTZIMgPhlMvQ1vBJYGmL5+65k3DVhUpB54B9XDf3/8JV3TRcDTUQDt5c4/MGJBOEqlfpGy6eKHxypyPV2lGrTDN74aJEFxM4mzU3OjuyTPCWd9Qk+83ip9y8h4SzrsslLfTWy6sxsYpVE9teNJgkdY/0C2puvylEhZsDIwcIE4Jgu3xyrznJaqdKkhm7IBXJV8V5Hl/xY5AtMi/ZH+qxcLScZKcLPP9tp3na1PTnp7BUT4lUHv3Yw1asaMRSwp3wK54qs4uSATY6emS7GcihCfbGZViHY2Y9TjQML7h2Y4cAsQjMTjTasmbQVQvdRBe+ZUZxcXfp3yjwxsTHwzHH5qR+qk9i3cCQKADC7LuEjUWFBdhQZoiaw3Zz74g45bhe8pUvd3hkYWDkn/jlFRMKh3IpLSHJMdLi3/fx99Rv4OmLFaOzRZIe1j3xi1tKuiNkI9dssQQXLc8jXuvj4aEP2w2hlGqIqHxKxRdTEqTLqDEQDVYJdt0fG0n1QU8sDSipUdKl/larBMuH0xVH6QxhOvDmuGsf1FcbFkoUr/SMaeS/kwQvP5c2LD8PD/HuxGM8I7LZ04+eIf/qjn0UdCrQIM5fA+nDaGSXQhxTuDLUgvoytXwbY0pc1lybMvmsfWO6GB2Dls57X4NyglorKQ4Cm/IVkLyP0w5yHsg3uSSdQN/75UIzKg8S8Al+rVQNr8F9sp9JtCFC1QHqctSd/eDoP7mYi9VPmSqputbgm1FjE49e3SnXCUAAAAJuHH+UmnolAAAHSBpEPAAClXUMdscRn+wIAAAAABFlaeJzjcnL3zEvL10tKz2QYBSMPTGSH0BXM2OXV7fayMrEBAJuABcLyE023AQAAAAIAAAAmAAAAeAMAAAAAAAABAAAAAAAAAAAAAAA
+[EncodedFile-AuthorEncoded-BgInfo_80.png]
 lines=1
-0=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
-1=jxxx+rGRSS7MXFRV61GNx7Q6P6zZBA6sRD+iSiyIvVvkr71ltv4ejRoyyMeuONN5j3HxkZYdLEN4Mk6SOiiDBOFk27Pv/8c3z33XdVUrkUB6QTcUMbTeBmSGCBLy+nzq12VBR3EqE0PyVy6H8Kckka6SBVJeJJKkn1uZQSSbRtab0ZRQBvo8lDmwSuvfB89Q1kWT1y5EiYJun1vDwFtJSHI2IowCUyKRuSTCarO+cSeaSatIMuD2KJzMOHD7Np2WoEW3aGL168eNJxnFacyPlaB9EM2lHhs2suPK+DU6dOMamiIH01ePRPBFISk9SQPolU+s4dBKk+DQJXf1J1Ipls4WqQ1JJ3/uCDD1rt2z8B/KWVC9qRQLbwnDrHG892xgh2fuQqxs9Rp4k4TlA98HrCYbY2C729vdWt59bKxxGJRP5qkFrTPWnDWDINtVg9SaDvNWag5UX1bdtAsld37txho03e9dq1a0ydXn/9dUYWnSOVpHIUpzU7qyGJpKwwZYRJ2siJtDMvJ2KOHDlS/c134r106VJ1h2Ka29IAnDlz5jGim0XbBFIDKGtLOHDgAJMe+k0Sx8+RipHdooY383wBQVJj79691d8vv/wyk9xG29DVgk/+qS38nnQ91UOSyevjqt5oj8A1eWj3QrJRJ06cYLaJRpE8Io3o7t27WYPoXO0soVmQOpG9rHUizWyE2Ag8JUVen9fHpXKzp7Cnajax2mrHqVbJaEcCs5sRX/1MoL41DwD/B8AlAimJ9r4+AAAAAElFTkSuQmCCeJwTckktzi7JL/DMS8uPtzDQK8hLZxgFIwe48eGXXxcwqZyRAQA+DwkPL7kZ4QEAAAACAAAAKgAAAEYOAAAAAAAAAQAAAAAAAAAAAAAA
+0=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
+1=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

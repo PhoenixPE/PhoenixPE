@@ -30,7 +30,7 @@
 
 [Main]
 Title=HWinfo
-Description=(v6.42) Comprehensive Hardware Analysis, Monitoring and Reporting.
+Description=(v7.00) Comprehensive Hardware Analysis, Monitoring and Reporting.
 Author=Homes32
 Level=5
 Selected=False
@@ -41,8 +41,8 @@ Date=2021-02-06
 [Variables]
 %ProgramFolder%="HWinfo"
 %ProgramExe%="hwinfo32.exe"
-%ProgramIni%="hwinfo32.ini"
-%DownloadURL%=https://www.sac.sk/download/utildiag/hwi_642.zip
+%ProgramCfg%="hwinfo32.ini"
+%DownloadURL%=https://www.hwinfo.com/files/hwi_700.zip
 %SetupFile%="hwinfo.zip"
 
 [Process]
@@ -62,18 +62,18 @@ Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 Echo,"Configuring %ScriptTitle%..."
 
 // Show Summary
-If,%cb_ShowSummaryOnStartup%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Settings","OpenSystemSummary",1
-Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Settings","OpenSystemSummary",0
+If,%cb_ShowSummaryOnStartup%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","OpenSystemSummary",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","OpenSystemSummary",0
 
 // Welcome Screen
-If,%cb_EnableDarkMode%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Settings","ShowWelcomeAndProgress",1
-Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Settings","ShowWelcomeAndProgress",0
+If,%cb_EnableDarkMode%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","ShowWelcomeAndProgress",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","ShowWelcomeAndProgress",0
 
 // Dark Theme
-If,%cb_EnableDarkMode%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Settings","DarkMode",1
-Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Settings","DarkMode",0
+If,%cb_EnableDarkMode%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","DarkMode",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","DarkMode",0
 
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","Settings","AutoUpdate",0
+IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","AutoUpdate",0
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -97,7 +97,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting files..."
 Run,%ScriptFile%,SetProgramArch
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -i!hwinfo32.ini -i!%ProgramExe% -o#$q#1#$q"
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -i!%ProgramExe% -o#$q#1#$q"
 If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 [#DownloadProgram#]
@@ -113,7 +113,7 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [#SetProgramArch#]
@@ -123,7 +123,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Syntax.........: Run,%ScriptFile%,SetProgramArch
 // Parameters.....: 
 // Return values..: Sets the following local variables:
-//                  %ProgramIni%    - The x86 or x64 config file.
+//                  %ProgramCfg%    - The x86 or x64 config file.
 //                  %ProgramExe%     - The x86 or x64 program exe.
 // Author.........: Homes32
 // Remarks........:
@@ -132,7 +132,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 [SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
   Set,%ProgramExe%,"hwinfo64.exe"
-  Set,%ProgramIni%,"hwinfo64.ini"
+  Set,%ProgramCfg%,"hwinfo64.ini"
 End  
 
 [#LaunchProgram#]
@@ -218,7 +218,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"HWinfo provides comprehensive hardware analysis, monitoring and reporting.#$x#$xHWinfo is freeware. If you enjoy the software please support the developer.#$x#$xOn first run this script will download the setup file (~7 MB) and cache it for future builds."
+Message,"HWinfo provides comprehensive hardware analysis, monitoring and reporting.#$x#$xHWinfo32 is freeware. If you enjoy the software please support the developer. HWinfo64 is free for non-commercial use only.#$x#$xOn first run this script will download the setup file (~8 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -289,10 +289,6 @@ lines=0
 [EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
-
-
-
-
 
 [EncodedFile-AuthorEncoded-hwinfo.png]
 lines=0
