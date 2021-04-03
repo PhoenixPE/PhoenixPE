@@ -33,6 +33,7 @@ Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
 Version=1.4.0.0
+Date=2021-04-03
 Level=0
 Selected=None
 
@@ -379,7 +380,7 @@ System,EndLocal
 [#_PhoenixAPI_FileCopyEx#]
 // ===============================================================================================================================
 // Name...........: FileCopyEx
-// Description....: Extract a single file and it's .mui's (if they exist) from a specified directory.
+// Description....: Copy a single file and it's .mui's (if they exist) from a specified directory.
 // Syntax.........: FileCopyEx,<SourcePath>,<DestPath>
 // Parameters.....: #1 SourcePath - Full path to the source file to copy. Wildcards are NOT supported.
 //                  #2 DestPath - Full path to the destination.
@@ -459,7 +460,8 @@ Run,%API%,_PhoenixAPI_RequireFileEx,ExtractFile,#1,#2
 // Description....: Extract a file and it's .mui's (if they exist) from Install.wim
 // Syntax.........: RequireFileEx,<Action>,<FilePath>[,NOMUI]
 // Parameters.....: #1 Action:
-//                             Append       - Append the file to a list (bulk extraction)
+//                             AppendList   - Append the file to a list (bulk extraction). You must call RequireFileEx,ExtractList
+//                                            in order to perform the actual extraction of the list.
 //                             ExtractFile  - Single file extraction
 //                             ExtractList  - Extract the list created with Append
 //                  #2 Path to the file to extract relative to the root of Install.wim
@@ -496,7 +498,7 @@ List,Count,%SourceFallbackLang%,%LangCount%
 // For .mun file check
 StrFormat,FileName,%GLOB%,%FileName%
 
-If,%Action%,Equal,"Append",Begin
+If,%Action%,Equal,"AppendList",Begin
   If,%GLOB%,Equal,"",Halt,"RequireFileEx Syntax Error: File was not specified."
   If,Not,ExistFile,%BulkFileList%,FileCreateBlank,%BulkFileList%
   TXTAddLine,%BulkFileList%,%GLOB%,APPEND
@@ -514,7 +516,7 @@ Else,If,%Action%,Equal,"ExtractFile",Begin
   FileDeleteEx,%SingleFileList%
 End
 Else,If,%Action%,Equal,"ExtractList",Begin
-  If,Not,ExistFile,%BulkFileList%,Halt,"RequireFileEx Error: You must create a list using [RequireFileEx,Append] before you can extract it!"
+  If,Not,ExistFile,%BulkFileList%,Halt,"RequireFileEx Error: You must create a list using [RequireFileEx,AppendList] before you can extract it!"
   Echo,"Extracting required files...#$x#$xThis can take awhile, please be patient."
   WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%BulkFileList%,%TargetDir%,NOACL,NOATTRIB,NOERR,NOWARN
   FileDeleteEx,%BulkFileList%
