@@ -41,30 +41,21 @@ Selected=None
 %_PhoenixAPI_ConfigMode%=PECMD
 
 [Macros]
+// Registry
 RegLoadHives=Run,%API%,_PhoenixAPI_RegLoadHives
 RegUnloadHives=Run,%API%,_PhoenixAPI_RegUnloadHives
 RegCopyDriver=Run,%API%,_PhoenixAPI_RegCopyDriver
 
+// Shortcuts/Autorun
 RunFromRam=Run,%API%,_PhoenixAPI_RunFromRam
 AddAutoRun=Run,%API%,_PhoenixAPI_AddAutoRun
 AddShortcut=Run,%API%,_PhoenixAPI_AddShortcut
 PinShortcut=Run,%API%,_PhoenixAPI_PinShortcut
 
+// File/Dir Handling
 DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
 FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
-
-// Experimental - May be changed or removed without notice
-7z=Run,%API%,_PhoenixAPI_7z
-//7zExtract=Run,%API%,_PhoenixAPI_7z
-InnoUnpack=Run,%API%,_PhoenixAPI_InnoUnpack
-Innounp=Run,%API%,_PhoenixAPI_Innounp
-
-XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
-XMLDelete=Run,%API%,_PhoenixAPI_XMLDelete
-//XMLRead=
-XMLRename=Run,%API%,_PhoenixAPI_XMLRename
-XMLUpdate=Run,%API%,_PhoenixAPI_XMLUpdate
 
 SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
 SetRegACL=Run,%API%,_PhoenixAPI_SetRegACL
@@ -74,6 +65,22 @@ RequireFileEx=Run,%API%,_PhoenixAPI_RequireFileEx
 
 Associate=Run,%API%,_PhoenixAPI_Associate
 
+ConvertImage=Run,%API%,_PhoenixAPI_ConvertImage
+
+// Experimental - May be changed or removed without notice
+7z=Run,%API%,_PhoenixAPI_7z
+//7zExtract=Run,%API%,_PhoenixAPI_7z
+InnoUnpack=Run,%API%,_PhoenixAPI_InnoUnpack
+Innounp=Run,%API%,_PhoenixAPI_Innounp
+
+// XML
+XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
+XMLDelete=Run,%API%,_PhoenixAPI_XMLDelete
+//XMLRead=
+XMLRename=Run,%API%,_PhoenixAPI_XMLRename
+XMLUpdate=Run,%API%,_PhoenixAPI_XMLUpdate
+
+// Bitmask Handling
 ApplyBitMask=Run,%API%,_PhoenixAPI_ApplyBitMask
 BitClear=Run,%API%,_PhoenixAPI_BitClear
 BitSet=Run,%API%,_PhoenixAPI_BitSet
@@ -283,6 +290,28 @@ If,Not,%ArgKey%,Equal,"",Begin
   End
   Else,Halt,"SYNTAX ERROR: Invalid Argument [#1]"
 End
+
+[#_PhoenixAPI_ConvertImage#]
+// ===============================================================================================================================
+// Name...........: ConvertImage
+// Description....: Convert an image to the specified format.
+// Syntax.........: ConvertImage,<Source>,<Target>[,<Resize>]
+// Parameters.....: #1 <Source> - The full path to the image file.
+//                  #2 <Target> - The full path to the converted image file. 
+//                  #3 <Resize> - (Optional) Resize the image.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Depends on ImageConvert.exe in %Tools%.
+//                  ImageConvert.exe <input_image> <output_image>
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_ConvertImage]
+// Convert images to the specified format...
+StrFormat,EXT,#2,%NewImageExt%
+Echo,"Converting [#1] to a [%NewImageExt%] image..."
+If,Not,#3,Equal,"",Set,%ResizeParam%," --resize:#3"
+ShellExecute,Hide,"%Tools%\%HostArch%\ImageConvert.exe","#$q#1#$q #$q#2#$q --silent%ResizeParam%"
+If,Not,%ExitCode%,Equal,0,Halt,"ERROR: Image conversion failed. [%ExitCode%]"
 
 [#_PhoenixAPI_Associate#]
 // ===============================================================================================================================

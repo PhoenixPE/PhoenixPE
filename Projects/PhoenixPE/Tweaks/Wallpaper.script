@@ -35,7 +35,7 @@ Description=Personalize your desktop background.
 Version=1.5.0.0
 Selected=True
 Mandatory=False
-Date=2019-03-12
+Date=2021-04-06
 Level=4
 
 [Variables]
@@ -45,8 +45,7 @@ Level=4
 
 [Process]
 Echo,"Configuring Desktop Wallpaper..."
-RegHiveLoad,Tmp_Default,%RegDefault%
-RegHiveLoad,Tmp_Software,%RegSoftware%
+RegLoadHives
 
 If,ExistFile,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%",FileDelete,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%"
 If,Not,ExistDir,"%TargetWindows%\Web\Wallpaper\Windows",DirMake,"%TargetWindows%\Web\Wallpaper\Windows"
@@ -125,12 +124,11 @@ Else,Halt,"LOGIC ERROR: No configuration exists for [%cmb_Position%]"
 
 Run,%ScriptFile%,ColorMeBadd
 
-RegHiveUnLoad,Tmp_Default
-RegHiveUnLoad,Tmp_Software
-
 // User Profile Pic
 If,%cb_ChangeUserProfilePic%,Equal,True,Run,%ScriptFile%,SetUserProfilePic
 Else,RequireFileEx,ExtractFile,\ProgramData\Microsoft\User Account Pictures\user*.*,NOMUI
+
+RegUnLoadHives
 
 [#SetWallpaper#]
 // ===============================================================================================================================
@@ -154,30 +152,8 @@ If,%WallpaperExt%,Equal,".jpg",Begin
 End
 Else,Begin
   // Image is not a .jpg so we need to convert it
-  Run,%ScriptFile%,ConvertImage,#1,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%"
+  ConvertImage,#1,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%"
 End
-
-[#ConvertImage#]
-// ===============================================================================================================================
-// Name...........: ConvertImage
-// Description....: Convert an image to the specified format.
-// Syntax.........: ConvertImage,<Source>,<Target>[,<Resize>]
-// Parameters.....: #1 <Source> - The full path to the image file.
-//                  #2 <Target> - The full path to the converted image file. 
-//                  #3 <Resize> - (Optional) Resize the image.
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: Depends on ImageConvert.exe in %Tools%.
-//                  ImageConvert.exe <input_image> <output_image>
-// Related........:
-// ===============================================================================================================================
-[ConvertImage]
-// Convert images to the specified format...
-StrFormat,EXT,#2,%NewImageExt%
-Echo,"Converting [#1] to a [%NewImageExt%] image..."
-If,Not,#3,Equal,"",Set,%ResizeParam%," --resize:#3"
-ShellExecute,Hide,"%Tools%\%HostArch%\ImageConvert.exe","#$q#1#$q #$q#2#$q --silent%ResizeParam%"
-If,Not,%ExitCode%,Equal,0,Halt,"ERROR: Image conversion failed. [%ExitCode%]"
 
 [#ColorMeBadd#]
 // ===============================================================================================================================
@@ -239,19 +215,34 @@ WriteInterface,Visible,%ScriptFile%,Interface,num_Blue,%Toggle%
 Echo,"Configuring User Profile Picture..."
 If,Not,ExistFile,%fb_UserProfilePic%,Halt,"ERROR: The specified image [%fb_UserProfilePic%] does not exist."
 
-Run,%ScriptFile%,ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user.bmp",448x448
-Run,%ScriptFile%,ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user.png",448x448
-Run,%ScriptFile%,ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-32.png",32x32
-Run,%ScriptFile%,ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-40.png",40x40
-Run,%ScriptFile%,ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-48.png",48x48
-Run,%ScriptFile%,ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-192.png",192x192
-
-// StartIsBack
-
-Run,%ScriptFile%,ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\448.jpg",448x448
-Run,%ScriptFile%,ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\96.jpg",96x96
-
-//AccountPicture.accountpicture-ms"
+StrFormat,EXT,%fb_UserProfilePic%,%UserProfilePicExt%
+If,%UserProfilePicExt%,Equal,".accountpicture-ms",Begin
+  // Extract .accountpicture-ms
+  ShellExecute,Hide,"%Tools%\anycpu\AcctPicExtractor.exe",%fb_UserProfilePic%,%ProjectTemp%
+  StrFormat,FileName,%fb_UserProfilePic%,%UserProfilePicFileName%
+  StrFormat,Replace,%UserProfilePicFileName%,".accountpicture-ms","",%UserProfilePicFileNameNoExt%
+  ConvertImage,"%ProjectTemp%\%UserProfilePicFileNameNoExt%-448.jpg","%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-448.png"
+  ConvertImage,"%ProjectTemp%\%UserProfilePicFileNameNoExt%-96.jpg","%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-96.png"
+  ConvertImage,"%ProjectTemp%\%UserProfilePicFileNameNoExt%-448.jpg","%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-40.png",40x40
+  ConvertImage,"%ProjectTemp%\%UserProfilePicFileNameNoExt%-448.jpg","%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-48.png",48x48
+  ConvertImage,"%ProjectTemp%\%UserProfilePicFileNameNoExt%-448.jpg","%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-192.png",192x192
+  // Register .accountpicture-ms
+  RegCopy,HKLM,"Tmp_Install_Software\Classes\.accountpicture-ms",HKLM,"Tmp_Software\Classes\.accountpicture-ms"
+  RegCopy,HKLM,"Tmp_Install_Software\Classes\accountpicturefile",HKLM,"Tmp_Software\Classes\accountpicturefile"
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\PropertySystem\PropertyHandlers\.accountpicture-ms","","{9a02e012-6303-4e1e-b9a1-630f802592c5}"
+  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\AccountPicture","SourceId","AccountPicture"  
+  FileCopy,%fb_UserProfilePic%,"%TargetDir%\Users\Default\AppData\Roaming\Microsoft\Windows\AccountPictures\AccountPicture.accountpicture-ms"
+End
+Else,Begin
+  // Used by Open-Shell, etc.
+  ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user.bmp",448x448
+  ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user.png",448x448
+  ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-32.png",32x32
+  ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-40.png",40x40
+  ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-48.png",48x48
+  ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-48.png",96x96
+  ConvertImage,%fb_UserProfilePic%,"%TargetDir%\ProgramData\Microsoft\User Account Pictures\user-192.png",192x192
+End
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
@@ -341,7 +332,7 @@ lbl_Green=Green,0,1,332,180,37,16,8,Normal
 lbl_Blue=Blue,0,1,383,180,40,16,8,Normal
 bvl_UserProfilePic="User Profile Picture",1,12,5,244,436,68,8,Bold
 cb_ChangeUserProfilePic="Select the image to be used as the User's profile picture:",1,3,15,260,388,18,False
-fb_UserProfilePic=,1,13,15,280,412,20,file,"__All standard image types are supported. (BMP, ICON, GIF, JPEG, PNG, TIFF, Exif, WMF, and EMF)"
+fb_UserProfilePic=,1,13,15,280,412,20,file,"__All standard image types are supported. (accountpicture-ms, BMP, ICON, GIF, JPEG, PNG, TIFF, Exif, WMF, and EMF)#$x#$x.accountpicture-ms is required if you are using the StartIsBack start menu replacement."
 
 [AuthorEncoded]
 wallpaper_80.png=12998,17432
@@ -864,7 +855,6 @@ lines=0
 [EncodedFile-InterfaceEncoded-Help_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
-
 
 [EncodedFile-AuthorEncoded-wallpaper_80.png]
 lines=4

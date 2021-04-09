@@ -35,7 +35,7 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.0.0.0
+Version=1.1.0.0
 Date=2020-03-01
 Interface=Interface
 
@@ -69,34 +69,15 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation"
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportPhone",%txt_SupportPh%
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportURL",%txt_SupportURL%
 
-If,Not,%fb_Logo%,Equal,"",If,Not,ExistFile,%fb_Logo%,Halt,"ERROR: The specified image [%fb_Logo%] does not exist."
-
-Run,%ScriptFile%,ConvertImage,%fb_Logo%,"%TargetSystem32%\OEMLogo.bmp",120x120
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","%SystemRoot%\System32\OEMLogo.bmp"
+If,Not,%fb_Logo%,Equal,"",Begin
+  If,ExistFile,%fb_Logo%,Begin
+    ConvertImage,%fb_Logo%,"%TargetSystem32%\OEMLogo.bmp",120x120
+    RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","%SystemRoot%\System32\OEMLogo.bmp"
+  End
+  Else,Halt,"ERROR: The specified image [%fb_Logo%] does not exist."
+End
 
 RegUnloadHives
-
-[#ConvertImage#]
-// ===============================================================================================================================
-// Name...........: ConvertImage
-// Description....: Convert an image to the specified format.
-// Syntax.........: ConvertImage,<Source>,<Target>[,<Resize>]
-// Parameters.....: #1 <Source> - The full path to the image file.
-//                  #2 <Target> - The full path to the converted image file. 
-//                  #3 <Resize> - (Optional) Resize the image.
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: Depends on ImageConvert.exe in %Tools%.
-//                  ImageConvert.exe <input_image> <output_image>
-// Related........:
-// ===============================================================================================================================
-[ConvertImage]
-// Convert images to the specified format...
-StrFormat,EXT,#2,%NewImageExt%
-Echo,"Converting [#1] to a [%NewImageExt%] image..."
-If,Not,#3,Equal,"",Set,%ResizeParam%," --resize:#3"
-ShellExecute,Hide,"%Tools%\%HostArch%\ImageConvert.exe","#$q#1#$q #$q#2#$q --silent%ResizeParam%"
-If,Not,%ExitCode%,Equal,0,Halt,"ERROR: Image conversion failed. [%ExitCode%]"
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================

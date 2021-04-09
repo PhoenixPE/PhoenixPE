@@ -35,18 +35,14 @@ Author=Homes32
 Level=7
 Selected=True
 Mandatory=True
-Version=1.0.0.0
+Version=1.0.1.0
 Date=2019-04-18
 
 [Variables]
+%bcdedit.exe%="%Tools%\%HostArch%\BCDBoot\bcdedit.exe"
 
 [Process]
 Echo,"Preparing to create bootable ISO file..."
-
-// Variables
-System,GetEnv,PROCESSOR_ARCHITECTURE,%HostArch%
-If,%HostArch%,Equal,AMD64,Set,%HostArch%,x64
-Set,%bcdedit.exe%,"%Tools%\%HostArch%\BCDBoot\bcdedit.exe"
 
 // Bootloader
 Run,%ScriptFile%,ProcessBootloader
@@ -121,7 +117,6 @@ Else,Begin
   Loop,%ScriptFile%,CopyBootfix_Loop,1,%LangCount%,"%TargetDir%\Windows\Boot\DVD\EFI\efisys_noprompt.bin",%SourceFallbackLang%,"%OutputDir%\efi\microsoft\boot"
   FileRename,"%OutputDir%\efi\microsoft\boot\efisys_noprompt.bin","%OutputDir%\efi\microsoft\boot\efisys.bin"
 End
-
 
 [#CopyBootfix_Loop#]
 // ===============================================================================================================================
@@ -236,14 +231,13 @@ System,Cursor,Normal
 // ===============================================================================================================================
 [ToggleAdvancedOptions]
 System,SetLocal
-ReadInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%state%
+ReadInterface,Visible,%ScriptFile%,Interface,cb_BypassDriverSigning,%state%
 If,%state%,Equal,False,Begin,
   If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
   Else,Set,%Toggle%,False
 End
 Else,Set,%Toggle%,False
 
-WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cb_BypassDriverSigning,%Toggle%
 System,EndLocal
 
@@ -278,10 +272,10 @@ btn_AdvancedOptions=,1,8,482,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,
 btn_ScriptInfo=,1,8,512,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_Options="Windows Bootloader Options",1,12,5,50,535,125,8,Bold
 cb_BootFix="Press any key to boot from CD...",1,3,20,72,264,18,False
-bvl_AdvancedOptions="Advanced Options",0,12,5,192,535,150,8,Bold
 cb_BypassDriverSigning="Bypass Driver Signing Requirement (x64)",0,3,20,92,223,18,False,"__Modify BCD settings in order to disable integrity checking for x64 drivers.#$x#$xMay not be applicable in newer Windows versions."
-lbl_BootMenuDelay="Boot Menu Delay:",1,1,20,145,96,16,8,Normal
-num_BootMenuDelay=num_BootMenuDelay,1,2,115,140,40,22,0,0,60,1,"__Configure how long (in seconds) the boot menu will display before the default action is selected.#$x#$xTo prevent the boot menu from displaying select 0."
+lbl_BootMenuDelay="Boot Menu Delay:",1,1,20,120,96,16,8,Normal
+num_BootMenuDelay=num_BootMenuDelay,1,2,20,135,40,22,0,0,60,1,"__Configure how long (in seconds) the boot menu will display before the default action is selected.#$x#$xTo prevent the boot menu from displaying select 0."
+lbl_Seconds=seconds,1,1,65,140,61,16,8,Normal
 
 [InterfaceEncoded]
 Program_Defaults_16.png=2529,3484
