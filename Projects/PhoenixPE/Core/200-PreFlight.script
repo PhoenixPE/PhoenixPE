@@ -45,12 +45,36 @@ Date=2020-07-12
 Echo,"Starting Pre-Flight Check..."
 
 Run,%ScriptFile%,CheckEngine
+Run,%ScriptFile%,CheckOutputDir
+If,%cb_CheckFreeSpace%,Equal,True,Run,%ScriptFile%,CheckDiskSpace
 Run,%ScriptFile%,CheckTools
-If,%cb_CheckForSupportedBuildVer%,Equal,True,Run,%ScriptFile%,KnownBuilds
+If,%cb_CheckForSupportedBuildVer%,Equal,True,Run,%ScriptFile%,CheckKnownBuilds
 Run,%ScriptFile%,CheckWinREVersion
+
+[#CheckOutputDir#]
+// ===============================================================================================================================
+// Name...........: CheckOutputDir
+// Description....: Verify that %OutputDir% is not a root drive (ie. d:\). This will cause issues with creating/cleaning up
+//                  the build environment. 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: Called by [Process]
+// ===============================================================================================================================
+[CheckOutputDir]
+System,SetLocal
+StrFormat,SPLIT,%OutputDir%,"\",0,%NumSplits%
+If,%NumSplits%,Equal,1,Begin
+  Message,"Error: Setting the OutputDir to the root of a drive is not supported.",Error
+  Halt,"Error: Setting the OutputDir to the root of a drive is not supported."
+End
+System,EndLocal
 
 [#CheckEngine#]
 // ===============================================================================================================================
+// Name...........: CheckEngine
 // Description....: Verify that PEBakery is using a supported configuration.
 // Syntax.........: 
 // Parameters.....: 
@@ -137,36 +161,38 @@ System,EndLocal
 
 [#CheckTools#]
 // ===============================================================================================================================
+// Name...........: CheckTools
 // Description....: Verify that all tools needed by the project exist in the %Tools% directory.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: 
-// Related........: [MissingTool], [Process]
+// Related........: [ErrMissingTool], [Process]
 // ===============================================================================================================================
 [CheckTools]
 Echo,"Verifying required 3rd party tools are present..."
-If,Not,ExistFile,"%Tools%\%HostArch%\7z.exe",Run,%ScriptFile%,MissingTool,7z.exe
-If,Not,ExistFile,"%Tools%\%HostArch%\BcastEnvChg.exe",Run,%ScriptFile%,MissingTool,BcastEnvChg.exe
-If,Not,ExistFile,"%Tools%\%HostArch%\binmay.exe",Run,%ScriptFile%,MissingTool,binmay.exe
-If,Not,ExistFile,"%Tools%\%HostArch%\GetBinaryResource.exe",Run,%ScriptFile%,MissingTool,GetBinaryResource.exe
-If,Not,ExistFile,"%Tools%\%HostArch%\GetStringResource.exe",Run,%ScriptFile%,MissingTool,GetStringResource.exe
-If,Not,ExistFile,"%Tools%\%HostArch%\GWT.exe",Run,%ScriptFile%,MissingTool,GWT.exe
-If,Not,ExistFile,"%Tools%\%HostArch%\hiderun.exe",Run,%ScriptFile%,MissingTool,hiderun.exe
-If,Not,ExistFile,"%Tools%\x86\HiveUnload.exe",Run,%ScriptFile%,MissingTool,HiveUnload.exe
-If,Not,ExistFile,"%Tools%\x86\innounp.exe",Run,%ScriptFile%,MissingTool,innounp.exe
-If,Not,ExistFile,"%Tools%\x86\mkISOfs.exe",Run,%ScriptFile%,MissingTool,mkISOfs.exe
-If,Not,ExistFile,"%Tools%\x86\SetACL.exe",Run,%ScriptFile%,MissingTool,SetACL.exe
-If,Not,ExistFile,"%Tools%\x86\xml.exe",Run,%ScriptFile%,MissingTool,xml.exe
+If,Not,ExistFile,"%Tools%\%HostArch%\7z.exe",Run,%ScriptFile%,ErrMissingTool,7z.exe
+If,Not,ExistFile,"%Tools%\%HostArch%\BcastEnvChg.exe",Run,%ScriptFile%,ErrMissingTool,BcastEnvChg.exe
+If,Not,ExistFile,"%Tools%\%HostArch%\binmay.exe",Run,%ScriptFile%,ErrMissingTool,binmay.exe
+If,Not,ExistFile,"%Tools%\%HostArch%\GetBinaryResource.exe",Run,%ScriptFile%,ErrMissingTool,GetBinaryResource.exe
+If,Not,ExistFile,"%Tools%\%HostArch%\GetStringResource.exe",Run,%ScriptFile%,ErrMissingTool,GetStringResource.exe
+If,Not,ExistFile,"%Tools%\%HostArch%\GWT.exe",Run,%ScriptFile%,ErrMissingTool,GWT.exe
+If,Not,ExistFile,"%Tools%\%HostArch%\hiderun.exe",Run,%ScriptFile%,ErrMissingTool,hiderun.exe
+If,Not,ExistFile,"%Tools%\x86\HiveUnload.exe",Run,%ScriptFile%,ErrMissingTool,HiveUnload.exe
+If,Not,ExistFile,"%Tools%\x86\innounp.exe",Run,%ScriptFile%,ErrMissingTool,innounp.exe
+If,Not,ExistFile,"%Tools%\x86\mkISOfs.exe",Run,%ScriptFile%,ErrMissingTool,mkISOfs.exe
+If,Not,ExistFile,"%Tools%\x86\SetACL.exe",Run,%ScriptFile%,ErrMissingTool,SetACL.exe
+If,Not,ExistFile,"%Tools%\x86\xml.exe",Run,%ScriptFile%,ErrMissingTool,xml.exe
 
 // WaikTools
 If,Not,ExistFile,"%Tools%\%HostArch%\BCDBoot\bcdedit.exe",Run,%ScriptFile%,GetWaikTools
 If,Not,ExistFile,"%Tools%\%HostArch%\DISM\dism.exe",Run,%ScriptFile%,GetWaikTools
 If,Not,ExistFile,"%Tools%\%HostArch%\Oscdimg\oscdimg.exe",Run,%ScriptFile%,GetWaikTools
 
-[#MissingTool#]
+[#ErrMissingTool#]
 // ===============================================================================================================================
+// Name...........: ErrMissingTool
 // Description....: Present an error message and halt the build if a required .exe is missing from the %Tools% folder.
 // Syntax.........: Run,%ScriptFile%,<ToolName>
 // Parameters.....: #1 - Tool Name
@@ -175,12 +201,13 @@ If,Not,ExistFile,"%Tools%\%HostArch%\Oscdimg\oscdimg.exe",Run,%ScriptFile%,GetWa
 // Remarks........: INTERNAL FUNCTION
 // Related........: [CheckTools]
 // ===============================================================================================================================
-[MissingTool]
+[ErrMissingTool]
 Message,"The build cannot continue because the required application [ #1 ] is missing.#$x#$xPlease re-download the project.#$x#$x If the issue persists you may need to add an exception for the [%Tools%] folder in your anti-virus software in order to prevent false-positives from recurring.",ERROR
 Halt,"The build cannot continue because [ #1 ] is missing."
 
 [#GetWaikTools#]
 // ===============================================================================================================================
+// Name...........: GetWaikTools
 // Description....: Download missing/required WAIK tools (dism, oscdimg, etc.) using JFX's GWT.exe
 // Syntax.........: 
 // Parameters.....: 
@@ -196,8 +223,9 @@ DirCopy,"%ProjectTemp%\ADK_6\x86\*.*","%Tools%\x86"
 DirCopy,"%ProjectTemp%\ADK_6\amd64\*.*","%Tools%\x64"
 If,Not,ExistFile,"%Tools%\x64\Oscdimg\oscdimg.exe",Halt,"Error downloading required Windows 10 ADK tools. The build cannot continue."
 
-[#KnownBuilds#]
+[#CheckKnownBuilds#]
 // ===============================================================================================================================
+// Name...........: CheckKnownBuilds
 // Description....: Verify if the source is a known working version. If not warn the user that there may be issues.
 //
 //                  Version  OS Build     Release Date  Codename      Marketing Name
@@ -220,7 +248,7 @@ If,Not,ExistFile,"%Tools%\x64\Oscdimg\oscdimg.exe",Halt,"Error downloading requi
 // Remarks........: As a general rule PhoenixPE will attempt to support the 2 most recent verified builds.
 // Related........: Called by [Process]
 // ===============================================================================================================================
-[KnownBuilds]
+[CheckKnownBuilds]
 System,SetLocal
 
 // Minimum supported version
@@ -274,10 +302,58 @@ If,ExistFile,"%ProjectCache%\WinRE.wim",Begin
   Set,%WinREVer%,%imgVerMaj%.%imgVerMin%.%imgVerBld%.%imgVerSPBld%
 
   If,Not,%WinREVer%,Equal,%SourceVer%,Begin
-    Echo,"Warning: Version mismatch. WinRE is not the same version as the source image. This could result in build failures.",Warn
+    Echo,"Warning: Version mismatch. WinRE is not the same version as the source image. This may result in build failures.",Warn
     Message,"Warning: Version Mismatch#$x#$xThe WinRE image is not the same version as the Windows source (install.wim).#$xThis doesn't necessarily mean the build will fail, but the resulting PE environment may be unstable.#$x#$xProceed at your own risk.#$x#$xInstall.wim:  %SourceVer%#$xWinRE.wim: %WinREVer%",Warning,10
   End
 End
+
+[#CheckDiskSpace#]
+// ===============================================================================================================================
+// Name...........: CheckDiskSpace
+// Description....: Make sure we have the minimum amount of free disk space required to build.
+//
+//                  Minimum Free Space is somewhat arbitrary, as we can't be sure what the final build size will be with 
+//                  whatever apps, features, etc. the user decides to include.
+//
+//                  For the purpose of this check we are primarily making sure we have the space needed to:
+//                    - extract our base .wim image and cache it
+//                    - extract the contents of the base .wim image to %TargetDir%
+//                    - copy files from install.wim for "core" features such as Explorer, etc. to %TargetDir%
+//                    - compress the resulting files back into a .wim image in %OutputDir%
+// Syntax.........:  
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: If %TargetDir% doesn't exist yet GetFreeSpace will fallback to the drive letter specified by the path.
+// Related........: 
+// ===============================================================================================================================
+[CheckDiskSpace]
+System,SetLocal
+
+// Set minimum space required to 5 GB
+Set,%MinimumFreeMegabytes%,5120
+Math,Mul,%MinimumFreeBytes%,%MinimumFreeMegabytes%,1048576
+StrFormat,IntToBytes,%MinimumFreeBytes%,%HumanReadableMinimumFreeSpace%
+
+// Check %TargetDir% & %Workbench%
+System,GetFreeSpace,%TargetDir%,%FreeMegabytes%
+Math,Mul,%FreeBytes%,%FreeMegabytes%,1048576
+StrFormat,IntToBytes,%FreeBytes%,%HumanReadableFreeSpace%
+If,%FreeMegabytes%,Smaller,%MinimumFreeMegabytes%,Begin
+    Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your target drive [%TargetDir%]. This may result in build failures.",Warn
+    Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your target drive, which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
+End
+
+// Check %OutputDir%
+System,GetFreeSpace,%OutputDir%,%FreeMegabytes%
+Math,Mul,%FreeBytes%,%FreeMegabytes%,1048576
+StrFormat,IntToBytes,%FreeBytes%,%HumanReadableFreeSpace%
+If,%FreeMegabytes%,Smaller,%MinimumFreeMegabytes%,Begin
+    Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your output drive [%OutputDir%]. This may result in build failures.",Warn
+    Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your output drive [%OutputDir%], which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
+End
+
+System,EndLocal
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
@@ -292,6 +368,7 @@ End
 // ===============================================================================================================================
 [SetDefaultOptions]
 WriteInterface,Value,%ScriptFile%,Interface,cb_CheckForSupportedBuildVer,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_CheckFreeSpace,True
 
 [#ToggleAdvancedOptions#]
 // ===============================================================================================================================
@@ -313,6 +390,7 @@ End
 Else,Set,%Toggle%,False
 
 WriteInterface,Visible,%ScriptFile%,Interface,cb_CheckForSupportedBuildVer,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_CheckFreeSpace,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
 System,EndLocal
 
@@ -346,7 +424,8 @@ btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_AdvancedOptions="Advanced Options",0,12,5,50,446,71,8,Bold
-cb_CheckForSupportedBuildVer="Verify Source Build Number",0,3,12,79,150,18,True,"__Check and see if the Win10 build version has been tested with this project."
+cb_CheckForSupportedBuildVer="Verify Source Build Number",0,3,12,64,150,18,True,"__Check and see if the Win10 build version has been tested with this project."
+cb_CheckFreeSpace="Verify Free Disk Space",0,3,12,84,150,18,True,"__Verify we have the free disk space required to build this project."
 
 [InterfaceEncoded]
 Advanced_16.png=1722,2396

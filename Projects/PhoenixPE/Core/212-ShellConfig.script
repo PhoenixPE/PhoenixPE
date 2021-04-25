@@ -125,6 +125,9 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\ProfileList\
 // Manage Computer on My Computer context menu
 RegWrite,HKLM,0x2,"Tmp_software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Manage\command","","#$pSystemRoot#$p\System32\mmc.exe /b compmgmt.msc",NoWarn
 
+// Add C:\Windows\System32\DriverStore\FileRepository to Installation Sources. This will allow our PE look for drivers on the C: drive of the Host computer.
+RegWrite,HKLM,0x7,"Tmp_Software\Microsoft\Windows\CurrentVersion\Setup","Installation Sources","C:\Windows\System32\DriverStore\FileRepository"
+
 // Enable SIHost
 RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","EnableSIHostIntegration",1
 
@@ -182,6 +185,10 @@ RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\usbhub\HubG","DisableOnSoft
 // Turn off WMI Telemetry
 RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\WMI\Autologger\AutoLogger-Diagtrack-Listener","Start",0
 
+// Disable Telemetry Service
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\diagnosticshub.standardcollector.service","Start",4
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\DiagTrack","Start",4
+
 // EnableWheelDetection
 RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\i8042prt\Parameters","EnableWheelDetection",2
 
@@ -217,6 +224,10 @@ RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\ComputerName\ActiveComputerN
 RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\services\Tcpip\Parameters","NV Hostname",%ProjectTitle%,NoWarn
 RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\services\Tcpip\Parameters","Hostname",%ProjectTitle%,NoWarn
 RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\Session Manager\Environment","ComputerName",%ProjectTitle%,NoWarn
+
+// Create and Disable Remote Desktop service to avoid event log errors
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TermService",HKLM,"Tmp_System\ControlSet001\Services\TermService"
+If,ExistRegSubKey,HKLM,"Tmp_System\ControlSet001\Services\TermService",RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\TermService","Start",4
 
 // Start Services in Redstone 5+
 If,%SourceVer%,Bigger,"10.0.17700.0",Begin

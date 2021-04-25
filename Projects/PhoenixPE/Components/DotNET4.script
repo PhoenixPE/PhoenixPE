@@ -41,6 +41,8 @@ Mandatory=False
 [TODO]
 // Finish writing .Net detector tool in PureBasic (Zero Runtime Dependencies) and include in build.
 
+// .Net3 Registry
+
 [Variables]
 
 [Process]
@@ -50,9 +52,16 @@ Mandatory=False
 
 Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
 
+If,%SourceArch%,Equal,x86,Begin
+  RequireFileEx,AppendList,\Program Files\Microsoft.NET
+  RequireFileEx,AppendList,\Program Files\Reference Assemblies
+End
+Else,Begin
+  RequireFileEx,AppendList,\Program Files (x86)\Microsoft.NET
+  RequireFileEx,AppendList,\Program Files (x86)\Reference Assemblies
+End
+
 RequireFileEx,AppendList,\Windows\Microsoft.NET
-If,%SourceArch%,Equal,x86,RequireFileEx,AppendList,\Program Files\Microsoft.NET
-Else,RequireFileEx,AppendList,\Program Files (x86)\Microsoft.NET
 RequireFileEx,AppendList,\Windows\System32\MUI\0409\mscorees.dll
 RequireFileEx,AppendList,\Windows\System32\aspnet_counters.dll
 RequireFileEx,AppendList,\Windows\System32\dfshim.dll
@@ -69,10 +78,10 @@ RequireFileEx,AppendList,\Windows\System32\PresentationCFFRasterizerNative_v0300
 RequireFileEx,AppendList,\Windows\System32\PresentationHost.exe
 RequireFileEx,AppendList,\Windows\System32\PresentationHostProxy.dll
 RequireFileEx,AppendList,\Windows\System32\PresentationNative_v0300.dll
+RequireFileEx,AppendList,\Windows\System32\sxstrace.exe
 RequireFileEx,AppendList,\Windows\System32\ucrtbase_clr0400.dll
 RequireFileEx,AppendList,\Windows\System32\UIAutomationCore.dll
 RequireFileEx,AppendList,\Windows\System32\vcruntime140_clr0400.dll
-RequireFileEx,AppendList,\Windows\System32\sxstrace.exe
 RequireFileEx,AppendList,\Windows\System32\WindowsCodecs.dll
 RequireFileEx,AppendList,\Windows\System32\WindowsCodecsExt.dll
 
@@ -90,13 +99,13 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
   RequireFileEx,AppendList,\Windows\SysWOW64\msvcr120_clr0400.dll
   RequireFileEx,AppendList,\Windows\SysWOW64\netfxperf.dll
   RequireFileEx,AppendList,\Windows\SysWOW64\PresentationCFFRasterizerNative_v0300.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\PresentationHost.exe
+  RequireFileEx,AppendList,\Windows\SysWOW64\PresentationHostProxy.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\PresentationNative_v0300.dll  
+  RequireFileEx,AppendList,\Windows\SysWOW64\sxstrace.exe  
   RequireFileEx,AppendList,\Windows\SysWoW64\UIAutomationCore.dll
   RequireFileEx,AppendList,\Windows\SysWOW64\ucrtbase_clr0400.dll
   RequireFileEx,AppendList,\Windows\SysWOW64\vcruntime140_clr0400.dll
-  RequireFileEx,AppendList,\Windows\SysWOW64\PresentationHost.exe
-  RequireFileEx,AppendList,\Windows\SysWOW64\PresentationHostProxy.dll
-  RequireFileEx,AppendList,\Windows\SysWOW64\PresentationNative_v0300.dll
-  RequireFileEx,AppendList,\Windows\SysWOW64\sxstrace.exe
   RequireFileEx,AppendList,\Windows\SysWOW64\WindowsCodecs.dll
   RequireFileEx,AppendList,\Windows\SysWOW64\WindowsCodecsExt.dll
 End
@@ -110,20 +119,14 @@ RequireFileEx,ExtractList
 ///////////////////////////////////////////////////////////////////////////////////
 // Configure Dummy Registry
 Echo,"Configuring the Registry..."
-RegHiveLoad,Tmp_Software,%RegSoftware%
-RegHiveLoad,Tmp_System,%RegSystem%
-RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
-RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
+RegLoadHives
 RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Fusion",HKLM,"Tmp_Software\Microsoft\Fusion"
 RegCopy,HKLM,"Tmp_Install_Software\Microsoft\.NETFramework",HKLM,"Tmp_Software\Microsoft\.NETFramework"
 RegCopy,HKLM,"Tmp_Install_Software\Microsoft\NET Framework Setup",HKLM,"Tmp_Software\Microsoft\NET Framework Setup"
-RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\FontCache*",HKLM,"Tmp_System\ControlSet001\Services",WILDCARD
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\FontCache",HKLM,"Tmp_System\ControlSet001\Services\FontCache"
 RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\.NETFramework",HKLM,"Tmp_Software\WOW6432Node\Microsoft\.NETFramework"
 RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\NET Framework Setup",HKLM,"Tmp_Software\WOW6432Node\Microsoft\NET Framework Setup"
-RegHiveUnload,Tmp_Software
-RegHiveUnload,Tmp_System
-RegHiveUnload,Tmp_Install_Software
-RegHiveUnload,Tmp_Install_System
+RegUnloadHives
 
 [#Interface#]
 // ===============================================================================================================================

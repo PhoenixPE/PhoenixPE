@@ -44,6 +44,7 @@ Date=2019-01-01
 Run,%ScriptFile%,Cleanup
 Run,%ScriptFile%,CreateTargetFolders
 Run,%ScriptFile%,ExtractBaseWim
+If,%cb_IncludeFullWinSxS%,Equal,False,Run,%ScriptFile%,CleanupWinSxS
 
 [#Cleanup#]
 // ===============================================================================================================================
@@ -103,10 +104,6 @@ Echo,"Creating Output directory..."
 DirMake,%OutputDir%
 DirMake,"%OutputDir%\Programs"
 DirMake,"%OutputDir%\sources"
-//DirMake,"%OutputDir%\boot"
-//DirMake,%OutputDir%\boot\fonts
-//DirMake,"%OutputDir%\efi"
-//DirMake,"%OutputDir%\efi\microsoft\boot\fonts"
 
 Echo,"Granting full access to [%OutputDir%]..."
 SetFileACL,%OutputDir%
@@ -130,8 +127,6 @@ If,Not,ExistFile,%SourceBaseWim%,Run,%ScriptFile%,ExtractWinRE
 StrFormat,FileName,%SourceBaseWim%,%tmp_BaseFileName%
 Echo,"Extracting [%tmp_BaseFileName%:%SourceBaseWimImage%] to [%TargetDir%]...#$x#$xThis can take awhile, please be patient."
 WimApply,%SourceBaseWim%,%SourceBaseWimImage%,%TargetDir%,NOACL,NOATTRIB
-
-If,%cb_IncludeFullWinSxS%,Equal,False,Run,%ScriptFile%,CleanupWinSxS
 
 // WallpaperHost.exe causes issues with explorer starting
 FileDeleteEx,%TargetDir%\Windows\System32\WallpaperHost.exe

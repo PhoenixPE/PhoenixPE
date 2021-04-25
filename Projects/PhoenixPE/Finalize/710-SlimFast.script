@@ -43,7 +43,6 @@ Date=2019-10-20
 
 [Process]
 Echo,"Cleaning up [TargetDir]..."
-If,%SourceArch%,Equal,x64,DirDeleteEx,"%TargetDir%\Program Files (x86)"
 DirDeleteEx,"%TargetDir%\Users\Default\Desktop\Desktop.ini"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -62,51 +61,51 @@ FileDeleteEx,%TargetSystem32%\windows.immersiveshell.serviceprovider.dll
 
 // Disable Diagnostic Telemetry Service
 // DiagTrack and diagnosticshub.standardcollector.service are disabled Shell Config
-FileDeleteEx,%TargetSystem32%\Windows\DiagTrack
-FileDeleteEx,%TargetSystem32%\Windows\System32\DiagSvcs
-FileDeleteEx,%TargetSystem32%\Windows\System32\diagER.dll
-FileDeleteEx,%TargetSystem32%\Windows\System32\diagtrack.dll
+DirDeleteEx,%TargetWindows%\DiagTrack
+DirDeleteEx,%TargetSystem32%\DiagSvcs
+FileDeleteEx,%TargetSystem32%\diagER.dll
+FileDeleteEx,%TargetSystem32%\diagtrack.dll
 
 // WMI Repository will be rebuilt at startup
-DirDeleteEx,%TargetSystem32%\Windows\System32\wbem\AutoRecover
-DirDeleteEx,%TargetSystem32%\Windows\System32\wbem\Logs
-DirDeleteEx,%TargetSystem32%\Windows\System32\wbem\Repository
-DirDeleteEx,%TargetSystem32%\Windows\System32\wbem\tmf
-DirDeleteEx,%TargetSystem32%\Windows\System32\wbem\xml
+DirDeleteEx,%TargetSystem32%\wbem\AutoRecover
+DirDeleteEx,%TargetSystem32%\wbem\Logs
+DirDeleteEx,%TargetSystem32%\wbem\Repository
+DirDeleteEx,%TargetSystem32%\wbem\tmf
+DirDeleteEx,%TargetSystem32%\wbem\xml
 
 // Edge web platform
-FileDeleteEx,%TargetSystem32%\Windows\System32\edgehtml.dll
-FileDeleteEx,%TargetSystem32%\Windows\System32\%SourceLang%\edgehtml.dll.mui
-FileDeleteEx,%TargetSystem32%\Windows\SystemResources\edgehtml.dll.mun
-FileDeleteEx,%TargetSystem32%\Windows\System32\edgeIso.dll
-FileDeleteEx,%TargetSystem32%\Windows\System32\EdgeManager.dll
+//FileDeleteEx,%TargetSystem32%\edgehtml.dll
+//FileDeleteEx,%TargetSystem32%\%SourceLang%\edgehtml.dll.mui
+//FileDeleteEx,%TargetWindows%\SystemResources\edgehtml.dll.mun
+//FileDeleteEx,%TargetSystem32%\edgeIso.dll
+//FileDeleteEx,%TargetSystem32%\EdgeManager.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Unused Language (MUI) Folders 
 
 If,%cb_CleanupLangFolders%,Equal,True,Begin
-  Run,%ScriptFile%,CleanupMui,%TargetDir%\Windows\System32
-  Run,%ScriptFile%,CleanupMui,%TargetDir%\Windows\Boot\EFI
-  Run,%ScriptFile%,CleanupMui,%TargetDir%\Windows\Boot\PCAT
-  Run,%ScriptFile%,CleanupMui,%TargetDir%\Windows\Boot\PXE
-  Run,%ScriptFile%,CleanupMui,%TargetDir%\Windows\System32\wbem
-  If,%SourceArch%,Equal,x64,Run,%ScriptFile%,CleanupMui,%TargetDir%\Windows\SysWOW64
+  Run,%ScriptFile%,CleanupMui,%TargetSystem32%
+  Run,%ScriptFile%,CleanupMui,%TargetWindows%\Boot\EFI
+  Run,%ScriptFile%,CleanupMui,%TargetWindows%\Boot\PCAT
+  Run,%ScriptFile%,CleanupMui,%TargetWindows%\Boot\PXE
+  Run,%ScriptFile%,CleanupMui,%TargetWindows%\System32\wbem
+  If,%SourceArch%,Equal,x64,Run,%ScriptFile%,CleanupMui,%TargetWindows%\SysWOW64
 End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Windows Speech2Text 
 
-Echo,"Removing folder [%TargetDir%\Windows\Speech]..."
-If,%cb_DeleteSpeechFolder%,Equal,True,DirDeleteEx,"%TargetDir%\Windows\Speech"
+Echo,"Removing folder [%TargetWindows%\Speech]..."
+If,%cb_DeleteSpeechFolder%,Equal,True,DirDeleteEx,"%TargetWindows%\Speech"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // WoW64
-// It's possible some poorly designed user scripts might add WoW64 files
+// It's possible some user scripts might add WoW64 files
 // even if the user has disabled the Core - W0W64 script. Let's clean them up and save space.
 
 If,%cb_DeleteWoW64%,Equal,True,If,Not,ExistFile,"%TargetSystem32%\wow64.dll",Begin
   Echo,"Removing unused WoW64 files..."
-  DirDeleteEx,"%TargetDir%\Windows\SysWOW64"
+  DirDeleteEx,"%TargetWindows%\SysWOW64"
   RegHiveLoad,Tmp_Software,%RegSoftware%
   RegHiveLoad,Tmp_Default,%RegDefault%
   RegDelete,HKLM,"Tmp_Software\Software\Wow6432Node"

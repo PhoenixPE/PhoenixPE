@@ -32,12 +32,12 @@
 Title=VirtualBox
 Author=Homes32
 Description=Run your ISO in Oracle VirtualBox
-Version=1.0.0.0
+Version=1.0.1.0
 Level=9
 Selected=False
 Mandatory=False
 NoWarning=False
-Date=2019-05-05
+Date=2021-04-25
 
 [Variables]
 %vmName%=%ProjectTitle%
@@ -140,6 +140,10 @@ End
 If,%cmb_numProc%,Equal,Auto,Begin
   System,GetEnv,"NUMBER_OF_PROCESSORS",%numProcessors%
   If,%numProcessors%,Equal,"",Set,%numProcessors%,1
+   Else,Begin
+	// Set to n-1 to reserve an entire processor for the host system
+	Math,Sub,%numProcessors%,%numProcessors%,1
+  End
 End
 Else,Set,%numProcessors%,%cmb_numProc%
 ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --cpus %numProcessors%"
