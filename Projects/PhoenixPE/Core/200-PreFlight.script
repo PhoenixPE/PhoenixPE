@@ -299,12 +299,16 @@ If,ExistFile,"%ProjectCache%\WinRE.wim",Begin
   WimInfo,"%ProjectCache%\WinRE.wim",1,WINDOWS/VERSION/BUILD,%imgVerBld%
   WimInfo,"%ProjectCache%\WinRE.wim",1,WINDOWS/VERSION/SPBUILD,%imgVerSPBld%
 
-  Set,%WinREVer%,%imgVerMaj%.%imgVerMin%.%imgVerBld%.%imgVerSPBld%
+  Set,%WinREVer%,"%imgVerMaj%.%imgVerMin%.%imgVerBld%.%imgVerSPBld%"
 
-  If,Not,%WinREVer%,Equal,%SourceVer%,Begin
-    Echo,"Warning: Version mismatch. WinRE is not the same version as the source image. This may result in build failures.",Warn
-    Message,"Warning: Version Mismatch#$x#$xThe WinRE image is not the same version as the Windows source (install.wim).#$xThis doesn't necessarily mean the build will fail, but the resulting PE environment may be unstable.#$x#$xProceed at your own risk.#$x#$xInstall.wim:  %SourceVer%#$xWinRE.wim: %WinREVer%",Warning,10
-  End
+  // Only check if 20H2 or newer. 20H1 and previous builds are fine.
+  If,%SourceVer%,Bigger,10.0.19041.264,Begin
+    If,Not,%WinREVer%,Equal,%SourceVer%,Begin
+      Echo,"Warning: Version mismatch. WinRE is not the same version as the source image. This may result in build failures.",Warn
+      Message,"Warning: Version Mismatch#$x#$xThe WinRE image is not the same version as the Windows source (install.wim).#$xThis doesn't necessarily mean the build will fail, but the resulting PE environment may be unstable.#$x#$xProceed at your own risk.#$x#$xInstall.wim:  %SourceVer%#$xWinRE.wim: %WinREVer%",Warning,10
+    End
+  End  
+  
 End
 
 [#CheckDiskSpace#]
