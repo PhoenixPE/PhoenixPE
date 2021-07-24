@@ -576,8 +576,13 @@ List,Get,#2,#c,%Language%
 StrFormat,FileName,#1,%FileName%
 StrFormat,Ext,#1,%FileExt%
 StrFormat,DirPath,#1,%DirPath%
-If,%FileExt%,Equal,.msc,TXTAddLine,#3,%DirPath%%Language%\%FileName%,APPEND
-Else,TXTAddLine,#3,%DirPath%%Language%\%FileName%.mui,APPEND
+
+StrFormat,Len,%FileExt%,%FileExtLen%
+StrFormat,RTrim,%FileName%,%FileExtLen%,%FileNameNoExt%
+
+If,%FileExt%,Equal,.mof,TXTAddLine,#3,"%DirPath%%Language%\%FileNameNoExt%.mfl",APPEND
+Else,If,%FileExt%,Equal,.msc,TXTAddLine,#3,"%DirPath%%Language%\%FileName%",APPEND
+Else,TXTAddLine,#3,"%DirPath%%Language%\%FileName%.mui",APPEND
 System,EndLocal
 
 [#_PhoenixAPI_AddAutoRun#]
@@ -821,8 +826,10 @@ System,EndLocal
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: This macro relies on PinUtil.exe to perform the actual pinning at boot.
-//                  Pins cannot target an executable located on removable media.
-// Related........: 
+//                  Normally Pins cannot target an executable located on removable media. To get around this restriction
+//                  we trick Windows by creating a symlink on the ramdrive (B:\) to the Y:\Programs folder. 
+//                  PECMD takes care of the symlink creation on boot, so here we only need to point Pintool to B:\ instead of Y:\
+// Related........: Depends on %ProjectDir%\Components\330-ImDisk.script for Ramdisk drive letter
 // ===============================================================================================================================
 [_PhoenixAPI_PinShortcut]
 System,SetLocal
@@ -857,6 +864,10 @@ Else,Begin
     Echo,"PinShortcut Warning: Existing pin for [%ExistingExe%] in [%PinLocation%] position [%PinPos%] will be overwritten by [%ProgramExe%].",Warn
   End
 
+  // Work around pin restrictions on removable media
+  ReadInterface,Value,"%ProjectDir%\Components\330-ImDisk.script",Interface,cmb_DriveLetter,%RamDisk%
+  StrFormat,Replace,%ProgramExe%,"Y:\","%RamDisk%\",%ProgramExe%
+  
   IniWrite,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
 End
 System,EndLocal
@@ -1181,10 +1192,10 @@ GetParam,2,%XPath%
 If,Not,ExistFile,%XMLFile%,Halt,"XMLDelete Syntax Error: The file [%XMLFile%] does not exist."
 If,%XPath%,Equal,"",Halt,"XMLDelete Syntax Error: You must specify an XPath."
 
-ShellExecute,Hide,"%Tools%\x86\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+//ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
 //If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to query [%XPath%] from [%XMLFile%]."
 
-ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
 If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to delete [%XPath%] from [%XMLFile%]."
 
 System,EndLocal
@@ -1218,26 +1229,25 @@ GetParam,4,%Type%
 GetParam,5,%Name%
 GetParam,6,%Value%
 
-If,%Operation%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify an operation [insert|append|subnode]."
-If,Not,ExistFile,%XMLFile%,Halt,"XMLInsert Syntax Error: The file [%XMLFile%] does not exist."
-If,%XPath%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify an XPath."
-If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a type [elem|text|attr]."
-If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a name."
-// Value is allowed to be empty. If,%Value%,Equal,"",Halt,"XMLInsert Syntax Error: You must specify a value."
+If,%Operation%,Equal,"",Halt,"XMLAdd Syntax Error: You must specify an operation [insert|append|subnode]."
+If,Not,ExistFile,%XMLFile%,Halt,"XMLAdd Syntax Error: The file [%XMLFile%] does not exist."
+If,%XPath%,Equal,"",Halt,"XMLAdd Syntax Error: You must specify an XPath."
+If,%Type%,Equal,"",Halt,"XMLAdd Syntax Error: You must specify a type [elem|text|attr]."
+If,%Name%,Equal,"",Halt,"XMLAdd Syntax Error: You must specify a name."
 
-ShellExecute,Hide,"%Tools%\x86\xml.exe","sel --text --template --value-of #$q%XPath%/@%Name%#$q #$q%XMLFile%#$q"
-//If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to query [%XPath%/@%Name%] from [%XMLFile%]."
+//ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%/@%Name%#$q #$q%XMLFile%#$q"
+//If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to query [%XPath%/@%Name%] from [%XMLFile%]."
 
 If,%Operation%,Equal,"Insert",Begin
-  ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --insert #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --insert #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
   If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to insert value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,If,%Operation%,Equal,"Append",Begin
-  ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --append #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --append #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
   If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to append value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,If,%Operation%,Equal,"Subnode",Begin
-  ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --subnode #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --subnode #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
   If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to add subnode value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,Halt,"XMLAdd Syntax Error: You must specify an valid operation [insert|append|subnode]."
@@ -1268,10 +1278,10 @@ If,Not,ExistFile,%XMLFile%,Halt,"XMLRename Syntax Error: The file [%XMLFile%] do
 If,%XPath%,Equal,"",Halt,"XMLRename Syntax Error: You must specify an XPath."
 If,%Value%,Equal,"",Halt,"XMLRename Syntax Error: You must specify a value."
 
-ShellExecute,Hide,"%Tools%\x86\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+//ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
 //If,Not,#r,Equal,0,Halt,"XMLRename ERROR: Failed to query [%XPath%] from [%XMLFile%]."
 
-ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --rename #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --rename #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
 If,Not,#r,Equal,0,Halt,"XMLRename ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
 
 System,EndLocal
@@ -1279,12 +1289,19 @@ System,EndLocal
 [#_PhoenixAPI_XMLUpdate#]
 // ===============================================================================================================================
 // Name...........: XMLUpdate
-// Description....: Experimental wrapper for XmlStarlet
-// Syntax.........: XMLUpdate,<XMLFile>,<XPath>,<Value>
+// Description....: Update the value of an existing Attribute/Element
+// Syntax.........: XMLUpdate,<XMLFile>,<XPath>,<Value>,[NOERR]
 // Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
 //                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to update.
 //                  #3 Value - New Value
-// Return values..: #r - Returns 
+//                  #4 NOERR - Don't Halt on errors. (Use if you intend to handle errors yourself).
+// Return values..: #r - Returns: 0 - Success
+//                                1 - Failure
+//                                2 - Invalid Arguments
+//                                3 - Invalid XML File
+//                                4 - Library Exception
+//                                5 - Internal Error
+//                        -99999999 - XPath does not exist
 // Author.........: Homes32
 // Remarks........: The XPath must exist in order for the value to be updated.
 //                  http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
@@ -1295,15 +1312,21 @@ System,SetLocal
 GetParam,1,%XMLFile%
 GetParam,2,%XPath%
 GetParam,3,%Value%
+GetParam,4,%NOERR%
 
 If,Not,ExistFile,%XMLFile%,Halt,"XMLUpdate Syntax Error: The file [%XMLFile%] does not exist."
 If,%XPath%,Equal,"",Halt,"XMLUpdate Syntax Error: You must specify an XPath."
 If,%Value%,Equal,"",Halt,"XMLUpdate Syntax Error: You must specify a value."
 
-ShellExecute,Hide,"%Tools%\x86\xml.exe","sel --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
-//If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to query [%XPath%] from [%XMLFile%]."
-
-ShellExecute,Hide,"%Tools%\x86\xml.exe","ed --inplace --update #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
+ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+If,Not,#r,Equal,0,Begin
+  If,Not,%NOERR%,Equal,"NOERR",Halt,"XMLUpdate ERROR: Failed to query [%XPath%] from [%XMLFile%]. The XPath must exist in order for the value to be updated."
+  Set,#r,-99999999
+  // Return
+End
+Else,Begin
+  ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --update #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
+  If,Not,#r,Equal,0,Halt,"XMLUpdate ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
+End
 
 System,EndLocal

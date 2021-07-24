@@ -42,8 +42,8 @@ Interface=Interface
 [Variables]
 %ProgramFolder%="HashTab"
 %SetupExe%="HashTab_v6.0.0.34_Setup.exe"
-%DownloadURL%=http://implbits.com/products/hashtab/HashTab_v6.0.0.34_Setup.exe
-%HashTabVer%=6.0.0.34
+%ProgramVersion%=6.0.0.34
+%DownloadURL%=http://implbits.com/products/hashtab/HashTab_v%ProgramVersion%_Setup.exe
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -57,7 +57,7 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,D
 DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
 7z,"x -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -xr!$PLUGINSDIR -xr!uninst.exe.nsis -o#$q%TargetPrograms%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"Extract [%SetupExe%] failed: The code returned was [#r]."
-If,%SourceArch%,Equal,x64,FileRename,"%TargetPrograms%\%ProgramFolder%\$R0","%TargetPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
+If,%SourceArch%,Equal,x64,FileRename,"%TargetPrograms%\%ProgramFolder%\$R0","%TargetPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
 Else,FileDelete,"%TargetPrograms%\%ProgramFolder%\$R0"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -152,8 +152,8 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\HashTab.DLL","AppID","{0A3C1C8E-58
 
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","","HashPage Class"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
-Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
+Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","ThreadingModel","Apartment"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\ProgID","","HashTab.HashPage.1"
 RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\Programmable"
@@ -162,8 +162,8 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41
 
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","","DropTargetImpl Class"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
-Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
+Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","ThreadingModel","Apartment"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\ProgID","","HashTab.DropTargetImpl.1"
 RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\Programmable"
@@ -192,8 +192,8 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage.1","","HashPage Class"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage.1\CLSID","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
 
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0","","HashTab 1.0 Type Library"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\FLAGS","",0
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
 
@@ -207,7 +207,7 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
   
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","","HashPage Class"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","ThreadingModel","Apartment"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\ProgID","","HashTab.HashPage.1"
   RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\Programmable"
@@ -216,7 +216,7 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
 
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","","DropTargetImpl Class"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","ThreadingModel","Apartment"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\ProgID","","HashTab.DropTargetImpl.1"
   RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\Programmable"
@@ -234,8 +234,8 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","Version","1.0"
 
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0","","HashTab 1.0 Type Library"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%HashTabVer%.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%HashTabVer%.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\FLAGS","",0
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
 End

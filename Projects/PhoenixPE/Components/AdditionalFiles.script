@@ -64,8 +64,17 @@ End
 // Related........:
 // ===============================================================================================================================
 [WimExploreX86]
-If,%fb_FWimilesx86%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_Filesx86,"#$pBaseDir#$p\Workbench\Additional\x86"
-If,Not,ExistDir,%fb_WimFilesx86%,DirMake,%fb_WimFilesx86%
+If,%fb_WimFilesx86%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_WimFilesx86,"#$pBaseDir#$p\Workbench\Additional\x86"
+If,Not,ExistDir,%fb_WimFilesx86%,Begin
+  DirMake,%fb_WimFilesx86%
+  DirMake,"%fb_WimFilesX86%\Program Files"
+  DirMake,"%fb_WimFilesX86%\ProgramData"
+  DirMake,"%fb_WimFilesX86%\Users\Default\Desktop"
+  DirMake,"%fb_WimFilesX86%\Users\Default\AppData\Local"
+  DirMake,"%fb_WimFilesX86%\Users\Default\AppData\Roaming"
+  DirMake,"%fb_WimFilesX86%\Windows\System32"
+  End
+End
 ShellExecuteEx,Explore,%fb_WimFilesx86%
 
 [#WimExploreX64#]
@@ -80,8 +89,15 @@ ShellExecuteEx,Explore,%fb_WimFilesx86%
 // Related........:
 // ===============================================================================================================================
 [WimExploreX64]
-If,%fb_WimFilesx64%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_Filesx64,"#$pBaseDir#$p\Workbench\Additional\x64"
-If,Not,ExistDir,%fb_WimFilesx64%,DirMake,%fb_WimFilesx64%
+If,%fb_WimFilesx64%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_WimFilesx64,"#$pBaseDir#$p\Workbench\Additional\x64"
+If,Not,ExistDir,%fb_WimFilesx64%,Begin
+  DirMake,"%fb_WimFilesX64%\Program Files"
+  DirMake,"%fb_WimFilesX64%\ProgramData"
+  DirMake,"%fb_WimFilesX64%\Users\Default\Desktop"
+  DirMake,"%fb_WimFilesX64%\Users\Default\AppData\Local"
+  DirMake,"%fb_WimFilesX64%\Users\Default\AppData\Roaming"
+  DirMake,"%fb_WimFilesX64%\Windows\System32"
+End
 ShellExecuteEx,Explore,%fb_WimFilesx64%
 
 [#MediaExploreX86#]
@@ -96,8 +112,8 @@ ShellExecuteEx,Explore,%fb_WimFilesx64%
 // Related........:
 // ===============================================================================================================================
 [MediaExploreX86]
-If,%fb_MediaFilesx86%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_Filesx86,"#$pBaseDir#$p\Workbench\Additional\x86"
-If,Not,ExistDir,%fb_MediaFilesx86%,DirMake,%fb_MediaFilesx86%
+If,%fb_MediaFilesx86%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_MediaFilesx86,"#$pBaseDir#$p\Workbench\Additional\x86"
+If,Not,ExistDir,%fb_MediaFilesx86%,DirMake,"%fb_MediaFilesx86%\Programs"
 ShellExecuteEx,Explore,%fb_MediaFilesx86%
 
 [#MediaExploreX64#]
@@ -112,8 +128,8 @@ ShellExecuteEx,Explore,%fb_MediaFilesx86%
 // Related........:
 // ===============================================================================================================================
 [MediaExploreX64]
-If,%fb_MediaFilesx64%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_Filesx64,"#$pBaseDir#$p\Workbench\Additional\x64"
-If,Not,ExistDir,%fb_MediaFilesx64%,DirMake,%fb_MediaFilesx64%
+If,%fb_MediaFilesx64%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_MediaFilesx64,"#$pBaseDir#$p\Workbench\Additional\x64"
+If,Not,ExistDir,%fb_MediaFilesx64%,DirMake,"%fb_MediaFilesx64%\Programs"
 ShellExecuteEx,Explore,%fb_MediaFilesx64%
 
 [#SetDefaultOptions#]
