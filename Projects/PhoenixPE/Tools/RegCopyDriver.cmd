@@ -6,6 +6,7 @@ SetLocal EnableDelayedExpansion
 Set HKFindKey=%~1
 Set HKFindKeyName=%~n1
 
+:: Drivers Hive
 Set HiveOrg=HKEY_LOCAL_MACHINE\Tmp_Install_Drivers
 Set HKMainOrg=%HiveOrg%\DriverDatabase\DriverInfFiles
 Reg Query "%HKMainOrg%\%HKFindKey%" >nul 2>nul
@@ -14,6 +15,7 @@ If %ERRORLEVEL% EQU 0 (
   Call :_RegAddDriver
 )
 
+:: System Hive
 Set HiveOrg=HKEY_LOCAL_MACHINE\Src_System
 Set HKMainOrg=%HiveOrg%\DriverDatabase\DriverInfFiles
 Reg Query "%HKMainOrg%\%HKFindKey%" >nul 2>nul
