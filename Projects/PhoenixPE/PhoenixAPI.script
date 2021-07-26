@@ -38,6 +38,9 @@ Level=0
 Selected=None
 
 [Variables]
+// Defines the configuration (pre-shell) processor used for things like creating shortcuts and auto-run entries.
+// In the future this can be used to add support for replacement pre-shell processors.
+// PECMD - Use PECMD (Default)
 %_PhoenixAPI_ConfigMode%=PECMD
 
 [Macros]
@@ -140,8 +143,8 @@ End
 [#_PhoenixAPI_RegCopyDriver#]
 // ===============================================================================================================================
 // Name...........: RegCopyDriver
-// Description....: Copy the driver entries from the INSTALL.WIM driver database to the target registry to the driver database
-//                  of our target DRIVERS hive. Both the DRIVERS hive and SYSTEM\Drivers store are processed.
+// Description....: Copy the driver entries from the INSTALL.WIM driver database to the target registry driver database.
+//                  Both the DRIVERS hive and SYSTEM\Drivers store are processed.
 // Syntax.........: RegCopyDriver,<filename.inf>
 // Parameters.....: InfFile - The name of the driver's .inf file
 // Return values..: 
@@ -220,7 +223,7 @@ System,EndLocal
 [#_PhoenixAPI_InnoUnpack#]
 // ===============================================================================================================================
 // Name...........: _PhoenixAPI_InnoUnpack
-// Description....: Execute Innounp (Inno Setup Unpacker) with the provided arguments.
+// Description....: Extract files from an Innounp (Inno Setup Unpacker) installer.
 // Syntax.........: InnoUnpack,<SetupFile>,<DestDir>[,<Args>]
 // Parameters.....: #1 SetupFile - The inno-setup file to unpack.
 //                  #2 DestDir - The full path to the directory where the files will be unpacked.
@@ -385,7 +388,7 @@ System,EndLocal
 [#_PhoenixAPI_SetRegACL#]
 // ===============================================================================================================================
 // Name...........: SetRegACL
-// Description....: Take ownership and full control for "Everyone" on a registry key using Helge Klein's SetAcl.exe
+// Description....: Take ownership and grant full control for "Everyone" on a registry key using Helge Klein's SetAcl.exe
 // Syntax.........: SetRegACL,<Path>
 // Parameters.....: #1 Path - Registry key to modify. The hive must already be mounted.
 // Return values..: 
@@ -486,7 +489,7 @@ Run,%API%,_PhoenixAPI_RequireFileEx,ExtractFile,#1,#2
 [#_PhoenixAPI_RequireFileEx#]
 // ===============================================================================================================================
 // Name...........: RequireFileEx
-// Description....: Extract a file and it's .mui's (if they exist) from Install.wim
+// Description....: Extract files and their .mui's (if they exist) from Install.wim
 // Syntax.........: RequireFileEx,<Action>,<FilePath>[,NOMUI]
 // Parameters.....: #1 Action:
 //                             AppendList   - Append the file to a list (bulk extraction). You must call RequireFileEx,ExtractList
@@ -704,8 +707,8 @@ TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","START #$q%Title%#$q %ExecMode
 [#_PhoenixAPI_AddShortcut#]
 // ===============================================================================================================================
 // Name...........: AddShortcut
-// Description....: Handle Shortcut creation
-// Syntax.........: AddShortcut,<Type>,<StartMenuFolder>,<Title>,<PathProgramExe>,<Parameters>,<WorkDir>,<IconPath>,<IconIndex>,<State>,<Hotkey>,<Tooltip>
+// Description....: Create Shortcuts for programs in PE.
+// Syntax.........: AddShortcut,<Type>,<StartMenuFolder>,<Title>,<PathProgramExe>,[Parameters],[WorkDir],[IconPath],[IconIndex],[State],[Hotkey],[Tooltip]
 // Parameters.....: #1 Type
 //                       Desktop - The shortcut will be created on the desktop.
 //                       StartMenu - The shortcut will be created in the start menu.                  
@@ -1175,7 +1178,7 @@ System,EndLocal
 [#_PhoenixAPI_XMLDelete#]
 // ===============================================================================================================================
 // Name...........: XMLDelete
-// Description....: Experimental wrapper for XmlStarlet
+// Description....: Experimental wrapper for XmlStarlet - Delete an XML path/value.
 // Syntax.........: XMLDelete,<XMLFile>,<XPath>
 // Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
 //                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to delete.
@@ -1203,7 +1206,7 @@ System,EndLocal
 [#_PhoenixAPI_XMLAdd#]
 // ===============================================================================================================================
 // Name...........: XMLAdd
-// Description....: Experimental wrapper for XmlStarlet
+// Description....: Experimental wrapper for XmlStarlet - Add a new element/text/attribute to an XML file.
 // Syntax.........: XMLAdd,<Operation>,<XMLFile>,<XPath>,<Type>,<Name>[,<Value>]
 // Parameters.....: #1 Operation - Can be one of:
 //                     Insert  - Insert a node at the the beginning of the XPath.
@@ -1257,7 +1260,7 @@ System,EndLocal
 [#_PhoenixAPI_XMLRename#]
 // ===============================================================================================================================
 // Name...........: XMLRename
-// Description....: Experimental wrapper for XmlStarlet
+// Description....: Experimental wrapper for XmlStarlet - Rename a value in an XML file.
 // Syntax.........: XMLRename,<XMLFile>,<XPath>,<Value>
 // Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
 //                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to rename.
