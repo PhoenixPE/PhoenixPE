@@ -50,50 +50,37 @@ Echo,"Enabling Additional Features..."
 StrFormat,PATH,%DismLog%,%DismLogPath%
 If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
-If,%HostArch%,Equal,x86,Set,%Dism.exe%,"%Tools%\x86\DISM\dism.exe"
-Else,Set,%Dism.exe%,"%Tools%\x64\DISM\dism.exe"
-
 // Make sure our source is Read-Write (ie. not a mounted ISO)
 FileCreateBlank,"%SourceDir%\RW-TEST",NOWARN
 If,Not,ExistFile,"%SourceDir%\RW-TEST",Halt,"ERROR: You cannot modify features on Read-Only media."
 FileDelete,"%SourceDir%\RW-TEST"
-
-If,ExistFile,%Dism.exe%,Begin
-  // Everything is good. let's get to work.
-  StrFormat,PATH,%Dism.exe%,%Dism.exePath%
   
-  // Mount our install.wim image
-  Echo,"Mounting source image [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
-  DirMake,%MountDir%
-  WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
+// Mount our install.wim image
+Echo,"Mounting source image [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
+DirMake,%MountDir%
+WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
   
-  Run,%ScriptFile%,ToggleFx3
-  Run,%ScriptFile%,ToggleFx4
-  Run,%ScriptFile%,ToggleTelentClient
-  Run,%ScriptFile%,ToggleTFTP
-  Run,%ScriptFile%,ToggleLegacyComponents
-  Run,%ScriptFile%,ToggleLinuxSubsystem
-  Run,%ScriptFile%,TogglePrintComponents
+Run,%ScriptFile%,ToggleFx3
+Run,%ScriptFile%,ToggleFx4
+Run,%ScriptFile%,ToggleTelentClient
+Run,%ScriptFile%,ToggleTFTP
+Run,%ScriptFile%,ToggleLegacyComponents
+Run,%ScriptFile%,ToggleLinuxSubsystem
+Run,%ScriptFile%,TogglePrintComponents
   
-  // Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
-  ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
-  Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
-  WimUnmount,%MountDir%,COMMIT
-End
-Else,Begin
-  // Dism.exe is missing. Run Pre-Flight Check to download.
-  Message,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools.",Warning
-  Halt,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools."
-End
+// Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
+ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
+Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
+WimUnmount,%MountDir%,COMMIT
 
 [ToggleSMB1]
 If,%cb_SMBv1%,Equal,True,Begin
   Echo,"Enabling feature: Server Message Block v1..."
   If,Not,ExistFile,"%MountDir%\Windows\System32\drivers\mrxsmb10.sys",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Client /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-	ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Server /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-	ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Deprecation /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Client /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
+	ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Server /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
+	ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:SMB1Protocol-Deprecation /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
 	If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Server Message Block v1 is already enabled!"
@@ -101,10 +88,10 @@ End
 Else,Begin
   Echo,"Disabling feature: Server Message Block v1..."
   If,ExistFile,"%MountDir%\Windows\System32\drivers\mrxsmb10.sys",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Client /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-	ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Server /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-	ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Deprecation /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol /LogPath:#$q%DismLog%#$q"
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Client /LogPath:#$q%DismLog%#$q"
+	ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Server /LogPath:#$q%DismLog%#$q"
+	ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:SMB1Protocol-Deprecation /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Server Message Block v1 is already disabled!"
@@ -114,7 +101,7 @@ End
 If,%cb_NetFX3%,Equal,True,Begin
   Echo,"Enabling feature: .NET Framework 3..."
   If,Not,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,".NET Framework 3 is already enabled!"
@@ -122,7 +109,7 @@ End
 Else,Begin
   Echo,"Disabling feature: .NET Framework 3..."
   If,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx3 /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx3 /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,".NET Framework 3 is already disabled!"
@@ -132,7 +119,7 @@ End
 If,%cb_NetFX4%,Equal,True,Begin
   Echo,"Enabling feature: .NET Framework 4 Extended..."
   If,Not,ExistDir,"%MountDir%\Windows\Microsoft.NET\Framework\v4.0.30319\Temporary ASP.NET Files",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx4Extended-ASPNET45 /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx4Extended-ASPNET45 /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,".NET Framework 4 Extended is already enabled!"
@@ -140,7 +127,7 @@ End
 Else,Begin
   Echo,"Disabling feature: .NET Framework 4 Extended..."
   If,ExistDir,"%MountDir%\Windows\Microsoft.NET\Framework\v4.0.30319\Temporary ASP.NET Files",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx4Extended-ASPNET45 /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx4Extended-ASPNET45 /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,".NET Framework 4 Extended is already disabled!"
@@ -150,7 +137,7 @@ End
 If,%cb_TelentClient%,Equal,True,Begin
   Echo,"Enabling feature: Telnet Client..."
   If,Not,ExistFile,"%MountDir%\Windows\System32\telnet.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:TelnetClient /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:TelnetClient /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Telnet Client is already enabled!"
@@ -158,7 +145,7 @@ End
 Else,Begin
   Echo,"Disabling feature: Telnet Client..."
   If,ExistFile,"%MountDir%\Windows\System32\telnet.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:TelnetClient /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:TelnetClient /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Telnet Client is already disabled!"
@@ -168,7 +155,7 @@ End
 If,%cb_TFTP%,Equal,True,Begin
   Echo,"Enabling feature: TFTP..."
   If,Not,ExistFile,"%MountDir%\Windows\System32\tftp.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:TFTP /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:TFTP /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"TFTP is already enabled!"
@@ -176,7 +163,7 @@ End
 Else,Begin
   Echo,"Disabling feature: TFTP Client..."
   If,ExistFile,"%MountDir%\Windows\System32\tftp.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:TFTP /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:TFTP /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"TFTP Client is already disabled!"
@@ -186,7 +173,7 @@ End
 If,%cb_Linux%,Equal,True,Begin
   Echo,"Enabling feature: Legacy Components (DirectPlay)..."
   If,Not,ExistFile,"%MountDir%\Windows\System32\bash.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:LegacyComponents /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:LegacyComponents /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Legacy Components (DirectPlay) are already enabled!"
@@ -194,7 +181,7 @@ End
 Else,Begin
   Echo,"Disabling feature: Legacy Components (DirectPlay)..."
   If,ExistFile,"%MountDir%\Windows\System32\bash.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:LegacyComponents /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:LegacyComponents /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Legacy Components (DirectPlay) is already disabled!"
@@ -204,7 +191,7 @@ End
 If,%cb_Linux%,Equal,True,Begin
   Echo,"Enabling feature: Linux Subsystem..."
   If,Not,ExistFile,"%MountDir%\Windows\System32\bash.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Linux Subsystem is already enabled!"
@@ -212,7 +199,7 @@ End
 Else,Begin
   Echo,"Disabling feature: Linux Subsystem..."
   If,ExistFile,"%MountDir%\Windows\System32\bask.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /LogPath:#$q%DismLog%#$q"
     If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Linux Subsystem is already disabled!"
@@ -222,8 +209,8 @@ End
 If,%cb_Print%,Equal,True,Begin
   Echo,"Enabling feature: Print Components..."
   If,Not,ExistFile,"%MountDir%\Windows\System32\lpdsvc.dll",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Printing-Foundation-LPDPrintService /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Printing-Foundation-LPRPortMonitor /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Printing-Foundation-LPDPrintService /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:Printing-Foundation-LPRPortMonitor /All /LimitAccess /Source:#$q%SourceDir%\Sources\sxs#$q /LogPath:#$q%DismLog%#$q"
 	If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Print Components are already installed!"
@@ -231,8 +218,8 @@ End
 Else,Begin
   Echo,"Disabling feature: Print Components..."
   If,ExistFile,"%MountDir%\Windows\System32\lpdsvc.dll",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Printing-Foundation-LPDPrintService /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Printing-Foundation-LPRPortMonitor /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Printing-Foundation-LPDPrintService /LogPath:#$q%DismLog%#$q"
+    ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:Printing-Foundation-LPRPortMonitor /LogPath:#$q%DismLog%#$q"
 	If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,Abort
   End
   Else,Echo,"Print Components are already disabled!"

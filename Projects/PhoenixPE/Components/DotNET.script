@@ -34,8 +34,8 @@ Description=.NET Framework is a software development framework for building and 
 Selected=True
 Level=4
 Author=Homes32
-Version=1.2.0.0
-Date=2021-07-14
+Version=1.3.0.0
+Date=2021-10-31
 Mandatory=False
 
 [Variables]
@@ -153,9 +153,6 @@ Echo,"Preparing to enable feature: .NET Framework v3..."
 StrFormat,PATH,%DismLog%,%DismLogPath%
 If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
-If,%HostArch%,Equal,x86,Set,%Dism.exe%,"%Tools%\x86\DISM\dism.exe"
-Else,Set,%Dism.exe%,"%Tools%\x64\DISM\dism.exe"
-
 // Make sure our source is Read-Write (ie. not a mounted ISO)
 FileCreateBlank,"%SourceDir%\RW-TEST",NOWARN
 If,Not,ExistFile,"%SourceDir%\RW-TEST",Begin,
@@ -164,33 +161,23 @@ If,Not,ExistFile,"%SourceDir%\RW-TEST",Begin,
 End
 FileDelete,"%SourceDir%\RW-TEST"
 
-If,ExistFile,%Dism.exe%,Begin
-  // Everything is good. let's get to work.
-  StrFormat,PATH,%Dism.exe%,%Dism.exePath%
+// Mount our install.wim image
+Echo,"Mounting source image [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
+DirMake,%MountDir%
+WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
   
-  // Mount our install.wim image
-  Echo,"Mounting source image [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
-  DirMake,%MountDir%
-  WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
-  
-  // Check for .NET 3 and Enable if necessary
-  Echo,"Enabling feature: .NET Framework 3..."
-  If,Not,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:#$q%SourceDir%\sources\sxs#$q /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,AbortFeature
-  End
-  Else,Message,".NET Framework 3 is already enabled!",Warning
-  
-  // Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
-  ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
-  Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
-  WimUnmount,%MountDir%,COMMIT
+// Check for .NET 3 and Enable if necessary
+Echo,"Enabling feature: .NET Framework 3..."
+If,Not,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
+  ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:#$q%SourceDir%\sources\sxs#$q /LogPath:#$q%DismLog%#$q"
+  If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,AbortFeature
 End
-Else,Begin
-  // Dism.exe is missing. Run Pre-Flight Check to download.
-  Message,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools.",Warning
-  Halt,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools."
-End
+Else,Message,".NET Framework 3 is already enabled!",Warning
+  
+// Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
+ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
+Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
+WimUnmount,%MountDir%,COMMIT
 
 [#DisableFx3#]
 // ===============================================================================================================================
@@ -210,9 +197,6 @@ Echo,"Preparing to disable feature: .NET Framework v3..."
 StrFormat,PATH,%DismLog%,%DismLogPath%
 If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
-If,%HostArch%,Equal,x86,Set,%Dism.exe%,"%Tools%\x86\DISM\dism.exe"
-Else,Set,%Dism.exe%,"%Tools%\x64\DISM\dism.exe"
-
 // Make sure our source is Read-Write (ie. not a mounted ISO)
 FileCreateBlank,"%SourceDir%\RW-TEST",NOWARN
 If,Not,ExistFile,"%SourceDir%\RW-TEST",Begin,
@@ -221,33 +205,23 @@ If,Not,ExistFile,"%SourceDir%\RW-TEST",Begin,
 End
 FileDelete,"%SourceDir%\RW-TEST"
 
-If,ExistFile,%Dism.exe%,Begin
-  // Everything is good. let's get to work.
-  StrFormat,PATH,%Dism.exe%,%Dism.exePath%
+// Mount our install.wim image
+Echo,"Mounting source image [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
+DirMake,%MountDir%
+WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
   
-  // Mount our install.wim image
-  Echo,"Mounting source image [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
-  DirMake,%MountDir%
-  WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
-  
-  // Check for .NET 3 and Enable if necessary
-  Echo,"Disabling feature: .NET Framework 3..."
-  If,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
-    ShellExecute,Hide,%Dism.exe%,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx3 /LogPath:#$q%DismLog%#$q",%Dism.exePath%
-    If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,AbortFeature
-  End
-  Else,Message,".NET Framework 3 is already disabled!",Warning
-  
-  // Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
-  ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
-  Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
-  WimUnmount,%MountDir%,COMMIT
+// Check for .NET 3 and Enable if necessary
+Echo,"Disabling feature: .NET Framework 3..."
+If,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
+  ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx3 /LogPath:#$q%DismLog%#$q"
+  If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,AbortFeature
 End
-Else,Begin
-  // Dism.exe is missing. Run Pre-Flight Check to download.
-  Message,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools.",Warning
-  Halt,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools."
-End
+Else,Message,".NET Framework 3 is already disabled!",Warning
+  
+// Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
+ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
+Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
+WimUnmount,%MountDir%,COMMIT
 
 [#AbortFeature#]
 // ===============================================================================================================================

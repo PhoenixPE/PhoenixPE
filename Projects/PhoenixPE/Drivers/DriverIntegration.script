@@ -77,24 +77,13 @@ Echo,"Integrating Drivers...#$x#$xThis can take awhile, please be patient."
 StrFormat,PATH,%DismLog%,%DismLogPath%
 If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
-If,%HostArch%,Equal,x86,Set,%Dism.exe%,"%Tools%\x86\DISM\dism.exe"
-Else,Set,%Dism.exe%,"%Tools%\x64\DISM\dism.exe"
-
 If,%cb_ForceUnsignedDrivers%,Equal,True,Set,%DismForceUnsigned%," /ForceUnsigned"
 Else,Set,%DismForceUnsigned%,""
 
-If,ExistFile,%Dism.exe%,Begin
-  StrFormat,PATH,%Dism.exe%,%Dism.exePath%
-  ShellExecute,Hide,%Dism.exe%,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%DriversSrc%#$q /recurse /LogPath:#$q%DismLog%#$q%DismForceUnsigned%",%Dism.exePath%
-  If,Not,%ExitCode%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
-  // Dism doesn't always unload hives correctly. Force unload just to make sure.
-  ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
-End
-Else,Begin
-  // Dism.exe is missing. Run Pre-Flight Check to download.
-  Message,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools.",Warning
-  Halt,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools."
-End
+ShellExecute,Hide,"Dism.exe","/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%DriversSrc%#$q /recurse /LogPath:#$q%DismLog%#$q%DismForceUnsigned%"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
+// Dism doesn't always unload hives correctly. Force unload just to make sure.
+ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
 
 [#ExportHostDrivers-ExportHostDrv#]
 // ===============================================================================================================================
@@ -148,27 +137,17 @@ System,GetEnv,COMPUTERNAME,%hostname%
 Echo,"Exporting Drivers from Host [%hostname%]...#$x#$xThis can take awhile, please be patient."
 
 If,%HostArch%,Equal,x86,Begin
-  Set,%Dism.exe%,"%Tools%\x86\DISM\dism.exe"
   Set,%ExportDest%,"%fb_DriversX86%\Exported-%hostname%"
 End
 Else,Begin
-  Set,%Dism.exe%,"%Tools%\x64\DISM\dism.exe"
   Set,%ExportDest%,"%fb_DriversX64%\Exported-%hostname%"
 End
 
 If,ExistDir,%ExportDest%,DirDeleteEx,%ExportDest%
 DirMake,%ExportDest%
 
-If,ExistFile,%Dism.exe%,Begin
-  // Export Drivers
-  StrFormat,PATH,%Dism.exe%,%Dism.exePath%
-  ShellExecute,Hide,%Dism.exe%,"/online /Export-Driver /Destination:#$q%ExportDest%#$q",%Dism.ExePath%
-End
-Else,Begin
-  // Dism.exe is missing. Run Pre-Flight Check to download.
-  Message,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools.",Warning
-  Halt,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools."
-End
+// Export Drivers
+ShellExecute,Hide,"Dism.exe","/online /Export-Driver /Destination:#$q%ExportDest%#$q"
 
 DirSize,%ExportDest%,%DirSize%
 StrFormat,Bytes,%DirSize%,%StrDirSize%

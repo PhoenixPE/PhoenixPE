@@ -35,11 +35,10 @@ Author=Homes32
 Level=7
 Selected=True
 Mandatory=True
-Version=1.0.1.0
-Date=2019-04-18
+Version=1.1.0.0
+Date=2021-10-31
 
 [Variables]
-%bcdedit.exe%="%Tools%\%HostArch%\BCDBoot\bcdedit.exe"
 
 [Process]
 Echo,"Preparing to create bootable ISO file..."
@@ -154,33 +153,31 @@ System,EndLocal
 [ConfigBcd]
 Echo,"Localizing and Configuring Boot Configuration Data..."
 
-StrFormat,PATH,%bcdedit.exe%,%bcdedit.exePath%
-
 ///////////////////////////////////////////////////////////////////////////////////
 // BIOS
 
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\Boot\bcd#$q /set {bootmgr} locale %SourceLang%",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\Boot\bcd#$q /set {bootmgr} timeout %num_BootMenuDelay%",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\Boot\bcd#$q /set {bootmgr} displaybootmenu True",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\Boot\bcd#$q /set {default} locale %SourceLang%",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\Boot\bcd#$q /set {default} description #$q%ProjectTitle% %SourceArch%#$q",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\Boot\bcd#$q /set {memdiag} locale %SourceLang%",%bcdedit.exePath%
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\Boot\bcd#$q /set {bootmgr} locale %SourceLang%"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\Boot\bcd#$q /set {bootmgr} timeout %num_BootMenuDelay%"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\Boot\bcd#$q /set {bootmgr} displaybootmenu True"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\Boot\bcd#$q /set {default} locale %SourceLang%"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\Boot\bcd#$q /set {default} description #$q%ProjectTitle% %SourceArch%#$q"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\Boot\bcd#$q /set {memdiag} locale %SourceLang%"
 
 // Show progress bar
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\Boot\bcd#$q /set {default} bootmenupolicy legacy",%bcdedit.exePath%
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\Boot\bcd#$q /set {default} bootmenupolicy legacy"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // UEFI
 
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {bootmgr} locale %SourceLang%",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\Boot\bcd#$q /set {bootmgr} timeout %num_BootMenuDelay%",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\Boot\bcd#$q /set {bootmgr} displaybootmenu True",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {default} locale %SourceLang%",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {default} description #$q%ProjectTitle% %SourceArch% UEFI#$q",%bcdedit.exePath%
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {memdiag} locale %SourceLang%",%bcdedit.exePath%
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {bootmgr} locale %SourceLang%"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\Boot\bcd#$q /set {bootmgr} timeout %num_BootMenuDelay%"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\Boot\bcd#$q /set {bootmgr} displaybootmenu True"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {default} locale %SourceLang%"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {default} description #$q%ProjectTitle% %SourceArch% UEFI#$q"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {memdiag} locale %SourceLang%"
 
 // Show progress bar
-ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {default} bootmenupolicy legacy",%bcdedit.exePath%
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {default} bootmenupolicy legacy"
 
 [#BypassDriverSigning#]
 // ===============================================================================================================================
@@ -195,9 +192,8 @@ ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q
 // ===============================================================================================================================
 [BypassDriverSigning]
 If,%SourceArch%,Equal,x64,Begin
-  StrFormat,PATH,%bcdedit.exe%,%bcdedit.exePath%
-  ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\Boot\bcd#$q /set {default} loadoptions DDISABLE_INTEGRITY_CHECKS",%bcdedit.exePath%
-  ShellExecute,Hide,%bcdedit.exe%,"/store #$q%OutputDir%\efi\microsoft\Boot\bcd#$q /set {default} loadoptions DDISABLE_INTEGRITY_CHECKS",%bcdedit.exePath%
+  ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\Boot\bcd#$q /set {default} loadoptions DDISABLE_INTEGRITY_CHECKS"
+  ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\Boot\bcd#$q /set {default} loadoptions DDISABLE_INTEGRITY_CHECKS"
 End
 
 [#SetDefaultOptions#]

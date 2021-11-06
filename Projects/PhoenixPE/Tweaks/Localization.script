@@ -40,8 +40,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.2.0.0
-Date=2019-05-03
+Version=1.3.0.0
+Date=2021-10-31
 
 [Variables]
 %DismLog%="%TargetWindows%\Logs\DISM\dism.log"
@@ -84,16 +84,6 @@ StrFormat,CTRIM,%TimeZone%," ",%TimeZone%
 StrFormat,PATH,%DismLog%,%DismLogPath%
 If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
-If,%HostArch%,Equal,x86,Set,%Dism.exe%,"%Tools%\x86\DISM\dism.exe"
-Else,Set,%Dism.exe%,"%Tools%\x64\DISM\dism.exe"
-
-If,Not,ExistFile,%Dism.exe%,Begin
-  // Dism.exe is missing. Prompt the user to run Pre-Flight Check to download.
-  Message,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools.",Warning
-  Halt,"Error: Dism.exe is missing from the [%Tools%] directory. Please run Pre-Flight Check first to download the required tools."
-End
-Else,StrFormat,PATH,%Dism.exe%,%Dism.exePath%
-
 // Get HostOS Settings if needed
 If,%cmb_InputLocale1%,Equal,HostOS,Run,%ScriptFile%,GetHostInternationalSettings
 Else,If,%cmb_InputLocale2%,Equal,HostOS,Run,%ScriptFile%,GetHostInternationalSettings
@@ -125,7 +115,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%WinDir%\System32\
 // ===============================================================================================================================
 [GetHostInternationalSettings]
 Echo,"Retrieving Host International Settings...#$x#$xThis can take awhile, please be patient."
-ShellExecute,Hide,"cmd.exe","/D /C %Dism.exe% /online /Get-Intl /English /LogPath:#$q%DismLog%#$q > #$q%ProjectTemp%\Get-Intl.ini#$q",%Dism.exePath%
+ShellExecute,Hide,"cmd.exe","/D /C dism.exe /online /Get-Intl /English /LogPath:#$q%DismLog%#$q > #$q%ProjectTemp%\Get-Intl.ini#$q"
 If,Not,%ExitCode%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
 
 If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Begin
@@ -174,7 +164,7 @@ If,Not,%TimeZone%,Equal,Default,Set,%DismArg%,"%DismArg% /Set-TimeZone:#$q%TimeZ
 // Set Keyboard, Format and Timezone with DISM
 If,Not,%DismArg%,Equal,"",Begin
   Echo,"Configuring International Settings...#$x#$xThis can take awhile, please be patient."
-  ShellExecute,Hide,%Dism.exe%,"/image:#$q%TargetDir%#$q %DismArg% /LogPath:#$q%DismLog%#$q",%Dism.exePath%
+  ShellExecute,Hide,"dism.exe","/image:#$q%TargetDir%#$q %DismArg% /LogPath:#$q%DismLog%#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
 End
 
