@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.0.0.0
-Date=2019-01-01
+Version=1.1.0.0
+Date=2020-05-02
 
 [Variables]
 
@@ -128,6 +128,9 @@ StrFormat,FileName,%SourceBaseWim%,%tmp_BaseFileName%
 Echo,"Extracting [%tmp_BaseFileName%:%SourceBaseWimImage%] to [%TargetDir%]...#$x#$xThis can take awhile, please be patient."
 WimApply,%SourceBaseWim%,%SourceBaseWimImage%,%TargetDir%,NOACL,NOATTRIB
 
+// If building with boot.wim we need to extract additional files to get up to the level of WinRE
+If,%tmp_BaseFileName%,Equal,"Boot.wim",Run,%ScriptFile%,SuperchargeBootWim
+
 // WallpaperHost.exe causes issues with explorer starting
 FileDeleteEx,%TargetDir%\Windows\System32\WallpaperHost.exe
 
@@ -207,6 +210,207 @@ WimExtractBulk,%SourceBaseWim%,%SourceBaseWimImage%,%WinSxS-Listfile%,%TargetDir
 If,Not,ExistDir,%TargetWindows%\WinSxS\Catalogs,DirMake,%TargetWindows%\WinSxS\Catalogs
 
 System,EndLocal
+
+[#SuperchargeBootWim#]
+// ===============================================================================================================================
+// Name...........: SuperchargeBootWim
+// Description....: Bring boot.wim files up to par with WinRE
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: WORK IN PROGRESS
+//                  WinRE is a extension of Boot.wim, with the addition of a few extra packages (WiFi, iSCSI, WinRejuv).
+//                  It seems that as of late boot.wim gets updated to the most recent build and WinRE gets left a build or more
+//                  behind install.wim. This can cause issues for us mismatching install.wim registry entries with older WinRE
+//                  registry and files. Here we use boot.wim which is (hopefully) the same version as install.wim and copy any
+//                  files that WinRE has that boot.wim is missing. We then continue on to build using boot.wim's registry, which
+//                  should be the same version of install.wim's registry.
+// Related........: Called by [Process]
+// ===============================================================================================================================
+[SuperchargeBootWim]
+
+Echo,"Supercharging boot.wim...#$x#$xThis can take awhile, please be patient."
+
+// Inf
+RequireFileEx,AppendList,\Windows\INF\netnwifi.inf
+
+// L2Schemas
+RequireFileEx,AppendList,\Windows\L2Schemas\OneX_v1.xsd
+RequireFileEx,AppendList,\Windows\L2Schemas\WFD_LEGACY_profile_v1.xsd
+RequireFileEx,AppendList,\Windows\L2Schemas\WFD_profile_v1.xsd
+RequireFileEx,AppendList,\Windows\L2Schemas\WLAN_policy_v1.xsd
+RequireFileEx,AppendList,\Windows\L2Schemas\WLAN_profile_v1.xsd
+RequireFileEx,AppendList,\Windows\L2Schemas\WLAN_profile_v2.xsd
+RequireFileEx,AppendList,\Windows\L2Schemas\WLAN_profile_v3.xsd
+RequireFileEx,AppendList,\Windows\L2Schemas\WLANAP_profile_v1.xsd
+
+// PLA
+RequireFileEx,AppendList,\Windows\PLA
+
+// DriverState
+
+// DriverStore
+RequireFileEx,AppendList,\Windows\System32\DriverStore\*\netnwifi.inf_loc
+RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netnwifi.inf*
+
+// wbem
+RequireFileEx,AppendList,\Windows\System32\wbem\iscsidsc.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\iscsihba.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\iscsiprf.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\iscsirem.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\iscsiwmiv2.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\iscsiwmiv2_uninstall.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\msiscsi.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\storagewmi.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\storagewmi_passthru.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\storagewmi_passthru_uninstall.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\storagewmi_uninstall.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\wcncsvc.mof
+RequireFileEx,AppendList,\Windows\System32\wbem\wlan.mof
+
+// WindowsPowerShell
+RequireFileEx,AppendList,\Windows\System32\WindowsPowerShell\v1.0\Modules\iSCSI
+RequireFileEx,AppendList,\Windows\System32\WindowsPowerShell\v1.0\Modules\Storage
+RequireFileEx,AppendList,\Windows\System32\WindowsPowerShell\v1.0\Modules\StorageBusCache
+
+// SysWOW64
+RequireFileEx,AppendList,\Windows\SysWOW64\fdWCN.dll
+RequireFileEx,AppendList,\Windows\SysWOW64\WcnApi.dll
+RequireFileEx,AppendList,\Windows\SysWOW64\wcnwiz.dll
+
+// System32
+RequireFileEx,AppendList,\Windows\System32\AppxPackaging.dll
+RequireFileEx,AppendList,\Windows\System32\cmi2migxml.dll
+RequireFileEx,AppendList,\Windows\System32\csiagent.dll
+RequireFileEx,AppendList,\Windows\System32\d3d8thk.dll
+RequireFileEx,AppendList,\Windows\System32\d3d9.dll
+RequireFileEx,AppendList,\Windows\System32\d3d10.dll
+RequireFileEx,AppendList,\Windows\System32\d3d10_1.dll
+RequireFileEx,AppendList,\Windows\System32\d3d10_1core.dll
+RequireFileEx,AppendList,\Windows\System32\d3d10core.dll
+RequireFileEx,AppendList,\Windows\System32\d3d10level9.dll
+RequireFileEx,AppendList,\Windows\System32\d3d10warp.dll
+RequireFileEx,AppendList,\Windows\System32\d3d11.dll
+RequireFileEx,AppendList,\Windows\System32\d3d11on12.dll
+RequireFileEx,AppendList,\Windows\System32\D3D12.dll
+RequireFileEx,AppendList,\Windows\System32\D3DCompiler_47.dll
+RequireFileEx,AppendList,\Windows\System32\dafWCN.dll
+RequireFileEx,AppendList,\Windows\System32\dafWfdProvider.dll
+RequireFileEx,AppendList,\Windows\System32\delegatorprovider.dll
+RequireFileEx,AppendList,\Windows\System32\diagER.dll
+RequireFileEx,AppendList,\Windows\System32\DXCore.dll
+RequireFileEx,AppendList,\Windows\System32\dxgi.dll
+RequireFileEx,AppendList,\Windows\System32\dxva2.dll
+RequireFileEx,AppendList,\Windows\System32\edgehtml.dll
+RequireFileEx,AppendList,\Windows\System32\EdgeManager.dll
+RequireFileEx,AppendList,\Windows\System32\fdWCN.dll
+RequireFileEx,AppendList,\Windows\System32\fmapi.dll
+RequireFileEx,AppendList,\Windows\System32\FntCache.dll
+RequireFileEx,AppendList,\Windows\System32\hwcompat.dll
+RequireFileEx,AppendList,\Windows\System32\hwcompat.txt
+RequireFileEx,AppendList,\Windows\System32\hwexclude.txt
+RequireFileEx,AppendList,\Windows\System32\ieframe.dll
+RequireFileEx,AppendList,\Windows\System32\iemigplugin.dll
+RequireFileEx,AppendList,\Windows\System32\IESettingSync.exe
+RequireFileEx,AppendList,\Windows\System32\imgutil.dll
+RequireFileEx,AppendList,\Windows\System32\IndexedDbLegacy.dll
+RequireFileEx,AppendList,\Windows\System32\inetcomm.dll
+RequireFileEx,AppendList,\Windows\System32\INETRES.dll
+RequireFileEx,AppendList,\Windows\System32\iscsicli.exe
+RequireFileEx,AppendList,\Windows\System32\iscsidsc.dll
+RequireFileEx,AppendList,\Windows\System32\iscsied.dll
+RequireFileEx,AppendList,\Windows\System32\iscsiexe.dll
+RequireFileEx,AppendList,\Windows\System32\iscsium.dll
+RequireFileEx,AppendList,\Windows\System32\iscsiwmi.dll
+RequireFileEx,AppendList,\Windows\System32\iscsiwmiv2.dll
+RequireFileEx,AppendList,\Windows\System32\l2nacp.dll
+RequireFileEx,AppendList,\Windows\System32\migapp.xml
+RequireFileEx,AppendList,\Windows\System32\migcore.dll
+RequireFileEx,AppendList,\Windows\System32\mighost.exe
+RequireFileEx,AppendList,\Windows\System32\migisol.dll
+RequireFileEx,AppendList,\Windows\System32\migres.dll
+RequireFileEx,AppendList,\Windows\System32\migstore.dll
+RequireFileEx,AppendList,\Windows\System32\migsys.dll
+RequireFileEx,AppendList,\Windows\System32\mlang.dat
+RequireFileEx,AppendList,\Windows\System32\mlang.dll
+RequireFileEx,AppendList,\Windows\System32\mshta.exe
+RequireFileEx,AppendList,\Windows\System32\mshtml.dll
+RequireFileEx,AppendList,\Windows\System32\mshtml.tlb
+RequireFileEx,AppendList,\Windows\System32\mshtmled.dll
+RequireFileEx,AppendList,\Windows\System32\msimtf.dll
+RequireFileEx,AppendList,\Windows\System32\msoert2.dll
+RequireFileEx,AppendList,\Windows\System32\msrating.dll
+RequireFileEx,AppendList,\Windows\System32\MXEAgent.dll
+RequireFileEx,AppendList,\Windows\System32\offline.xml
+RequireFileEx,AppendList,\Windows\System32\oledlg.dll
+RequireFileEx,AppendList,\Windows\System32\onex.dll
+RequireFileEx,AppendList,\Windows\System32\OpcServices.dll
+RequireFileEx,AppendList,\Windows\System32\oscomps.woa.xml
+RequireFileEx,AppendList,\Windows\System32\oscomps.xml
+RequireFileEx,AppendList,\Windows\System32\osfilter.inf
+RequireFileEx,AppendList,\Windows\System32\pngfilt.dll
+RequireFileEx,AppendList,\Windows\System32\pnppropmig.dll
+RequireFileEx,AppendList,\Windows\System32\ReserveManager.dll
+RequireFileEx,AppendList,\Windows\System32\setupplatform.cfg
+RequireFileEx,AppendList,\Windows\System32\setupplatform.dll
+RequireFileEx,AppendList,\Windows\System32\setupplatform.exe
+RequireFileEx,AppendList,\Windows\System32\SFCN.dat
+RequireFileEx,AppendList,\Windows\System32\SFLCID.dat
+RequireFileEx,AppendList,\Windows\System32\SFLISTRS1.dat
+RequireFileEx,AppendList,\Windows\System32\SFLISTW7.dat
+RequireFileEx,AppendList,\Windows\System32\SFLISTW8.dat
+RequireFileEx,AppendList,\Windows\System32\sflistw8.woa.dat
+RequireFileEx,AppendList,\Windows\System32\SFLISTWB.dat
+RequireFileEx,AppendList,\Windows\System32\sflistwb.woa.dat
+RequireFileEx,AppendList,\Windows\System32\SFLISTWT.dat
+RequireFileEx,AppendList,\Windows\System32\sflistwt.woa.dat
+RequireFileEx,AppendList,\Windows\System32\SFPAT.inf
+RequireFileEx,AppendList,\Windows\System32\SFPATRS1.inf
+RequireFileEx,AppendList,\Windows\System32\SFPATW7.inf
+RequireFileEx,AppendList,\Windows\System32\SFPATW8.inf
+RequireFileEx,AppendList,\Windows\System32\SFPATWB.inf
+RequireFileEx,AppendList,\Windows\System32\SFPATWT.inf
+RequireFileEx,AppendList,\Windows\System32\storagewmi.dll
+RequireFileEx,AppendList,\Windows\System32\storagewmi_passthru.dll
+RequireFileEx,AppendList,\Windows\System32\unbcl.dll
+RequireFileEx,AppendList,\Windows\System32\uninstall.xml
+RequireFileEx,AppendList,\Windows\System32\uninstall_data.xml
+RequireFileEx,AppendList,\Windows\System32\upgrade_bulk.xml
+RequireFileEx,AppendList,\Windows\System32\upgrade_comp.xml
+RequireFileEx,AppendList,\Windows\System32\upgrade_data.xml
+RequireFileEx,AppendList,\Windows\System32\upgrade_frmwrk.xml
+RequireFileEx,AppendList,\Windows\System32\upgradeagent.dll
+RequireFileEx,AppendList,\Windows\System32\upgradeagent.xml
+RequireFileEx,AppendList,\Windows\System32\upgWow_bulk.xml
+RequireFileEx,AppendList,\Windows\System32\WcnApi.dll
+RequireFileEx,AppendList,\Windows\System32\wcncsvc.dll
+RequireFileEx,AppendList,\Windows\System32\WcnEapAuthProxy.dll
+RequireFileEx,AppendList,\Windows\System32\WcnEapPeerProxy.dll
+RequireFileEx,AppendList,\Windows\System32\WcnNetsh.dll
+RequireFileEx,AppendList,\Windows\System32\wcnwiz.dll
+RequireFileEx,AppendList,\Windows\System32\wdsutil.dll
+RequireFileEx,AppendList,\Windows\System32\webplatstorageserver.dll
+RequireFileEx,AppendList,\Windows\System32\wfdprov.dll
+RequireFileEx,AppendList,\Windows\System32\WiFiConfigSP.dll
+RequireFileEx,AppendList,\Windows\System32\WiFiDisplay.dll
+RequireFileEx,AppendList,\Windows\System32\wlanapi.dll
+RequireFileEx,AppendList,\Windows\System32\wlancfg.dll
+RequireFileEx,AppendList,\Windows\System32\WLanConn.dll
+RequireFileEx,AppendList,\Windows\System32\wlandlg.dll
+RequireFileEx,AppendList,\Windows\System32\wlanext.exe
+RequireFileEx,AppendList,\Windows\System32\wlanhlp.dll
+RequireFileEx,AppendList,\Windows\System32\wlanmsm.dll
+RequireFileEx,AppendList,\Windows\System32\wlanpref.dll
+RequireFileEx,AppendList,\Windows\System32\wlansec.dll
+RequireFileEx,AppendList,\Windows\System32\wlansvc.dll
+RequireFileEx,AppendList,\Windows\System32\wlansvcpal.dll
+RequireFileEx,AppendList,\Windows\System32\wlanui.dll
+
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
