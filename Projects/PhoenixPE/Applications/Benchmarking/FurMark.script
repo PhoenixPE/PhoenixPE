@@ -30,18 +30,18 @@
 
 [Main]
 Title=FurMark
-Description=(v1.25.0.0) FurMark is a lightweight but very intensive GPU stress testing and OpenGL bench-marking application. 
+Description=(v1.28.0.0 x86) FurMark is a lightweight but very intensive GPU stress testing and OpenGL bench-marking application.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2021-03-07
+Version=1.1.0.0
+Date=2021-10-17
 
 [Variables]
 %ProgramFolder%="FurMark"
 %ProgramExe%="FurMark.exe"
-%DownloadURL%=https://geeks3d.com/downloads/2021p/FurMark_1.25.0.0_Setup.exe
+%DownloadURL%=https://geeks3d.com/downloads/2021p/FurMark_1.28.0.0_Setup.exe
 %SetupFile%="FurMark_Setup.exe"
 
 [Process]
@@ -53,7 +53,16 @@ If,%cb_RunFromRam%,Equal,True,RunFromRam
 // Extract
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
+// DirMove will fail if the dir already exists (ex. the project has already been built)
+DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
 DirMove,"%ProjectTemp%\%ProgramFolder%\{app}","%TargetPrograms%\%ProgramFolder%"
+
+// Dependencies
+RequireFileEx,AppendList,\Windows\System32\glu32.dll
+RequireFileEx,AppendList,\Windows\System32\opengl32.dll
+RequireFileEx,AppendList,\Windows\SysWOW64\glu32.dll
+RequireFileEx,AppendList,\Windows\SysWOW64\opengl32.dll
+RequireFileEx,ExtractList
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings

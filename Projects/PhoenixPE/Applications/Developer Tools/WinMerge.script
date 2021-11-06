@@ -30,19 +30,20 @@
 
 [Main]
 Title=WinMerge
-Description=(v2.16.10) WinMerge is an Open Source differencing and merging tool for Windows. WinMerge can compare both folders and files, presenting differences in a visual text format that is easy to understand and handle.
+Description=(v2.16.14) WinMerge is an Open Source differencing and merging tool for Windows. WinMerge can compare both folders and files, presenting differences in a visual text format that is easy to understand and handle.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2021-02-06
+Version=1.0.1.0
+Date=2021-10-17
 
 [Variables]
 %ProgramFolder%="WinMerge"
 %ProgramExe%="WinMergeU.exe"
-%DownloadURLx86%=https://github.com/WinMerge/winmerge/releases/download/v2.16.10/winmerge-2.16.10-exe.zip
-%DownloadURLx64%=https://github.com/WinMerge/winmerge/releases/download/v2.16.10/winmerge-2.16.10-x64-exe.zip
+%ProgramVer%=2.16.14
+%DownloadURLx86%=https://github.com/WinMerge/winmerge/releases/download/v%ProgramVer%/winmerge-%ProgramVer%-exe.zip
+%DownloadURLx64%=https://github.com/WinMerge/winmerge/releases/download/v%ProgramVer%/winmerge-%ProgramVer%-x64-exe.zip
 %SetupFile%="WinMerge_%SourceArch%.zip"
 %ShellExtDLL86%="ShellExtensionU.dll"
 %ShellExtDLL64%="ShellExtensionX64.dll"
@@ -180,6 +181,7 @@ FileCopy,"%ProjectTemp%\%ProgramFolder%\WinMerge\*.*",#1
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
@@ -304,7 +306,7 @@ Message,"WinMerge is an Open Source differencing and merging tool for Windows. W
 [Interface]
 btn_LaunchProgram="Launch WinMerge",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://www.WinMerge.com/
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.WinMerge.org/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
