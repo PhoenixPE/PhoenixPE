@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-10-22
+Version=1.1.0.0
+Date=2021-11-07
 
 [Variables]
 %ProgramFolder%="Q-Dir"
@@ -90,6 +90,9 @@ If,Not,%fb_IncludeDir%,Equal,"",If,ExistDir,%fb_IncludeDir%,Begin
   Echo,"Processing additional include files..."
   FileCopy,"%fb_IncludeDir%\*.*","%TargetPrograms%\%ProgramFolder%"
 End
+
+// Autorun
+AddAutorun,PostShell,NoWait,"Starting %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -220,6 +223,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,True
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Managers"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Q-Dir"
+WriteInterface,Value,%ScriptFile%,Interface,cb_AutoRun,False
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [1]"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_ViewMode,"4-Dir (Quad)              [0]"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TreeMode,"Do Not Use   [0]"
@@ -239,13 +243,14 @@ System,Cursor,Normal
 // ===============================================================================================================================
 [ToggleAdvancedOptions]
 System,SetLocal
-ReadInterface,Visible,%ScriptFile%,Interface,lbl_IncludeDir,%state%
+ReadInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%state%
 If,%state%,Equal,False,Begin,
   If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
   Else,Set,%Toggle%,False
 End
 Else,Set,%Toggle%,False
 
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_IncludeDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,fb_IncludeDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,btn_BrowseIncludeDir,%Toggle%
@@ -295,15 +300,17 @@ cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,True
 txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"File Managers"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,Q-Dir
 bvl_Options=Options,1,12,150,90,263,184,8,Bold
-lbl_Language=Language,1,1,159,105,153,16,8,Normal
-cmb_Language="English [1]",1,4,160,121,180,21,"Arabic [25]","Bulgarian [32]","Chinese (Simplified) [9]","Chinese (Traditional) [5]","Croatian [23]","Czech [16]","Danish [17]","Dutch [11]","English [1]","English (UK) [28]","Estonian [27]","Finnish [21]","French [2]","German [0]","Greek [13]","Hungarian [22]","Italian [3]","Japanese [6]","Korean [7]","Norsk [29]","Polish [8]","Portuguese (Brazil) [18]","Romanian [19]","Russian [10]","Serbian [30]","Slovak [15]","Slovenian [24]","Spanish (Argentina) [14]","Spanish (Latin) [31]","Spanish (Spain) [4]","Swedish [20]","Turkish [12]","Ukrainian [26]"
-lbl_ViewMode="View Mode",1,1,159,150,153,16,8,Normal
-cmb_ViewMode="4-Dir (Quad)              [0]",1,4,160,163,180,21,"4-Dir (Quad)              [0]","4-Dir (Tile Vertically)   [1]","4-Dir (Tile Horizontally) [2]","3-Dir (1 on Top)          [3]","3-Dir (1 on Bottom)       [4]","3-Dir (1 on Left)         [5]","3-Dir (1 on Right)        [6]","3-Dir (Tile Vertically)   [7]","3-Dir (Tile Horizontally) [8]","2-Dir (Tile Vertically)   [9]","2-Dir (Tile Horizontally) [10]","1-Dir                     [11]"
-lbl_TreeMode="Tree Mode",1,1,159,192,153,16,8,Normal
-cmb_TreeMode="One 4 All    [1]",1,4,160,205,180,21,"Do Not Use   [0]","One 4 All    [1]","Each Has One [2]"
-lbl_IncludeDir="Include these files",0,1,160,236,200,16,8,Normal
-fb_IncludeDir=,0,13,160,248,211,20,dir,"__Files and folders in this directory will be copied to the program folder.#$x#$xYou can use this option to include custom config, favorites, quick-links, etc.#$xIf you include a customized Q-Dir.ini it will override all setting configured by the script interface."
-btn_BrowseIncludeDir=,0,8,377,248,25,20,BrowseIncludeDir,OpenFolder_16.png,True,__Browse
+cb_AutoRun="Run on startup",1,3,159,104,200,18,False
+lbl_Language=Language,1,1,159,135,153,16,8,Normal
+cmb_Language="English [1]",1,4,160,151,180,21,"Arabic [25]","Bulgarian [32]","Chinese (Simplified) [9]","Chinese (Traditional) [5]","Croatian [23]","Czech [16]","Danish [17]","Dutch [11]","English [1]","English (UK) [28]","Estonian [27]","Finnish [21]","French [2]","German [0]","Greek [13]","Hungarian [22]","Italian [3]","Japanese [6]","Korean [7]","Norsk [29]","Polish [8]","Portuguese (Brazil) [18]","Romanian [19]","Russian [10]","Serbian [30]","Slovak [15]","Slovenian [24]","Spanish (Argentina) [14]","Spanish (Latin) [31]","Spanish (Spain) [4]","Swedish [20]","Turkish [12]","Ukrainian [26]"
+lbl_ViewMode="View Mode",1,1,159,180,153,16,8,Normal
+cmb_ViewMode="4-Dir (Quad)              [0]",1,4,160,193,180,21,"4-Dir (Quad)              [0]","4-Dir (Tile Vertically)   [1]","4-Dir (Tile Horizontally) [2]","3-Dir (1 on Top)          [3]","3-Dir (1 on Bottom)       [4]","3-Dir (1 on Left)         [5]","3-Dir (1 on Right)        [6]","3-Dir (Tile Vertically)   [7]","3-Dir (Tile Horizontally) [8]","2-Dir (Tile Vertically)   [9]","2-Dir (Tile Horizontally) [10]","1-Dir                     [11]"
+lbl_TreeMode="Tree Mode",1,1,159,222,153,16,8,Normal
+cmb_TreeMode="Do Not Use   [0]",1,4,160,235,180,21,"Do Not Use   [0]","One 4 All    [1]","Each Has One [2]"
+bvl_AdvancedOptions="Advanced Options",0,12,150,290,381,60,8,Bold
+lbl_IncludeDir="Include these files",0,1,160,308,200,16,8,Normal
+fb_IncludeDir=,0,13,160,321,331,20,dir,"__Files and folders in this directory will be copied to the program folder.#$x#$xYou can use this option to include custom config, favorites, quick-links, etc.#$xIf you include a customized Q-Dir.ini it will override all setting configured by the script interface."
+btn_BrowseIncludeDir=,0,8,497,321,25,20,BrowseIncludeDir,OpenFolder_16.png,True,__Browse
 
 [InterfaceEncoded]
 play-hot.png=841,1220
