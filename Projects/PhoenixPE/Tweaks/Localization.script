@@ -106,7 +106,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%WinDir%\System32\
 // ===============================================================================================================================
 // Name...........: GetHostInternationalSettings
 // Description....: Use DISM to read the local settings from the host operating system.
-// Syntax.........: 
+// Syntax.........: Run,%ScriptFile%,GetHostInternationalSettings
 // Parameters.....: 
 // Return values..: Retrieved info is saved directly to this scripts local variables.
 // Author.........: Homes32
@@ -147,7 +147,7 @@ Else,Halt,"Error: Unable to read International Settings from Dism. Check the log
 // ===============================================================================================================================
 // Name...........: SetInternationalSettings
 // Description....: Use DISM to configure the target PE with our desired local.
-// Syntax.........: 
+// Syntax.........: Run,%ScriptFile%,SetInternationalSettings
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
@@ -157,6 +157,7 @@ Else,Halt,"Error: Unable to read International Settings from Dism. Check the log
 [SetInternationalSettings]
 Set,%DismArg%,""
 If,Not,%InputLocale1%,Equal,Default,Set,%DismArg%,"/Set-InputLocale:%InputLocale1%"
+// DISM doesn't mind if you try and set both keyboards the same and will only set it once, so we aren't going to bother checking for dups
 If,Not,%InputLocale2%,Equal,Default,Set,%DismArg%,"%DismArg%;%InputLocale2%"
 If,Not,%UserLocale%,Equal,Default,Set,%DismArg%,"%DismArg% /Set-UserLocale:%UserLocale%"
 If,Not,%TimeZone%,Equal,Default,Set,%DismArg%,"%DismArg% /Set-TimeZone:#$q%TimeZone%#$q"
@@ -278,7 +279,7 @@ bvl_RegionalSettings="Regional Settings",1,12,145,50,271,132,8,Bold
 lbl_InputLocale1="Keyboard 1",1,1,156,70,56,18,8,Normal
 cmb_InputLocale1=HostOS,1,4,221,66,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your primary keyboard layout.#$x#$xThe en-US keyboard will added as a secondary layout if it is not already the default."
 lbl_InputLocale2="Keyboard 2",1,1,156,98,56,18,8,Normal
-cmb_InputLocale2=HostOS,1,4,221,93,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your primary keyboard layout.#$x#$xThe en-US keyboard will added as a secondary layout if it is not already the default."
+cmb_InputLocale2="(en-US) English US",1,4,221,93,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your primary keyboard layout.#$x#$xThe en-US keyboard will added as a secondary layout if it is not already the default."
 lbl_UserLocale=Format,1,1,156,127,58,18,8,Normal
 cmb_UserLocale=HostOS,1,4,221,121,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your date and time format."
 lbl_TimeZone=TimeZone,1,1,156,154,58,18,8,Normal

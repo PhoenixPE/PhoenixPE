@@ -32,12 +32,12 @@
 Title=VMware
 Author=Homes32
 Description=Run your ISO in VMware Player/Workstation
-Version=1.0.1.0
+Version=1.1.1.0
 Level=9
 Selected=True
 Mandatory=False
 NoWarning=False
-Date=2021-04-25
+Date=2021-11-28
 
 [Variables]
 %VMPath%=%ProjectTemp%\VMware
@@ -200,6 +200,9 @@ If,%cmb_Firmware%,Equal,"UEFI",TxtAddLine,%VMCfg%,"firmware = #$qefi#$q",Append
 Else,If,%cmb_Firmware%,Equal,"BIOS",TxtAddLine,%VMCfg%,"firmware = #$qbios#$q",Append
 Else,Halt,"Logic Error: No configuration has been defined for Firmware [%cmb_Firmware%]"
 
+// Trusted Platform Module (TPM) -- We should check and make sure Firmware is UEFI...)
+If,%cb_EnableTPM%,Equal,True,TxtAddLine,%VMCfg%,"managedvm.autoAddVTPM = #$qsoftware#$q",Append
+
 // Shared Folder
 If,Not,%cmb_SharedFolder%,Equal,Disabled,Begin
 
@@ -342,6 +345,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cmb_SharedFolder,"Disabled"
 WriteInterface,Value,%ScriptFile%,Interface,fb_SharedFolder,"#$pBaseDir#$p\Workbench\VM-Shared"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_VirtualHDD,"Disabled"
 WriteInterface,Visible,%ScriptFile%,Interface,cmb_Firmware,True
+WriteInterface,Visible,%ScriptFile%,Interface,cb_EnableTPM,False
 
 Run,%ScriptFile%,ToggleAdvancedOptions
 
@@ -369,6 +373,7 @@ WriteInterface,Visible,%ScriptFile%,Interface,lbl_Firmware,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cmb_Firmware,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_BootDelay,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,num_BootDelay,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_EnableTPM,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,bvl_SharedFolder,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cmb_SharedFolder,%Toggle%
 If,%cmb_SharedFolder%,Equal,Disabled,WriteInterface,Visible,%ScriptFile%,Interface,fb_SharedFolder,False
@@ -414,11 +419,11 @@ web_DownloadVMware="Download VMware",1,10,400,10,101,18,https://my.vmware.com/we
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
-bvl_vmOptions="Virtual Machine Settings",1,12,5,50,257,242,8,Bold
-cmb_numProc=2,1,4,140,67,112,21,Auto,1,2,3,4,5,6,7,8
+bvl_vmOptions="Virtual Machine Settings",1,12,5,50,257,265,8,Bold
+cmb_numProc=Auto,1,4,140,67,112,21,Auto,1,2,3,4,5,6,7,8
 lbl_numProc="Number of Processors:",1,1,15,74,117,16,8,Normal
 lbl_AllocMem="Allocated Memory (MB):",1,1,15,101,123,16,8,Normal
-cmb_MemSize=4096,1,4,140,95,112,21,1024,2048,4096,8192,16384,32768,65536
+cmb_MemSize=2048,1,4,140,95,112,21,1024,2048,4096,8192,16384,32768,65536
 lbl_Audio="Audio Device:",1,1,15,129,73,16,8,Normal
 cmb_Audio="Intel HD Audio",1,4,140,123,112,21,Disabled,"Creative ES1371","Intel HD Audio"
 lbl_Network="Network Adapter:",1,1,15,184,91,16,8,Normal
@@ -431,14 +436,15 @@ lbl_Firmware=Firmware:,0,1,15,239,53,16,8,Normal
 cmb_Firmware=UEFI,0,4,140,234,63,21,BIOS,UEFI
 lbl_BootDelay="Boot Delay (sec):",0,1,15,266,86,16,8,Normal
 num_BootDelay=num_BootDelay,0,2,139,261,63,22,0,0,120,1
-rtf_Info=VMwareInfo.rtf,1,6,270,50,356,242
-bvl_SharedFolder="Shared Folder",0,12,270,307,356,82,8,Bold
-cmb_SharedFolder=Disabled,0,4,280,325,155,21,Disabled,Read-Only,Read/Write,_ToggleSharedFolderFilebox_,True
-fb_SharedFolder=%BaseDir%\Workbench\VM-Shared,0,13,280,356,282,20,dir,Title=Select the directory to share
-btn_ExploreSharedFolder=Explore,0,8,569,356,45,20,ExploreSharedFolder,0,True
-bvl_VHD="Virtual HDD",0,12,5,307,257,82,8,Bold
-cmb_VirtualHDD=Disabled,0,4,14,325,155,21,Disabled,"Empty 10GB Linux Disk","Empty 10GB NTFS Disk","User defined .vmdk",_ToggleVirtualHDDFilebox_,True
-fb_VirtualHDD=,0,13,14,356,237,20,file,Title=Select your virtual hard drive image,"__VMware supported file types:#$x  - VMware (*.vmdk)"
+cb_EnableTPM="Enable TPM Passthru",0,3,15,288,200,18,False,"__Enable Trusted Platform Module pass-through."
+rtf_Info=VMwareInfo.rtf,1,6,270,50,356,265
+bvl_SharedFolder="Shared Folder",0,12,270,332,356,82,8,Bold
+cmb_SharedFolder=Disabled,0,4,280,350,155,21,Disabled,Read-Only,Read/Write,_ToggleSharedFolderFilebox_,True
+fb_SharedFolder=%BaseDir%\Workbench\VM-Shared,0,13,280,381,282,20,dir,Title=Select the directory to share
+btn_ExploreSharedFolder=Explore,0,8,569,381,45,20,ExploreSharedFolder,0,True
+bvl_VHD="Virtual HDD",0,12,5,332,257,82,8,Bold
+cmb_VirtualHDD=Disabled,0,4,14,350,155,21,Disabled,"Empty 10GB Linux Disk","Empty 10GB NTFS Disk","User defined .vmdk",_ToggleVirtualHDDFilebox_,True
+fb_VirtualHDD=,0,13,14,381,237,20,file,Title=Select your virtual hard drive image,"__VMware supported file types:#$x  - VMware (*.vmdk)"
 
 [InterfaceEncoded]
 Help.png=3774,3999

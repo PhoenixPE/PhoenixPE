@@ -63,6 +63,7 @@ FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
 SetRegACL=Run,%API%,_PhoenixAPI_SetRegACL
 
+RequireDriver=Run,%API%,_PhoenixAPI_RequireDriver
 RequireFile=Run,%API%,_PhoenixAPI_RequireFile
 RequireFileEx=Run,%API%,_PhoenixAPI_RequireFileEx
 
@@ -151,12 +152,12 @@ End
 // Author.........: Homes32
 // Remarks........: This function uses a modified version of ChrisR's RegAddDriver.cmd as PEBakery does not have a good way
 //                  to enum/query registry keys yet...
-//                  Registry hives must be loaded before calling.
+//                  Registry hives Tmp_Install_Drivers, Tmp_Install_System, Tmp_Drivers, Tmp_System must be loaded before calling.
 // Related........: Depends on %Tools%\RegCopyDriver.cmd
 // ===============================================================================================================================
 [_PhoenixAPI_RegCopyDriver]
 System,SetLocal
-Set,%Debug%,False
+Set,%Debug%,True
 
 If,#1,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to register."
 GetParam,1,%InfFile%
@@ -165,6 +166,55 @@ Echo,"Processing [%InfFile%] registration..."
 If,%Debug%,Equal,True,TXTReplace,"%Tools%\RegCopyDriver.cmd",":::",""
 
 ShellExecute,Hide,"cmd.exe","/D /C RegCopyDriver.cmd #$q%InfFile%#$q",%Tools%
+
+System,EndLocal
+
+[#_PhoenixAPI_RequireDriver#]
+// ===============================================================================================================================
+// Name...........: RequireDriver
+// Description....: Copy the driver support files and driver entries from the INSTALL.WIM driver database to the target registry driver database.
+//                  Both the DRIVERS hive and SYSTEM\Drivers store are processed.
+//
+//                  You must still copy additional/supporting driver files yourself if they have a different name then the .inf file itself.
+//                  Ex. RequireDriver,netrndis.inf - you still need to copy \Windows\System32\drivers\usb8023.sys yourself.
+//
+// Syntax.........: RequireDriver,<filename.inf>
+// Parameters.....: InfFile - The name of the driver's .inf file
+//                  NOREG - (Optional) Don't copy registry (driver database)
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: This function uses a modified version of ChrisR's RegAddDriver.cmd as PEBakery does not have a good way
+//                  to enum/query registry keys yet...
+//                  Registry hives Tmp_Install_Drivers, Tmp_Install_System, Tmp_Drivers, Tmp_System must be loaded before calling.
+// Related........: Depends on %Tools%\RegCopyDriver.cmd
+// ===============================================================================================================================
+[_PhoenixAPI_RequireDriver]
+System,SetLocal
+
+If,#1,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to include/register."
+GetParam,1,%InfFile%
+GetParam,2,%Arg2%
+
+If,%Arg2%,Equal,NOREG,Set,%NOREG%,True
+Else,Set,%NOREG%,False
+
+StrFormat,RTRIM,%InfFile%,3,%InfFileNoExt%
+
+Set,%RequireDriver-Listfile%,%ProjectTemp%\RequireDriver-ListFile.txt
+FileDeleteEx,%RequireDriver-Listfile%
+
+Echo,"Extracting [%InfFile%] Driver Support Files..."
+TxtAddline,%RequireDriver-Listfile%,"\Windows\INF\%InfFileNoExt%*",Append
+TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\%InfFileNoExt%*",Append
+TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\Drivers\%InfFileNoExt%*",Append
+TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\Driverstore\??-??\%InfFile%_loc",Append
+TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\DriverStore\FileRepository\%InfFile%*",Append
+WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%RequireDriver-Listfile%,%TargetDir%,NOACL,NOATTRIB,NOERR
+
+If,%NOREG%,Equal,False,Begin
+  Echo,"Registering [%InfFile%] Driver..."
+  RegCopyDriver,%InfFile%
+End
 
 System,EndLocal
 
@@ -192,9 +242,9 @@ Set,#r,%ExitCode%
 
 System,EndLocal
 
-[#_PhoenixAPI_InnounpEx#]
+[#_PhoenixAPI_Innounp#]
 // ===============================================================================================================================
-// Name...........: _PhoenixAPI_Innounp
+// Name...........: Innounp
 // Description....: Execute Innounp (Inno Setup Unpacker) with the provided arguments.
 // Syntax.........: Innounp,<Args>[,<WorkDir>]
 // Parameters.....: #1 Args - The arguments to pass to the Innounp executable.
@@ -222,7 +272,7 @@ System,EndLocal
 
 [#_PhoenixAPI_InnoUnpack#]
 // ===============================================================================================================================
-// Name...........: _PhoenixAPI_InnoUnpack
+// Name...........: InnoUnpack
 // Description....: Extract files from an Innounp (Inno Setup Unpacker) installer.
 // Syntax.........: InnoUnpack,<SetupFile>,<DestDir>[,<Args>]
 // Parameters.....: #1 SetupFile - The inno-setup file to unpack.
@@ -266,7 +316,7 @@ System,EndLocal
 [#__PhoenixAPI_InnoUnpack_Process_Arg#]
 // ===============================================================================================================================
 // Name...........: __PhoenixAPI_InnoUnpack_Process_Arg
-// Description....: Loop to copy a file's .mui
+// Description....: Process InnoUnpack optional arguments
 // Syntax.........: __PhoenixAPI_InnoUnpack_Process_Arg,<Arg>
 // Parameters.....: #1 Arg - The argument to process
 // Return values..: #r - Command line string to be passed to Innounp.exe
@@ -318,7 +368,7 @@ If,Not,%ExitCode%,Equal,0,Halt,"ERROR: Image conversion failed. [%ExitCode%]"
 
 [#_PhoenixAPI_Associate#]
 // ===============================================================================================================================
-// Name...........: _PhoenixAPI_Associate
+// Name...........: Associate
 // Description....: Associate a file extension with a program.
 // Syntax.........: Associate,<FileExtension>,<ProgramExe>[,<Icon>]
 // Parameters.....: #1 FileExtension - The file extension to associate.
@@ -517,9 +567,9 @@ System,SetLocal
 
 GetParam,1,%Action%
 GetParam,2,%GLOB%
-GetParam,3,%Arg1%
+GetParam,3,%Arg3%
 
-If,%Arg1%,Equal,NOMUI,Set,%ExtractMui%,False
+If,%Arg3%,Equal,NOMUI,Set,%ExtractMui%,False
 Else,Set,%ExtractMui%,True
 
 Set,%BulkFileList%,%ProjectTemp%\RequireFileEx-BulkFileList.txt
@@ -592,7 +642,7 @@ System,EndLocal
 // ===============================================================================================================================
 // Name...........: AddAutoRun
 // Description....: Run a program when the PE Environment starts
-// Syntax.........: AddAutoRun,<RunGroup>,<Mode>,<Title>,<ProgramExe>,<Parameters>
+// Syntax.........: AddAutoRun,<RunGroup>,<Mode>,<Title>,<ProgramExe>,[Parameters]
 // Parameters.....: #1 RunGroup
 //                     PreShell - Run before the shell (ie. Explorer) is loaded.
 //                     PostShell - Run after the shell is loaded.
@@ -605,7 +655,7 @@ System,EndLocal
 //                     HideWait   - Run the program hidden and wait for it to terminate.
 //                  #3 Title - Title that may be shown in a progress window while the program is running.
 //                  #4 ProgramExe - The full path to the program to be executed.
-//                  #5 Parameters - Parameters that will be passed to the program.
+//                  #5 Parameters - (Optional) Parameters that will be passed to the program.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: PECMD: EXEC {[-hide] [-wait]} <ProgramExe> [Parameters]
@@ -615,6 +665,7 @@ System,EndLocal
 System,SetLocal
 If,#1,Equal,"",Halt,"AddAutoRun Syntax Error: Run position was not specified."
 If,#2,Equal,"",Halt,"AddAutoRun Syntax Error: Run mode was not specified."
+// #3 Title is required but may be empty.
 If,#4,Equal,"",Halt,"AddAutoRun Syntax Error: Program Executable was not specified."
 
 GetParam,1,%RunGroup%
@@ -723,7 +774,7 @@ TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","START #$q%Title%#$q %ExecMode
 //                       Normal - Start the program normally.
 //                       Minimized - Start the program minimized to the taskbar.
 //                       Maximized - Start the program maximized.
-//                  #10 Hotkey -
+//                  #10 Hotkey - Keyboard sequence used to active the shortcut.
 //                  #11 Tooltip - Tooltip Text
 // Return values..: 
 // Author.........: Homes32
@@ -824,7 +875,7 @@ System,EndLocal
 //                     Taskbar    - Pin to the taskbar.
 //                  #2 Position
 //                     Auto       - (Default) Automatically determine the pin position.
-//                     1-99       - Pin the shortcut to a specific position [1-99].
+//                     1-99       - Pin the shortcut to a specific position [0-99].
 //                  #3 ProgramExe - The full path to the program to be executed.
 // Return values..: 
 // Author.........: Homes32
@@ -851,8 +902,8 @@ If,%PinPos%,Equal,"Auto",Begin
   Loop,%Api%,__PhoenixAPI_PinShortcut_FindOpenPos_Loop,0,99,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%
   Set,%PinPos%,#r  
 End
-Else,If,%PinPos%,Smaller,0,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [1-99]."
-Else,If,%PinPos%,Bigger,99,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [1-99]."
+Else,If,%PinPos%,Smaller,0,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
+Else,If,%PinPos%,Bigger,99,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
 
 If,%PinPos%,Equal,-1,Begin
   Echo,"PinShortcut Warning: Could not find an open [%PinLocation%] position for [%ProgramExe%].",Warn
@@ -922,7 +973,7 @@ Set,%PEPrograms%,"X:\Program Files"
 [#_PhoenixAPI_DirDeleteEx#]
 // ===============================================================================================================================
 // Name...........: DirDeleteEx
-// Description....: Delete a directory if it exists. If the DirDelete commands fails, for example if a file is open in another
+// Description....: Delete a directory if it exists. If the DirDelete commands fails, for example if a file or folder is open in another
 //                  application or Explorer then give the user a meaningful error message and a chance to correct the problem.
 //                  if that doesn't work halt the build.
 // Syntax.........: DirDeleteEx,<Directory>
@@ -1002,10 +1053,10 @@ End
 // Syntax.........: ApplyBitMask,<BitArray>,<BitGroup>,<BitMask>[,BitSize]
 // Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
 //                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
-//                                supplied by <BitArray>. Example: In order to apply or mask to the value 'DB' in
+//                                supplied by <BitArray>. Example: In order to apply a mask to the value 'DB' in
 //                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
 //                  #3 BitMask - The hexadecimal bitmask to apply to the specified <BitGroup>. Ex. 0x000020
-//                  #4 BitSize (Optional) - Specify the bitsize (8,16,32,64) used. Default is 32.
+//                  #4 BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
 // Return values..: #r - Returns <BitArray> with the specified bitmask applied.
 // Author.........: Homes32
 // Remarks........:
@@ -1046,10 +1097,10 @@ System,EndLocal
 // Syntax.........: BitClear,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
 // Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
 //                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
-//                                supplied by <BitArray>. Example: In order to apply or mask to the value 'DB' in
+//                                supplied by <BitArray>. Example: In order to clear a bit in the value 'DB' in
 //                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
 //                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
-//                  #4 BitSize (Optional) - Specify the bitsize (8,16,32,64) used. Default is 32.
+//                  #4 BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
 // Return values..: #r - Returns <BitArray> with the specified bit cleared.
 // Author.........: Homes32
 // Remarks........: BitGroup &= ~(1 << BitPosition); // Take OR of <BitGroup> and 1 shifted <BitPosition> positions negated
@@ -1092,10 +1143,10 @@ System,EndLocal
 // Syntax.........: BitSet,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
 // Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
 //                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
-//                                supplied by <BitArray>. Example: In order to apply or mask to the value 'DB' in
+//                                supplied by <BitArray>. Example: In order to set a bit in the value 'DB' in
 //                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
 //                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
-//                  #4 BitSize (Optional) - Specify the bitsize (8,16,32,64) used. Default is 32.
+//                  #4 BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
 // Return values..: #r - Returns <BitArray> with the specified bit set.
 // Author.........: Homes32
 // Remarks........: BitGroup |= (1 << BitPosition); // Take OR of <BitGroup> and 1 shifted <BitPosition> positions
@@ -1137,10 +1188,10 @@ System,EndLocal
 // Syntax.........: BitToggle,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
 // Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
 //                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
-//                                supplied by <BitArray>. Example: In order to apply or mask to the value 'DB' in
+//                                supplied by <BitArray>. Example: In order to toggle a bit in the value 'DB' in
 //                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
 //                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
-//                  #4 BitSize (Optional) - Specify the bitsize (8,16,32,64) used. Default is 32.
+//                  #4 BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
 // Return values..: #r - Returns <BitArray> with the specified bit flipped.
 // Author.........: Homes32
 // Remarks........: BitGroup ^= (1 << BitPosition); // Take XOR of <BitGroup> and 1 shifted <BitPosition> positions
@@ -1172,34 +1223,6 @@ StrFormat,LTRIM,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
 Set,#r,%BitArray%
-
-System,EndLocal
-
-[#_PhoenixAPI_XMLDelete#]
-// ===============================================================================================================================
-// Name...........: XMLDelete
-// Description....: Experimental wrapper for XmlStarlet - Delete an XML path/value.
-// Syntax.........: XMLDelete,<XMLFile>,<XPath>
-// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
-//                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to delete.
-// Return values..: #r - Returns 
-// Author.........: Homes32
-// Remarks........: http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
-// Related........:
-// ===============================================================================================================================
-[_PhoenixAPI_XMLDelete]
-System,SetLocal
-GetParam,1,%XMLFile%
-GetParam,2,%XPath%
-
-If,Not,ExistFile,%XMLFile%,Halt,"XMLDelete Syntax Error: The file [%XMLFile%] does not exist."
-If,%XPath%,Equal,"",Halt,"XMLDelete Syntax Error: You must specify an XPath."
-
-//ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
-//If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to query [%XPath%] from [%XMLFile%]."
-
-ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
-If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to delete [%XPath%] from [%XMLFile%]."
 
 System,EndLocal
 
@@ -1254,6 +1277,34 @@ Else,If,%Operation%,Equal,"Subnode",Begin
   If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to add subnode value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,Halt,"XMLAdd Syntax Error: You must specify an valid operation [insert|append|subnode]."
+
+System,EndLocal
+
+[#_PhoenixAPI_XMLDelete#]
+// ===============================================================================================================================
+// Name...........: XMLDelete
+// Description....: Experimental wrapper for XmlStarlet - Delete an XML path/value.
+// Syntax.........: XMLDelete,<XMLFile>,<XPath>
+// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
+//                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to delete.
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_XMLDelete]
+System,SetLocal
+GetParam,1,%XMLFile%
+GetParam,2,%XPath%
+
+If,Not,ExistFile,%XMLFile%,Halt,"XMLDelete Syntax Error: The file [%XMLFile%] does not exist."
+If,%XPath%,Equal,"",Halt,"XMLDelete Syntax Error: You must specify an XPath."
+
+//ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
+//If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to query [%XPath%] from [%XMLFile%]."
+
+ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
+If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to delete [%XPath%] from [%XMLFile%]."
 
 System,EndLocal
 

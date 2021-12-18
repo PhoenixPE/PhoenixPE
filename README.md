@@ -32,10 +32,10 @@ No. PhoenixPE development started around 2014 as a Winbuilder project and was or
 
 ### Is PhoenixPE a replacement for Win10XPE?
 
-No. Both produce a very similar environment based on decades of community members working together. We aren't in competition.
+No. It's an alternative. Both produce a very similar environment based on decades of community members working together. We aren't in competition.
 
 In my option the 2 projects have different goals. Win10XPE states that _"it's main objective is to be simple, user-friendly and to be as fast as possible"_. This caters well to user that just want to press a button and get a working PE without much fuss. Win10XPE does great at providing a simple, pre-packaged experience, however it's core codebase is cumbersome and inconsistent and in an effort to provide a simple user experience, it loses the flexibility and ease of customization advanced users crave. 
 
-PhoenixPE on the other hand targets advanced users and developers that what more control over how and what goes into their PE. It strives to be simple for both users to build, and developers to contribute to. 
+PhoenixPE on the other hand targets advanced users and developers that what more control over how and what goes into their PE. It strives to be simple for both users to build, and for developers to contribute/maintain. 
 
-TL;DR: No. If anything the projects complement each other and encourage developers to work together. Use the one that best meets your needs. You can't go wrong.
+TL;DR: No. It's an alternative. If anything the projects complement each other and encourage developers to work together and share their knowledge and experience. Use the one that best meets your needs. You can't go wrong.

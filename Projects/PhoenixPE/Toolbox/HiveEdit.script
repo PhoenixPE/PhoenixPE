@@ -35,8 +35,8 @@ Author=Homes32
 Level=10
 Selected=None
 Mandatory=False
-Version=1.0.0.0
-Date=2019-04-17
+Version=1.1.0.0
+Date=2021-11-21
 
 [Process]
 Halt,"This script is not designed to be run directly."
@@ -71,32 +71,35 @@ Run,%ScriptFile%,UnloadHives
 // ===============================================================================================================================
 [LoadHives]
 Echo,"Loading selected registry hives..."
+
+Run,%ScriptFile%,CheckMountPrefix
+
 If,%cb_TargetSoftwareHive%,Equal,True,Begin,
   If,Not,ExistFile,%RegSoftware%,Halt,"The Software registry hive was not found. Please build the project before attempting to edit it's registry hives!"
-  RegHiveLoad,Tmp_Software,%RegSoftware%
+  RegHiveLoad,%txt_TargetPrefix%Software,%RegSoftware%
 End
 If,%cb_TargetSystemHive%,Equal,True,Begin
   If,Not,ExistFile,%RegSystem%,Halt,"The System registry hive was not found. Please build the project before attempting to edit it's registry hives!"
-  RegHiveLoad,Tmp_System,%RegSystem%
+  RegHiveLoad,%txt_TargetPrefix%System,%RegSystem%
 End
 If,%cb_TargetDefaultHive%,Equal,True,Begin
   If,Not,ExistFile,%RegDefault%,Halt,"The Default registry hive was not found. Please build the project before attempting to edit it's registry hives!"
-  RegHiveLoad,Tmp_Default,%RegDefault%
+  RegHiveLoad,%txt_TargetPrefix%Default,%RegDefault%
 End  
 If,%cb_TargetDriversHive%,Equal,True,Begin
   If,Not,ExistFile,%RegDrivers%,Halt,"The Drivers registry hive was not found. Please build the project before attempting to edit it's registry hives!"
-  RegHiveLoad,Tmp_Drivers,%RegDrivers%
+  RegHiveLoad,%txt_TargetPrefix%Drivers,%RegDrivers%
 End
 
-If,%cb_InstallSoftwareHive%,Equal,True,RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
-If,%cb_InstallSystemHive%,Equal,True,RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
-If,%cb_InstallDefaultHive%,Equal,True,RegHiveLoad,Tmp_Install_Default,%RegInstallDefault%
-If,%cb_InstallDriversHive%,Equal,True,RegHiveLoad,Tmp_Install_Drivers,%RegInstallDrivers%
+If,%cb_InstallSoftwareHive%,Equal,True,RegHiveLoad,%txt_InstallPrefix%Software,%RegInstallSoftware%
+If,%cb_InstallSystemHive%,Equal,True,RegHiveLoad,%txt_InstallPrefix%System,%RegInstallSystem%
+If,%cb_InstallDefaultHive%,Equal,True,RegHiveLoad,%txt_InstallPrefix%Default,%RegInstallDefault%
+If,%cb_InstallDriversHive%,Equal,True,RegHiveLoad,%txt_InstallPrefix%Drivers,%RegInstallDrivers%
 
-If,%cb_CustomSoftwareHive%,Equal,True,RegHiveLoad,Tmp_Custom_Software,"%fb_CustomHives%\SOFTWARE"
-If,%cb_CustomSystemHive%,Equal,True,RegHiveLoad,Tmp_Custom_System,"%fb_CustomHives%\SYSTEM"
-If,%cb_CustomDefaultHive%,Equal,True,RegHiveLoad,Tmp_Custom_Default,"%fb_CustomHives%\DEFAULT"
-If,%cb_CustomDriversHive%,Equal,True,RegHiveLoad,Tmp_Custom_Drivers,"%fb_CustomHives%\DRIVERS"
+If,%cb_CustomSoftwareHive%,Equal,True,RegHiveLoad,%txt_CustomPrefix%Software,"%fb_CustomHives%\SOFTWARE"
+If,%cb_CustomSystemHive%,Equal,True,RegHiveLoad,%txt_CustomPrefix%System,"%fb_CustomHives%\SYSTEM"
+If,%cb_CustomDefaultHive%,Equal,True,RegHiveLoad,%txt_CustomPrefix%Default,"%fb_CustomHives%\DEFAULT"
+If,%cb_CustomDriversHive%,Equal,True,RegHiveLoad,%txt_CustomPrefix%Drivers,"%fb_CustomHives%\DRIVERS"
 
 [#UnloadHives#]
 // ===============================================================================================================================
@@ -111,20 +114,23 @@ If,%cb_CustomDriversHive%,Equal,True,RegHiveLoad,Tmp_Custom_Drivers,"%fb_CustomH
 // ===============================================================================================================================
 [UnloadHives]
 Echo,"Unloading registry hives..."
-If,%cb_TargetSoftwareHive%,Equal,True,RegHiveUnLoad,Tmp_Software
-If,%cb_TargetSystemHive%,Equal,True,RegHiveUnLoad,Tmp_System
-If,%cb_TargetDefaultHive%,Equal,True,RegHiveUnLoad,Tmp_Default
-If,%cb_TargetDriversHive%,Equal,True,RegHiveUnLoad,Tmp_Drivers
 
-If,%cb_InstallSoftwareHive%,Equal,True,RegHiveUnLoad,Tmp_Install_Software
-If,%cb_InstallSystemHive%,Equal,True,RegHiveUnLoad,Tmp_Install_System
-If,%cb_InstallDefaultHive%,Equal,True,RegHiveUnLoad,Tmp_Install_Default
-If,%cb_InstallDriversHive%,Equal,True,RegHiveUnLoad,Tmp_Install_Drivers
+Run,%ScriptFile%,CheckMountPrefix
 
-If,%cb_CustomSoftwareHive%,Equal,True,RegHiveUnLoad,Tmp_Custom_Software
-If,%cb_CustomSystemHive%,Equal,True,RegHiveUnLoad,Tmp_Custom_System
-If,%cb_CustomDefaultHive%,Equal,True,RegHiveUnLoad,Tmp_Custom_Default
-If,%cb_CustomDriversHive%,Equal,True,RegHiveUnLoad,Tmp_Custom_Drivers
+If,%cb_TargetSoftwareHive%,Equal,True,RegHiveUnLoad,%txt_TargetPrefix%Software
+If,%cb_TargetSystemHive%,Equal,True,RegHiveUnLoad,%txt_TargetPrefix%System
+If,%cb_TargetDefaultHive%,Equal,True,RegHiveUnLoad,%txt_TargetPrefix%Default
+If,%cb_TargetDriversHive%,Equal,True,RegHiveUnLoad,%txt_TargetPrefix%Drivers
+
+If,%cb_InstallSoftwareHive%,Equal,True,RegHiveUnLoad,%txt_InstallPrefix%Software
+If,%cb_InstallSystemHive%,Equal,True,RegHiveUnLoad,%txt_InstallPrefix%System
+If,%cb_InstallDefaultHive%,Equal,True,RegHiveUnLoad,%txt_InstallPrefix%Default
+If,%cb_InstallDriversHive%,Equal,True,RegHiveUnLoad,%txt_InstallPrefix%Drivers
+
+If,%cb_CustomSoftwareHive%,Equal,True,RegHiveUnLoad,%txt_CustomPrefix%Software
+If,%cb_CustomSystemHive%,Equal,True,RegHiveUnLoad,%txt_CustomPrefix%System
+If,%cb_CustomDefaultHive%,Equal,True,RegHiveUnLoad,%txt_CustomPrefix%Default
+If,%cb_CustomDriversHive%,Equal,True,RegHiveUnLoad,%txt_CustomPrefix%Drivers
 
 Run,%ScriptFile%,Cleanup-TransactionLogs
 
@@ -143,6 +149,30 @@ Run,%ScriptFile%,Cleanup-TransactionLogs
 Echo,"Unloading all registry hives..."
 RegUnloadHives,Force
 Run,%ScriptFile%,Cleanup-TransactionLogs
+
+// ===============================================================================================================================
+// Name...........: CheckMountPrefix
+// Description....: Verify Hive Prefix values from the user interface are populated.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: [ForceUnloadHives], [UnloadHives]
+// ===============================================================================================================================
+[CheckMountPrefix]
+If,%txt_TargetPrefix%,Equal,"",Begin
+  Message,"You must specify a prefix for the Target Hive Mount-point.",ERROR
+  Halt,"You must specify a prefix for the Target Hive Mount-point."
+End
+If,%txt_InstallPrefix%,Equal,"",Begin
+  Message,"You must specify a prefix for the Install Hive Mount-point.",ERROR
+  Halt,"You must specify a prefix for the Install Hive Mount-point."
+End
+If,%txt_CustomPrefix%,Equal,"",Begin
+  Message,"You must specify a prefix for the Custom Hive Mount-point.",ERROR
+  Halt,"You must specify a prefix for the Custom Hive Mount-point."
+End  
 
 [#Cleanup-TransactionLogs#]
 // ===============================================================================================================================
@@ -202,6 +232,9 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_CustomSystemHive,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_CustomDefaultHive,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_CustomDriversHive,False
 WriteInterface,Value,%ScriptFile%,Interface,fb_CustomHives,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_TargetPrefix,"Tmp_"
+WriteInterface,Value,%ScriptFile%,Interface,txt_InstallPrefix,"Tmp_Install_"
+WriteInterface,Value,%ScriptFile%,Interface,txt_CustomPrefix,"Tmp_Custom_"
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -238,6 +271,10 @@ WriteInterface,Visible,%ScriptFile%,Interface,cb_CustomDriversHive,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_CustomHivePath,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,fb_CustomHives,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_CustomHiveInfo,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_HiveMountPrefix,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,txt_TargetPrefix,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,txt_InstallPrefix,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,txt_CustomPrefix,%Toggle%
 System,EndLocal
 
 [#ShowScriptInfo#]
@@ -267,29 +304,33 @@ Message,"This script will allow you to mount and edit the registry hives associa
 // ===============================================================================================================================
 [Interface]
 btn_EditHives=" Edit Hives",1,8,5,5,90,25,EditHives,Regedit_16.ico,False,"__Load the selected hives and open regedit."
-btn_LoadHives="Load Hives",0,8,104,5,90,25,LoadHives,Registry_1601.png,False,"__Load the selected hives.#$xThe Hives will remain loaded until you manually unload them."
+btn_LoadHives="Load Hives",1,8,104,5,90,25,LoadHives,Registry_1601.png,False,"__Load the selected hives.#$xThe Hives will remain loaded until you manually unload them."
 btn_ForceUnloadHives="Unload All Hives",1,8,204,5,118,25,ForceUnloadHives,RegistryUnload_16.png,True
 btn_SetDefaultOptions=,1,8,540,5,25,25,SetDefaultOptions,SetDefaults_16.png,False,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,570,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,600,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_TargetHives="Target Hives",1,12,5,50,84,90,8,Bold
-cb_TargetSoftwareHive=Software,1,3,15,61,70,18,True,"__Edit the Software registry hive"
+cb_TargetSoftwareHive=Software,1,3,15,61,70,18,False,"__Edit the Software registry hive"
 cb_TargetSystemHive=System,1,3,15,80,70,18,True,"__Edit the System registry hive"
-cb_TargetDefaultHive=Default,1,3,15,98,70,18,True,"__Edit the Default registry hive"
+cb_TargetDefaultHive=Default,1,3,15,98,70,18,False,"__Edit the Default registry hive"
 cb_TargetDriversHive=Drivers,1,3,15,116,70,18,False,"__Edit the Drivers registry hive"
-bvl_InstallHives="Install.wim Hives",0,12,94,50,104,90,8,Bold
-cb_InstallSoftwareHive=Software,0,3,105,63,70,18,False,"__Edit the Software registry hive"
-cb_InstallSystemHive=System,0,3,105,81,70,18,False,"__Edit the System registry hive"
-cb_InstallDefaultHive=Default,0,3,105,99,70,18,False,"__Edit the Default registry hive"
-cb_InstallDriversHive=Drivers,0,3,105,116,70,18,False,"__Edit the Drivers registry hive"
-bvl_CustomHives="Custom Hives",0,12,203,50,422,90,8,Bold
-cb_CustomSoftwareHive=Software,0,3,214,62,70,18,False,"__Edit the Software registry hive"
-cb_CustomSystemHive=System,0,3,214,80,70,18,False,"__Edit the System registry hive"
-cb_CustomDefaultHive=Default,0,3,214,98,70,18,False,"__Edit the Default registry hive"
-cb_CustomDriversHive=Drivers,0,3,214,116,70,18,False,"__Edit the Drivers registry hive"
-lbl_CustomHivePath="Hive directory:",0,1,304,90,84,16,8,Bold
-fb_CustomHives=,0,13,303,108,307,20,dir
-lbl_CustomHiveInfo="Load offline registry hives from any location. This can be useful if you want to compare your hives to another project or build.",0,1,302,59,314,27,8,Normal
+bvl_InstallHives="Install.wim Hives",1,12,94,50,104,90,8,Bold
+cb_InstallSoftwareHive=Software,1,3,105,63,70,18,False,"__Edit the Software registry hive"
+cb_InstallSystemHive=System,1,3,105,81,70,18,False,"__Edit the System registry hive"
+cb_InstallDefaultHive=Default,1,3,105,99,70,18,False,"__Edit the Default registry hive"
+cb_InstallDriversHive=Drivers,1,3,105,116,70,18,False,"__Edit the Drivers registry hive"
+bvl_CustomHives="Custom Hives",1,12,203,50,422,90,8,Bold
+cb_CustomSoftwareHive=Software,1,3,214,62,70,18,False,"__Edit the Software registry hive"
+cb_CustomSystemHive=System,1,3,214,80,70,18,True,"__Edit the System registry hive"
+cb_CustomDefaultHive=Default,1,3,214,98,70,18,False,"__Edit the Default registry hive"
+cb_CustomDriversHive=Drivers,1,3,214,116,70,18,False,"__Edit the Drivers registry hive"
+lbl_CustomHivePath="Hive directory:",1,1,304,90,84,16,8,Bold
+fb_CustomHives=P:\Win10XPE_2021-10-27\Win10XPE\Target\Windows\System32\config\,1,13,303,108,307,20,dir
+lbl_CustomHiveInfo="Load offline registry hives from any location. This can be useful if you want to compare your hives to another project or build.",1,1,302,59,314,27,8,Normal
+bvl_HiveMountPrefix="Hive Mount Prefix Configuration",1,12,5,155,224,154,8,Bold
+txt_TargetPrefix="Target Hive Prefix",1,0,15,185,200,21,Tmp_
+txt_InstallPrefix="Install Hive Prefix",1,0,15,230,200,21,Tmp_Install_
+txt_CustomPrefix="Custom Hive Prefix",1,0,15,275,200,21,XPE_
 
 [InterfaceEncoded]
 Help.png=3774,3999

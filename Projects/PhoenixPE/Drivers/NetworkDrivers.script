@@ -36,8 +36,8 @@ Author=Homes32
 Level=6
 Selected=False
 Mandatory=False
-Version=1.2.0.0
-Date=2021-03-15
+Version=1.3.0.0
+Date=2021-11-28
 
 [Variables]
 %NetworkDriverRegCache%="%ProjectCache%\NetworkDrivers"
@@ -69,7 +69,7 @@ Set,%RegCacheVer%,Nil
 Set,%ScriptVer%,Nil
 
 // Extract Drivers
-Run,%ScriptFile%,Drivers%SourceArch%
+Run,%ScriptFile%,ExtractDrivers
 
 // Load the Main Drivers Registry Hive and Import from Cache
 RegHiveLoad,Tmp_Drivers,%RegDrivers%
@@ -172,150 +172,81 @@ IniWrite,"%NetworkDriverRegCache%\.Cache","NetworkDrivers","Version",%ScriptVer%
 RegHiveUnLoad,Tmp_Drivers
 RegHiveUnload,Tmp_Install_Drivers
 
-[#Driversx64#]
+[#ExtractDrivers#]
 // ===============================================================================================================================
-// Name...........: Driversx64
-// Description....: Extract x64 Network Drivers
+// Name...........: ExtractDrivers
+// Description....: Extract Network Drivers
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........:
+// Remarks........: We extract drivers manually instead of using RequireDriver, so we can save time by using a separate registry cache.
+//                  RequireDriver copies registry entries on the fly and is much slower with large operations the using a cache.
 // Related........: 
 // ===============================================================================================================================
-[Driversx64]
+[ExtractDrivers]
 Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
 
 // Driver Files to Extract
-RequireFileEx,AppendList,\Windows\INF\athw8x.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\mrvlpcie8897.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8185.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8187bv64.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8187se64.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8192se64.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8192su64.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netathr10x.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netathrx.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netbc63a.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netbc64.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netr28x.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netr28ux.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netr7364.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netrtwlane.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netrtwlane_13.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netrtwlane01.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netrtwlanu.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwbw02.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwew00.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwew01.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwlv64.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwns64.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwsw00.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwtw02.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwtw04.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwtw06.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwtw08.inf,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\athw8x.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\mrvlpcie8897.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8185.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8187bv64.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8187se64.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8192se64.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8192su64.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netathr10x.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netathrx.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netbc63a.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netbc64.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netr28x.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netr28ux.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netr7364.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrtwlane.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrtwlane_13.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrtwlanu.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwbw02.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwew00.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwew01.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwlv64.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwns64.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwsw00.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwtw02.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwtw04.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwtw06.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwtw08.inf*,NOMUI
-
-// Extract
-RequireFileEx,ExtractList
-
-[#Driversx86#]
-// ===============================================================================================================================
-// Name...........: Driversx86
-// Description....: Extract x86 Network Drivers
-// Syntax.........: 
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: 
-// ===============================================================================================================================
-[Driversx86]
-Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
-
-// Driver Files to Extract
-RequireFileEx,AppendList,\Windows\INF\athw8.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8185.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8187bv32.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8187se86.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8192se32.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\net8192su32.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netathr.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netathr10.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netbc63.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netbc64.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netr28.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netr28u.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netr73.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netrtwlane.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netrtwlane_13.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netrtwlane01.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netrtwlanu.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwbn02.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwen00.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwen01.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwlv32.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwns32.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwsn00.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwtn02.inf,NOMUI
-RequireFileEx,AppendList,\Windows\INF\netwtn04.inf,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\athw8.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8185.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8187bv32.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8187se86.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8192se32.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\net8192su32.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netathr.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netathr10.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netbc63.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netbc64.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netr28.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netr28u.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netr73.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrtwlane.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrtwlane_13.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrtwlane01.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrtwlanu.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwbn02.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwen00.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwen01.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwlv32.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwns32.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwsn00.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwtn04.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwtn02.inf*,NOMUI
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netwtn04.inf*,NOMUI
-
-// Extract
-RequireFileEx,ExtractList
+If,%SourceArch%,Equal,"x64",Begin
+  // x64
+  RequireDriver,athw8x.inf,NOREG
+  RequireDriver,mrvlpcie8897.inf,NOREG
+  RequireDriver,net8185.inf,NOREG
+  RequireDriver,net8187bv64.inf,NOREG
+  RequireDriver,net8187se64.inf,NOREG
+  RequireDriver,net8192se64.inf,NOREG
+  RequireDriver,net8192su64.inf,NOREG
+  RequireDriver,netathr10x.inf,NOREG
+  RequireDriver,netathrx.inf,NOREG
+  RequireDriver,netbc63a.inf,NOREG
+  RequireDriver,netbc64.inf,NOREG
+  RequireDriver,netr28x.inf,NOREG
+  RequireDriver,netr28ux.inf,NOREG
+  RequireDriver,netr7364.inf,NOREG
+  RequireDriver,netrtwlane.inf,NOREG
+  RequireDriver,netrtwlane_13.inf,NOREG
+  RequireDriver,netrtwlane01.inf,NOREG
+  RequireDriver,netrtwlanu.inf,NOREG
+  RequireDriver,netwbw02.inf,NOREG
+  RequireDriver,netwew00.inf,NOREG
+  RequireDriver,netwew01.inf,NOREG
+  RequireDriver,netwlv64.inf,NOREG
+  RequireDriver,netwns64.inf,NOREG
+  RequireDriver,netwsw00.inf,NOREG
+  RequireDriver,netwtw02.inf,NOREG
+  RequireDriver,netwtw04.inf,NOREG
+  RequireDriver,netwtw06.inf,NOREG
+  RequireDriver,netwtw08.inf,NOREG
+End
+Else,Begin
+  // x86
+  RequireDriver,athw8.inf,NOREG
+  RequireDriver,net8185.inf,NOREG
+  RequireDriver,net8187bv32.inf,NOREG
+  RequireDriver,net8187se86.inf,NOREG
+  RequireDriver,net8192se32.inf,NOREG
+  RequireDriver,net8192su32.inf,NOREG
+  RequireDriver,netathr.inf,NOREG
+  RequireDriver,netathr10.inf,NOREG
+  RequireDriver,netbc63.inf,NOREG
+  RequireDriver,netbc64.inf,NOREG
+  RequireDriver,netr28.inf,NOREG
+  RequireDriver,netr28u.inf,NOREG
+  RequireDriver,netr73.inf,NOREG
+  RequireDriver,netrtwlane.inf,NOREG
+  RequireDriver,netrtwlane_13.inf,NOREG
+  RequireDriver,netrtwlane01.inf,NOREG
+  RequireDriver,netrtwlanu.inf,NOREG
+  RequireDriver,netwbn02.inf,NOREG
+  RequireDriver,netwen00.inf,NOREG
+  RequireDriver,netwen01.inf,NOREG
+  RequireDriver,netwlv32.inf,NOREG
+  RequireDriver,netwns32.inf,NOREG
+  RequireDriver,netwsn00.inf,NOREG
+  RequireDriver,netwtn02.inf,NOREG
+  RequireDriver,netwtn04.inf,NOREG
+End
 
 [#PurgeRegCache#]
 // ===============================================================================================================================
