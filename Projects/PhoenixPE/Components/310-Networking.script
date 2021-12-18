@@ -74,7 +74,7 @@ End
 FileCopy,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","%TargetPrograms%\%ProgramFolder%"
 
 // Workaround a couple of bugs in PENetwork where .ini settings are not properly handled
-// for certain Global Settings. ie. UseProfiles and StartMode
+// for certain Global Settings, such as UseProfiles, StartMode, and StartToTray.
 IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","UseProfiles",%PENMini_UseProfiles%
 If,%PENMini_UseProfiles%,Equal,"Yes",RegWrite,HKLM,0x1,"Tmp_Software\PENetwork","UseProfiles",1
 Else,RegWrite,HKLM,0x1,"Tmp_Software\PENetwork","UseProfiles",0
@@ -204,23 +204,10 @@ If,%cb_EnableRNDIS%,Equal,True,Begin
   RequireFileEx,AppendList,\Windows\System32\drivers\RNDISMP.sys
   RequireFileEx,AppendList,\Windows\System32\drivers\usb8023.sys
   
-  RequireFileEx,AppendList,\Windows\INF\netrndis*
-  RequireFileEx,AppendList,\Windows\System32\netrndis*
-  RequireFileEx,AppendList,\Windows\System32\Drivers\netrndis*
-  RequireFileEx,AppendList,\Windows\System32\Driverstore\??-??\netrndis.inf_loc
-  RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netrndis.inf*
-  
-  RequireFileEx,AppendList,\Windows\INF\rndiscmp*
-  RequireFileEx,AppendList,\Windows\System32\rndiscmp*
-  RequireFileEx,AppendList,\Windows\System32\Drivers\rndiscmp*
-  RequireFileEx,AppendList,\Windows\System32\Driverstore\??-??\rndiscmp.inf_loc
-  RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\rndiscmp.inf*
-  
-  RequireFileEx,AppendList,\Windows\INF\wceisvista*
-  RequireFileEx,AppendList,\Windows\System32\wceisvista*
-  RequireFileEx,AppendList,\Windows\System32\Drivers\wceisvista*
-  RequireFileEx,AppendList,\Windows\System32\Driverstore\??-??\wceisvista.inf_loc
-  RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\wceisvista.inf*
+  RequireDriver,netrndis.inf
+  RequireDriver,rndiscmp.inf
+  RequireDriver,wceisvista.inf
+
 End
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +247,7 @@ RequireFileEx,AppendList,\Windows\System32\icsxml
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Firewall
-// Included in Winre.wim: bfe.dll, cmifw.dll, firewallapi.dll, fwpuclnt.dll,
+// Included in Boot.wim/Winre.wim: bfe.dll, cmifw.dll, firewallapi.dll, fwpuclnt.dll,
 // fwremotesvr.dll, mpssvc.dll, sscore.dll, wfapigp.dll
 RequireFileEx,AppendList,\Windows\System32\authfwcfg.dll
 RequireFileEx,AppendList,\Windows\System32\authfwgp.dll
@@ -273,25 +260,25 @@ RequireFileEx,AppendList,\Windows\System32\wfhc.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // NetShell (netsh)
-// Included in Winre.wim: DMCmnutils.dll, fwcfg.dll, HNetMon.dll, MDMRegistration.dll,
-// NshHttp.dll,NshIpsec.dll, P2PNetsh.dll, P2P.dll, PeerDistSh.dll, RpcNsh.dll,
-// WcnNetsh.dll, WhHelper.dll
+// Included in Winre.wim: WcnNetsh.dll
 RequireFileEx,AppendList,\Windows\System32\dmcmnutils.dll
+RequireFileEx,AppendList,\Windows\System32\HNetMon.dll
 RequireFileEx,AppendList,\Windows\System32\mdmregistration.dll
 RequireFileEx,AppendList,\Windows\System32\nettrace.dll
 RequireFileEx,AppendList,\Windows\System32\P2P.dll
 RequireFileEx,AppendList,\Windows\System32\p2pnetsh.dll
+If,%SourceBaseWimName%,Equal,"Boot.wim",RequireFileEx,AppendList,\Windows\System32\WcnNetsh.dll
 RequireFileEx,AppendList,\Windows\System32\wwancfg.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // CoreMessaging Browser 
-// Included in Winre.wim: mi.dll, fwbase.dll, fwpolicyiomgr.dll
+// Included in Boot.wim/Winre.wim: fwbase.dll, fwpolicyiomgr.dll, mi.dll
 RequireFileEx,AppendList,\Windows\System32\browser.dll
 RequireFileEx,AppendList,\Windows\System32\CoreMessaging.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Share folder 
-// Included in Winre.wim: gpapi.dll, gpsvc.dll, nlaapi.dll, smbwmiv2.dll, wmiclnt.dll
+// Included in Boot.wim/Winre.wim: gpapi.dll, gpsvc.dll, nlaapi.dll, smbwmiv2.dll, wmiclnt.dll
 RequireFileEx,AppendList,\Windows\System32\comsvcs.dll
 RequireFileEx,AppendList,\Windows\System32\gptext.dll
 RequireFileEx,AppendList,\Windows\System32\shacct.dll
@@ -301,7 +288,7 @@ RequireFileEx,AppendList,\Windows\System32\SMBHelperClass.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Passwords 
-// Included in Winre.wim: credui.dll, credprovhost.dll, credprovs.dll, DWrite.dll
+// Included in Boot.wim/Winre.wim: credui.dll, credprovhost.dll, credprovs.dll, DWrite.dll
 RequireFileEx,AppendList,\Windows\System32\credssp.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -311,11 +298,15 @@ RequireFileEx,AppendList,\Windows\System32\dot3api.dll
 RequireFileEx,AppendList,\Windows\System32\dot3cfg.dll
 RequireFileEx,AppendList,\Windows\System32\dot3dlg.dll
 RequireFileEx,AppendList,\Windows\System32\dot3gpclnt.dll
+RequireFileEx,AppendList,\Windows\System32\dot3gpui.dll
+RequireFileEx,AppendList,\Windows\System32\dot3hc.dll
 RequireFileEx,AppendList,\Windows\System32\dot3msm.dll
 RequireFileEx,AppendList,\Windows\System32\dot3svc.dll
+RequireFileEx,AppendList,\Windows\System32\dot3ui.dll
 RequireFileEx,AppendList,\Windows\System32\l2gpstore.dll
 RequireFileEx,AppendList,\Windows\System32\l2nacp.dll
 RequireFileEx,AppendList,\Windows\System32\onex.dll
+RequireFileEx,AppendList,\Windows\System32\onexui.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Control
@@ -326,6 +317,7 @@ RequireFileEx,AppendList,\Windows\System32\mshtml.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Misc
+RequireFileEx,AppendList,\Windows\System32\certenc.dll
 RequireFileEx,AppendList,\Windows\System32\fdWNet.dll
 RequireFileEx,AppendList,\Windows\System32\inetcomm.dll
 RequireFileEx,AppendList,\Windows\System32\iphlpsvc.dll
@@ -364,7 +356,7 @@ RequireFileEx,AppendList,\Windows\System32\ndfhcdiscovery.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // File Sharing 
-// Included in Winre.wim: rtutils.dll, mpr.dll, mprapi.dll, mprmsg.dll
+// Included in Boot.wim/Winre.wim: mpr.dll, mprapi.dll, mprmsg.dll, rtutils.dll
 // optional: netplwiz.dll, Netplwiz.exe
 RequireFileEx,AppendList,\Windows\System32\iprtprio.dll
 RequireFileEx,AppendList,\Windows\System32\iprtrmgr.dll
@@ -376,14 +368,20 @@ RequireFileEx,AppendList,\Windows\System32\rtm.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // SMB
-// Included in Winre.wim: wkssvc.dll, wkscli.dll
+// Included in Boot.wim/Winre.wim: wkscli.dll, wkssvc.dll
 RequireFileEx,AppendList,\Windows\System32\wkspbrokerax.dll
 RequireFileEx,AppendList,\Windows\System32\wksprtps.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // NlaSvc
-// Included in Winre.wim: nlaapi.dll, nlasvc.dll, rasapi32.dll, tapi32.dll
+// Included in Boot.wim/Winre.wim: nlaapi.dll, nlasvc.dll, rasapi32.dll, tapi32.dll
+RequireFileEx,AppendList,\Windows\System32\nlahc.dll
 
+///////////////////////////////////////////////////////////////////////////////////
+// Telephony
+// Included in Boot.wim/Winre.wim: tapi32.dll
+RequireFileEx,AppendList,\Windows\System32\tapisrv.dll
+RequireFileEx,AppendList,\Windows\System32\TapiUnattend.exe
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Security Components
@@ -400,7 +398,7 @@ RequireFileEx,AppendList,\Windows\System32\seclogon.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // TCPIP support 
-// Included in Winre.wim: esent.dll, scecli.dll
+// Included in Boot.wim/Winre.wim: esent.dll, scecli.dll
 RequireFileEx,AppendList,\Windows\System32\ubpm.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -414,7 +412,7 @@ RequireFileEx,AppendList,\Windows\System32\RMapi.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // WcmSvc
-// Included in Winre.wim: nlaapi.dll
+// Included in Boot.wim/Winre.wim: nlaapi.dll
 RequireFileEx,AppendList,\Windows\System32\wcmapi.dll
 RequireFileEx,AppendList,\Windows\System32\wcmcsp.dll
 RequireFileEx,AppendList,\Windows\System32\wcmsvc.dll
@@ -430,7 +428,7 @@ RequireFileEx,AppendList,\Windows\System32\wcnwiz.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // EapHost
-// Included in Winre.wim: Eap3Host.exe, eapp3hst.dll, eappcfg.dll, eappgnui.dll,
+// Included in Boot.wim/Winre.wim: Eap3Host.exe, eapp3hst.dll, eappcfg.dll, eappgnui.dll,
 // eapphost.dll, eappprxy.dll, eapprovp.dll, eapsvc.dll, keyiso.dll, ttlsauth.dll,ttlscfg.dll
 RequireFileEx,AppendList,\Windows\System32\cngcredui.dll
 RequireFileEx,AppendList,\Windows\System32\cngprovider.dll
@@ -445,7 +443,10 @@ RequireFileEx,AppendList,\Windows\System32\WLanConn.dll
 RequireFileEx,AppendList,\Windows\System32\wlandlg.dll
 RequireFileEx,AppendList,\Windows\System32\wlanext.exe
 RequireFileEx,AppendList,\Windows\System32\wlanhlp.dll
+RequireFileEx,AppendList,\Windows\System32\WLanHC.dll
+RequireFileEx,AppendList,\Windows\System32\wlanhlp.dll
 RequireFileEx,AppendList,\Windows\System32\WlanMediaManager.dll
+RequireFileEx,AppendList,\Windows\System32\WlanMM.dll
 RequireFileEx,AppendList,\Windows\System32\wlanmsm.dll
 RequireFileEx,AppendList,\Windows\System32\wlanpref.dll
 RequireFileEx,AppendList,\Windows\System32\wlansec.dll
@@ -465,6 +466,10 @@ RequireFileEx,AppendList,\Windows\System32\winhttp.dll
 ///////////////////////////////////////////////////////////////////////////////////
 // Net event
 RequireFileEx,AppendList,\Windows\System32\netevent.dll
+
+///////////////////////////////////////////////////////////////////////////////////
+// Network Location
+RequireFileEx,AppendList,\Windows\System32\shwebsvc.dll 
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Resources
@@ -599,8 +604,8 @@ RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters\{E475C
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\RadioManagement",HKLM,"Tmp_System\ControlSet001\Control\RadioManagement"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\VAN",HKLM,"Tmp_System\ControlSet001\Control\VAN"
 
-  // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Control\wcncsvc
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\wcncsvc",HKLM,"Tmp_System\ControlSet001\Control\wcncsvc"
+// Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Control\wcncsvc
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\wcncsvc",HKLM,"Tmp_System\ControlSet001\Control\wcncsvc"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Winlogon\Notifications\Components\Dot3svc",HKLM,"Tmp_System\ControlSet001\Control\Winlogon\Notifications\Components\Dot3svc"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Winlogon\Notifications\Components\Wlansvc",HKLM,"Tmp_System\ControlSet001\Control\Winlogon\Notifications\Components\Wlansvc"
 
@@ -612,13 +617,13 @@ If,ExistRegSubKey,HKLM,"Tmp_Install_System\ControlSet001\Services\EventLog\Syste
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\EventLog\System\Microsoft-Windows-WLAN-AutoConfig",HKLM,"Tmp_System\ControlSet001\Services\EventLog\System\Microsoft-Windows-WLAN-AutoConfig"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\IPNAT",HKLM,"Tmp_System\ControlSet001\Services\IPNAT"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\IpFilterDriver",HKLM,"Tmp_System\ControlSet001\Services\IpFilterDriver"
-  // In WinRE.wim: HKLM\Tmp_System\ControlSet001\Services\HTTP, HKLM\Tmp_System\ControlSet001\Services\NativeWifiP
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\HTTP",HKLM,"Tmp_System\ControlSet001\Services\HTTP"
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\NativeWifiP",HKLM,"Tmp_System\ControlSet001\Services\NativeWifiP"
+// In WinRE.wim: HKLM\Tmp_System\ControlSet001\Services\HTTP, HKLM\Tmp_System\ControlSet001\Services\NativeWifiP
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\HTTP",HKLM,"Tmp_System\ControlSet001\Services\HTTP"
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\NativeWifiP",HKLM,"Tmp_System\ControlSet001\Services\NativeWifiP"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\HTTP\Parameters\UrlAclInfo",HKLM,"Tmp_System\ControlSet001\Services\HTTP\Parameters\UrlAclInfo"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\NdisCap",HKLM,"Tmp_System\ControlSet001\Services\NdisCap"
-  // In WinRE.wim: HKLM\Tmp_System\ControlSet001\Services\NlaSvc
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\NlaSvc",HKLM,"Tmp_System\ControlSet001\Services\NlaSvc"
+// In WinRE.wim: HKLM\Tmp_System\ControlSet001\Services\NlaSvc
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\NlaSvc",HKLM,"Tmp_System\ControlSet001\Services\NlaSvc"
 
 // Internet Connection Sharing (ICS)
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\SharedAccess",HKLM,"Tmp_System\ControlSet001\Services\SharedAccess"
@@ -631,19 +636,19 @@ RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","DriverMinorVe
 // Telephony service
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TapiSrv",HKLM,"Tmp_System\ControlSet001\Services\TapiSrv"
 
-  // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\tdx, HKLM\Tmp_System\ControlSet001\Services\vwifibus
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\tdx",HKLM,"Tmp_System\ControlSet001\Services\tdx"
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwifibus",HKLM,"Tmp_System\ControlSet001\Services\vwifibus"
-  //RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\vwifibus","Owners","netvwifibus.inf"
-  // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\vwififlt
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwififlt",HKLM,"Tmp_System\ControlSet001\Services\vwififlt"
+// Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\tdx, HKLM\Tmp_System\ControlSet001\Services\vwifibus
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\tdx",HKLM,"Tmp_System\ControlSet001\Services\tdx"
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwifibus",HKLM,"Tmp_System\ControlSet001\Services\vwifibus"
+//RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\vwifibus","Owners","netvwifibus.inf"
+// Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\vwififlt
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwififlt",HKLM,"Tmp_System\ControlSet001\Services\vwififlt"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\Wcmsvc",HKLM,"Tmp_System\ControlSet001\Services\Wcmsvc"
-  // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\wcncsvc, HKLM\Tmp_System\ControlSet001\Services\wdiwifi
-  // Included in Winre.wim (Partial): HKLM\Tmp_System\ControlSet001\Services\WinSock, HKLM\Tmp_System\ControlSet001\Services\WinSock2
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wcncsvc",HKLM,"Tmp_System\ControlSet001\Services\wcncsvc"
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wdiwifi",HKLM,"Tmp_System\ControlSet001\Services\wdiwifi"
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock",HKLM,"Tmp_System\ControlSet001\Services\WinSock"
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock2",HKLM,"Tmp_System\ControlSet001\Services\WinSock2"
+// Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\wcncsvc, HKLM\Tmp_System\ControlSet001\Services\wdiwifi
+// Included in Winre.wim (Partial): HKLM\Tmp_System\ControlSet001\Services\WinSock, HKLM\Tmp_System\ControlSet001\Services\WinSock2
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wcncsvc",HKLM,"Tmp_System\ControlSet001\Services\wcncsvc"
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wdiwifi",HKLM,"Tmp_System\ControlSet001\Services\wdiwifi"
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock",HKLM,"Tmp_System\ControlSet001\Services\WinSock"
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock2",HKLM,"Tmp_System\ControlSet001\Services\WinSock2"
 
 RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\dnscache"
 RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\nlasvc"

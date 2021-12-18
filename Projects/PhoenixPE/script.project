@@ -99,15 +99,16 @@ InterfaceList=Interface,Interface_About,Interface_Options
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Source Globals - Do Not Modify! - Set by 'Config Source' script
-%SourceDir%=D:\Images\Win11Preview
-%SourceBaseWim%=P:\PhoenixPE\Workbench\PhoenixPE\Cache\WinRE.wim
-%SourceInstallWim%=D:\Images\Win11Preview\Sources\Install.wim
-%SourceBaseWimImage%=1
-%SourceInstallWimImage%=6
-%SourceArch%=x64
-%SourceLang%=en-US
-%SourceFallbackLang%=en-US
-%SourceVer%=10.0.21996.1
+%SourceDir%=
+%SourceBaseWimName%=
+%SourceBaseWim%=
+%SourceInstallWim%=
+%SourceBaseWimImage%=
+%SourceInstallWimImage%=
+%SourceArch%=
+%SourceLang%=
+%SourceFallbackLang%=
+%SourceVer%=
 
 [#Process#]
 // ===============================================================================================================================
@@ -208,6 +209,13 @@ Set,%LogFile%,"%Timestamp%-%ProjectTitle%-Logs.7z"
 
 // Collect various useful information
 If,ExistFile,"%TargetWindows%\Logs\DISM\dism.log",Filecopy,"%TargetWindows%\Logs\DISM\dism.log","%ProjectTemp%"
+
+RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","ReleaseId",%ReleaseId%
+RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","CurrentBuildNumber",%CurrentBuildNumber%
+RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","UBR",%UBR%
+RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","DisplayVersion",%DisplayVersion%
+RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","ProductName",%ProductName%
+Echo,"Host OS: %ProductName%, Version [%DisplayVersion%/%ReleaseId%], %HostArch% (Build %CurrentBuildNumber%.%UBR%)"
 
 // Compress our build log and our other logs into a zip archive
 Echo,"Archiving Support Log...."

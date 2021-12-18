@@ -16,7 +16,7 @@ If %ERRORLEVEL% EQU 0 (
 )
 
 :: System Hive
-Set HiveOrg=HKEY_LOCAL_MACHINE\Src_System
+Set HiveOrg=HKEY_LOCAL_MACHINE\Tmp_Install_System
 Set HKMainOrg=%HiveOrg%\DriverDatabase\DriverInfFiles
 Reg Query "%HKMainOrg%\%HKFindKey%" >nul 2>nul
 If %ERRORLEVEL% EQU 0 (
@@ -35,7 +35,7 @@ Set HKMainNew=%HiveNew%\DriverDatabase\DeviceIds
 For /F "tokens=1,2,3*" %%A IN ('REG Query %HKMainOrg% /s /e /f %HKFindKey%') Do (
   If /I Not "%%A" EQU "%HKFindKey%" (Set "HKeyOrg=%%A") Else (
     Set HKeyNew=!HKeyOrg:HKEY_LOCAL_MACHINE\Tmp_Install_=HKEY_LOCAL_MACHINE\Tmp_!
-    :::Echo Reg Add "!HKeyNew!" /v "%%A" /t %%B /d "%%C" /f
+    Echo Reg Add "!HKeyNew!" /v "%%A" /t %%B /d "%%C" /f
     If "%%B" NEQ "REG_NONE" (Reg Add "!HKeyNew!" /v %%A /t %%B /d "%%C" /f >nul) Else (Call :_RegNone "!HKeyNew!" "%%A")
   )
 )
@@ -61,7 +61,7 @@ Set HKeyOrg=%~1
 If "%HKeyOrg:~0,5%" NEQ "HKEY_" Goto :EOF
 Call Set HKeyNew=%%HKeyOrg:!HKMainOrg!=!HKMainNew!%%
 Reg Query "%HKeyOrg%" >nul 2>nul
-:::If Not ErrorLevel 1 Echo Reg Copy "%HKeyOrg%" "%HKeyNew%" /s /f
+If Not ErrorLevel 1 Echo Reg Copy "%HKeyOrg%" "%HKeyNew%" /s /f
 If Not ErrorLevel 1 Reg Copy "%HKeyOrg%" "%HKeyNew%" /s /f
 Goto :EOF
 
