@@ -430,7 +430,7 @@ System,SetLocal
 If,#1,Equal,"",Halt,"SetFileACL Syntax Error: You must specify the file or directory to modify."
 
 Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
-ShellExecute,Hide,%Tools%\x86\SetAcl.exe," -ot #$qfile#$q -on #$q#1#$q -actn ace -actn setprot -op #$qdacl:p_nc#$q -ace #$qn:S-1-1-0;p:full;s:y#$q"
+ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe," -ot #$qfile#$q -on #$q#1#$q -actn ace -actn setprot -op #$qdacl:p_nc#$q -ace #$qn:S-1-1-0;p:full;s:y#$q"
 If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
 
 System,EndLocal
@@ -451,10 +451,10 @@ System,SetLocal
 If,#1,Equal,"",Halt,"SetRegACL Syntax Error: You must specify the Registry Key to modify."
 
 Echo,"Taking ownership of [#1] ...#$X#$XThis can take awhile, please be patient."
-ShellExecute,Hide,%Tools%\x86\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
+ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
 If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
 Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
-ShellExecute,Hide,%Tools%\x86\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
+ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
 If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
 
 System,EndLocal

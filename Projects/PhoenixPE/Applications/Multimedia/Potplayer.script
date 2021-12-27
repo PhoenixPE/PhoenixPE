@@ -468,11 +468,19 @@ System,Cursor,Normal
 [ToggleAdvancedOptions]
 System,SetLocal
 ReadInterface,Visible,%ScriptFile%,Interface,lbl_IncludeDir,%state%
-If,%state%,Equal,False,Begin,
-  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
+If,%state%,Equal,False,Begin
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Begin
+	Set,%Toggle%,True
+    WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_Exit_16.png
+	WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Hide Advanced Options"
+  End
   Else,Set,%Toggle%,False
 End
-Else,Set,%Toggle%,False
+Else,Begin
+  Set,%Toggle%,False
+  WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_16.png
+  WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
+End
 
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_IncludeDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,fb_IncludeDir,%Toggle%
@@ -510,7 +518,7 @@ web_Homepage=Homepage,1,10,377,9,60,18,https://potplayer.daum.net/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
-btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
 cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
@@ -544,6 +552,7 @@ Help_16.png=2830,3868
 VistalcoDownload_16.png=927,1348
 Trash.ico=1150,1212
 OpenFolder_16.png=2299,3168
+Advanced_Exit_16.png=705,1048
 
 [EncodedFile-InterfaceEncoded-OpenFolder_16.png]
 lines=0
@@ -572,3 +581,7 @@ lines=0
 [EncodedFile-AuthorEncoded-PotPlayer_96.ico]
 lines=0
 0=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
+
+[EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA

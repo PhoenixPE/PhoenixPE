@@ -37,7 +37,6 @@ Description=PuTTY is a free and open-source terminal emulator, serial console an
 Date=2019-12-29
 Selected=False
 Mandatory=False
-Interface=Interface
 
 [Variables]
 %ProgramFolder%="PuTTY"
@@ -176,11 +175,19 @@ System,Cursor,Normal
 [ToggleAdvancedOptions]
 System,SetLocal
 ReadInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%state%
-If,%state%,Equal,False,Begin,
-  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Set,%Toggle%,True
+If,%state%,Equal,False,Begin
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Begin
+	Set,%Toggle%,True
+    WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_Exit_16.png
+	WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Hide Advanced Options"
+  End
   Else,Set,%Toggle%,False
 End
-Else,Set,%Toggle%,False
+Else,Begin
+  Set,%Toggle%,False
+  WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_16.png
+  WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
+End
 
 WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_IncludePluginsDir,%Toggle%
@@ -217,7 +224,7 @@ bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
 web_Homepage=Homepage,1,10,377,9,60,18,https://www.chiark.greenend.org.uk/~sgtatham/putty/
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
-btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
 cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
@@ -235,7 +242,7 @@ rbtn_puttySuite="PuTTY + Tools",1,11,263,53,91,20,False,"__Include PuTTY, pagent
 cb_AlwaysDownload="Always download latest version",1,3,370,54,177,18,False,"__Enable this option to ensure you always included the latest version of PuTTY in your build."
 bvl_AdvancedOptions="Advanced Options",0,12,150,90,235,66,8,Bold
 lbl_IncludePluginsDir="Include PuTTY settings from .reg file",0,1,160,106,200,16,8,Normal
-fb_puttySettingsReg=,0,13,160,123,211,20,file,"__Specify a .reg file containing PuTTY settings & connections to import into the PE registry.#$xIf you have PuTTY configured on an existing system you can export settings from 'HKCU\Software\SimonTatham\PuTTY'#$x#$xIMPORTANT:#$xThis .reg file will be imported at build time so it must be converted to use the 'HKLM\Tmp_Default\Software\SimonTatham\PuTTY' path."
+fb_puttySettingsReg=,0,13,160,123,211,20,file,"Title=Select your .reg file","Filter=Registry File|*.reg;*.txt","__Specify a .reg file containing PuTTY settings & connections to import into the PE registry.#$xIf you have PuTTY configured on an existing system you can export settings from 'HKCU\Software\SimonTatham\PuTTY'#$x#$xIMPORTANT:#$xThis .reg file will be imported at build time so it must be converted to use the 'HKLM\Tmp_Default\Software\SimonTatham\PuTTY' path."
 
 [AuthorEncoded]
 PuTTY_icon_128px.png=1700,2376
@@ -246,6 +253,7 @@ SetDefaults_16.png=2475,3404
 Advanced_16.png=2000,2768
 Help_16.png=2830,3868
 Trash.ico=1150,1212
+Advanced_Exit_16.png=705,1048
 
 [EncodedFile-InterfaceEncoded-SetDefaults_16.png]
 lines=0
@@ -266,3 +274,7 @@ lines=0
 [EncodedFile-AuthorEncoded-PuTTY_icon_128px.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAPNQTFRFAAAAAAAAv7+/gICA////AAB5AAB6AAB7AAB8AAB4AAB3AAB2AAB1AAB0AABzAAByAABxAABwAABvAABuAABtAAB9AAD3AAD4AAD5AAD6AAD7AAD2AAD0AADzAADyAADxAADvAADuAADsAADqAADoAADmAADkAADiAADgAADeAAD8AADwAADtAADrAADpAADnAADlAADjAADhAADfAAD9AAD1AAD+AAD///8AAADcAADdAADbAADZAADXAADVAADTAADSAADQAADaAADYAADWAADUAADNAADRAADPAADKAADOAADMAADJAADHAADIAADGAADEYqvEzAAAAAF0Uk5TAEDm2GYAAAABYktHRASPaNlRAAAEp0lEQVR42u2aZ1fbMBSGK4ckjFIKbUNSTCYZkEWcumF00EVL9///Nb1Xsh3bCbWs2Q+9X+BwOH4eXTmyotcPHqgokreUUCX4ig3gek6uKqgVyM9XKyDAVyogwlcpIMRXKCDGVycgyFcpsJGnQr4tgYivVqDAW0u+HQFnQ5tAsVgqlcrl8mZY8Dv8pVjc2t7eebj7aO/x/sGTpxsaBRCP4GesmEPaQKNAqVypHFZrtedh1WrVw0rlyD2uN5qtduek2+sPTjUKlMuH1Srgz8IChSoooMGwORpPpuczb65TYBOHf3b2IixQoE3w3ePGMGyBZgHKf8mKGWAL/GULdApsbkb8xWIRN/BduAtG0AKYA90CIT80YC2AOWC3oRmBxSIwiAsEN4H5DuDW02QH0vcA3fsaugfWfQqAfgECZj4Fq+sAYXxiah1Ir4RLvpmVMP0sQHzAN/MsKJb8o8ohdgGLpPhBAy51ChRdHxTAASrOHy75V9caBba26seu6x8dgQTFIx+GD/OPfDoB1680CmxvDxt1dHD9iI/41mjcgfEj//LVa40COzut5nDYaNRJxB8iHoZ/0oX+U/4bjQK7D9vtUavZDPgggHTEQ/vp/AP/rUaBR7uTznjcDvDYgPYYmk/x0H7Kv3mnUWBvrzs9ITF+Z4L0c8TPry7ff/j46ebdrUaB/cezXpw/nXYp3aN4bP/nL7d3GgUODgYhHvm9Xm9G6acMD8P/+u37D40CT0mc73neYDBH+vX7Dwx/e/fz128NAsiFyzoJ/l++nMYFVJyWESbgRPgM/sYavowBHk4gMMHnOZ0osP+jShIC9CpsEJx8Z5UvIcCukovvrPLFBQLaEs/Bd1b5wgLL8cf4BZ5K8kUFlPEFBSL+RYzPWwm+mIBCvqgA/fAn+LmOC2UPDAGnii88BTH8av9z8MUFLv42//x8IYEkf7U4F0RhgQw894osKJA9fM4VOVqXNPLvWQYcOX6O9mcK5N+O5Gt/loDAdmjNFZN8rgeSOH+NQYKfBy/GDy1YI9OPI1P8UEAjn/fRKvI4jurf5metZendqPkwPsU3HsYn+ebDeBL/MkLMh/FpvukwPsEX31cp5JvNwknsLIIUzAus45vMwuN8iY2dsABZHsURG2F8gm8hjI/x7YTx4Uk0IXbCeBIexRM7YXzEtxTGR3xLYTwJkihiKYyP+JbCeBIlcXbCeMKCWGthfMg39ULGyqeA8c29krKyDtB9r8mXctaF8SZfS7L+YlYyjK/hcwDn31IYjwWj931LYTwU/PRd11IYj+Ui3U4YDxbHwK43GnbC+GFYTTth/Gg0amHBTxth/GTSAQtaHRth/Hm3O52esLIRxnv92azX651jWQjjn1ydzueDged5/X7fQhjPG/wkvrFln31x8TGM506e1vBVhPHZJxRhxfiOsjBeQIAoDePzCxC1YXxuAaIwjKcCiUgru4jCMJ4KyPGlwvjgBC5vOarCeEEBR1EYL1nSYbwqviUB+TBeGV9GgH/9ue+R8F+gIBpG8grcswzIhPGKBUS3I6oEhLdD6UYKlvh2TI2AxHZQiYDMdlSFgOx2WEGJ89UYSOD/AMUSm/bhQPQIAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDEyLTExLTEzVDE1OjIyOjEzKzA0OjAw5lvkLQAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxMi0xMS0xM1QxNToyMjoxMyswNDowMJcGXJEAAAAASUVORK5CYIJ4nBMJKA0JiYzPTM7Pizc0siio0CvIS2cYBSMFLGHDL7//X/IBRgYAXs8Kw1ar3tYBAAAAAgAAACwAAACkBgAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
