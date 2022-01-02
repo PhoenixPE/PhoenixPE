@@ -172,34 +172,34 @@ Else,ExtractFile,%ScriptFile%,x64,DrvInstPatch.exe,%ProjectTemp%
 If,ExistFile,%TargetSystem32%\drvinst.exe,FileCopy,%TargetSystem32%\drvinst.exe,%TargetSystem32%\drvinst.exe.orig
 ShellExecute,Hide,%ProjectTemp%\DrvInstPatch.exe,"P %TargetSystem32%\drvinst.exe"
 
-[#ExploreX86#]
+[#BrowseX86#]
 // ===============================================================================================================================
-// Name...........: ExploreX86
+// Name...........: BrowseX86
 // Description....: Explore the specified x86 drivers folder. If the folder does not exist it will be created.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
-// Related........: btn_ExploreX86
+// Related........: btn_BrowseX86
 // ===============================================================================================================================
-[ExploreX86]
+[BrowseX86]
 If,%fb_Drivers86%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_Driversx86,"#$pBaseDir#$p\Workbench\Drivers\x86"
 If,Not,ExistDir,%fb_Driversx86%,DirMake,%fb_Driversx86%
 ShellExecuteEx,Explore,%fb_Driversx86%
 
-[#ExploreX64#]
+[#BrowseX64#]
 // ===============================================================================================================================
-// Name...........: ExploreX64
+// Name...........: BrowseX64
 // Description....: Explore the specified x64 drivers folder. If the folder does not exist it will be created.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
-// Related........: btn_ExploreX64
+// Related........: btn_BrowseX64
 // ===============================================================================================================================
-[ExploreX64]
+[BrowseX64]
 If,%fb_Driversx64%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_Driversx64,"#$pBaseDir#$p\Workbench\Drivers\x86"
 If,Not,ExistDir,%fb_Driversx64%,DirMake,%fb_Driversx64%
 ShellExecuteEx,Explore,%fb_Driversx64%
@@ -224,7 +224,7 @@ DirDeleteEx,%fb_Driversx64%
 // ===============================================================================================================================
 // Name...........: ViewDismLog
 // Description....: View the log created by the Deployment Image Servicing and Management (DISM) tool. Useful for troubleshooting
-//                  failed driver export or integrations.
+//                  failed driver export or integration.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -324,13 +324,13 @@ btn_SetDefaultOptions=,1,8,496,5,25,25,SetDefaultOptions,SetDefaults_16.png,True
 btn_AdvancedOptions=,1,8,526,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,556,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_DriverSource="Driver Packages",1,12,5,50,575,180,8,Bold
-lbl_DriversX86="x86 Drivers",1,1,17,141,70,16,8,Bold
-fb_DriversX86=%BaseDir%\Workbench\Drivers\x86,1,13,84,135,433,20,dir,Title=Select the directory containing your uncompressed x86 (32bit) drivers,"__The directory containing uncompressed x86 (32bit) drivers."
-lbl_DriversX64="x64 Drivers",1,1,17,172,70,16,8,Bold
-fb_DriversX64=%BaseDir%\Workbench\Drivers\x64,1,13,84,166,433,20,dir,Title=Select the directory containing your uncompressed x64 (64bit) drivers,"__The directory containing uncompressed x64 (64bit) drivers."
 lbl_DriverPackagesNote="Please specify the path to the directory containing the drivers you wish to integrate.#$x#$xYou may also use the buttons above to export drivers from your host computer and integrate them into your build.#$x#$xDriver packages must be decompressed (*.ini). Sub-Folders are allowed.",1,1,14,66,559,62,8,Normal
-btn_ExploreX86=Explore,1,8,524,135,45,20,ExploreX86,0,True
-btn_ExploreX64=Explore,1,8,524,166,45,20,ExploreX64,0,True
+lbl_DriversX86="x86 Drivers",1,1,17,141,70,16,8,Bold
+fb_DriversX86=%BaseDir%\Workbench\Drivers\x86,1,13,84,135,458,20,dir,"Title=Select the directory containing your uncompressed x86 (32bit) drivers","__The directory containing uncompressed x86 (32bit) drivers."
+btn_BrowseX86=,1,8,549,135,20,20,BrowseX86,OpenFolder_16.png,True,"__Browse"
+lbl_DriversX64="x64 Drivers",1,1,17,172,70,16,8,Bold
+fb_DriversX64=%BaseDir%\Workbench\Drivers\x64,1,13,84,166,458,20,dir,"Title=Select the directory containing your uncompressed x64 (64bit) drivers","__The directory containing uncompressed x64 (64bit) drivers."
+btn_BrowseX64=,1,8,549,166,20,20,BrowseX64,OpenFolder_16.png,True,"__Browse"
 cb_LoadDriversOnStartup="Load Drivers At Startup",1,3,17,200,139,16,True
 cb_ForceUnsignedDrivers="Force Install Unsigned Drivers (x64)",0,3,167,200,200,18,False,"__Caution: See Notes below"
 cb_PatchDrvInst="Bypass Catalog Signature Check",0,3,380,200,173,18,False,"__Patch Drvinst.exe to disable signature checking for catalog files.#$xAmong other things this allows you to use modified *.inf files."
@@ -350,6 +350,7 @@ Advanced_16.png=2000,2768
 Help_16.png=2830,3868
 ExportThirdPartyDrivers_16.png=953,1392
 Advanced_Exit_16.png=705,1048
+OpenFolder_16.png=2299,3168
 
 [AuthorEncoded]
 hardware.png=6100,8232
@@ -430,3 +431,8 @@ lines=7
 [EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-OpenFolder_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTA1LTE3VDIxOjQ1OjAzLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpiMmUxM2M3YS01ODljLWQ0NDItOTQ3MC1lZTI4MGIwNDcyM2IiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0ZmIxZDNiYS00OWNhLTI4NDUtYjQ3My1hMjZjZWRlYWZhMDQiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjRmYjFkM2JhLTQ5Y2EtMjg0NS1iNDczLWEyNmNlZGVhZmEwNCIgc3RFdnQ6d2hlbj0iMjAxOS0wNS0xN1QyMTo0NTowMy0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHN0RXZ0OndoZW49IjIwMTktMTAtMjBUMTk6NDc6NTktMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz63gCC6AAACp0lEQVQ4EX3BS2hcVRzA4d//nHMfc28mk45NGo1JpwpFquBKKmh3KggWC6WCbroQVy5EunBTwb0Vl8WKCwUrlEoXPlAkhlqKYqVYFW1jk0jbiXnM3NxJJjP3zn0cKYKL0vH75O33TnMnLQ6hrvLuwmtcbV+jPhLsnaxlvwZ+YbWU3s22fzROnI92VQcX9TMHD3OnkpxQV5mp7GUp+Z2V/vr2+nb5TdQ1HxZ55Y/xID3pKvukq8on5MSpT0jTgVOUpS/8ywJWysFUdSbNyoSL7a/pZB2+jz6j1YuZqHDmoYAj7Uxhsjx/1XWd47XACQUoLSiBbn/QX2wtvFOr1E4eqB1ip3sv6aC3+9utT88FuQnnO/ktpUuRE6dO2xcPPYvxQpIClAKloEgTZufO047iLd/30GJwlFPdSCOk9Ho/RLMvnG2+/52pBe5gYnzM/XwRogSqI5AZaNQdjh55jjilKhqsBS0wauDyz1GQz003xho7vjBJmqUFuI/vgnj9L7T2uE024IZ2sKLBWm7LShitQ9ydp9P++L6XpxYw/ugMq9cvsDR3DMRHtA9YyhIKQAn/sRaWlVDk8PTU6rE0jx82uVVcnX2TB3Y/wsyBtyi3lgBhmMKCF4Qoi3f+7OvPm6h5hWm1yYP7X0GcNbALoCsMVfQheJRB16G/+fefpt/6haDhIyP3wPpXkLRBudydQLYBO/fRal5ja+PGj0b15hmfmAa2yVcugPZBNHdlLeQxBododZ40GfxkArtMfWI/JE3SzeuIN8lQZYo2FUymiJavgHDJ7Kh0pX7/YxBOEjYOg6kxVNGD+j6QGq1blxKl1GUz5nZGSvHJsnFk7CD/z0JlDyu/nSFeay76YaVvunby3JcfvPSUFRcrBqxlKBGwQtZf23Q89w0Q/gH+aSDn8z1ZagAAAABJRU5ErkJggnicE/QvSM1zy89JSS2KNzTTK8hLZxgFIwj85sAvf+m11BRGBgBbPwmoRWA0QwEAAAACAAAAKQAAAPsIAAAAAAAAAQAAAAAAAAAAAAAA
+

@@ -7,7 +7,15 @@ PhoenixPE is a Pre-Install Environment based on Win10.
 * Easy to understand options and uncluttered user interface.
 * Flexible and fully customizable.
 
-# Building PhoenixPE
+## License
+
+**PhoenixPE** is licensed under the MIT license. Refer to [license](license) for more information.
+
+## Installation
+
+Download the [latest release]() and unpack it in the desired location. Please remember to use `7z x` when unpacking the archive from the command line to ensure full file paths remain intact.
+
+## Building PhoenixPE
 
 1. Mount or Extract your Win10 ISO to a location of your choice. If you don’t have a Win10 ISO you may use the links on the 'Source Config' script to download the most recent version.
 1. Using the 'Source Config' script, select the location of your source you provided in Step 1 and press the 'Save' button.

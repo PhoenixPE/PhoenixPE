@@ -1,0 +1,287 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2022 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=Driver Injection
+Description=Inject drivers into an existing boot.wim image.
+Author=Homes32
+Level=10
+Selected=None
+Mandatory=False
+Version=1.0.0.0
+Date=2019-03-12
+
+[Variables]
+%DismLog%=%TargetWindows%\Logs\DISM\dism.log
+%MountDir%="%ProjectTemp%\Mount"
+
+[Process]
+
+Echo,"Preparing for driver integration..."
+
+If,ExistDir,%fb_DriversSrc%,Begin
+  DirSize,%fb_DriversSrc%,%DirSize%
+  StrFormat,Bytes,%DirSize%,%StrDirSize%
+  If,%DirSize%,Equal,0,Begin
+      Message,"No drivers are available for integration.",ERROR
+	  Exit,"No drivers are available for integration."
+  End
+  Else,Echo,"Drivers found. Size: (%StrDirSize%)"
+End
+Else,Begin
+  Message,"No drivers are available for integration.#$x#$x[%fb_DriversSrc%]#$x#$xdoes not exist.",ERROR
+  Exit,"[%fb_DriversSrc%]#$x#$xdoes not exist."
+End
+
+If,ExistFile,%fb_WimImage%,Begin
+  // Inject Drivers
+  Run,%ScriptFile%,IntegrateDrivers
+  // Optimize Image (Keep original compression)
+  Echo,"Optimizing Boot.wim..."
+  WimOptimize,%fb_WimImage%,ReComp=KEEP
+  // Done.
+  Echo,"Driver integration finished."
+  Message,"Driver integration finished.",INFORMATION
+End
+Else,Begin
+  Message,"The specified image [%fb_WimImage%]#$x#$xdoes not exist."
+  Exit,"[%fb_WimImage%]#$x#$xdoes not exist."
+End
+
+[#IntegrateDrivers#]
+// ===============================================================================================================================
+// Name...........: IntegrateDrivers
+// Description....: Use Microsoft's Deployment Image Servicing and Management (DISM) tool to integrate drivers into our image.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[IntegrateDrivers]
+
+// Mount our .wim image
+Echo,"Mounting source image [%fb_WimImage%]...#$x#$xThis can take awhile, please be patient."
+DirMake,%MountDir%
+WimMount,%fb_WimImage%,1,%MountDir%,READWRITE
+
+Echo,"Integrating Drivers...#$x#$xThis can take awhile, please be patient."
+StrFormat,PATH,%DismLog%,%DismLogPath%
+If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
+
+If,%cb_ForceUnsignedDrivers%,Equal,True,Set,%DismForceUnsigned%," /ForceUnsigned"
+Else,Set,%DismForceUnsigned%,""
+
+// Inject Drivers
+ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Add-Driver /Driver:#$q%fb_DriversSrc%#$q /recurse /LogPath:#$q%DismLog%#$q%DismForceUnsigned%"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
+
+// Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
+ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%MountDir%\Windows\System32\config"
+
+// Unmount
+Echo,"Committing changes and unmounting source image:#$x  [%fb_WimImage%]...#$x#$xThis can take awhile, please be patient."
+WimUnmount,%MountDir%,COMMIT
+
+[#BrowseDrvSource#]
+// ===============================================================================================================================
+// Name...........: BrowseDrvSource
+// Description....: Explore the specified drivers folder. If the folder does not exist it will be created.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_BrowseDrvSource
+// ===============================================================================================================================
+[BrowseDrvSource]
+If,%fb_DriverSrc%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_DriversSrc,"#$pBaseDir#$p\Workbench\Drivers\x64"
+If,Not,ExistDir,%fb_DriversSrc%,DirMake,%fb_DriversSrc%
+ShellExecuteEx,Explore,%fb_DriversSrc%
+
+[#ViewDismLog#]
+// ===============================================================================================================================
+// Name...........: ViewDismLog
+// Description....: View the log created by the Deployment Image Servicing and Management (DISM) tool. Useful for troubleshooting
+//                  failed driver export or integration.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ViewDismLog
+// ===============================================================================================================================
+[ViewDismLog]
+If,Not,ExistFile,%DismLog%,FileCreateBlank,%DismLog%
+ShellExecuteEx,Open,%DismLog%
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
+// ===============================================================================================================================
+[SetDefaultOptions]
+WriteInterface,Value,%ScriptFile%,Interface,fb_DriversSrc,"#$pBaseDir#$p\Workbench\Drivers\x64"
+WriteInterface,Value,%ScriptFile%,Interface,fb_WimImage,"#$pOutputDir#$p\sources\boot.wim"
+WriteInterface,Value,%ScriptFile%,Interface,cb_ForceUnsignedDrivers,False
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,cb_ForceUnsignedDrivers,%state%
+If,%state%,Equal,False,Begin
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Begin
+	Set,%Toggle%,True
+    WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_Exit_16.png
+	WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Hide Advanced Options"
+  End
+  Else,Set,%Toggle%,False
+End
+Else,Begin
+  Set,%Toggle%,False
+  WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_16.png
+  WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
+End
+
+WriteInterface,Visible,%ScriptFile%,Interface,cb_ForceUnsignedDrivers,%Toggle%
+System,EndLocal
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"This script allows you to include additional drivers for your hardware that are not already shipped with Windows into an existing .wim image.#$x#$xUse this script to inject drivers into an existing boot.wim image without rebuilding."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_Process="Inject Drivers",1,8,5,5,100,25,Process,DownloadArrow_16.png,False,__
+btn_ViewDismLog=,1,8,456,5,25,25,ViewDismLog,Health.ico,True,"__View the DISM log from the last integration."
+btn_SetDefaultOptions=,1,8,496,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,526,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
+btn_ScriptInfo=,1,8,556,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+lbl_DriverSourceInfo="Please specify the path to the directory containing the drivers you wish to integrate.#$x#$xDriver packages must be decompressed (*.ini). Sub-Folders are allowed.",1,1,14,66,559,36,8,Normal
+bvl_DriverSource="Driver Packages",1,12,5,50,575,180,8,Bold
+lbl_DriversSrc=Drivers,1,1,17,111,70,16,8,Bold
+fb_DriversSrc=%BaseDir%\Workbench\Drivers\x64,1,13,84,105,458,20,dir,"Title=Select the directory containing your uncompressed drivers","__The directory containing uncompressed drivers."
+btn_BrowseDriversSrc=,1,8,549,105,20,20,BrowseDrvSource,OpenFolder_16.png,True,__Browse
+lbl_WimImageInfo="Please specify the path to your existing boot.wim image.",1,1,14,148,282,16,8,Normal
+lbl_WimImage="Wim Image",1,1,17,172,70,16,8,Bold
+fb_WimImage=%OutputDir%\sources\boot.wim,1,13,84,166,485,20,file,"Title=Select your .wim image","Filter=boot.wim|boot.wim|WIM Files|*.wim|All Files|*.*","__The .wim image where drivers will be injected."
+cb_ForceUnsignedDrivers="Force Install Unsigned Drivers (x64)",0,3,17,200,240,16,False,"__Caution: See Notes below"
+rtf_DriverNotes=DriversNotes.rtf,1,6,5,246,575,95
+
+[InterfaceEncoded]
+Health.ico=1150,896
+DriversNotes.rtf=39302,12016
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+Advanced_Exit_16.png=705,1048
+DownloadArrow_16.png=2302,3176
+OpenFolder_16.png=2299,3168
+
+[AuthorEncoded]
+hardware.png=6100,8232
+Logo=hardware.png
+
+[EncodedFile-InterfaceEncoded-Health.ico]
+lines=0
+0=eJxjYGAEQgEBBiCpwJDBwsAgxsDAoAHEQCGgCEQcBBxYGDCAltZkJi4uFZBSaRKxpKCgG7e4eH2hqenKL0D8lRRsYrLiKwuLUZGISHtvWNi1/1ZWJ/8bG58gGru6Xv7PymrXIyLS0xsScvW/k9OJ/yYmR/6rqx8kCjs6XgDqdwDqn9QbEXHjv5fXOTB2cjrz38jo+H8Dg+P/37//9f/Fix//9fWPY2BX1ytA/c49wsIzemNj7/wPCroCx/7+l8Hmg8DPn3//W1icw8De3jf/s7C4AfXP601OfvA/Ovo2GMfG3v7//fvf/+jg48ff/52dr8FxYOA9oH4voP4lvVlZz/6npDwC47S0x0A7/2Ho//Ll738/v/twHBHx+D8zsy9Q/6re/PxX/3NzX8Jxfv7L/0VFr8D6fv3697+g4OX/xMQXQD3P4Tgu7gVQf0CPkNCG3pKSd/9LSz9g4O/f//3//PkvnJ+T8x5ozjswTk5+85+JKRiof2tvRcXH/9XVX4nCFRVf/mdnf/mfkfEeqD+sS0BgZ09v75f/M2d+IxrPmPHtf1PT5/+ior3N9vanzERF97ZJSu5rExZe3M3Hl/Wfjy/zv4DA9HYgHyi2pA3I7ufnz/rPy5v5R1R0FVgtUE+rnd1xXeS8pKmZzikuLv5fWVn5v5iY8mYxMY1N4uKam8TEVHaqqan9FxER+Y6ZA1GBqKjoamNj478mJib/kbGRkdEfISGhOYT0g4CubjSLkpINm5KSJRBbsCkrW7Pp6kZiyf3kgQf8DAwfgPiHPAMDABDk7XV4nOPySE3MKcnQy0zOZxgFIw/UsUDoECbs8gWfDskysAEAN5kG6TZDaKUBAAAAAgAAACYAAABUAgAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-hardware.png]
+lines=2
+0=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
+1=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
+2=01s8TYkBAAAAAgAAACQAAADUFwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-DriversNotes.rtf]
+lines=2
+0=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
+1=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
+2=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
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-DownloadArrow_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAHUwAAB1MAHdM3LNAAAF8WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEyLTE1VDE5OjU5OjQ2LTA2OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0xNVQyMDowMDoyNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0xNVQyMDowMDoyNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoyZDgxZjBkMy01ZDYzLTA4NDgtODA4Zi01ODEyOThhNzJiNDIiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDo2ODM1ZDAzZC03ZDNiLTRlNDYtOTBlMS1hNjI1ZWNiNzcxZDgiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDplYjdiNGViNy0yZmJmLTYyNGItODQ5ZS1lNjU5NmJiNzZhZmYiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmViN2I0ZWI3LTJmYmYtNjI0Yi04NDllLWU2NTk2YmI3NmFmZiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0xNVQxOTo1OTo0Ni0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDoyZDgxZjBkMy01ZDYzLTA4NDgtODA4Zi01ODEyOThhNzJiNDIiIHN0RXZ0OndoZW49IjIwMTktMTItMTVUMjA6MDA6MjctMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMS4wIChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7PCg1HAAACs0lEQVQ4y33TT2hUVxTH8e99b968mczfaBIlCmm1ptKKRtFIRIoutLqo0o0Lu6mxboIuSjdd1EpL3TQLEUEXaquoG8ESUVDRRcBuJEhLa0k0QoKmMdrMOL6Z92feu+9eF0GNnbRnc1b3cw/n/m5Caw3A4u8EsQQ7naC1K/fhio6uLe+Haz6f73YMjzwav3Tx7oXHQhh3TMMEYOzHxwAkmFV+CN3L1l5YufyD3T3tm9Ali3bjndv7Nh748+bIta7x0vidQrow+8jbABps224JkjXG6vcJnmuKuTYNPPVCryxVRBSH/w2YAipBmWwgaM0swIsUkapHQM0PPRVJSSj/BxACfOlSlSY15eBGEbGWIQpZqpaklOCHPq/21gAYQCB9qrGmphzqCsbKozJqj4m1Ehgzl5iGNRcgMITGjzycOKCmKzhBHZEVwkqZtOXbEmWvhJ1IkUsVGgEDAxXHuJGrhJQ4cYV/ghdY+aQCsIQdBG4M6YDZL/EayNmF9Rmh3nsRV9pMBZ52UYZmdHpk5YMnw7vyRWvb0uSiSMtEczVy7gETbwFKSCvf0nzeMyokAYGkJdvCreGrO8/+fnznvo37Jw9uPjrU80P3gvKz0mDDBOWq82uo3Z9al9BrJyFlhgjTJdkUMi/Ic3Dz0R0nBk9kh5yhgWUdS4MGwDQhqMaHCha9TRlIG3VEOmDCmeTM9su9d6f+eNp3si+Xn848mYqfwVf/BmyohkzErn1seTF3QJhF/vJG2b+ud6Cz/aOfF37W/DHXueF47txBSsyHTAEeOeH3n0Tv9tHkm6l5q2pfdp7eu+ObT7fyC7/NiotqALIbZkIyWdPTD8Xz/j3pnq+7O099cWbwYteVwwNFYBpoAoI5J5jqn+n1EK7mx08u3LV6xbn73/59qv9IERgALMCf+XJv6iWz4TG8VpN2LAAAAABJRU5ErkJggnicE3HJL8/LyU9McSwqyi+PNzTTK8hLZxgFIwX848AvX7L26DdGBgApMAt06lj3+gEAAAACAAAALAAAAP4IAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-OpenFolder_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTA1LTE3VDIxOjQ1OjAzLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpiMmUxM2M3YS01ODljLWQ0NDItOTQ3MC1lZTI4MGIwNDcyM2IiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0ZmIxZDNiYS00OWNhLTI4NDUtYjQ3My1hMjZjZWRlYWZhMDQiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjRmYjFkM2JhLTQ5Y2EtMjg0NS1iNDczLWEyNmNlZGVhZmEwNCIgc3RFdnQ6d2hlbj0iMjAxOS0wNS0xN1QyMTo0NTowMy0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHN0RXZ0OndoZW49IjIwMTktMTAtMjBUMTk6NDc6NTktMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz63gCC6AAACp0lEQVQ4EX3BS2hcVRzA4d//nHMfc28mk45NGo1JpwpFquBKKmh3KggWC6WCbroQVy5EunBTwb0Vl8WKCwUrlEoXPlAkhlqKYqVYFW1jk0jbiXnM3NxJJjP3zn0cKYKL0vH75O33TnMnLQ6hrvLuwmtcbV+jPhLsnaxlvwZ+YbWU3s22fzROnI92VQcX9TMHD3OnkpxQV5mp7GUp+Z2V/vr2+nb5TdQ1HxZ55Y/xID3pKvukq8on5MSpT0jTgVOUpS/8ywJWysFUdSbNyoSL7a/pZB2+jz6j1YuZqHDmoYAj7Uxhsjx/1XWd47XACQUoLSiBbn/QX2wtvFOr1E4eqB1ip3sv6aC3+9utT88FuQnnO/ktpUuRE6dO2xcPPYvxQpIClAKloEgTZufO047iLd/30GJwlFPdSCOk9Ho/RLMvnG2+/52pBe5gYnzM/XwRogSqI5AZaNQdjh55jjilKhqsBS0wauDyz1GQz003xho7vjBJmqUFuI/vgnj9L7T2uE024IZ2sKLBWm7LShitQ9ydp9P++L6XpxYw/ugMq9cvsDR3DMRHtA9YyhIKQAn/sRaWlVDk8PTU6rE0jx82uVVcnX2TB3Y/wsyBtyi3lgBhmMKCF4Qoi3f+7OvPm6h5hWm1yYP7X0GcNbALoCsMVfQheJRB16G/+fefpt/6haDhIyP3wPpXkLRBudydQLYBO/fRal5ja+PGj0b15hmfmAa2yVcugPZBNHdlLeQxBododZ40GfxkArtMfWI/JE3SzeuIN8lQZYo2FUymiJavgHDJ7Kh0pX7/YxBOEjYOg6kxVNGD+j6QGq1blxKl1GUz5nZGSvHJsnFk7CD/z0JlDyu/nSFeay76YaVvunby3JcfvPSUFRcrBqxlKBGwQtZf23Q89w0Q/gH+aSDn8z1ZagAAAABJRU5ErkJggnicE/QvSM1zy89JSS2KNzTTK8hLZxgFIwj85sAvf+m11BRGBgBbPwmoRWA0QwEAAAACAAAAKQAAAPsIAAAAAAAAAQAAAAAAAAAAAAAA
