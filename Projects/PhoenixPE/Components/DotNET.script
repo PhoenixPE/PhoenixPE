@@ -175,7 +175,8 @@ End
 Else,Message,".NET Framework 3 is already enabled!",Warning
   
 // Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
-ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
+RegUnloadHives,Force,"Target=%TargetSystem32%\config"
+
 Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
 WimUnmount,%MountDir%,COMMIT
 
@@ -219,7 +220,8 @@ End
 Else,Message,".NET Framework 3 is already disabled!",Warning
   
 // Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
-ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%TargetSystem32%\config"
+RegUnloadHives,Force,"Target=%TargetSystem32%\config"
+
 Echo,"Committing changes and unmounting source image:#$x  [%SourceInstallWim%]...#$x#$xThis can take awhile, please be patient."
 WimUnmount,%MountDir%,COMMIT
 

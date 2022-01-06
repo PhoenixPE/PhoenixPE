@@ -115,17 +115,36 @@ RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
 // ===============================================================================================================================
 // Name...........: RegUnloadHives
 // Description....: UnMount Source and Build registry hives.
-// Syntax.........: RegUnLoadHives,[FORCE]
-// Parameters.....: #1 Force - Force hive unload using HiveUnload.exe
+// Syntax.........: RegUnLoadHives[,FORCE][,HKEY=<HKEY>][,Target=<Dir>]
+// Parameters.....: Force - Force hive unload using HiveUnload.exe
+//                  HKEY=<HKEY> - Unload hives from this root key. (HKLM, HKU)
+//                  Target=<Dir> - Unload hives from this directory.
 // Return values..: ExitCode provided by the HiveUnload.exe application
+//                  0 -  All registry hives unloaded successfully.
+//                  1 -  Not all registry hives could be unloaded.
+//                  2 -  No loaded registry hives were found.
+//                  You must handle ExitCode. The script will not Exit/Halt.
 // Author.........: Homes32
-// Remarks........: 
+// Remarks........: HiveUnload.exe is open-source software developed by BlueLife
 // Related........: 
 // ===============================================================================================================================
 [_PhoenixAPI_RegUnloadHives]
+System,SetLocal
 
-If,#1,Equal,"Force",Begin
-  If,ExistFile,"%Tools%\x86\HiveUnload.exe",ShellExecute,Hide,"%Tools%\x86\HiveUnload.exe","/HKLM /Target:ALL"
+GetParam,1,%Arg1%
+GetParam,2,%Arg2%
+GetParam,3,%Arg3%
+  
+Set,%ForceUnmount%,False
+Set,%HKEY%,"HKLM"
+Set,%UnloadTarget%,"ALL"
+
+Run,%API%,__PhoenixAPI_RegUnloadHives_Process_Arg,%Arg1%
+Run,%API%,__PhoenixAPI_RegUnloadHives_Process_Arg,%Arg2%
+Run,%API%,__PhoenixAPI_RegUnloadHives_Process_Arg,%Arg3%
+
+If,%ForceUnmount%,Equal,True,Begin
+  If,ExistFile,"%Tools%\x86\HiveUnload.exe",ShellExecute,Hide,"%Tools%\x86\HiveUnload.exe","/%HKEY% /Target:%UnloadTarget%"
   If,%ExitCode%,Equal,0,Echo,"HiveUnload: All registry hives unloaded successfully."
   If,%ExitCode%,Equal,1,Echo,"HiveUnload: Warning: Not all registry hives could be unloaded! Please verify that regedit is not running and try again.",Warn
   If,%ExitCode%,Equal,2,Echo,"HiveUnload: No loaded registry hives were found."
@@ -139,6 +158,32 @@ Else,Begin
   RegHiveUnload,Tmp_Install_Drivers
   RegHiveUnload,Tmp_Install_Software
   RegHiveUnload,Tmp_Install_System
+End
+
+System,EndLocal
+
+[#__PhoenixAPI_RegUnloadHives_Process_Arg#]
+// ===============================================================================================================================
+// Name...........: __PhoenixAPI_RegUnloadHives_Process_Arg
+// Description....: Process RegUnloadHives optional arguments
+// Syntax.........: __PhoenixAPI_RegUnloadHives_Process_Arg,<Arg>
+// Parameters.....: #1 Arg - The argument to process
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Internal Function
+//                  Do not call System,SetLocal here. We need this function to run in the same scope as PhoenixAPI_InnoUnpack
+// Related........: _PhoenixAPI_RegUnloadHives
+// ===============================================================================================================================
+[__PhoenixAPI_RegUnloadHives_Process_Arg]
+
+If,#1,Equal,"Force",Set,%ForceUnmount%,True
+Else,Begin
+  StrFormat,Split,#1,"=",1,%ArgKey%
+  If,Not,%ArgKey%,Equal,"",Begin
+    If,%ArgKey%,Equal,"HKEY",StrFormat,Split,#1,"=",2,%HKEY%
+    Else,If,%ArgKey%,Equal,"TARGET",StrFormat,Split,#1,"=",2,%UnloadTarget%
+    Else,Halt,"SYNTAX ERROR: Invalid Argument [#1]"
+  End
 End
 
 [#_PhoenixAPI_RegCopyDriver#]
@@ -319,7 +364,7 @@ System,EndLocal
 // Description....: Process InnoUnpack optional arguments
 // Syntax.........: __PhoenixAPI_InnoUnpack_Process_Arg,<Arg>
 // Parameters.....: #1 Arg - The argument to process
-// Return values..: #r - Command line string to be passed to Innounp.exe
+// Return values..: 
 // Author.........: Homes32
 // Remarks........: Internal Function
 //                  Do not call System,SetLocal here. We need this function to run in the same scope as PhoenixAPI_InnoUnpack

@@ -237,21 +237,28 @@ System,EndLocal
 // ===============================================================================================================================
 [NukeProject]
 Echo,"Nuke Project Files..."
-Echo,"Cleaning up files from the previous build..."
-DirDeleteEx,%TargetDir%
-DirDeleteEx,%ProjectTemp%
 
-Echo,"Purging the project cache..."
-DirDeleteEx,%ProjectCache%
-DirDeleteEx,%ProgramsCache%
+If,QUESTION,"Nuke PhoenixPE#$x#$xThis operation will obliterate all Target, ISO, Temp, Downloaded, and Cached files and return PhoenixPE to a clean build environment.#$x#$x    Are you sure you want to continue?",Begin
 
-Echo,"Removing downloaded tools..."
-DirDeleteEx,%Tools%\x86\Oscdimg
-DirDeleteEx,%Tools%\x64\Oscdimg
+  Echo,"Cleaning up files from the previous build..."
+  DirDeleteEx,%TargetDir%
+  DirDeleteEx,%ProjectTemp%
 
-Echo,"Clearing the Output directories..."
-DirDeleteEx,%ISODir%
-DirDeleteEx,%OutputDir%
+  Echo,"Purging the project cache..."
+  DirDeleteEx,%ProjectCache%
+  DirDeleteEx,%ProgramsCache%
+
+  Echo,"Removing downloaded tools..."
+  DirDeleteEx,%Tools%\x86\Oscdimg
+  DirDeleteEx,%Tools%\x64\Oscdimg
+
+  Echo,"Clearing the Output directories..."
+  DirDeleteEx,%ISODir%
+  DirDeleteEx,%OutputDir%
+
+  Echo,"Environment cleanup complete."
+  If,QUESTION,"Would you like to reset Source Config to defaults? (Recommended)",Exec,"%ProjectDir%\100-ConfigSource.script","SetDefaultOptions"
+End
 
 [#SwitchToMainInterface#]
 // ===============================================================================================================================
@@ -315,7 +322,7 @@ System,RefreshInterface
 // ===============================================================================================================================
 [Interface]
 lbl_Welcome=Welcome!,1,1,5,10,200,25,16,Bold
-btn_Nuke=,1,8,288,5,25,25,NukeProject,Toxic.png,False,"__Obliterate all Target, ISO, Temp, Downloaded, and Cached Files.#$xUse this if you want to reset to a clean build environment.#$x#$xThe following folders and any files they contain will be destroyed:#$x  - %TargetDir%#$x  - %ISODir%#$x  - %OutputDir%#$x  - %ProjectCache%#$x  - %ProgramsCache%#$x  - Downloaded Tools (BCDEdit/DISM/Oscdimg)"
+btn_Nuke=,1,8,288,5,25,25,NukeProject,Toxic.png,False,"__Obliterate all Target, ISO, Temp, Downloaded, and Cached files.#$xUse this if you want to reset to a clean build environment.#$x#$xThe following folders and any files they contain will be destroyed:#$x  - %TargetDir%#$x  - %ISODir%#$x  - %OutputDir%#$x  - %ProjectCache%#$x  - %ProgramsCache%#$x  - Downloaded Tools (BCDEdit/DISM/Oscdimg)"
 btn_Options=,1,8,320,5,25,25,SwitchToOptionsInterface,Advanced_16.png,True,"__Project Options"
 btn_About=,1,8,352,5,25,25,SwitchToAboutInterface,Help_16.png,True,"__About PhoenixPE"
 rtf_BuildInstructions=HowToBuild.rtf,1,6,5,50,373,375

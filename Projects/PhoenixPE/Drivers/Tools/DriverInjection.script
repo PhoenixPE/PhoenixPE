@@ -32,7 +32,7 @@
 Title=Driver Injection
 Description=Inject drivers into an existing boot.wim image.
 Author=Homes32
-Level=10
+Level=6
 Selected=None
 Mandatory=False
 Version=1.0.0.0
@@ -64,7 +64,7 @@ If,ExistFile,%fb_WimImage%,Begin
   // Inject Drivers
   Run,%ScriptFile%,IntegrateDrivers
   // Optimize Image (Keep original compression)
-  Echo,"Optimizing Boot.wim..."
+  Echo,"Optimizing image..."
   WimOptimize,%fb_WimImage%,ReComp=KEEP
   // Done.
   Echo,"Driver integration finished."
@@ -105,7 +105,7 @@ ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Add-Driver /Driver:#$q%fb
 If,Not,%ExitCode%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
 
 // Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
-ShellExecute,Hide,%Tools%\x86\HiveUnload.exe,"/HKLM /Target:%MountDir%\Windows\System32\config"
+RegUnloadHives,Force,"Target=%MountDir%\Windows\System32\config"
 
 // Unmount
 Echo,"Committing changes and unmounting source image:#$x  [%fb_WimImage%]...#$x#$xThis can take awhile, please be patient."
@@ -224,7 +224,7 @@ btn_ScriptInfo=,1,8,556,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 lbl_DriverSourceInfo="Please specify the path to the directory containing the drivers you wish to integrate.#$x#$xDriver packages must be decompressed (*.ini). Sub-Folders are allowed.",1,1,14,66,559,36,8,Normal
 bvl_DriverSource="Driver Packages",1,12,5,50,575,180,8,Bold
 lbl_DriversSrc=Drivers,1,1,17,111,70,16,8,Bold
-fb_DriversSrc=%BaseDir%\Workbench\Drivers\x64,1,13,84,105,458,20,dir,"Title=Select the directory containing your uncompressed drivers","__The directory containing uncompressed drivers."
+fb_DriversSrc=%BaseDir%\Workbench\Drivers\x64,1,13,84,105,460,20,dir,"Title=Select the directory containing your uncompressed drivers","__The directory containing uncompressed drivers."
 btn_BrowseDriversSrc=,1,8,549,105,20,20,BrowseDrvSource,OpenFolder_16.png,True,__Browse
 lbl_WimImageInfo="Please specify the path to your existing boot.wim image.",1,1,14,148,282,16,8,Normal
 lbl_WimImage="Wim Image",1,1,17,172,70,16,8,Bold
