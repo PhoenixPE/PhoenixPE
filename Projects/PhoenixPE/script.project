@@ -203,6 +203,7 @@ Echo,"Generating Support Log..."
 // Get a timestamp for our archive file name to avoid overwrites
 StrFormat,DATE,%Timestamp%,"yyyy-mm-dd-hhnn"
 Echo,"Exporting Log as [HTML]..."
+If,Not,ExistDir,%ProjectTemp%,DirMake,%ProjectTemp%
 System,SaveLog,"%ProjectTemp%\BuildLog.html"
 System,SaveLog,"%ProjectTemp%\BuildLog.log",Text
 Set,%LogFile%,"%Timestamp%-%ProjectTitle%-Logs.7z"
@@ -210,16 +211,10 @@ Set,%LogFile%,"%Timestamp%-%ProjectTitle%-Logs.7z"
 // Collect various useful information
 If,ExistFile,"%TargetWindows%\Logs\DISM\dism.log",Filecopy,"%TargetWindows%\Logs\DISM\dism.log","%ProjectTemp%"
 
-RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","ReleaseId",%ReleaseId%
-RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","CurrentBuildNumber",%CurrentBuildNumber%
-RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","UBR",%UBR%
-RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","DisplayVersion",%DisplayVersion%
-RegRead,HKLM,"Software\Microsoft\Windows NT\CurrentVersion","ProductName",%ProductName%
-Echo,"Host OS: %ProductName%, Version [%DisplayVersion%/%ReleaseId%], %HostArch% (Build %CurrentBuildNumber%.%UBR%)"
-
 // Compress our build log and our other logs into a zip archive
 Echo,"Archiving Support Log...."
 Compress,7z,%ProjectTemp%\*.log,%BaseDir%\Logs\%LogFile%
+Compress,7z,%ProjectTemp%\*.ini,%BaseDir%\Logs\%LogFile%
 Compress,7z,%ProjectTemp%\BuildLog.html,%BaseDir%\Logs\%LogFile%
 System,EndLocal
 

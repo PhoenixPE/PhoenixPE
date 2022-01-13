@@ -169,8 +169,8 @@ WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
 // Check for .NET 3 and Enable if necessary
 Echo,"Enabling feature: .NET Framework 3..."
 If,Not,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
-  ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:#$q%SourceDir%\sources\sxs#$q /LogPath:#$q%DismLog%#$q"
-  If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,AbortFeature
+  DISM,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:#$q%SourceDir%\sources\sxs#$q /LogPath:#$q%DismLog%#$q"
+  If,Not,#r,Equal,0,Run,%ScriptFile%,AbortFeature
 End
 Else,Message,".NET Framework 3 is already enabled!",Warning
   
@@ -214,8 +214,8 @@ WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
 // Check for .NET 3 and Enable if necessary
 Echo,"Disabling feature: .NET Framework 3..."
 If,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
-  ShellExecute,Hide,"Dism.exe","/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx3 /LogPath:#$q%DismLog%#$q"
-  If,Not,%ExitCode%,Equal,0,Run,%ScriptFile%,AbortFeature
+  DISM,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx3 /LogPath:#$q%DismLog%#$q"
+  If,Not,#r,Equal,0,Run,%ScriptFile%,AbortFeature
 End
 Else,Message,".NET Framework 3 is already disabled!",Warning
   
@@ -237,9 +237,9 @@ WimUnmount,%MountDir%,COMMIT
 // Related........: EnableFx3, DisableFx3
 // ===============================================================================================================================
 [AbortFeature]
-Echo,"Aborting operation...#$xDism.exe terminated with error code: [%ExitCode%]. Check the log for details."
+Echo,"Aborting operation...#$xDism.exe terminated with error code: [#r]. Check the log for details."
 WimUnmount,%MountDir%,DISCARD
-Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
+Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
 
 [#ViewDismLog#]
 // ===============================================================================================================================
@@ -318,7 +318,7 @@ btn_ViewDismLog=,1,8,491,5,25,25,ViewDismLog,Health.ico,True,"__View the DISM lo
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,572,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,603,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
-lbl_NetFx4="This script will add the .NET Framework v4 runtime embedded within your Win10 source.#$x#$xIf required, you may use the buttons above to enable .NET Framework version 2.0-3.5 in your source image. Once the feature is enabled they will be included in your build.",1,1,5,50,518,49,8,Bold
+lbl_NetFx4="This script will add the .NET Framework v4 runtime embedded within your source.#$x#$xIf required, you may use the buttons above to enable .NET Framework version 2.0-3.5 in your source image. Once the feature is enabled they will be included in your build.",1,1,5,50,518,49,8,Bold
 
 [AuthorEncoded]
 net-icon-100x95.png=12277,16476

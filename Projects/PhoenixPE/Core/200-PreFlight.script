@@ -187,6 +187,7 @@ If,Not,ExistFile,"%Tools%\%HostArch%\SetACL.exe",Run,%ScriptFile%,ErrMissingTool
 If,Not,ExistFile,"%Tools%\x86\xml.exe",Run,%ScriptFile%,ErrMissingTool,xml.exe
 
 // WaikTools
+If,Not,ExistFile,"%Tools%\%HostArch%\DISM\dism.exe",Run,%ScriptFile%,GetWaikTools
 If,Not,ExistFile,"%Tools%\%HostArch%\Oscdimg\oscdimg.exe",Run,%ScriptFile%,GetWaikTools
 
 [#ErrMissingTool#]
@@ -217,15 +218,15 @@ Halt,"The build cannot continue because [ #1 ] is missing."
 // ===============================================================================================================================
 [GetWaikTools]
 Echo,"Downloading required tools from Windows 10 ADK...#$x#$xThis will only need to be done once."
-ShellExecute,Open,"%Tools%\%HostArch%\GWT.exe","-Win10 -Silent -folder:%ProjectTemp%"
+ShellExecute,Open,"%Tools%\%HostArch%\GWT.exe","-Win10 -Win10dism -Silent -folder:%ProjectTemp%"
 DirCopy,"%ProjectTemp%\ADK_6\x86\*.*","%Tools%\x86"
 DirCopy,"%ProjectTemp%\ADK_6\amd64\*.*","%Tools%\x64"
 If,Not,ExistFile,"%Tools%\x64\Oscdimg\oscdimg.exe",Halt,"Error downloading required Windows 10 ADK tools. The build cannot continue."
 
-// Don't waste disk space with these, we will use the OS versions
-DirDeleteEx,"%Tools%\x86\DISM"
+// Don't waste disk space with these, we will use the OS versions (DISM required for Win7 Compatibility shim PhoenixAPI_DISM)
+//DirDeleteEx,"%Tools%\x86\DISM"
 DirDeleteEx,"%Tools%\x86\BCDBOOT"
-DirDeleteEx,"%Tools%\x64\DISM"
+//DirDeleteEx,"%Tools%\x64\DISM"
 DirDeleteEx,"%Tools%\x64\BCDBOOT"
 
 

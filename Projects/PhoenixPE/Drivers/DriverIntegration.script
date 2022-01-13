@@ -80,8 +80,8 @@ If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 If,%cb_ForceUnsignedDrivers%,Equal,True,Set,%DismForceUnsigned%," /ForceUnsigned"
 Else,Set,%DismForceUnsigned%,""
 
-ShellExecute,Hide,"Dism.exe","/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%DriversSrc%#$q /recurse /LogPath:#$q%DismLog%#$q%DismForceUnsigned%"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
+DISM,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%DriversSrc%#$q /recurse /LogPath:#$q%DismLog%#$q%DismForceUnsigned%"
+If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
 // Dism doesn't always unload hives correctly. Force unload just to make sure.
 RegUnloadHives,Force,"Target=%TargetSystem32%\config"
 
@@ -147,7 +147,7 @@ If,ExistDir,%ExportDest%,DirDeleteEx,%ExportDest%
 DirMake,%ExportDest%
 
 // Export Drivers
-ShellExecute,Hide,"Dism.exe","/online /Export-Driver /Destination:#$q%ExportDest%#$q"
+DISM,"/online /Export-Driver /Destination:#$q%ExportDest%#$q"
 
 DirSize,%ExportDest%,%DirSize%
 StrFormat,Bytes,%DirSize%,%StrDirSize%

@@ -60,6 +60,7 @@ DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
 FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 
+// ACL Management
 SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
 SetRegACL=Run,%API%,_PhoenixAPI_SetRegACL
 
@@ -71,7 +72,9 @@ Associate=Run,%API%,_PhoenixAPI_Associate
 
 ConvertImage=Run,%API%,_PhoenixAPI_ConvertImage
 
-// Experimental - May be changed or removed without notice
+DISM=Run,%API%,_PhoenixAPI_DISM
+
+// Compression/Decompression
 7z=Run,%API%,_PhoenixAPI_7z
 //7zExtract=Run,%API%,_PhoenixAPI_7z
 InnoUnpack=Run,%API%,_PhoenixAPI_InnoUnpack
@@ -277,12 +280,50 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_7z]
 System,SetLocal
-If,#1,Equal,"",Halt,"7zip Error: You must specify the program arguments."
+If,#1,Equal,"",Halt,"7zip Error: You must provide required 7z.exe arguments."
 
 GetParam,1,%Args%
 Getparam,2,%WorkDir%
 
 ShellExecute,Hide,"%Tools%\%HostArch%\7z.exe",%Args%,%WorkDir%
+Set,#r,%ExitCode%
+
+System,EndLocal
+
+[#_PhoenixAPI_DISM#]
+// ===============================================================================================================================
+// Name...........: DISM
+// Description....: Execute DISM with the provided arguments.
+// Syntax.........: DISM,<Args>[,<WorkDir>]
+// Parameters.....: #1 Args - The arguments to pass to the 7z executable.
+//                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+// Return values..: ExitCode provided by the DISM application
+// Author.........: Homes32
+// Remarks........: This command is provided as compatibility shim to allow using DISM on Win10 images from a Win7 Host.
+//                  The version of DISM provided with Win7 does not recognize Win10 imagines when using the /image: argument.
+//                  In order to work around this limitation and allow DISM operations (Localization, driver integration, etc) on Win7
+//                  we use DISM from Win10 AIK tools, downloaded using JFX's GetWaikTools.exe during Pre-Flight Check. 
+//                    * Win10+ - Executes DISM.exe from the HostOS
+//                    * Win7/8 - Executes Win10 AIK DISM.exe
+//
+//                  Eventually GetWaikTools will no longer be able to download an AIK that works on Win7, at which time it will no
+//                  longer be possible to build PhoenixPE on Win7. What do you expect running an unsupported OS? ;-)
+//                  
+// Related........: Depends on %Tools%\%HostArch%\GWT.exe
+// ===============================================================================================================================
+[_PhoenixAPI_DISM]
+System,SetLocal
+If,#1,Equal,"",Halt,"DISM Error: You must provide the dism.exe arguments."
+
+GetParam,1,%Args%
+Getparam,2,%WorkDir%
+
+System,GetEnv,windir,%HostWinDir%
+FileVersion,"%HostWinDir%\System32\ntdll.dll",%HostOSVer%
+
+If,%HostOSVer%,Bigger,10.0.0.0,ShellExecute,Hide,"dism.exe",%Args%,%WorkDir%
+Else,ShellExecute,Hide,"%Tools%\%HostArch%\DISM\dism.exe",%Args%,%WorkDir%
+
 Set,#r,%ExitCode%
 
 System,EndLocal
@@ -305,7 +346,7 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_Innounp]
 System,SetLocal
-If,#1,Equal,"",Halt,"InnoExtractEx Syntax Error: You must specify the program arguments."
+If,#1,Equal,"",Halt,"InnoExtractEx Syntax Error: You must provide the Innounp.exe arguments."
 
 GetParam,1,%Args%
 Getparam,2,%WorkDir%
