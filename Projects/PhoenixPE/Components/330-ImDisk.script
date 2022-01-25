@@ -63,7 +63,7 @@ If,%cb_CreateRamdisk%,Equal,True,Begin
     // PECMD (v2012.1.88) does not listen for WM_SETTINGCHANGE messages.
     // This is a problem, as any programs PECMD will EXEC get passed the Environment block established when PECMD was started and be oblivious our changes.
     // To avoid using the old TEMP, we need to force PECMD to update it's Environment block with our new TEMP dir and pass it on to any EXEC programs.
-    // We accomplish this by calling "ENVI TEMP=%TmpDirPath%" -- The #$x is a bit hackish, but will force the cmd to be written to its own line by AddAutoRun
+    // We accomplish this by calling "ENVI TEMP=%TmpDirPath%" -- The #$x will force the cmd to be written to its own line by AddAutoRun
     Set,%TmpDirPath%," %cmb_DriveLetter%\Temp#$xENVI TEMP=%cmb_DriveLetter%\Temp"
   End
   Else,Set,%TmpDirPath%,""
@@ -71,6 +71,9 @@ If,%cb_CreateRamdisk%,Equal,True,Begin
   // Create Ramdrive at startup
   AddAutoRun,PreShell,HideNoWait,"Initializing ImDisk Ramdrive...","#$pWinDir#$p\System32\ImDiskStart.exe","%RamDiskSize% %cmb_DriveLetter% %txt_VolLabel% %cmb_DiskFormat%%TmpDirPath%"
 End
+
+// Add the RamDrive to ENV so PECMD knows where to create a symlink for pinning from removable media
+RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\Session Manager\Environment","RamDrive",%cmb_DriveLetter%
 
 // Shortcuts
 If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"#$pWinDir#$p\System32\imdisk.cpl",,,"%WinDir%\System32\imdisk.cpl",-1,,,"Configure Imdisk"
@@ -261,7 +264,7 @@ cmb_RamdiskSizeMode=%,1,4,321,145,46,22,%,MB,_ToggleRamdiskMode_,True
 lbl_DriveFormat="Drive Format:",0,1,158,183,78,16,8,Bold
 cmb_DiskFormat=NTFS-Compressed,0,4,239,176,129,22,FAT,FAT32,NTFS,NTFS-Compressed
 txt_VolLabel="Volume Label:",1,0,158,223,209,21,Ramdisk
-lbl_PinNotes="Note: Disabling Ramdisk support will remove support for pinning programs (taskbar/start menu) that reside on removeable media.",1,1,5,430,621,16,8,Normal
+lbl_PinNotes="Note: Disabling Ramdisk support will remove support for pinning programs (taskbar/start menu) that reside on removeable media.",1,1,5,430,630,27,8,Normal
 
 [ImDisk]
 ImDisk-x64.7z=140433,187344

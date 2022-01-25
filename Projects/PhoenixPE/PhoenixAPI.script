@@ -48,6 +48,7 @@ Selected=None
 RegLoadHives=Run,%API%,_PhoenixAPI_RegLoadHives
 RegUnloadHives=Run,%API%,_PhoenixAPI_RegUnloadHives
 RegCopyDriver=Run,%API%,_PhoenixAPI_RegCopyDriver
+Associate=Run,%API%,_PhoenixAPI_Associate
 
 // Shortcuts/Autorun
 RunFromRam=Run,%API%,_PhoenixAPI_RunFromRam
@@ -64,21 +65,22 @@ FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
 SetRegACL=Run,%API%,_PhoenixAPI_SetRegACL
 
+// Include Files
 RequireDriver=Run,%API%,_PhoenixAPI_RequireDriver
 RequireFile=Run,%API%,_PhoenixAPI_RequireFile
 RequireFileEx=Run,%API%,_PhoenixAPI_RequireFileEx
 
-Associate=Run,%API%,_PhoenixAPI_Associate
-
+// Utility
 ConvertImage=Run,%API%,_PhoenixAPI_ConvertImage
-
 DISM=Run,%API%,_PhoenixAPI_DISM
 
 // Compression/Decompression
 7z=Run,%API%,_PhoenixAPI_7z
 //7zExtract=Run,%API%,_PhoenixAPI_7z
-InnoUnpack=Run,%API%,_PhoenixAPI_InnoUnpack
+InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
 Innounp=Run,%API%,_PhoenixAPI_Innounp
+MSIExtract=Run,%API%,_PhoenixAPI_MSIExtract
+WixExtract=Run,%API%,_PhoenixAPI_WixExtract
 
 // XML
 XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
@@ -174,7 +176,7 @@ System,EndLocal
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Internal Function
-//                  Do not call System,SetLocal here. We need this function to run in the same scope as PhoenixAPI_InnoUnpack
+//                  Do not call System,SetLocal here. We need this function to run in the same scope as the caller
 // Related........: _PhoenixAPI_RegUnloadHives
 // ===============================================================================================================================
 [__PhoenixAPI_RegUnloadHives_Process_Arg]
@@ -257,6 +259,8 @@ TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\%InfFileNoExt%*",Append
 TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\Drivers\%InfFileNoExt%*",Append
 TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\Driverstore\??-??\%InfFile%_loc",Append
 TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\DriverStore\FileRepository\%InfFile%*",Append
+TxtAddline,%RequireDriver-Listfile%,"\Windows\System32\??-??\%InfFileNoExt%*",Append
+TxtAddline,%RequireDriver-Listfile%,"\Windows\SystemResources\%InfFileNoExt%*",Append
 WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%RequireDriver-Listfile%,%TargetDir%,NOACL,NOATTRIB,NOERR
 
 If,%NOREG%,Equal,False,Begin
@@ -346,7 +350,7 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_Innounp]
 System,SetLocal
-If,#1,Equal,"",Halt,"InnoExtractEx Syntax Error: You must provide the Innounp.exe arguments."
+If,#1,Equal,"",Halt,"InnoUnp Syntax Error: You must provide the Innounp.exe arguments."
 
 GetParam,1,%Args%
 Getparam,2,%WorkDir%
@@ -356,11 +360,11 @@ Set,#r,%ExitCode%
 
 System,EndLocal
 
-[#_PhoenixAPI_InnoUnpack#]
+[#_PhoenixAPI_InnoExtract#]
 // ===============================================================================================================================
-// Name...........: InnoUnpack
-// Description....: Extract files from an Innounp (Inno Setup Unpacker) installer.
-// Syntax.........: InnoUnpack,<SetupFile>,<DestDir>[,<Args>]
+// Name...........: InnoExtract
+// Description....: Extract files from an Inno Setup installer.
+// Syntax.........: InnoExtract,<SetupFile>,<DestDir>[,<Args>]
 // Parameters.....: #1 SetupFile - The inno-setup file to unpack.
 //                  #2 DestDir - The full path to the directory where the files will be unpacked.
 //                  #3-#5 - Additional Arguments:
@@ -372,7 +376,7 @@ System,EndLocal
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
 // Related........: Innounp.exe
 // ===============================================================================================================================
-[_PhoenixAPI_InnoUnpack]
+[_PhoenixAPI_InnoExtract]
 System,SetLocal
 If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the setup file."
 If,#2,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the destination directory."
@@ -387,31 +391,31 @@ Set,%Password%,""
 Set,%CurrentDir%,""
 Set,%ListFile%,""
 
-Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg3%
-Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg4%
-Run,%API%,__PhoenixAPI_InnoUnpack_Process_Arg,%Arg5%
+Run,%API%,__PhoenixAPI_InnoExtract_Process_Arg,%Arg3%
+Run,%API%,__PhoenixAPI_InnoExtract_Process_Arg,%Arg4%
+Run,%API%,__PhoenixAPI_InnoExtract_Process_Arg,%Arg5%
 
 ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Password%%CurrentDir%#$q%SetupFile%#$q%ListFile%"
-If,Not,%ExitCode%,Equal,0,Begin,
+If,Not,%ExitCode%,Equal,0,Begin
   FileVersion,"%Tools%\x86\Innounp.exe",%InnounpVer%
-  Halt,"Error: Failed to unpack setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using Innounp.exe version [%InnounpVer%]."
+  Halt,"InnoExtract Error: Failed to unpack setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using Innounp.exe version [%InnounpVer%]."
 End
 
 System,EndLocal
 
-[#__PhoenixAPI_InnoUnpack_Process_Arg#]
+[#__PhoenixAPI_InnoExtract_Process_Arg#]
 // ===============================================================================================================================
-// Name...........: __PhoenixAPI_InnoUnpack_Process_Arg
-// Description....: Process InnoUnpack optional arguments
-// Syntax.........: __PhoenixAPI_InnoUnpack_Process_Arg,<Arg>
+// Name...........: __PhoenixAPI_InnoExtract_Process_Arg
+// Description....: Process InnoExtract optional arguments
+// Syntax.........: __PhoenixAPI_InnoExtract_Process_Arg,<Arg>
 // Parameters.....: #1 Arg - The argument to process
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Internal Function
-//                  Do not call System,SetLocal here. We need this function to run in the same scope as PhoenixAPI_InnoUnpack
-// Related........: _PhoenixAPI_InnoUnpack
+//                  Do not call System,SetLocal here. We need this function to run in the same scope as PhoenixAPI_InnoExtract
+// Related........: _PhoenixAPI_InnoExtract
 // ===============================================================================================================================
-[__PhoenixAPI_InnoUnpack_Process_Arg]
+[__PhoenixAPI_InnoExtract_Process_Arg]
 
 StrFormat,Split,#1,"=",1,%ArgKey%
 If,Not,%ArgKey%,Equal,"",Begin
@@ -427,8 +431,68 @@ If,Not,%ArgKey%,Equal,"",Begin
 	  StrFormat,Split,#1,"=",2,%ListFile%
 	  Set,%ListFile%," #$q@%ListFile%#$q"
   End
-  Else,Halt,"SYNTAX ERROR: Invalid Argument [#1]"
+  Else,Halt,"InnoExtract SYNTAX ERROR: Invalid Argument [#1]"
 End
+
+[#_PhoenixAPI_MSIExtract#]
+// ===============================================================================================================================
+// Name...........: MSIExtract
+// Description....: Extract files from an .msi installer.
+// Syntax.........: MSIExtract,<MSIFile>,<DestDir>
+// Parameters.....: #1 SetupFile - The .msi file to unpack.
+//                  #2 DestDir - The full path to the directory where the files will be unpacked.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:                      *** Experimental - May be changed or removed without notice ***
+// Related........: Depends on lessmsi.exe for extraction. (http://lessmsi.activescott.com/)
+// ===============================================================================================================================
+[_PhoenixAPI_MSIExtract]
+System,SetLocal
+If,#1,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the setup file."
+If,#2,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the destination directory."
+
+GetParam,1,%SetupFile%
+Getparam,2,%DestDir%
+
+StrFormat,CTrim,%DestDir%,"\","%DestDir%"
+
+ShellExecute,Hide,"%Tools%\anycpu\lessmsi\lessmsi.exe","x #$q%SetupFile%#$q #$q%DestDir%\#$q"
+If,Not,%ExitCode%,Equal,0,Begin
+  FileVersion,"%Tools%\anycpu\lessmsi\lessmsi.exe",%lessmsiVer%
+  Halt,"MSIExtract Error: Failed to unpack .msi file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using lessmsi.exe version [%lessmsiVer%]."
+End
+
+System,EndLocal
+
+[#_PhoenixAPI_WixExtract#]
+// ===============================================================================================================================
+// Name...........: WixExtract
+// Description....: Extract files from an WIX based installer.
+// Syntax.........: WixExtract,<SetupFile>,<DestDir>
+// Parameters.....: #1 SetupFile - The WIX exe file to unpack.
+//                  #2 DestDir - The full path to the directory where the files will be unpacked.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:                      *** Experimental - May be changed or removed without notice ***
+// Related........: Depends on dark.exe for extraction. (https://wixtoolset.org/)
+// ===============================================================================================================================
+[_PhoenixAPI_WixExtract]
+System,SetLocal
+If,#1,Equal,"",Halt,"WixExtract Syntax Error: You must specify the setup file."
+If,#2,Equal,"",Halt,"WixExtract Syntax Error: You must specify the destination directory."
+
+GetParam,1,%SetupFile%
+Getparam,2,%DestDir%
+
+StrFormat,CTrim,%DestDir%,"\","%DestDir%"
+
+ShellExecute,Hide,"%Tools%\anycpu\wix\dark.exe","-x #$q%DestDir%#$q #$q%SetupFile%#$q"
+If,Not,%ExitCode%,Equal,0,Begin
+  FileVersion,"%Tools%\anycpu\wix\dark.exe",%DarkVer%
+  Halt,"WixExtract Error: Failed to unpack the setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using dark.exe version [%DarkVer%]."
+End
+
+System,EndLocal
 
 [#_PhoenixAPI_ConvertImage#]
 // ===============================================================================================================================

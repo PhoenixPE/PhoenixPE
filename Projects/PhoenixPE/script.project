@@ -65,21 +65,21 @@ Interface=Interface
 %Tools%=%BaseDir%\Projects\%ProjectTitle%\Tools
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Target (Build) Globals - Do Not Modify!
+// Target (Build) Globals - Do Not Modify! - TargetPrograms & PEPrograms set by 'Config Source' script.
 %TargetDir%=%Workbench%\%ProjectTitle%\Target
 %TargetWindows%=%TargetDir%\WINDOWS
 %TargetSystem32%=%TargetDir%\WINDOWS\System32
 %TargetBootWim%=%OutputDir%\Sources\Boot.wim
-%TargetPrograms%=P:\PhoenixPE\Output\PhoenixPE\Programs
-%PEPrograms%=Y:\Programs
+%TargetPrograms%=
+%PEPrograms%=
 %TargetAppData%=%TargetDir%\Users\Default\AppData\Roaming
 %TargetLocalAppData%=%TargetDir%\Users\Default\AppData\Local
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Output Globals - Do Not Modify! - Can be overridden by 'Config Source' script.
-%OutputDir%=P:\PhoenixPE\Output\PhoenixPE
-%ISODir%=P:\PhoenixPE\Output
-%ISOFile%=P:\PhoenixPE\Output\PhoenixPE_en-US_x64.iso
+// Output Globals - Do Not Modify! - Set by 'Config Source' and 'Create ISO' scripts.
+%OutputDir%=
+%ISODir%=
+%ISOFile%=
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Registry Globals - Do Not Modify!
@@ -253,6 +253,7 @@ If,QUESTION,"Nuke PhoenixPE#$x#$xThis operation will obliterate all Target, ISO,
   DirDeleteEx,%ISODir%
   DirDeleteEx,%OutputDir%
 
+  Set,%ISOFile%,"",PERMANENT
   Echo,"Environment cleanup complete."
   If,QUESTION,"Would you like to reset Source Config to defaults? (Recommended)",Exec,"%ProjectDir%\100-ConfigSource.script","SetDefaultOptions"
 End

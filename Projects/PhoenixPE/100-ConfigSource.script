@@ -64,14 +64,15 @@ Set,%tmp_ISODir%,Nil
 Run,%ScriptFile%,GetSourceWimImage
 
 // Set RunFromWim
+If,%txt_YProgramsDirName%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,txt_YProgramsDirName,"Programs"
 If,%cb_RunFromWim%,Equal,True,Begin
   Echo,"Packing ALL programs in Boot.wim."
   Set,%TargetPrograms%,"%TargetDir%\Program Files",PERMANENT
   Set,%PEPrograms%,"X:\Program Files",PERMANENT
 End
 Else,Begin
-  Set,%TargetPrograms%,"%OutputDir%\Programs",PERMANENT
-  Set,%PEPrograms%,"Y:\Programs",PERMANENT
+  Set,%TargetPrograms%,"%OutputDir%\%txt_YProgramsDirName%",PERMANENT
+  Set,%PEPrograms%,"Y:\%txt_YProgramsDirName%",PERMANENT
 End
 
 [#ResetVars#]
@@ -125,7 +126,7 @@ StrFormat,CTrim,%fb_SrcPath%,"\",%fb_SrcPath%
 Set,%SourceDir%,%fb_SrcPath%,PERMANENT
 
 // Install.wim
-If,ExistFile,%SourceDir%\Sources\Install.wim,Begin,
+If,ExistFile,%SourceDir%\Sources\Install.wim,Begin
   Set,%SourceInstallWim%,%SourceDir%\Sources\Install.wim,PERMANENT
 End
 Else,If,ExistFile,%SourceDir%\Sources\Install.esd,Begin
@@ -381,11 +382,15 @@ Run,%ScriptFile%,ResetVars
 WriteInterface,Value,%ScriptFile%,Interface,cmb_BaseWim,"WinRE.wim"
 // SourceDir is already reset in [ResetVars] but we still need to reset the interface here.
 WriteInterface,Value,%ScriptFile%,Interface,fb_SrcPath,""
-Set,%ISODir%,"#$pBaseDir#$p\Output\#$pProjectTitle#$p\"
 WriteInterface,Value,%ScriptFile%,Interface,fb_OutputDir,"#$pBaseDir#$p\Output\#$pProjectTitle#$p\"
-Set,%OutputDir%,"#$pBaseDir#$p\Output\"
 WriteInterface,Value,%ScriptFile%,Interface,fb_IsoOutputDir,"#$pBaseDir#$p\Output\"
+WriteInterface,Value,%ScriptFile%,Interface,txt_YProgramsDirName,"Programs"
 WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromWim,False
+// We also need to zero out the globals
+Set,%OutputDir%,"",PERMANENT
+Set,%ISODir%,"",PERMANENT
+Set,%TargetPrograms%,"",PERMANENT
+Set,%PEPrograms%,"",PERMANENT
 
 [#ToggleAdvancedOptions#]
 // ===============================================================================================================================
@@ -422,6 +427,7 @@ WriteInterface,Visible,%ScriptFile%,Interface,fb_OutputDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_OutputDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,fb_IsoOutputDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_IsoOutputDir,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,txt_YProgramsDirName,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cb_RunFromWim,%Toggle%
 
 System,EndLocal
@@ -475,12 +481,13 @@ lbl_SrcInstallImage="'install.wim' Image:",1,1,29,244,94,18,8,Normal
 cmb_SrcInstallImage="[Please select a valid source]",1,4,130,237,474,21,"[Please select a valid source]",_GetSourceWimImage_,True
 lbl_ImageInfo="Image Info:",1,1,64,274,60,16,8,Normal
 lbl_ImgInfo=,1,1,131,274,474,16,8,Bold
-bvl_DestCfg="Configure Destination",0,12,5,313,625,112,8,Bold
-cb_RunFromWim="Run all programs from RAM (Boot.wim)",0,3,16,332,215,18,False,"__Select this option to pack all programs into Boot.wim regardless of individual script settings.#$x#$xRequired for PXE/Network boot."
-lbl_OutputDir="Output Dir:",0,1,17,369,70,16,8,Bold
-fb_OutputDir=%BaseDir%\Output\%ProjectTitle%\,0,13,94,363,525,20,dir,"Title=Select the directory where the final build will be saved","__The directory where the final build will be saved. (eg. BOOT.WIM, Programs, etc.)"
-lbl_IsoOutputDir="ISO Dir:",0,1,17,400,70,16,8,Bold
-fb_IsoOutputDir=%BaseDir%\Output\,0,13,94,394,526,20,dir,"Title=Select the directory where the final ISO file will be saved","__The directory where the final ISO file will be saved."
+bvl_DestCfg="Configure Destination",0,12,5,313,625,140,8,Bold
+lbl_OutputDir="Output Dir:",0,1,17,339,70,16,8,Bold
+fb_OutputDir=%BaseDir%\Output\%ProjectTitle%\,0,13,94,333,525,20,dir,"Title=Select the directory where the final build will be saved","__The directory where the final build will be saved. (eg. BOOT.WIM, Programs, etc.)"
+lbl_IsoOutputDir="ISO Dir:",0,1,17,370,70,16,8,Bold
+fb_IsoOutputDir=%BaseDir%\Output\,0,13,94,364,526,20,dir,"Title=Select the directory where the final ISO file will be saved","__The directory where the final ISO file will be saved."
+txt_YProgramsDirName="Ext. Programs folder:",0,0,94,417,200,21,Programs,"__The name of the 'Programs' folder on the final media (CD/DVD/USB).#$x#$xChanges will take effect on the next build."
+cb_RunFromWim="Run all programs from RAM (Boot.wim)",0,3,341,417,215,18,False,"__Select this option to pack all programs into Boot.wim regardless of individual script settings.#$x#$xRequired for PXE/Network boot."
 
 [InterfaceEncoded]
 Advanced_Exit_16.png=705,1048
