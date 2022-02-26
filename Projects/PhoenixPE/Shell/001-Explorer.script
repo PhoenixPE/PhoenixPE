@@ -35,12 +35,15 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.2.2.0
-Date=2021-01-23
+Version=1.3.0.0
+Date=2022-02-02
 
 [Variables]
 
 [Process]
+Echo,"Processing Explorer Shell..."
+
+Set,%Shell%,"Explorer",PERMANENT
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Explorer Files
@@ -61,7 +64,6 @@ ExtractAllFiles,%ScriptFile%,Reg,%ProjectTemp%
 Run,%ScriptFile%,Reg-Explorer
 Run,%ScriptFile%,Reg-Themes
 Run,%ScriptFile%,Reg-BitLocker
-Run,%ScriptFile%,Reg-MMC
 Run,%ScriptFile%,Reg-Search
 Run,%ScriptFile%,Reg-Options
 
@@ -310,26 +312,6 @@ If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
   RegWrite,HKLM,0x2,Tmp_Software\Classes\Drive\shell\unlock-bde\command,,"#$pSystemRoot#$p\System32\bdeunlock.exe #$p1"
 End
 
-[#Reg-MMC#]
-// ===============================================================================================================================
-// Name...........: Reg-MMC
-// Description....: Configure Registry settings related to Microsoft Management Console 
-// Syntax.........: 
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: Called from [Process]
-// ===============================================================================================================================
-[Reg-MMC]
-Echo,"Registering Microsoft Management Console..."
-If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Applications\MMC.exe","NoOpenWith,"
-  RegWrite,HKLM,0x1,"Tmp_software\Classes\.msc","","MSCFile"
-  RegCopy,HKLM,"Tmp_Install_Software\Classes\mscfile",HKLM,"Tmp_Software\Classes\mscfile"
-  RegCopy,HKLM,"Tmp_Install_Software\Microsoft\MMC",HKLM,"Tmp_Software\Microsoft\MMC"
-End
-
 [#Reg-Search#]
 // ===============================================================================================================================
 // Name...........: Reg-Search
@@ -524,9 +506,6 @@ RequireFileEx,AppendList,\Windows\System32\drivers\WindowsTrustedRT.sys,NOMUI
 RequireFileEx,AppendList,\Windows\System32\iernonce.dll
 RequireFileEx,AppendList,\Windows\System32\ole32.dll
 
-// Network Schemas
-RequireFileEx,AppendList,\Windows\L2Schemas
-
 ///////////////////////////////////////////////////////////////////////////////////
 // Explorer
 
@@ -541,19 +520,14 @@ RequireFileEx,AppendList,\Windows\System32\Clipc.dll
 RequireFileEx,AppendList,\Windows\System32\avifil32.dll
 If,%SourceVer%,BiggerEqual,10.0.17134.0,RequireFileEx,AppendList,\Windows\System32\coloradapterclient.dll
 RequireFileEx,AppendList,\Windows\System32\comctl32.dll
-RequireFileEx,AppendList,\Windows\System32\compmgmt.msc
-RequireFileEx,AppendList,\Windows\System32\CompMgmtLauncher.exe
 RequireFileEx,AppendList,\Windows\System32\comsvcs.dll,NOMUI
 RequireFileEx,AppendList,\Windows\System32\control.exe,NOMUI
 RequireFileEx,AppendList,\Windows\System32\CoreMessaging.dll
-RequireFileEx,AppendList,\Windows\System32\CoreUIComponents.dll,NOMUI
+RequireFileEx,AppendList,\Windows\System32\CoreUIComponents.dll
 RequireFileEx,AppendList,\windows\system32\credssp.dll
 RequireFileEx,AppendList,\Windows\System32\cscapi.dll
 RequireFileEx,AppendList,\Windows\System32\ctfmon.exe
 RequireFileEx,AppendList,\Windows\System32\desk.cpl
-RequireFileEx,AppendList,\Windows\System32\devmgmt.msc
-RequireFileEx,AppendList,\Windows\System32\devmgr.dll
-RequireFileEx,AppendList,\Windows\System32\dwmghost.dll
 RequireFileEx,AppendList,\Windows\System32\edputil.dll
 RequireFileEx,AppendList,\Windows\System32\dlnashext.dll
 If,%SourceVer%,BiggerEqual,10.0.20150.0,RequireFileEx,AppendList,\Windows\System32\dmenrollengine.dll
@@ -597,7 +571,6 @@ RequireFileEx,AppendList,\Windows\System32\ProximityServicePal.dll,NOMUI
 RequireFileEx,AppendList,\Windows\System32\rmclient.dll,NOMUI
 RequireFileEx,AppendList,\Windows\System32\rshx32.dll
 RequireFileEx,AppendList,\Windows\System32\sendmail.dll
-RequireFileEx,AppendList,\Windows\System32\services.msc
 RequireFileEx,AppendList,\Windows\System32\SettingSyncCore.dll
 RequireFileEx,AppendList,\Windows\System32\SharedStartModel.dll,NOMUI
 If,%SourceVer%,BiggerEqual,10.0.19041.0,RequireFileEx,AppendList,\Windows\System32\SHCore.dll
@@ -709,6 +682,7 @@ RequireFileEx,AppendList,\Windows\System32\winusb.dll
 // Theme and dwm
 RequireFileEx,AppendList,\Windows\System32\dwm.exe
 RequireFileEx,AppendList,\Windows\System32\dwmcore.dll
+RequireFileEx,AppendList,\Windows\System32\dwmghost.dll
 RequireFileEx,AppendList,\Windows\System32\dwminit.dll
 RequireFileEx,AppendList,\Windows\System32\dwmredir.dll
 RequireFileEx,AppendList,\Windows\System32\hotplug.dll
@@ -723,27 +697,6 @@ If,%SourceVer%,BiggerEqual,10.0.22000.282,RequireFileEx,AppendList,\Windows\Syst
 RequireFileEx,AppendList,\Windows\System32\wdi.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.Gaming.Input.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.UI.Immersive.dll
-
-///////////////////////////////////////////////////////////////////////////////////
-// Microsoft Management Control & Disk Management
-RequireFileEx,AppendList,\windows\system32\diskmgmt.msc
-RequireFileEx,AppendList,\Windows\System32\dmdlgs.dll,NOMUI
-RequireFileEx,AppendList,\Windows\System32\dmdskmgr.dll,NOMUI
-RequireFileEx,AppendList,\Windows\System32\dmdskres.dll
-RequireFileEx,AppendList,\Windows\System32\dmdskres2.dll
-RequireFileEx,AppendList,\Windows\System32\dmintf.dll,NOMUI
-RequireFileEx,AppendList,\Windows\System32\dmocx.dll
-RequireFileEx,AppendList,\Windows\System32\dmutil.dll
-RequireFileEx,AppendList,\Windows\System32\dmvdsitf.dll,NOMUI
-RequireFileEx,AppendList,\Windows\System32\dmview.ocx,NOMUI
-RequireFileEx,AppendList,\Windows\System32\hhsetup.dll,NOMUI
-RequireFileEx,AppendList,\Windows\System32\filemgmt.dll
-RequireFileEx,AppendList,\Windows\System32\mmc.exe
-RequireFileEx,AppendList,\Windows\System32\mmcbase.dll
-RequireFileEx,AppendList,\Windows\System32\mmcndmgr.dll
-RequireFileEx,AppendList,\Windows\System32\mmcshext.dll
-RequireFileEx,AppendList,\windows\system32\wbem\servdeps.dll
-RequireFileEx,AppendList,\windows\system32\OnDemandConnRouteHelper.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Additional Command Line Programs
@@ -791,7 +744,6 @@ RequireFileEx,AppendList,\Windows\System32\Windows.Storage.Search.dll
 RequireFileEx,AppendList,\Windows\System32\wsepno.dll
 RequireFileEx,AppendList,\Windows\System32\prm*.dll
 RequireFileEx,AppendList,\Windows\System32\MLS*.dll
-
 
 // Cursor required for touch screens
 RequireFileEx,AppendList,\Windows\cursors\aero_arrow.cur

@@ -36,8 +36,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.5.1.0
-Date=2021-03-28
+Version=1.6.1.0
+Date=2022-02-06
 
 [Variables]
 %ProgramFolder%="PENetwork"
@@ -435,7 +435,7 @@ RequireFileEx,AppendList,\Windows\System32\cngprovider.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Wlan
-// additional: wlangpui.dll, wlandlg.dll, WLanConn.dll, wlanpref.dll, wlanutil.dll, provcore.dll
+// additional: wlangpui.dll, provcore.dll
 RequireFileEx,AppendList,\Windows\System32\mobilenetworking.dll
 RequireFileEx,AppendList,\Windows\System32\wlanapi.dll
 RequireFileEx,AppendList,\Windows\System32\wlancfg.dll
@@ -639,14 +639,15 @@ RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TapiSrv",HKLM,"Tmp_Syste
 // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\tdx, HKLM\Tmp_System\ControlSet001\Services\vwifibus
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\tdx",HKLM,"Tmp_System\ControlSet001\Services\tdx"
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwifibus",HKLM,"Tmp_System\ControlSet001\Services\vwifibus"
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Network\{4d36e974-e325-11ce-bfc1-08002be10318}\{5CBF81BF-5055-47CD-9055-A76B2B4E3698}",HKLM,"Tmp_System\ControlSet001\Control\Network\{4d36e974-e325-11ce-bfc1-08002be10318}\{5CBF81BF-5055-47CD-9055-A76B2B4E3698}"
 //RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\vwifibus","Owners","netvwifibus.inf"
 // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\vwififlt
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwififlt",HKLM,"Tmp_System\ControlSet001\Services\vwififlt"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\Wcmsvc",HKLM,"Tmp_System\ControlSet001\Services\Wcmsvc"
 // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\wcncsvc, HKLM\Tmp_System\ControlSet001\Services\wdiwifi
-// Included in Winre.wim (Partial): HKLM\Tmp_System\ControlSet001\Services\WinSock, HKLM\Tmp_System\ControlSet001\Services\WinSock2
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wcncsvc",HKLM,"Tmp_System\ControlSet001\Services\wcncsvc"
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wdiwifi",HKLM,"Tmp_System\ControlSet001\Services\wdiwifi"
+// Included in Winre.wim (Partial): HKLM\Tmp_System\ControlSet001\Services\WinSock, HKLM\Tmp_System\ControlSet001\Services\WinSock2
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock",HKLM,"Tmp_System\ControlSet001\Services\WinSock"
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock2",HKLM,"Tmp_System\ControlSet001\Services\WinSock2"
 
@@ -654,6 +655,11 @@ RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\dnscache"
 RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\nlasvc"
 RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\wcmsvc"
 RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3","Settings",30,00,00,00,fe,ff,ff,ff,02,00,00,00,03,00,00,00,3e,00,00,00,28,00,00,00,00,00,00,00,f2,03,00,00,90,06,00,00,1a,04,00,00,60,00,00,00,01,00,00,00
+
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\WMI\Autologger\WiFiSession",HKLM,"Tmp_System\ControlSet001\Control\WMI\Autologger\WiFiSession"
+
+// iSCSI
+If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\MSiSCSI",HKLM,"Tmp_System\ControlSet001\Services\MSiSCSI"
 
 [#PENetwork-AutoConnectWifi#]
 // ===============================================================================================================================

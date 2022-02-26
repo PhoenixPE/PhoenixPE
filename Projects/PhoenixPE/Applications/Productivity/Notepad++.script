@@ -30,19 +30,19 @@
 
 [Main]
 Title=Notepad++
-Description=(v8.2.0.0) Notepad++ is a free and open source code editor and Notepad replacement that supports multiple languages.
+Description=(v8.3.1.0) Notepad++ is a free and open source code editor and Notepad replacement that supports multiple languages.
 Author=Homes32
 Level=5
 Selected=True
 Mandatory=False
-Version=1.3.5.0
-Date=2021-12-18
+Version=1.3.7.0
+Date=2022-02-23
 
 [Variables]
 %ProgramFolder%="Notepad++"
 %ProgramExe%="notepad++.exe"
 %ShellExtDll%="NppShell_06.dll"
-%ProgramVersion%=8.2
+%ProgramVersion%=8.3.1
 %DownloadURLx32%=https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v%ProgramVersion%/npp.%ProgramVersion%.portable.7z
 %DownloadURLx64%=https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v%ProgramVersion%/npp.%ProgramVersion%.portable.x64.7z
 %aToolbarIconMap%=Fluent UI: small|small|Fluent UI: large|large|Filled Fluent UI: small|small2|Filled Fluent UI: large|large2|Standard icons: small|standard
@@ -92,7 +92,7 @@ Loop,%ScriptFile%,RegisterFileExtensions_Loop,1,%ExtCount%
 
 Echo,"Configuring %ScriptTitle%..."
 
-// doLocalConf is ignored if running from Program Files
+// doLocalConf is ignored if running from Program Files because
 // the notepad++ authors decided that they know better then us when the ProgramDir is writable,
 // so unless we want to patch the .exe we can only use doLocalConf if notepadd++ is running from cd/usb.
 // otherwise we will need to copy config.xml to %AppData% if using Run From Ram.
@@ -107,7 +107,7 @@ Else,Begin
 End
 
 // Don't check for updates
-XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='noUpdate']","no"
+XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='noUpdate']","yes"
 
 // Menu Bar
 If,%cb_ShowMenuBar%,Equal,True,XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='MenuBar']","show"

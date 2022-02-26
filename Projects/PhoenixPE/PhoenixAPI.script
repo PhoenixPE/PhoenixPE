@@ -73,6 +73,7 @@ RequireFileEx=Run,%API%,_PhoenixAPI_RequireFileEx
 // Utility
 ConvertImage=Run,%API%,_PhoenixAPI_ConvertImage
 DISM=Run,%API%,_PhoenixAPI_DISM
+AddPostProcess=Run,%API%,_PhoenixAPI_AddPostProcess
 
 // Compression/Decompression
 7z=Run,%API%,_PhoenixAPI_7z
@@ -81,6 +82,15 @@ InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
 Innounp=Run,%API%,_PhoenixAPI_Innounp
 MSIExtract=Run,%API%,_PhoenixAPI_MSIExtract
 WixExtract=Run,%API%,_PhoenixAPI_WixExtract
+
+// JSON
+JSONCompact=Run,%API%,_PhoenixAPI_JSONCompact
+JSONDelete=Run,%API%,_PhoenixAPI_JSONDelete
+JSONPretty=Run,%API%,_PhoenixAPI_JSONPretty
+JSONRead=Run,%API%,_PhoenixAPI_JSONRead
+//JSON2INI=
+//INI2JSON=
+JSONWrite=Run,%API%,_PhoenixAPI_JSONWrite
 
 // XML
 XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
@@ -329,6 +339,34 @@ If,%HostOSVer%,Bigger,10.0.0.0,ShellExecute,Hide,"dism.exe",%Args%,%WorkDir%
 Else,ShellExecute,Hide,"%Tools%\%HostArch%\DISM\dism.exe",%Args%,%WorkDir%
 
 Set,#r,%ExitCode%
+
+System,EndLocal
+
+[#_PhoenixAPI_AddPostProcess#]
+// ===============================================================================================================================
+// Name...........: AddPostProcess
+// Description....: Define a section to process during Build Post-Process
+// Syntax.........: AddPostProcess,<Script>,<Section>
+// Parameters.....: #1 Script - The full path to the script containing the section to process.
+//                  #2 Section - The name of the section to process.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: This command adds EXEC entries to %ProjectTemp%\PostProcessCommands.script
+//                  The %ProjectTemp%\PostProcessCommands.script is run at the end of a build process, right be fore the .wim file captured.
+//                  
+//                  It can be useful to run commands at the end of the build that may depend on the result of scripts that have not run yet.
+//                  
+// Related........: 
+// ===============================================================================================================================
+[_PhoenixAPI_AddPostProcess]
+System,SetLocal
+If,#1,Equal,"",Halt,"AddPostProcess Error: You must specify the script parameter."
+If,#2,Equal,"",Halt,"AddPostProcess Error: You must specify the section to execute."
+
+GetParam,1,%Script%
+Getparam,2,%Section%
+
+IniWriteTextLine,"%ProjectTemp%\PostProcessCommands.script","Process","Exec,%Script%,%Section%",APPEND
 
 System,EndLocal
 
@@ -912,7 +950,8 @@ TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","START #$q%Title%#$q %ExecMode
 // Syntax.........: AddShortcut,<Type>,<StartMenuFolder>,<Title>,<PathProgramExe>,[Parameters],[WorkDir],[IconPath],[IconIndex],[State],[Hotkey],[Tooltip]
 // Parameters.....: #1 Type
 //                       Desktop - The shortcut will be created on the desktop.
-//                       StartMenu - The shortcut will be created in the start menu.                  
+//                       StartMenu - The shortcut will be created in the start menu.
+//                       QuickLaunch - The shortcut will be created in the QuickLaunch folder. (used by WinXShell)                  
 //                  #2 StartMenuFolder - The name of the start menu folder where the shortcut will be created.
 //                  #3 Title - The name of the shortcut. 
 //                  #4 ProgramExe - The full path to the program to be executed.
@@ -961,6 +1000,7 @@ If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
   // Type
   If,%Type%,Equal,"Desktop",Set,%Cmd%,"LINK #$pDesktop#$p\%Title%#$c%ProgramExe%#$c%Parameters%"
   Else,If,%Type%,Equal,"StartMenu",Set,%Cmd%,"LINK #$pPrograms#$p%Folder%\%Title%#$c%ProgramExe%#$c%Parameters%"
+  Else,If,%Type%,Equal,"QuickLaunch",Set,%Cmd%,"LINK #$pQuickLaunch#$p\%Title%#$c%ProgramExe%#$c%Parameters%"
   Else,Halt,"AddShortcut Syntax Error: Shortcut type [%Type%] is not supported."
 
   // Window State
@@ -1030,9 +1070,19 @@ System,EndLocal
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: This macro relies on PinUtil.exe to perform the actual pinning at boot.
+//
+//                  Explorer Shell:
 //                  Normally Pins cannot target an executable located on removable media. To get around this restriction
 //                  we trick Windows by creating a symlink on the ramdrive (B:\) to the Y:\Programs folder. 
 //                  PECMD takes care of the symlink creation on boot, so here we only need to point Pintool to B:\ instead of Y:\
+//
+//                  I don't like referencing individual scripts inside PhoenixAPI but this is a fairly important feature, and the alternatives are:
+//                    - Do nothing: listen to users complain that Pin's don't work after they have changed the ramdrive letter.
+//                    - Hardcode the ram drive letter: listen to users complain that they can't change the ram drive letter.
+//
+//                 WinXShell:
+//                 WinXShell's taskbar does not have "Pin" verbs in it's context menu, instead it behaves like WinXP and uses QuickLaunch shortcuts.
+//
 // Related........: Depends on %ProjectDir%\Components\330-ImDisk.script for Ramdisk drive letter
 // ===============================================================================================================================
 [_PhoenixAPI_PinShortcut]
@@ -1047,32 +1097,39 @@ GetParam,3,%ProgramExe%
 
 If,Not,%PinLocation%,Equal,"StartMenu",If,Not,%PinLocation%,Equal,"Taskbar",Halt,"PinShortcut Syntax Error: [%PinLocation%] is not a valid pin location."
 
-If,%PinPos%,Equal,"Auto",Begin
-  // Find an unused pin position
-  Loop,%Api%,__PhoenixAPI_PinShortcut_FindOpenPos_Loop,0,99,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%
-  Set,%PinPos%,#r  
-End
-Else,If,%PinPos%,Smaller,0,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
-Else,If,%PinPos%,Bigger,99,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
-
-If,%PinPos%,Equal,-1,Begin
-  Echo,"PinShortcut Warning: Could not find an open [%PinLocation%] position for [%ProgramExe%].",Warn
-  // Return without doing anything.
+If,"%Shell%-%PinLocation%",Equal,"WinXShell-Taskbar",Begin
+  // WinXShell Taskbar
+  StrFormat,FileName,%ProgramExe%,%ProgramTitle%
+  AddShortcut,"QuickLaunch",,%ProgramTitle%,%ProgramExe%
 End
 Else,Begin
-  // Check if user specified position will be overwritten
-  IniReadSection,"%TargetSystem32%\pecmd.ini","PinUtil",%IniSection%
-  List,Pos,%IniSection%,%PinLocation%%PinPos%,%Index%
-  If,Not,%Index%,Equal,0,Begin
-    IniRead,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ExistingExe%
-    Echo,"PinShortcut Warning: Existing pin for [%ExistingExe%] in [%PinLocation%] position [%PinPos%] will be overwritten by [%ProgramExe%].",Warn
+  If,%PinPos%,Equal,"Auto",Begin
+    // Find an unused pin position
+    Loop,%Api%,__PhoenixAPI_PinShortcut_FindOpenPos_Loop,0,99,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%
+    Set,%PinPos%,#r  
   End
+  Else,If,%PinPos%,Smaller,0,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
+  Else,If,%PinPos%,Bigger,99,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
 
-  // Work around pin restrictions on removable media
-  ReadInterface,Value,"%ProjectDir%\Components\330-ImDisk.script",Interface,cmb_DriveLetter,%RamDisk%
-  StrFormat,Replace,%ProgramExe%,"Y:\","%RamDisk%\",%ProgramExe%
+  If,%PinPos%,Equal,-1,Begin
+    Echo,"PinShortcut Warning: Could not find an open [%PinLocation%] position for [%ProgramExe%].",Warn
+    // Return without doing anything.
+  End
+  Else,Begin
+    // Check if user specified position will be overwritten
+    IniReadSection,"%TargetSystem32%\pecmd.ini","PinUtil",%IniSection%
+    List,Pos,%IniSection%,%PinLocation%%PinPos%,%Index%
+    If,Not,%Index%,Equal,0,Begin
+      IniRead,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ExistingExe%
+      Echo,"PinShortcut Warning: Existing pin for [%ExistingExe%] in [%PinLocation%] position [%PinPos%] will be overwritten by [%ProgramExe%].",Warn
+    End
+
+    // Work around pin restrictions on removable media.
+    ReadInterface,Value,"%ProjectDir%\Components\330-ImDisk.script",Interface,cmb_DriveLetter,%RamDisk%
+    StrFormat,Replace,%ProgramExe%,"Y:\","%RamDisk%\",%ProgramExe%
   
-  IniWrite,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
+    IniWrite,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
+  End
 End
 System,EndLocal
 
@@ -1373,6 +1430,144 @@ StrFormat,LTRIM,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
 Set,#r,%BitArray%
+
+System,EndLocal
+
+[#_PhoenixAPI_JSONCompact#]
+// ===============================================================================================================================
+// Name...........: JSONCompact
+// Description....: Experimental wrapper for jj - Compress the JSON into the fewest characters possible by squashing newlines and spaces.
+// Syntax.........: JSONCompact,<JSONFile>
+// Parameters.....: #1 JSONFile - Full path to the JSON filed to compact.
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: https://github.com/tidwall/jj
+// Related........: Depends on %Tools%\%HostArch%\jj.exe
+// ===============================================================================================================================
+[_PhoenixAPI_JSONCompact]
+System,SetLocal
+GetParam,1,%JSONFile%
+
+If,Not,ExistFile,%JSONFile%,Halt,"JSONCompact Syntax Error: The file [%JSONFile%] does not exist."
+
+ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-u -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q"
+If,Not,#r,Equal,0,Halt,"JSONCompact ERROR: Failed to compact [%JSONFile%]."
+
+System,EndLocal
+
+[#_PhoenixAPI_JSONDelete#]
+// ===============================================================================================================================
+// Name...........: JSONDelete
+// Description....: Experimental wrapper for jj - Delete an JSON value.
+// Syntax.........: JSONDelete,<JSONFile>,<Path>
+// Parameters.....: #1 JSONFile - Full path to the JSON filed to edit.
+//                  #2 Path - GJSON Path notation used to locate the value to delete.
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj
+//                  Path Syntax Help: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
+// Related........: Depends on %Tools%\%HostArch%\jj.exe
+// ===============================================================================================================================
+[_PhoenixAPI_JSONDelete]
+System,SetLocal
+GetParam,1,%JSONFile%
+GetParam,2,%Path%
+
+If,Not,ExistFile,%JSONFile%,Halt,"JSONDelete Syntax Error: The file [%JSONFile%] does not exist."
+If,%Path%,Equal,"",Halt,"JSONDelete Syntax Error: You must specify an JSON Path."
+
+ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-D -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q #$q%Path%#$q"
+If,Not,#r,Equal,0,Halt,"JSONDelete ERROR: Failed to delete [%Path%] from [%JSONFile%]."
+
+System,EndLocal
+
+[#_PhoenixAPI_JSONPretty#]
+// ===============================================================================================================================
+// Name...........: JSONPretty
+// Description....: Experimental wrapper for jj - Compress the JSON into the fewest characters possible by squashing newlines and spaces.
+// Syntax.........: JSONPretty,<JSONFile>
+// Parameters.....: #1 JSONFile - Full path to the JSON filed to compact.
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: https://github.com/tidwall/jj
+// Related........: Depends on %Tools%\%HostArch%\jj.exe
+// ===============================================================================================================================
+[_PhoenixAPI_JSONPretty]
+System,SetLocal
+GetParam,1,%JSONFile%
+
+If,Not,ExistFile,%JSONFile%,Halt,"JSONPretty Syntax Error: The file [%JSONFile%] does not exist."
+
+ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-p -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q"
+If,Not,#r,Equal,0,Halt,"JSONPretty ERROR: Failed to pretty [%JSONFile%]."
+
+System,EndLocal
+
+[#_PhoenixAPI_JSONRead#]
+// ===============================================================================================================================
+// Name...........: JSONRead
+// Description....: Experimental wrapper for jj - Read an JSON value.
+// Syntax.........: JSONRead,<JSONFile>,<Path>
+// Parameters.....: #1 JSONFile - Full path to the JSON filed to read.
+//                  #2 Path - GJSON Path notation used to locate the value to read.
+// Return values..: #r - Returns the value of <Path>
+// Author.........: Homes32
+// Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj
+//                  Path Syntax Help: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
+// Related........: Depends on %Tools%\%HostArch%\jj.exe
+// ===============================================================================================================================
+[_PhoenixAPI_JSONRead]
+System,SetLocal
+GetParam,1,%JSONFile%
+GetParam,2,%Path%
+
+If,Not,ExistFile,%JSONFile%,Halt,"JSONRead Syntax Error: The file [%JSONFile%] does not exist."
+If,%Path%,Equal,"",Halt,"JSONRead Syntax Error: You must specify an JSON Path."
+
+FileDeleteEx,"%ProjectTemp%\PhoenixAPI-JSONRead.txt"
+FileDeleteEx,"%ProjectTemp%\PhoenixAPI-JSONRead.ini"
+
+ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-i #$q%JSONFile%#$q -o #$q%ProjectTemp%\PhoenixAPI-JSONRead.txt#$q #$q%Path%#$q"
+If,Not,#r,Equal,0,Halt,"JSONRead ERROR: Failed to read [%JSONFile%]."
+
+ShellExecute,Hide,"cmd.exe","/c for /f #$qtokens=*#$q %a in (PhoenixAPI-JSONRead.txt) do (echo Value=%a) > #$q%ProjectTemp%\PhoenixAPI-JSONRead.ini#$q",%ProjectTemp%
+If,ExistFile,"%ProjectTemp%\PhoenixAPI-JSONRead.ini",Begin
+  // Value was found in JSON file
+  TXTAddLine,"%ProjectTemp%\PhoenixAPI-JSONRead.ini","[Read]",PREPEND
+  IniRead,"%ProjectTemp%\PhoenixAPI-JSONRead.ini","Read","Value",#r
+End
+Else,Begin
+  // Value was not found in JSON file
+  Set,#r,""
+End
+
+System,EndLocal
+
+[#_PhoenixAPI_JSONWrite#]
+// ===============================================================================================================================
+// Name...........: JSONWrite
+// Description....: Experimental wrapper for jj - Delete an JSON value.
+// Syntax.........: JSONWrite,<JSONFile>,<Path>,<Value>
+// Parameters.....: #1 JSONFile - Full path to the JSON filed to edit.
+//                  #2 Path - GJSON Path notation used to locate the value to delete.
+// Return values..: #r - Returns 
+// Author.........: Homes32
+// Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj
+//                  Path Syntax Help: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
+// Related........: Depends on %Tools%\%HostArch%\jj.exe
+// ===============================================================================================================================
+[_PhoenixAPI_JSONWrite]
+System,SetLocal
+GetParam,1,%JSONFile%
+GetParam,2,%Path%
+GetParam,3,%Value%
+
+If,Not,ExistFile,%JSONFile%,Halt,"JSONWrite Syntax Error: The file [%JSONFile%] does not exist."
+If,%Path%,Equal,"",Halt,"JSONWrite Syntax Error: You must specify an JSON Path."
+If,%Value%,Equal,"",Halt,"JSONWrite Syntax Error: You must specify an value to write."
+
+ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-v #$q%Value%#$q -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q #$q%Path%#$q"
+If,Not,#r,Equal,0,Halt,"JSONWrite ERROR: Failed to write the value of [%Value%] to [%Path%] in [%JSONFile%]."
 
 System,EndLocal
 

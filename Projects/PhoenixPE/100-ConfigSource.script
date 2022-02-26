@@ -233,7 +233,10 @@ System,Cursor,Normal
 [GetImgInfo_Loop]
 StrFormat,FileName,#1,%WimFile%
 Echo,"Getting image info from %WimFile% [#c]..."
-WimInfo,#1,#c,DISPLAYNAME,%imgName%
+WimInfo,#1,#c,NAME,%imgName%
+// Keep from halting our build if there is no DISPLAYNAME property in the XML (eg. Boot.wim).
+Set,%imgDisplayName%,""
+WimInfo,#1,#c,DISPLAYNAME,%imgDisplayName%,NOERR
 WimInfo,#1,#c,WINDOWS/VERSION/MAJOR,%imgVerMaj%
 WimInfo,#1,#c,WINDOWS/VERSION/MINOR,%imgVerMin%
 WimInfo,#1,#c,WINDOWS/VERSION/BUILD,%imgVerBld%
@@ -253,8 +256,15 @@ StrFormat,CTrim,%imgFallbackLang%,|,%imgFallbackLang%
 If,%imgArch%,Equal,0,Set,%imgArch%,"x86"
 Else,Set,%imgArch%,"x64"
 
-List,Append,%imgIndexList%,"#c - %imgName%"
-List,Append,%imgNameList%,"%imgName%"
+
+If,%imgDisplayName%,Equal,"",Begin
+  List,Append,%imgIndexList%,"#c - %imgName%"
+  List,Append,%imgNameList%,"%imgName%"
+End
+Else,Begin
+  List,Append,%imgIndexList%,"#c - %imgDisplayName%"
+  List,Append,%imgNameList%,"%imgDisplayName%"
+End
 
 [#GetSourceWimImage#]
 // ===============================================================================================================================

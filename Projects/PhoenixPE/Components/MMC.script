@@ -30,17 +30,83 @@
 
 [Main]
 Title=MMC Snap-Ins
-Description=Add shortcuts for various Microsoft Management Console (MMC) Snap-Ins
-Selected=False
+Description=Add support for Microsoft Management Console (MMC) Snap-Ins
+Selected=True
 Level=4
 Author=Homes32
-Version=1.1.0.0
-Date=2020-04-05
+Version=1.2.0.0
+Date=2022-01-29
 Mandatory=False
 
 [Variables]
 
 [Process]
+
+///////////////////////////////////////////////////////////////////////////////////
+// Collect Files
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+// Microsoft Management Control (MMC)
+RequireFileEx,AppendList,\windows\system32\apphelp.dll
+RequireFileEx,AppendList,\Windows\System32\filemgmt.dll
+RequireFileEx,AppendList,\Windows\System32\mycomput.dll
+RequireFileEx,AppendList,\windows\system32\mmc.exe
+RequireFileEx,AppendList,\windows\system32\mmcbase.dll
+RequireFileEx,AppendList,\windows\system32\mmcndmgr.dll
+RequireFileEx,AppendList,\windows\system32\mmcshext.dll
+RequireFileEx,AppendList,\Windows\System32\OnDemandConnRouteHelper.dll
+RequireFileEx,AppendList,\windows\system32\wbem\servdeps.dll
+
+// Computer Management
+RequireFileEx,AppendList,\Windows\System32\compmgmt.msc
+RequireFileEx,AppendList,\Windows\System32\CompMgmtLauncher.exe
+
+// Disk Management
+RequireFileEx,AppendList,\windows\system32\diskmgmt.msc
+RequireFileEx,AppendList,\windows\system32\dmdlgs.dll
+RequireFileEx,AppendList,\windows\system32\dmdskmgr.dll
+RequireFileEx,AppendList,\windows\system32\dmdskres.dll
+RequireFileEx,AppendList,\windows\system32\dmdskres2.dll
+RequireFileEx,AppendList,\windows\system32\dmintf.dll
+RequireFileEx,AppendList,\windows\system32\dmocx.dll
+RequireFileEx,AppendList,\windows\system32\dmutil.dll
+RequireFileEx,AppendList,\windows\system32\dmvdsitf.dll
+RequireFileEx,AppendList,\windows\system32\dmview.ocx
+RequireFileEx,AppendList,\windows\system32\hhsetup.dll
+
+// Device Manager
+RequireFileEx,AppendList,\Windows\System32\devmgmt.msc
+RequireFileEx,AppendList,\Windows\System32\devmgr.dll
+
+// File & Sharing Manager
+RequireFileEx,AppendList,\Windows\System32\filemgmt.dll
+RequireFileEx,AppendList,\Windows\System32\fsmgmt.msc
+
+// Service Manager
+RequireFileEx,AppendList,\Windows\System32\services.msc
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Config
+Echo,"Preparing Registry Hives..."
+RegLoadHives
+
+Echo,"Registering Microsoft Management Console..."
+If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Applications\MMC.exe","NoOpenWith,"
+  RegWrite,HKLM,0x1,"Tmp_software\Classes\.msc","","MSCFile"
+  RegCopy,HKLM,"Tmp_Install_Software\Classes\mscfile",HKLM,"Tmp_Software\Classes\mscfile"
+  RegCopy,HKLM,"Tmp_Install_Software\Microsoft\MMC",HKLM,"Tmp_Software\Microsoft\MMC"
+End
+
+RegUnloadHives
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
 
 If,%cb_compmgmt_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_compmgmt_ShortcutName%,"#$pWinDir#$p\System32\compmgmt.msc"
 If,%cb_compmgmt_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_compmgmt_StartMenuFolder%,%txt_compmgmt_ShortcutName%,"#$pWinDir#$p\System32\compmgmt.msc"
@@ -203,4 +269,3 @@ lines=2
 [AuthorEncoded]
 MMC_80.png=7737,10412
 Logo=MMC_80.png
-

@@ -30,23 +30,22 @@
 
 [Main]
 Title=Notepad3
-Description=(v5.21.905.1) Notepad3 is a fast and light-weight Scintilla-based text editor with syntax highlighting. It has a small memory footprint, but is powerful enough to handle most programming jobs. 
+Description=(v5.21.1129.1) Notepad3 is a fast and light-weight Scintilla-based text editor with syntax highlighting. It has a small memory footprint, but is powerful enough to handle most programming jobs. 
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.3.0
-Date=2021-10-17
+Version=1.1.0.0
+Date=2022-02-22
 
 [Variables]
 %ProgramFolder%="Notepad3"
 %ProgramExe%="Notepad3.exe"
-%ProgramVersion%=5.21.905.1
-%DownloadURL%=https://github.com/rizonesoft/Notepad3/releases/download/RELEASE_%ProgramVersion%/Notepad3_%ProgramVersion%.zip
-%SetupFile%="Notepad3.zip"
+%ProgramVersion%=5.21.1129.1
+%DownloadURLx32%=https://github.com/rizonesoft/Notepad3/releases/download/RELEASE_%ProgramVersion%/Notepad3_%ProgramVersion%_x86.zip
+%DownloadURLx64%=https://github.com/rizonesoft/Notepad3/releases/download/RELEASE_%ProgramVersion%/Notepad3_%ProgramVersion%_x64.zip
+%SetupFile%="Notepad3_%SourceArch%.zip"
 %ConfigFile%="%ProgramsCache%\%ProgramFolder%\Notepad3.ini"
-%InnerSetupFilex86%="Notepad3_%ProgramVersion%_x86.zip"
-%InnerSetupFilex64%="Notepad3_%ProgramVersion%_x64.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -125,8 +124,7 @@ Associate,"%Ext%","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting program files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
-Decompress,"%ProjectTemp%\%ProgramFolder%\%InnerSetupFile%",#1
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -158,10 +156,10 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // ===============================================================================================================================
 [SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
-  Set,%InnerSetupFile%,%InnerSetupFilex64%
+  Set,%DownloadURL%,%DownloadURLx64%
 End  
 Else,Begin
-  Set,%InnerSetupFile%,%InnerSetupFilex86%
+  Set,%DownloadURL%,%DownloadURL86%
 End
 
 [#LaunchProgram#]

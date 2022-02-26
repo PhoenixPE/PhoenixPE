@@ -1,0 +1,315 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2022 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=ChoEazyCopy
+Description=(v2.0.0.0 Beta5) ChoEazyCopy is a GUI for Microsoft RoboCopy; a powerful tool that allows you to copy or mirror file structures, preserving time stamps and security ACLs.
+Author=Homes32
+Level=5
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2021-03-05
+
+[Variables]
+%ProgramFolder%="ChoEazyCopy"
+%ProgramExe%="ChoEazyCopy.exe"
+%ConfigFile%="%TargetPrograms%\%ProgramFolder%\%ProgramExe%.config"
+%SetupFile%="ChoEazyCopy.zip"
+%DownloadURL%=https://github.com/Cinchoo/ChoEazyCopy/releases/download/v2.0.0.0-beta5/ChoEazyCopy.zip
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
+
+RequireFile,\Windows\System32\mscms.dll
+RequireFile,\Windows\System32\ColorAdapterClient.dll
+
+///////////////////////////////////////////////////////////////////////////////////
+// Config
+
+Echo,"Configuring %ScriptTitle%..."
+
+RegLoadHives
+
+// Try to set Scroll by default
+XMLUpdate,%ConfigFile%,"configuration/userSettings/ChoEazyCopy.Properties.Settings/setting[@name='ScrollOutput']/value","True",NOERR
+ 
+//FileExt
+If,%cb_RegisterShellExt%,Equal,True,Begin
+  Associate,".ezy","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\EazyCopyFiles","","Copy with ChoEazyCopy"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\EazyCopyFiles","Icon","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q,0"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\EazyCopyFiles\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #EazyCopyFiles# /d:#$q#$p1#$q"
+End
+
+RegUnLoadHives
+
+// Additional Files - Keep this after any config changes so if the users wants to provide their own config file we don't overwrite it.
+If,Not,%fb_IncludePluginsDir%,Equal,"",If,ExistDir,%fb_IncludePluginsDir%,Begin
+  Echo,"Processing additional include files..."
+  If,%cb_RunFromRam%,Equal,True,FileCopy,"%fb_IncludePluginsDir%\*.*","%TargetAppData%\%ProgramFolder%"
+  Else,FileCopy,"%fb_IncludePluginsDir%\*.*","%TargetPrograms%\%ProgramFolder%"
+  
+  XMLAdd,SubNode,%ConfigFile%,"configuration/userSettings/ChoEazyCopy.Properties.Settings","elem","setting",""
+  XMLAdd,Insert,%ConfigFile%,"configuration/userSettings/ChoEazyCopy.Properties.Settings/setting[not(@name)]","attr","name","BackupTaskDirectory"
+  XMLAdd,Append,%ConfigFile%,"configuration/userSettings/ChoEazyCopy.Properties.Settings/setting[@name='BackupTaskDirectory']","attr","serializeAs","String"
+  XMLAdd,SubNode,%ConfigFile%,"configuration/userSettings/ChoEazyCopy.Properties.Settings/setting[@name='BackupTaskDirectory']","elem","value","%PEPrograms%\%ProgramFolder%"
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram
+// Parameters.....: #1 - Destination Directory
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting Program Files..."
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+
+[#LaunchProgram#]
+// ===============================================================================================================================
+// Name...........: LaunchProgram
+// Description....: Unpack and launch the program.
+// Syntax.........: Run,%ScriptFile%,LaunchProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_LaunchProgram
+// ===============================================================================================================================
+[LaunchProgram]
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+
+[#BrowseIncludeDir#]
+// ===============================================================================================================================
+// Name...........: BrowseIncludeDir
+// Description....: Explore the specified additional files and plugins folder.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_BrowseIncludeDir
+// ===============================================================================================================================
+[BrowseIncludeDir]
+If,ExistDir,%fb_IncludePluginsDir%,ShellExecuteEx,Explore,%fb_IncludePluginsDir%
+Else,Message,"The specified directory does not exist.",ERROR
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
+// ===============================================================================================================================
+[SetDefaultOptions]
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Backup & Imaging"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"ChoEazyCopy"
+WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_RegisterShellExt,True
+WriteInterface,Value,%ScriptFile%,Interface,fb_IncludePluginsDir,""
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options in the script interface.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"ChoEazyCopy is a GUI for Microsoft RoboCopy; a powerful tool that allows you to copy or mirror file structures, preserving time stamps and security ACLs...#$x#$xOn first run this script will download the setup file (~2 MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_LaunchProgram="Launch ChoEazyCopy",1,8,5,5,133,25,LaunchProgram,play-hot.png,False
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://github.com/Cinchoo/ChoEazyCopy
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Backup & Imaging"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,ChoEazyCopy
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of ChoEazyCopy in your build."
+bvl_Options=Options,1,12,150,90,373,184,8,Bold
+cb_RegisterShellExt="Register shell extension",1,3,160,104,151,18,True
+lbl_IncludePluginsDir="Include these files",1,1,160,226,200,16,8,Normal
+fb_IncludePluginsDir=,1,13,160,243,323,20,dir,"__Files and folders in this directory will be copied to the program folder.#$x#$xYou can use this option to include custom config, .ezy script files, etc."
+btn_BrowseIncludeDir=,1,8,489,243,20,20,BrowseIncludeDir,OpenFolder_16.png,True,__Browse
+lbl_RuntimeNote="Note: Requires the PhoenixPE > Components > .NET Framework script to be enabled.",1,1,5,295,563,16,8,Bold
+
+[InterfaceEncoded]
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+Advanced_Exit_16.png=705,1048
+play-hot.png=841,1220
+OpenFolder_16.png=2299,3168
+
+[AuthorEncoded]
+ChoEazyCopy.ico=67646,4600
+Logo=ChoEazyCopy.ico
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-OpenFolder_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTA1LTE3VDIxOjQ1OjAzLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpiMmUxM2M3YS01ODljLWQ0NDItOTQ3MC1lZTI4MGIwNDcyM2IiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0ZmIxZDNiYS00OWNhLTI4NDUtYjQ3My1hMjZjZWRlYWZhMDQiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjRmYjFkM2JhLTQ5Y2EtMjg0NS1iNDczLWEyNmNlZGVhZmEwNCIgc3RFdnQ6d2hlbj0iMjAxOS0wNS0xN1QyMTo0NTowMy0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHN0RXZ0OndoZW49IjIwMTktMTAtMjBUMTk6NDc6NTktMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz63gCC6AAACp0lEQVQ4EX3BS2hcVRzA4d//nHMfc28mk45NGo1JpwpFquBKKmh3KggWC6WCbroQVy5EunBTwb0Vl8WKCwUrlEoXPlAkhlqKYqVYFW1jk0jbiXnM3NxJJjP3zn0cKYKL0vH75O33TnMnLQ6hrvLuwmtcbV+jPhLsnaxlvwZ+YbWU3s22fzROnI92VQcX9TMHD3OnkpxQV5mp7GUp+Z2V/vr2+nb5TdQ1HxZ55Y/xID3pKvukq8on5MSpT0jTgVOUpS/8ywJWysFUdSbNyoSL7a/pZB2+jz6j1YuZqHDmoYAj7Uxhsjx/1XWd47XACQUoLSiBbn/QX2wtvFOr1E4eqB1ip3sv6aC3+9utT88FuQnnO/ktpUuRE6dO2xcPPYvxQpIClAKloEgTZufO047iLd/30GJwlFPdSCOk9Ho/RLMvnG2+/52pBe5gYnzM/XwRogSqI5AZaNQdjh55jjilKhqsBS0wauDyz1GQz003xho7vjBJmqUFuI/vgnj9L7T2uE024IZ2sKLBWm7LShitQ9ydp9P++L6XpxYw/ugMq9cvsDR3DMRHtA9YyhIKQAn/sRaWlVDk8PTU6rE0jx82uVVcnX2TB3Y/wsyBtyi3lgBhmMKCF4Qoi3f+7OvPm6h5hWm1yYP7X0GcNbALoCsMVfQheJRB16G/+fefpt/6haDhIyP3wPpXkLRBudydQLYBO/fRal5ja+PGj0b15hmfmAa2yVcugPZBNHdlLeQxBododZ40GfxkArtMfWI/JE3SzeuIN8lQZYo2FUymiJavgHDJ7Kh0pX7/YxBOEjYOg6kxVNGD+j6QGq1blxKl1GUz5nZGSvHJsnFk7CD/z0JlDyu/nSFeay76YaVvunby3JcfvPSUFRcrBqxlKBGwQtZf23Q89w0Q/gH+aSDn8z1ZagAAAABJRU5ErkJggnicE/QvSM1zy89JSS2KNzTTK8hLZxgFIwj85sAvf+m11BRGBgBbPwmoRWA0QwEAAAACAAAAKQAAAPsIAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-ChoEazyCopy.ico]
+lines=1
+0=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
+1=Ez2Pnm4uLi4uJySxaXTjVXZCV3hUKVGckEHDnek94P6YEZn4Z0RfavZ3ygM5kelHF0UGXWx3sOkEhfS+oAXel0OOPsGTnYlU6nDtiWTg9IpnOCk+hJx7MOnzpBZ096UNbpUifc1ZOuzDpd6oTNPemKvtKhDGVnh2WoKzMd7p3uzEwPysoey2BueldmurJ3ui0zPaB3ujkzXdE7HcpSr3QiOx0vlO7KTocLpTuz04PMpvdnpwc6nd6Vna4MWtrt+Nnla/Z+Mnu/Frr/Cz4/bZnpPp6/XZnpPp7fQs9/bnlRqHzJLY9yy6uC5VvGBQzoq7zMLU9zy9vc8ji3vM4tz3uV990nrOy7vsitT3Lrm9z6qFd9lVuf5dZ3ufVhr/oytz7NrW971cfF6//qCGg7eJzjd87Id02sqnTOL6jUy0zOZxgFIwrYcTCCaU1e7PICkXejGdgAUy8H6xZSpV8BAAAAAgAAACsAAAApDQAAAAAAAAEAAAAAAAAAAAAAAA

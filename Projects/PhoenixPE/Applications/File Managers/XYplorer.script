@@ -66,6 +66,14 @@ ExtractAllFiles,%ScriptFile%,config,"%TargetPrograms%\%ProgramFolder%\Data"
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
+RegLoadHives
+// Add the program dir to the System PATH so we can launch from anywhere
+RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
+StrFormat,Replace,%PathVar%,"%PEPrograms%\%ProgramFolder%;","",%PathVar%
+Set,%PathVar%,"%PEPrograms%\%ProgramFolder%;%PathVar%"
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
+RegUnloadHives
+
 // Language
 If,Not,%cmb_Language%,Equal,"English",Begin
   List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
@@ -147,7 +155,7 @@ If,%rbtn_CopyDataFromFolder%,Equal,True,Begin
 End
 
 // Autorun
-AddAutorun,PostShell,NoWait,"Starting %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_AutoRun%,Equal,True,AddAutorun,PostShell,NoWait,"Starting %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts

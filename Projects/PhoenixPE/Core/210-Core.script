@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.1.0.0
-Date=2020-05-02
+Version=1.2.0.0
+Date=2022-02-02
 
 [Variables]
 
@@ -233,26 +233,16 @@ System,EndLocal
 Echo,"Supercharging boot.wim...#$x#$xThis can take awhile, please be patient."
 
 // Inf
-RequireFileEx,AppendList,\Windows\INF\netnwifi.inf
+RequireDriver,netnwifi.inf
 
-// L2Schemas
-RequireFileEx,AppendList,\Windows\L2Schemas\OneX_v1.xsd
-RequireFileEx,AppendList,\Windows\L2Schemas\WFD_LEGACY_profile_v1.xsd
-RequireFileEx,AppendList,\Windows\L2Schemas\WFD_profile_v1.xsd
-RequireFileEx,AppendList,\Windows\L2Schemas\WLAN_policy_v1.xsd
-RequireFileEx,AppendList,\Windows\L2Schemas\WLAN_profile_v1.xsd
-RequireFileEx,AppendList,\Windows\L2Schemas\WLAN_profile_v2.xsd
-RequireFileEx,AppendList,\Windows\L2Schemas\WLAN_profile_v3.xsd
-RequireFileEx,AppendList,\Windows\L2Schemas\WLANAP_profile_v1.xsd
+// L2Schemas are copied in Network.script
 
 // PLA
 RequireFileEx,AppendList,\Windows\PLA
 
-// DriverState
-
-// DriverStore
-RequireFileEx,AppendList,\Windows\System32\DriverStore\*\netnwifi.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netnwifi.inf*
+//vWIFI
+RequireFileEx,AppendList,\Windows\System32\Drivers\vwifibus.sys
+RequireFileEx,AppendList,\Windows\System32\Drivers\vwifimp.sys
 
 // wbem
 RequireFileEx,AppendList,\Windows\System32\wbem\iscsidsc.mof
@@ -283,18 +273,7 @@ RequireFileEx,AppendList,\Windows\SysWOW64\wcnwiz.dll
 RequireFileEx,AppendList,\Windows\System32\AppxPackaging.dll
 RequireFileEx,AppendList,\Windows\System32\cmi2migxml.dll
 RequireFileEx,AppendList,\Windows\System32\csiagent.dll
-RequireFileEx,AppendList,\Windows\System32\d3d8thk.dll
-RequireFileEx,AppendList,\Windows\System32\d3d9.dll
-RequireFileEx,AppendList,\Windows\System32\d3d10.dll
-RequireFileEx,AppendList,\Windows\System32\d3d10_1.dll
-RequireFileEx,AppendList,\Windows\System32\d3d10_1core.dll
-RequireFileEx,AppendList,\Windows\System32\d3d10core.dll
-RequireFileEx,AppendList,\Windows\System32\d3d10level9.dll
-RequireFileEx,AppendList,\Windows\System32\d3d10warp.dll
-RequireFileEx,AppendList,\Windows\System32\d3d11.dll
-RequireFileEx,AppendList,\Windows\System32\d3d11on12.dll
-RequireFileEx,AppendList,\Windows\System32\D3D12.dll
-RequireFileEx,AppendList,\Windows\System32\D3DCompiler_47.dll
+RequireFileEx,AppendList,\Windows\System32\d3d*.dll
 RequireFileEx,AppendList,\Windows\System32\dafWCN.dll
 RequireFileEx,AppendList,\Windows\System32\dafWfdProvider.dll
 RequireFileEx,AppendList,\Windows\System32\delegatorprovider.dll
@@ -317,13 +296,7 @@ RequireFileEx,AppendList,\Windows\System32\imgutil.dll
 RequireFileEx,AppendList,\Windows\System32\IndexedDbLegacy.dll
 RequireFileEx,AppendList,\Windows\System32\inetcomm.dll
 RequireFileEx,AppendList,\Windows\System32\INETRES.dll
-RequireFileEx,AppendList,\Windows\System32\iscsicli.exe
-RequireFileEx,AppendList,\Windows\System32\iscsidsc.dll
-RequireFileEx,AppendList,\Windows\System32\iscsied.dll
-RequireFileEx,AppendList,\Windows\System32\iscsiexe.dll
-RequireFileEx,AppendList,\Windows\System32\iscsium.dll
-RequireFileEx,AppendList,\Windows\System32\iscsiwmi.dll
-RequireFileEx,AppendList,\Windows\System32\iscsiwmiv2.dll
+RequireFileEx,AppendList,\Windows\System32\iscsi*
 RequireFileEx,AppendList,\Windows\System32\l2nacp.dll
 RequireFileEx,AppendList,\Windows\System32\migapp.xml
 RequireFileEx,AppendList,\Windows\System32\migcore.dll
@@ -335,9 +308,7 @@ RequireFileEx,AppendList,\Windows\System32\migsys.dll
 RequireFileEx,AppendList,\Windows\System32\mlang.dat
 RequireFileEx,AppendList,\Windows\System32\mlang.dll
 RequireFileEx,AppendList,\Windows\System32\mshta.exe
-RequireFileEx,AppendList,\Windows\System32\mshtml.dll
-RequireFileEx,AppendList,\Windows\System32\mshtml.tlb
-RequireFileEx,AppendList,\Windows\System32\mshtmled.dll
+RequireFileEx,AppendList,\Windows\System32\mshtml*
 RequireFileEx,AppendList,\Windows\System32\msimtf.dll
 RequireFileEx,AppendList,\Windows\System32\msoert2.dll
 RequireFileEx,AppendList,\Windows\System32\msrating.dll
@@ -394,19 +365,7 @@ RequireFileEx,AppendList,\Windows\System32\webplatstorageserver.dll
 RequireFileEx,AppendList,\Windows\System32\wfdprov.dll
 RequireFileEx,AppendList,\Windows\System32\WiFiConfigSP.dll
 RequireFileEx,AppendList,\Windows\System32\WiFiDisplay.dll
-RequireFileEx,AppendList,\Windows\System32\wlanapi.dll
-RequireFileEx,AppendList,\Windows\System32\wlancfg.dll
-RequireFileEx,AppendList,\Windows\System32\WLanConn.dll
-RequireFileEx,AppendList,\Windows\System32\wlandlg.dll
-RequireFileEx,AppendList,\Windows\System32\wlanext.exe
-RequireFileEx,AppendList,\Windows\System32\wlanhlp.dll
-RequireFileEx,AppendList,\Windows\System32\wlanmsm.dll
-RequireFileEx,AppendList,\Windows\System32\wlanpref.dll
-RequireFileEx,AppendList,\Windows\System32\wlansec.dll
-RequireFileEx,AppendList,\Windows\System32\wlansvc.dll
-RequireFileEx,AppendList,\Windows\System32\wlansvcpal.dll
-RequireFileEx,AppendList,\Windows\System32\wlanui.dll
-
+RequireFileEx,AppendList,\Windows\System32\wlan*.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract

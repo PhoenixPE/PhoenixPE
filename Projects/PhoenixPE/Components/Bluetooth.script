@@ -35,8 +35,8 @@ Description=Bluetooth Device Support (Experimental)
 Selected=False
 Level=4
 Author=Homes32
-Version=1.0.0.0
-Date=2021-07-24
+Version=1.1.0.0
+Date=2022-01-24
 Mandatory=False
 Interface=Interface
 
@@ -44,11 +44,6 @@ Interface=Interface
 
 [Process]
 Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
-
-
-\Windows\System32\drivers\Microsoft.Bluetooth.AvrcpTransport.sys
-\Windows\System32\drivers\Microsoft.Bluetooth.Legacy.LEEnumerator.sys
-
 
 RequireFileEx,AppendList,\Windows\System32\*Bluetooth.dll
 RequireFileEx,AppendList,\Windows\System32\Bluetooth*.*
@@ -75,64 +70,12 @@ RequireFileEx,AppendList,\Windows\System32\wshbth.dll
 RequireFileEx,AppendList,\Windows\System32\catroot2\{127D0A1D-4EF2-11D1-8608-00C04FC295EE}
 RequireFileEx,AppendList,\Windows\System32\catroot2\{F750E6C3-38EE-11D1-85E5-00C04FC295EE}
 
-
-
-
-
-
-RequireFileEx,AppendList,\Windows\INF\btampm.inf
-RequireFileEx,AppendList,\Windows\INF\bth*.inf
-RequireFileEx,AppendList,\Windows\INF\c_bluetooth.inf
-RequireFileEx,AppendList,\Windows\INF\c_swdevice.inf
-RequireFileEx,AppendList,\Windows\INF\hidbth.inf
-RequireFileEx,AppendList,\Windows\INF\hidbthle.inf
-RequireFileEx,AppendList,\Windows\INF\hidvhf.inf
-RequireFileEx,AppendList,\Windows\INF\mdmbtmdm.inf
-RequireFileEx,AppendList,\Windows\INF\microsoft_bluetooth_*.inf
-RequireFileEx,AppendList,\Windows\INF\mshidkmdf.inf
-RequireFileEx,AppendList,\Windows\INF\qca_btusb.inf
-RequireFileEx,AppendList,\Windows\INF\tdibth.inf
-RequireFileEx,AppendList,\Windows\INF\umpass.inf
-RequireFileEx,AppendList,\Windows\INF\xinputhid.inf
-
-RequireFileEx,AppendList,\Windows\System32\drivers\Btampm.sys
-RequireFileEx,AppendList,\Windows\System32\drivers\Bth*.sys
-RequireFileEx,AppendList,\Windows\System32\drivers\hidbth.sys
+RequireFileEx,AppendList,\Windows\System32\drivers\Microsoft.Bluetooth.AvrcpTransport.sys
+RequireFileEx,AppendList,\Windows\System32\drivers\Microsoft.Bluetooth.Legacy.LEEnumerator.sys
 RequireFileEx,AppendList,\Windows\System32\drivers\Microsoft.Bluetooth.*.sys
-RequireFileEx,AppendList,\Windows\System32\drivers\mshidkmdf.sys
-RequireFileEx,AppendList,\Windows\System32\drivers\mshidumdf.sys
 RequireFileEx,AppendList,\Windows\System32\drivers\rfcomm.sys
-RequireFileEx,AppendList,\Windows\System32\drivers\umpass.sys
 RequireFileEx,AppendList,\Windows\System32\drivers\vhf.sys
 RequireFileEx,AppendList,\Windows\System32\drivers\WUDFRd.sys
-RequireFileEx,AppendList,\Windows\System32\drivers\xinputhid.sys
-
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\btampm.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\bth*.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\c_bluetooth.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\c_swdevice.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\hidbth.inf_amd64_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\hidbthle.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\hidvhf.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\mdmbtmdm.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\microsoft_bluetooth_*.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\mshidkmdf.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\qca_btusb.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\tdibth.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\umpass.inf_*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\xinputhid.inf_*
-
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\btampm.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\bth*.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\c_bluetooth.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\c_swdevice.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\hidbth.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\hidbthle.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\hidvhf.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\mdmbtmdm.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\microsoft_bluetooth_*.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\umpass.inf_loc
-RequireFileEx,AppendList,\Windows\System32\DriverStore\??-??\xinputhid.inf_loc
 
 // Extract
 RequireFileEx,ExtractList
@@ -185,8 +128,6 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{687529e6-4d36-4336-88ea-94b03d16a
 
 RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetooth","Value","Allow"
 RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync","Value","Allow"
-
-
 
 RegUnloadHives
 

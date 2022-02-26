@@ -35,15 +35,16 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.0.0
-Date=2021-11-07
+Version=1.1.1.0
+Date=2022-02-24
 
 [Variables]
 %ProgramFolder%="Explorer++"
 %ProgramExe%="Explorer++.exe"
-%DownloadURLx86%=https://github.com/derceg/explorerplusplus/releases/download/version-1.4.0-beta-2/explorerpp_x86.zip
-%DownloadURLx64%=https://github.com/derceg/explorerplusplus/releases/download/version-1.4.0-beta-2/explorerpp_x64.zip
-%TranslationsURL%=https://ci.appveyor.com/api/projects/derceg/explorerplusplus/artifacts/explorerpp_translations.zip?branch=master&job=Platform%3A%20Win32
+%ProgramVersion%=1.4.0-beta-2
+%DownloadURLx86%=https://github.com/derceg/explorerplusplus/releases/download/version-%ProgramVersion%/explorerpp_x86.zip
+%DownloadURLx64%=https://github.com/derceg/explorerplusplus/releases/download/version-%ProgramVersion%/explorerpp_x64.zip
+%TranslationsURL%=https://github.com/derceg/explorerplusplus/releases/download/version-%ProgramVersion%/explorerpp_translations.zip
 %SetupFile%="Explorer++.zip"
 %TranslationsFile%="Translations.zip"
 %aLangMap%=CA|3|ZH_CN|2052|ZH_TW|1028|CS|5|DA|6|NA|19|EN|9|FA|41|FI|1035|FR|12|DE|7|HE|1037|HU|14|IT|16|JA|17|KO|18|NO|20|PL|21|PT|22|RO|24|RU|25|SI|91|ES|10|SV|29|TR|31|UK|34|VI|1066
@@ -64,6 +65,12 @@ Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
 // Settings
 
 RegLoadHives
+
+// Add the program dir to the System PATH so we can launch from anywhere
+RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
+StrFormat,Replace,%PathVar%,"%PEPrograms%\%ProgramFolder%;","",%PathVar%
+Set,%PathVar%,"%PEPrograms%\%ProgramFolder%;%PathVar%"
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
 
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
@@ -112,7 +119,7 @@ If,Not,%fb_IncludeDir%,Equal,"",If,ExistDir,%fb_IncludeDir%,Begin
 End
 
 // Autorun
-AddAutorun,PostShell,NoWait,"Starting %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_AutoRun%,Equal,True,AddAutorun,PostShell,NoWait,"Starting %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -152,9 +159,9 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%TranslationsFile%",#1
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR,"UserAgent=Webget/cURL"
 If,Not,#r,Equal,200,Halt,"Download [%SetupFile%] failed: The code returned was [#r]."
-WebGet,%TranslationsURL%,"%ProgramsCache%\%ProgramFolder%\%TranslationsFile%",NOERR
+WebGet,%TranslationsURL%,"%ProgramsCache%\%ProgramFolder%\%TranslationsFile%",NOERR,"UserAgent=Webget/cURL"
 If,Not,#r,Equal,200,Halt,"Download [%TranslationsFile%] failed: The code returned was [#r]."
 
 [#SetProgramArch#]

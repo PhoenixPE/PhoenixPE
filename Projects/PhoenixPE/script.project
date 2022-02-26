@@ -63,6 +63,7 @@ Interface=Interface
 %ProgramsCache%=%Workbench%\%ProjectTitle%\Programs
 %ProjectTemp%=%Workbench%\%ProjectTitle%\Temp
 %Tools%=%BaseDir%\Projects\%ProjectTitle%\Tools
+%Shell%=
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Target (Build) Globals - Do Not Modify! - TargetPrograms & PEPrograms set by 'Config Source' script.
@@ -125,7 +126,6 @@ Interface=Interface
 // Related........: 
 // ===============================================================================================================================
 [Process]
-Echo,"Starting %ProjectTitle% Build..."
 
 System,GetEnv,PROCESSOR_ARCHITECTURE,%HostArch%
 If,%HostArch%,Equal,"AMD64",Set,%HostArch%,"x64",GLOBAL
@@ -148,6 +148,9 @@ System,OnBuildExit,Exec,%ProjectDir%\script.project,PostBuildCleanup
 [PostBuildCleanup]
 Echo,"Running Post-Build Cleanup..."
 
+GetParam,1,%OnBuildExitReason%
+
+// For Project Options (SupportLog, etc)
 AddInterface,%ScriptFile%,Interface_Options,""
 
 // Make sure registry hives are unloaded if we halt
@@ -156,28 +159,28 @@ RegUnloadHives,Force
 If,%cb_GenerateSupportLog%,Equal,True,Run,%ScriptFile%,GenerateSupportLog
 Echo,""
 
-If,#1,EQUAL,ERROR,Begin
+If,%OnBuildExitReason%,EQUAL,ERROR,Begin
   // Error
   Beep,ERROR
   Set,%BuildExitMsg%,"An error occurred building %ProjectTitle%. Please check the build log for details.#$x#$xA support package was generated and saved to #$x    %BaseDir%\Logs"
   Echo,%BuildExitMsg%,Warn
   Message,%BuildExitMsg%,ERROR
 End
-Else,If,#1,EQUAL,STOP,Begin
+Else,If,%OnBuildExitReason%,EQUAL,STOP,Begin
   // User STOP
   Beep,Asterisk
   Set,%BuildExitMsg%,"The %ProjectTitle% build was aborted by the user."
   Echo,%BuildExitMsg%,Warn
   Message,%BuildExitMsg%,WARNING
 End
-Else,If,#1,EQUAL,DONE,Begin
+Else,If,%OnBuildExitReason%,EQUAL,DONE,Begin
   // Build/Script Finished
   Beep,OK
   Set,%BuildExitMsg%,"The %ProjectTitle% build was successful.#$x#$xOutput:#$x  %OutputDir%"
   Echo,%BuildExitMsg%
   Message,%BuildExitMsg%,INFORMATION,5
 End
-Else,If,#1,EQUAL,COMMAND,Begin
+Else,If,%OnBuildExitReason%,EQUAL,COMMAND,Begin
   // HALT/EXIT command
   Beep,CONFIRMATION
   Set,%BuildExitMsg%,"An error occurred building %ProjectTitle%. Please check the build log for details.#$x#$xA support package was generated and saved to #$x    %BaseDir%\Logs#$xbe sure to include this package if you ask for help."
@@ -227,7 +230,8 @@ System,EndLocal
 // Return values..: 
 // Author.........: Homes32
 // Modified.......:
-// Remarks........:
+// Remarks........: Output directories %ISODir% and %OutputDir% must be checked for existence, as Config Source > Set Defaults can
+//                  clear them causing DirDeleteEx to fail.
 // Related........:
 // ===============================================================================================================================
 [NukeProject]
@@ -246,14 +250,17 @@ If,QUESTION,"Nuke PhoenixPE#$x#$xThis operation will obliterate all Target, ISO,
   Echo,"Removing downloaded tools..."
   DirDeleteEx,%Tools%\x86\DISM
   DirDeleteEx,%Tools%\x64\DISM
-    DirDeleteEx,%Tools%\x86\Oscdimg
+  DirDeleteEx,%Tools%\x86\Oscdimg
   DirDeleteEx,%Tools%\x64\Oscdimg
 
   Echo,"Clearing the Output directories..."
-  DirDeleteEx,%ISODir%
-  DirDeleteEx,%OutputDir%
+  If,ExistDir,%ISODir%,DirDeleteEx,%ISODir%
+  If,ExistDir,%OutputDir%,DirDeleteEx,%OutputDir%
 
+  Echo,"Resetting project vars..."
+  Set,%Shell%,"",PERMANENT
   Set,%ISOFile%,"",PERMANENT
+  
   Echo,"Environment cleanup complete."
   If,QUESTION,"Would you like to reset Source Config to defaults? (Recommended)",Exec,"%ProjectDir%\100-ConfigSource.script","SetDefaultOptions"
 End
