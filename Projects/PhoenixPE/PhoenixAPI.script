@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.4.0.0
-Date=2021-04-03
+Version=1.5.0.0
+Date=2022-03-05
 Level=0
 Selected=None
 
@@ -60,6 +60,7 @@ PinShortcut=Run,%API%,_PhoenixAPI_PinShortcut
 DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
 FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
+InnoCleanup=Run,%API%,_PhoenixAPI_InnoCleanup
 
 // ACL Management
 SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
@@ -77,7 +78,7 @@ AddPostProcess=Run,%API%,_PhoenixAPI_AddPostProcess
 
 // Compression/Decompression
 7z=Run,%API%,_PhoenixAPI_7z
-//7zExtract=Run,%API%,_PhoenixAPI_7z
+//7zExtract=
 InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
 Innounp=Run,%API%,_PhoenixAPI_Innounp
 MSIExtract=Run,%API%,_PhoenixAPI_MSIExtract
@@ -300,7 +301,7 @@ GetParam,1,%Args%
 Getparam,2,%WorkDir%
 
 ShellExecute,Hide,"%Tools%\%HostArch%\7z.exe",%Args%,%WorkDir%
-Set,#r,%ExitCode%
+Return,%ExitCode%
 
 System,EndLocal
 
@@ -338,7 +339,7 @@ FileVersion,"%HostWinDir%\System32\ntdll.dll",%HostOSVer%
 If,%HostOSVer%,Bigger,10.0.0.0,ShellExecute,Hide,"dism.exe",%Args%,%WorkDir%
 Else,ShellExecute,Hide,"%Tools%\%HostArch%\DISM\dism.exe",%Args%,%WorkDir%
 
-Set,#r,%ExitCode%
+Return,%ExitCode%
 
 System,EndLocal
 
@@ -394,7 +395,7 @@ GetParam,1,%Args%
 Getparam,2,%WorkDir%
 
 ShellExecute,Hide,"%Tools%\x86\Innounp.exe","%Args%",%WorkDir%
-Set,#r,%ExitCode%
+Return,%ExitCode%
 
 System,EndLocal
 
@@ -1155,7 +1156,7 @@ If,%CurrentPos%,Equal,"",Begin
   Set,#r,#c
   Loop,Break
 End
-Else,Set,#r,-1
+Else,Return,-1
 
 System,EndLocal
 
@@ -1253,6 +1254,65 @@ If,ExistFile,#1,Begin
   End
 End
 
+[#_PhoenixAPI_InnoCleanup#]
+// ===============================================================================================================================
+// Name...........: InnoCleanup
+// Description....: Cleanup extracted Inno Setup files.
+// Syntax.........: InnoCleanup,<Operation>,<Path>,<Suffix>[,NOREC]
+// Parameters.....: #1 Operation - One of the following:
+//                                 Rename  - Rename Arch specific files
+//                                 Delete - Remove leftover Arch specific files
+//                  #2 Path      - The path to the extracted InnoSetup Files.
+//                  #3 Filter    - Comma delimited list of file types to include. eg. *.dll,*.exe
+//                  #4 Suffix    - The number representing the group of files to process. eg. 1
+//                  #5 NOREC  -  - (Optional) Do not recurse sub-directories.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: An Inno Setup installer may contain several identical files (possibly under different names).
+//                  Inno Setup stores only one copy of such files, so identical files are unpacked with an incremental sufix
+//                  eg. myfile,1.exe  myfile,2.exe  myfile,3.exe etc.
+//                  If the installer contains files for multiple processor architectures, you will need to determine which sufix
+//                  is used for the architecture you are interested in. This can be accomplished with tools such as exeinfope or CFF Explorer.
+//                  Note that sub-folders may use a different suffix then the parent folder for the same architecture.
+//
+//                  You can use the InnoCleanup command to bulk rename the files with the suffix you want and remove the others.
+//                  Once this has been accomplished you can then copy the entire directory or groups of files,
+//                  instead of having to copy and rename each file individually.
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_InnoCleanup]
+System,SetLocal
+GetParam,1,%Operation%
+GetParam,2,%Path%
+GetParam,3,%Filter%
+GetParam,4,%Suffix%
+GetParam,5,%Arg5%
+
+If,%Operation%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify an operation to perform."
+If,%Path%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify the full Path of the Extracted InnoSetup package."
+If,%Filter%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify a file filter."
+If,%Arg5%,Equal,"NOREC",Set,%Recurse%,False
+Else,Set,%Recurse%,True
+  
+If,%Operation%,Equal,"Rename",Begin
+  If,%Suffix%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify the suffix to process."
+
+  StrFormat,Replace,%Filter%," ","",%Filter%
+  StrFormat,Replace,%Filter%,",","#$c",%Filter%
+
+  If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | ForEach { Rename-Item -Force $_ $_.Name.Replace('#$c%Suffix%.','.') }#$q","%Path%"
+  Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | ForEach { Rename-Item -Force $_ $_.Name.Replace('#$c%Suffix%.','.') }#$q","%Path%"
+End
+Else,If,%Operation%,Equal,"Delete",Begin
+  If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | Where-Object {$_.Name -Like '*#$c?.???'} | Remove-Item -Force#$q","%Path%"
+  Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | Where-Object {$_.Name -Like '*#$c?.???'} | Remove-Item -Force#$q","%Path%"
+End
+Else,Halt,"InnoCleanup Error: [%Operation%] is not a valid operation."
+
+If,Not,%ExitCode%,Equal,0,Halt,"InnoCleanup ERROR: Failed to process files. [%ExitCode%]."
+
+System,EndLocal
+
 [#_PhoenixAPI_ApplyBitMask#]
 // ===============================================================================================================================
 // Name...........: ApplyBitMask
@@ -1293,7 +1353,7 @@ Math,Hex,%Hex%,%Bits%,%BitSize%
 StrFormat,LTRIM,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
-Set,#r,%BitArray%
+Return,%BitArray%
 
 System,EndLocal
 
@@ -1339,7 +1399,7 @@ Math,Hex,%Hex%,%Bits%,%BitSize%
 StrFormat,LTRIM,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
-Set,#r,%BitArray%
+Return,%BitArray%
 
 System,EndLocal
 
@@ -1384,7 +1444,7 @@ Math,Hex,%Hex%,%Bits%,%BitSize%
 StrFormat,LTRIM,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
-Set,#r,%BitArray%
+Return,%BitArray%
 
 System,EndLocal
 
@@ -1429,7 +1489,7 @@ Math,Hex,%Hex%,%Bits%,%BitSize%
 StrFormat,LTRIM,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
-Set,#r,%BitArray%
+Return,%BitArray%
 
 System,EndLocal
 
@@ -1538,7 +1598,7 @@ If,ExistFile,"%ProjectTemp%\PhoenixAPI-JSONRead.ini",Begin
 End
 Else,Begin
   // Value was not found in JSON file
-  Set,#r,""
+  Return,""
 End
 
 System,EndLocal
@@ -1720,8 +1780,7 @@ If,%Value%,Equal,"",Halt,"XMLUpdate Syntax Error: You must specify a value."
 ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
 If,Not,#r,Equal,0,Begin
   If,Not,%NOERR%,Equal,"NOERR",Halt,"XMLUpdate ERROR: Failed to query [%XPath%] from [%XMLFile%]. The XPath must exist in order for the value to be updated."
-  Set,#r,-99999999
-  // Return
+  Return,-99999999
 End
 Else,Begin
   ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --update #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"

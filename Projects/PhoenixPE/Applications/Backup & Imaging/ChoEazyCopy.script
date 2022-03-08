@@ -41,9 +41,10 @@ Date=2021-03-05
 [Variables]
 %ProgramFolder%="ChoEazyCopy"
 %ProgramExe%="ChoEazyCopy.exe"
+%ProgramVersion%="2.0.0.0-beta5"
 %ConfigFile%="%TargetPrograms%\%ProgramFolder%\%ProgramExe%.config"
 %SetupFile%="ChoEazyCopy.zip"
-%DownloadURL%=https://github.com/Cinchoo/ChoEazyCopy/releases/download/v2.0.0.0-beta5/ChoEazyCopy.zip
+%DownloadURL%=https://github.com/Cinchoo/ChoEazyCopy/releases/download/v%ProgramVersion%/ChoEazyCopy.zip
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -55,7 +56,6 @@ If,%cb_RunFromRam%,Equal,True,RunFromRam
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
-FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
 
 RequireFile,\Windows\System32\mscms.dll
 RequireFile,\Windows\System32\ColorAdapterClient.dll
