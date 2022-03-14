@@ -61,6 +61,7 @@ DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
 FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 InnoCleanup=Run,%API%,_PhoenixAPI_InnoCleanup
+InnoRename=Run,%API%,_PhoenixAPI_InnoRename
 
 // ACL Management
 SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
@@ -1258,58 +1259,88 @@ End
 // ===============================================================================================================================
 // Name...........: InnoCleanup
 // Description....: Cleanup extracted Inno Setup files.
-// Syntax.........: InnoCleanup,<Operation>,<Path>,<Suffix>[,NOREC]
-// Parameters.....: #1 Operation - One of the following:
-//                                 Rename  - Rename Arch specific files
-//                                 Delete - Remove leftover Arch specific files
-//                  #2 Path      - The path to the extracted InnoSetup Files.
-//                  #3 Filter    - Comma delimited list of file types to include. eg. *.dll,*.exe
-//                  #4 Suffix    - The number representing the group of files to process. eg. 1
-//                  #5 NOREC  -  - (Optional) Do not recurse sub-directories.
+// Syntax.........: InnoCleanup,<Path>,<Filter>[,NOREC]
+// Parameters.....: #1 Path   - The full path to the extracted InnoSetup Files.
+//                  #2 Filter - Comma delimited list of file types to include. eg. *.dll,*.exe
+//                  #3 NOREC  - (Optional) Do not recurse sub-directories.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: An Inno Setup installer may contain several identical files (possibly under different names).
-//                  Inno Setup stores only one copy of such files, so identical files are unpacked with an incremental sufix
+//                  Inno Setup stores only one copy of such files, so identical files are unpacked with an incremental suffix
 //                  eg. myfile,1.exe  myfile,2.exe  myfile,3.exe etc.
-//                  If the installer contains files for multiple processor architectures, you will need to determine which sufix
+//                  If the installer contains files for multiple processor architectures, you will need to determine which suffix
 //                  is used for the architecture you are interested in. This can be accomplished with tools such as exeinfope or CFF Explorer.
 //                  Note that sub-folders may use a different suffix then the parent folder for the same architecture.
 //
-//                  You can use the InnoCleanup command to bulk rename the files with the suffix you want and remove the others.
+//                  You can use the InnoCleanup command to bulk remove files that you have not renamed with the InnoRename command.
 //                  Once this has been accomplished you can then copy the entire directory or groups of files,
 //                  instead of having to copy and rename each file individually.
-// Related........:
+// Related........: InnoExtract, InnoRename
 // ===============================================================================================================================
 [_PhoenixAPI_InnoCleanup]
 System,SetLocal
-GetParam,1,%Operation%
-GetParam,2,%Path%
-GetParam,3,%Filter%
-GetParam,4,%Suffix%
-GetParam,5,%Arg5%
+GetParam,1,%Path%
+GetParam,2,%Filter%
+GetParam,3,%Arg3%
 
-If,%Operation%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify an operation to perform."
-If,%Path%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify the full Path of the Extracted InnoSetup package."
+If,%Path%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify the full path to the folder containing the extracted Inno Setup files."
 If,%Filter%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify a file filter."
-If,%Arg5%,Equal,"NOREC",Set,%Recurse%,False
+If,%Arg3%,Equal,"NOREC",Set,%Recurse%,False
+Else,Set,%Recurse%,True
+
+StrFormat,Replace,%Filter%," ","",%Filter%
+StrFormat,Replace,%Filter%,",","#$c",%Filter%
+
+If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | Where-Object {$_.Name -Like '*#$c?.*'} | Remove-Item -Force#$q","%Path%"
+Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | Where-Object {$_.Name -Like '*#$c?.*'} | Remove-Item -Force#$q","%Path%"
+If,Not,%ExitCode%,Equal,0,Halt,"InnoCleanup Error: Failed to rename files. [%ExitCode%]."
+
+System,EndLocal
+
+[#_PhoenixAPI_InnoRename#]
+// ===============================================================================================================================
+// Name...........: InnoRename
+// Description....: Rename extracted Inno Setup files.
+// Syntax.........: InnoRename,<Path>,<Filter>,<Suffix>[,NOREC]
+// Parameters.....: #1 Path      - The full path to the extracted InnoSetup Files.
+//                  #2 Filter    - Comma delimited list of file types to include. eg. *.dll,*.exe
+//                  #3 Suffix    - A number representing the group of files to process. eg. 1
+//                  #4 NOREC     - (Optional) Do not recurse sub-directories.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: An Inno Setup installer may contain several identical files (possibly under different names).
+//                  Inno Setup stores only one copy of such files, so identical files are unpacked with an incremental suffix
+//                  eg. myfile,1.exe  myfile,2.exe  myfile,3.exe etc.
+//                  If the installer contains files for multiple processor architectures, you will need to determine which suffix
+//                  is used for the architecture you are interested in. This can be accomplished with tools such as exeinfope or CFF Explorer.
+//                  Note that sub-folders may use a different suffix then the parent folder for the same architecture.
+//
+//                  You can use the InnoRename command to bulk rename the files with the suffix you want and remove the others
+//                  with the InnoCleanup command. Once this has been accomplished you can then copy the entire directory or groups
+//                  of files, instead of having to copy and rename each file individually.
+//
+//                  Dev Note: We are using `Move-Item -Force` as `Rename-Item -Force` can't overwrite files that already exist. Brilliant M$.
+// Related........: InnoExtract, InnoCleanup
+// ===============================================================================================================================
+[_PhoenixAPI_InnoRename]
+System,SetLocal
+GetParam,1,%Path%
+GetParam,2,%Filter%
+GetParam,3,%Suffix%
+GetParam,4,%Arg4%
+
+If,%Path%,Equal,"",Halt,"InnoRename Syntax Error: You must specify the full path to the folder containing the extracted Inno Setup files."
+If,%Filter%,Equal,"",Halt,"InnoRename Syntax Error: You must specify a file filter."
+If,%Suffix%,Equal,"",Halt,"InnoRename Syntax Error: You must specify the suffix to process."
+If,%Arg4%,Equal,"NOREC",Set,%Recurse%,False
 Else,Set,%Recurse%,True
   
-If,%Operation%,Equal,"Rename",Begin
-  If,%Suffix%,Equal,"",Halt,"InnoCleanup Syntax Error: You must specify the suffix to process."
+StrFormat,Replace,%Filter%," ","",%Filter%
+StrFormat,Replace,%Filter%,",","#$c",%Filter%
 
-  StrFormat,Replace,%Filter%," ","",%Filter%
-  StrFormat,Replace,%Filter%,",","#$c",%Filter%
-
-  If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | ForEach { Rename-Item -Force $_ $_.Name.Replace('#$c%Suffix%.','.') }#$q","%Path%"
-  Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | ForEach { Rename-Item -Force $_ $_.Name.Replace('#$c%Suffix%.','.') }#$q","%Path%"
-End
-Else,If,%Operation%,Equal,"Delete",Begin
-  If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | Where-Object {$_.Name -Like '*#$c?.???'} | Remove-Item -Force#$q","%Path%"
-  Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | Where-Object {$_.Name -Like '*#$c?.???'} | Remove-Item -Force#$q","%Path%"
-End
-Else,Halt,"InnoCleanup Error: [%Operation%] is not a valid operation."
-
-If,Not,%ExitCode%,Equal,0,Halt,"InnoCleanup ERROR: Failed to process files. [%ExitCode%]."
+If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | ForEach { Move-Item -Force $_ $_.Name.Replace('#$c%Suffix%.','.') }#$q","%Path%"
+Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | ForEach { Move-Item -Force $_ $_.Name.Replace('#$c%Suffix%.','.') }#$q","%Path%"
+If,Not,%ExitCode%,Equal,0,Halt,"InnoRename Error: Failed to cleanup files. [%ExitCode%]."
 
 System,EndLocal
 
@@ -1544,7 +1575,7 @@ System,EndLocal
 [#_PhoenixAPI_JSONPretty#]
 // ===============================================================================================================================
 // Name...........: JSONPretty
-// Description....: Experimental wrapper for jj - Compress the JSON into the fewest characters possible by squashing newlines and spaces.
+// Description....: Experimental wrapper for jj - Format and indent the JSON file for easy human reading.
 // Syntax.........: JSONPretty,<JSONFile>
 // Parameters.....: #1 JSONFile - Full path to the JSON filed to compact.
 // Return values..: #r - Returns 
@@ -1606,10 +1637,11 @@ System,EndLocal
 [#_PhoenixAPI_JSONWrite#]
 // ===============================================================================================================================
 // Name...........: JSONWrite
-// Description....: Experimental wrapper for jj - Delete an JSON value.
+// Description....: Experimental wrapper for jj - Set/Modify an JSON value.
 // Syntax.........: JSONWrite,<JSONFile>,<Path>,<Value>
 // Parameters.....: #1 JSONFile - Full path to the JSON filed to edit.
-//                  #2 Path - GJSON Path notation used to locate the value to delete.
+//                  #2 Path - GJSON Path notation used to locate the value to write.
+//                  #3 Value - The value to write.
 // Return values..: #r - Returns 
 // Author.........: Homes32
 // Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj

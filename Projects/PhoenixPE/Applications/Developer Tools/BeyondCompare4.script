@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.3.0
-Date=2022-01-07
+Version=1.1.0.0
+Date=2022-03-08
 
 [Variables]
 %ProgramFolder%="Beyond Compare 4"
@@ -58,40 +58,17 @@ Run,%ScriptFile%,ExtractProgram
 ///////////////////////////////////////////////////////////////////////////////////
 // Copy Program Files
 
-If,%SourceArch%,Equal,x64,Begin
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\7z,2.dll","%TargetPrograms%\%ProgramFolder%\7z.dll"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BCompare,2.exe","%TargetPrograms%\%ProgramFolder%\BCompare.exe"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BCUnrar,2.dll","%TargetPrograms%\%ProgramFolder%\BCUnrar.dll"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\mscoree,2.dll","%TargetPrograms%\%ProgramFolder%\mscoree.dll"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\PdfToText,2.exe","%TargetPrograms%\%ProgramFolder%\PdfToText.exe"
-End
-Else,Begin
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\7z,1.dll","%TargetPrograms%\%ProgramFolder%\7z.dll"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BCompare,1.exe","%TargetPrograms%\%ProgramFolder%\BCompare.exe"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BCUnrar,1.dll","%TargetPrograms%\%ProgramFolder%\BCUnrar.dll"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\mscoree,1.dll","%TargetPrograms%\%ProgramFolder%\mscoree.dll"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\PdfToText,1.exe","%TargetPrograms%\%ProgramFolder%\PdfToText.exe"
-End
-
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BCClipboard.exe","%TargetPrograms%\%ProgramFolder%\BCClipboard.exe"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BComp.com","%TargetPrograms%\%ProgramFolder%\BComp.com"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BComp.exe","%TargetPrograms%\%ProgramFolder%\BComp.exe"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BCompare.chm","%TargetPrograms%\%ProgramFolder%\BCompare.chm"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BCShellEx64.dll","%TargetPrograms%\%ProgramFolder%\BCShellEx64.dll"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\BCShellEx.dll","%TargetPrograms%\%ProgramFolder%\BCShellEx.dll"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\License.html","%TargetPrograms%\%ProgramFolder%\License.html"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\mime.types","%TargetPrograms%\%ProgramFolder%\mime.types"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\Patch.exe","%TargetPrograms%\%ProgramFolder%\Patch.exe"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\Readme.txt","%TargetPrograms%\%ProgramFolder%\Readme.txt"
+If,%SourceArch%,Equal,x64,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe",2
+Else,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe",1
+InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe"
+FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
 Echo,"Configuring %ScriptTitle%..."
 
-RegHiveLoad,Tmp_Default,%RegDefault%
-RegHiveLoad,Tmp_Software,%RegSoftware%
-RegHiveLoad,Tmp_System,%RegSystem%
+RegLoadHives
 
 Run,%ScriptFile%,RegisterBCompare
 
@@ -119,10 +96,7 @@ If,%rb_IncludeSettingsFromFolder%,Equal,True,Begin
   End
 End
 
-RegHiveUnLoad,Tmp_Default
-RegHiveUnLoad,Tmp_Software
-RegHiveUnLoad,Tmp_System
-
+RegUnloadHives
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts

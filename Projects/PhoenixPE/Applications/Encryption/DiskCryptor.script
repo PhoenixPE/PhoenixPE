@@ -58,19 +58,9 @@ Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ///////////////////////////////////////////////////////////////////////////////////
 // Copy Files
 
-// Sort out Arch Specific files
-If,%SourceArch%,Equal,x64,Begin
-  // ,2 in {app} and subfolders is x64
-  ShellExecute,Hide,"powershell.exe","–ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%ProjectTemp%\%ProgramFolder%\{app}' -Include *.dll#$c*.exe#$c*.sys -Recurse | ForEach { Rename-Item $_ $_.Name.Replace('#$c2.','.') }#$q","%ProjectTemp%\%ProgramFolder%\{app}"
-End
-Else,Begin
-  // ,1 in {app} and subfolders is x86
-  ShellExecute,Hide,"powershell.exe","–ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%ProjectTemp%\%ProgramFolder%\{app}' -Include *.dll#$c*.exe#$c*.sys -Recurse | ForEach { Rename-Item $_ $_.Name.Replace('#$c1.','.') }#$q","%ProjectTemp%\%ProgramFolder%\{app}"
-End
-
-// get rid of any leftover , x86/x64 .dll/.exe/.sys files
-ShellExecute,Hide,"powershell.exe","–ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%ProjectTemp%\%ProgramFolder%\{app}' -Include *.dll#$c*.exe#$c*.sys -Recurse | Where-Object {$_.Name -Like '*#$c?.???'} | Remove-Item -Force#$q","%ProjectTemp%\%ProgramFolder%\{app}"
-
+If,%SourceArch%,Equal,x64,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe",2
+Else,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe",1
+InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
 FileCopy,"%TargetPrograms%\%ProgramFolder%\dcrypt.sys","%TargetSystem32%\Drivers"
 
@@ -85,7 +75,7 @@ Run,%ScriptFile%,RegisterDcrypt
 Echo,"Configuring %ScriptTitle%..."
 If,%cb_StartOnLogon%,Equal,True,Begin
   RegLoadHives
-  // DiskCryptor uses RunOnce when toggling this option via it's Settings interface, however since our environment is volatile and RunOnce doesn't process in PE we use Run instead.
+  // DiskCryptor uses RunOnce when toggling this option via it's Settings interface, however since our environment is volatile we can use Run instead.
   RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Run","DiskCryptor","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -h"
   RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\dcrypt\config","Flags",1440
   RegUnloadHives

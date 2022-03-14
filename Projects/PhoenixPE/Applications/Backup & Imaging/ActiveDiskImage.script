@@ -61,21 +61,17 @@ Run,%ScriptFile%,ExtractProgram
 
 // Sort out Arch Specific files
 If,%SourceArch%,Equal,x64,Begin
-  // .dll ,1 in {app} is x64
-  ShellExecute,Hide,"powershell.exe","–ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%ProjectTemp%\%ProgramFolder%\{app}' -Include *.dll -Recurse | ForEach { Rename-Item $_ $_.Name.Replace('#$c1.','.') }#$q","%ProjectTemp%\%ProgramFolder%\{app}"
-  // .exe and .sys ,2 in {app} and subfolders is x64
-  ShellExecute,Hide,"powershell.exe","–ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%ProjectTemp%\%ProgramFolder%\{app}' -Include *.exe#$c*.sys -Recurse | ForEach { Rename-Item $_ $_.Name.Replace('#$c2.','.') }#$q","%ProjectTemp%\%ProgramFolder%\{app}"
+  InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll",1
+  InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.exe,*.sys",2
 End
 Else,Begin
   // x86
-  // .dll ,2 in {app} is x86
-  ShellExecute,Hide,"powershell.exe","–ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%ProjectTemp%\%ProgramFolder%\{app}' -Include *.dll -Recurse | ForEach { Rename-Item $_ $_.Name.Replace('#$c2.','.') }#$q","%ProjectTemp%\%ProgramFolder%\{app}"
-  // .exe and .sys ,1 in {app} and subfolders is x86
-  ShellExecute,Hide,"powershell.exe","–ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%ProjectTemp%\%ProgramFolder%\{app}' -Include *.exe#$c*.sys -Recurse | ForEach { Rename-Item $_ $_.Name.Replace('#$c1.','.') }#$q","%ProjectTemp%\%ProgramFolder%\{app}"
+  InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll",2
+  InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.exe,*.sys",1
 End
 
-// get rid of any leftover , x86/x64 .dll/.exe/.sys files
-ShellExecute,Hide,"powershell.exe","–ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%ProjectTemp%\%ProgramFolder%\{app}' -Include *.dll#$c*.exe#$c*.sys -Recurse | Where-Object {$_.Name -Like '*#$c?.???'} | Remove-Item -Force#$q","%ProjectTemp%\%ProgramFolder%\{app}"
+// get rid of any leftover files
+InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe,*.sys"
 
 FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
 
