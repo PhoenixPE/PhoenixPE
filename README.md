@@ -19,7 +19,7 @@ Download the [latest release]() and unpack it in the desired location. Please re
 
 1. Mount or Extract your Win10 ISO to a location of your choice. If you don’t have a Win10 ISO you may use the links on the 'Source Config' script to download the most recent version.
 1. Using the 'Source Config' script, select the location of your source you provided in Step 1 and press the 'Save' button.
-1. Select the Source 'install.wim. image. We recommend using the Pro image.
+1. Select the Source `install.wim` image. We recommend using the Pro image.
 1. Enable the Apps you wish to include in your build. Note that some Apps require additional files or config. **Do not blindly enable all apps and expect to get a successful build**.
 1. Tweak any settings you wish.
 1. Press the Build button on PEBakery’s Main Menu.
@@ -46,4 +46,4 @@ In my option the 2 projects have different goals. Win10XPE states that _"it's ma
 
 PhoenixPE on the other hand targets advanced users and developers that what more control over how and what goes into their PE. It strives to be simple for both users to build, and for developers to contribute/maintain. 
 
-TL;DR: No. It's an alternative. If anything the projects complement each other and encourage developers to work together and share their knowledge and experience. Use the one that best meets your needs. You can't go wrong.
+TL;DR: No. It's an alternative. The developers of both projects are part of a vibrate community that works together and shares their knowledge and experience. Use the one that best meets your needs. You can't go wrong.
