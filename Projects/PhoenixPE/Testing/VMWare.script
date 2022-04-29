@@ -140,6 +140,9 @@ Else,Set,%numProcessors%,%cmb_numProc%
 TXTAddLine,%VMCfg%,"numvcpus=#$q%numProcessors%#$q",Append
 TXTAddLine,%VMCfg%,"cpuid.coresPerSocket=#$q%numProcessors%#$q",Append
 
+// Disable CPU Side Channel Mitigation that can make our VM run like crap. (No Script UI Setting and not available in VMware Player Pref.)
+TxtAddLine,%VMCfg%,"ulm.disableMitigations = #$qTRUE#$q",Append
+
 // Memory
 TXTAddLine,%VMCfg%,"memsize = #$q%cmb_MemSize%#$q",Append
 
@@ -200,7 +203,7 @@ If,%cmb_Firmware%,Equal,"UEFI",TxtAddLine,%VMCfg%,"firmware = #$qefi#$q",Append
 Else,If,%cmb_Firmware%,Equal,"BIOS",TxtAddLine,%VMCfg%,"firmware = #$qbios#$q",Append
 Else,Halt,"Logic Error: No configuration has been defined for Firmware [%cmb_Firmware%]"
 
-// Trusted Platform Module (TPM) -- We should check and make sure Firmware is UEFI...)
+// Trusted Platform Module (TPM) - This setting is not available in VMWare Player Pref. -- We should check and make sure Firmware is UEFI...)
 If,%cb_EnableTPM%,Equal,True,TxtAddLine,%VMCfg%,"managedvm.autoAddVTPM = #$qsoftware#$q",Append
 
 // Shared Folder

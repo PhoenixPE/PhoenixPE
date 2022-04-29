@@ -29,76 +29,139 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=DMDE
-Description=(v4.0.0.800) DMDE is a powerful software for data searching, editing, and recovery on disks. Features include disk editor, simple partition manager (e.g. allows partition undeleting), a tool to create disk images and clones, RAID constructor, and file recovery.
+Title=OpenHashTab
+Description=(v3.0.1) OpenHashTab is a shell extension for conveniently calculating and checking file hashes from file properties.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.0.0
-Date=2022-04-11
+Version=1.0.0.0
+Date=2022-03-26
 
 [Variables]
-%ProgramFolder%="DMDE"
-%ProgramExe%="dmde.exe"
-%ProgramVersion%="4-0-0-800"
-%DownloadURLx86%=https://dmde.com/download/dmde-%ProgramVersion%-win32-gui.zip
-%DownloadURLx64%=https://dmde.com/download/dmde-%ProgramVersion%-win64-gui.zip
-%SetupFile%="dmde-%SourceArch%.zip"
-%ConfigFile%="%TargetPrograms%\%ProgramFolder%\dmde.ini"
-%lngfileHashTable%=zh-cn|7dcca8cd|en|9873380f|fr|97a9b971|de|5cc30625|it|d2729ac3|fa|b0973292|pl|dc0a7eaa|pt-br|10a4972a|pt-pt|b0ec58f5|ru|87223af8|es|d241e1cc
+%ProgramFolder%="OpenHashTab"
+%SetupFile%="OpenHashTab_Setup.exe"
+%ProgramVersion%=3.0.1
+%DownloadURL%=https://github.com/namazso/OpenHashTab/releases/download/v%ProgramVersion%/OpenHashTab_setup_system.exe
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
-If,%cb_RunFromRam%,Equal,True,RunFromRam
-Run,%ScriptFile%,SetProgramArch
+RunFromRam
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
+DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+
+// ,1 - x86 | ,2 - x64 | ,3 - ARM64
+If,%SourceArch%,Equal,x64,Begin
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*x64*.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\OpenHashTab,2.dll","%TargetPrograms%\%ProgramFolder%\OpenHashTab.dll"
+End
+Else,Begin
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*Win32*.dll","%TargetPrograms%\%ProgramFolder%"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\OpenHashTab,1.dll","%TargetPrograms%\%ProgramFolder%\OpenHashTab.dll"
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Register Ext.
+
+Run,%ScriptFile%,RegisterShellExtension
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
-// It's annoying when developers don't follow the .ini standard
-TxtAddLine,%ConfigFile%,"[Tmp-Setup]",Prepend
+RegHiveLoad,Tmp_Default,%RegDefault%
+If,%cb_LowercaseHashes%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab\Settings","DisplayUppercase",0
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","DisplayUppercase",1
 
-// Language
-StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
-StrFormat,RTRIM,%Lang%,1,%Lang%
-If,%Lang%,Equal,"en",IniWrite,%ConfigFile%,"Tmp-Setup","lngfile","\en"
-Else,IniWrite,%ConfigFile%,"Tmp-Setup","lngfile","#$pappres#$p\locals\%Lang%.lng"
+If,%cb_CRC32%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","CRC32",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","CRC32",0
+If,%cb_CRC64%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","CRC64",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","CRC64",0
+If,%cb_MD5%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","MD5",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","MD5",0
+If,%cb_SHA-1%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-1",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-1",0
+If,%cb_SHA-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-256",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-256",0
+If,%cb_SHA-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-512",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-512",0
+If,%cb_SHA3-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA3-256",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA3-256",0
+If,%cb_SHA3-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA3-512",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA3-512",0
+RegHiveUnLoad,Tmp_Default
 
-// Accept EULA - DMDE appears to be populating the setupsign= field using some sort of hash (CRC?) of the lngfile= value
-List,Pos,%lngfileHashTable%,%Lang%,%LangPos%
-Math,Add,%HashPos%,%LangPos%,1
-List,Get,%lngfileHashTable%,%HashPos%,%LangHash%
-If,%cb_AcceptEULA%,Equal,True,IniWrite,%ConfigFile%,"Tmp-Setup","setupsign",%LangHash%
-Else,IniWrite,%ConfigFile%,"Tmp-Setup","setupsign",""
+[#RegisterShellExtension#]
+// ===============================================================================================================================
+// Name...........: RegisterShellExtension
+// Description....: Register OpenHashTab's shell property sheet handler.
+// Syntax.........: Run,%ScriptFile%,RegisterShellExtension
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[RegisterShellExtension]
+Echo,"Registering Property Sheet Handlers..."
 
-TxtDelLine,%ConfigFile%,"[Tmp-Setup]"
+RegHiveLoad,Tmp_Software,%RegSoftware%
 
-// Toolbar
-StrFormat,Left,%cmb_ToolbarIcons%,1,%ToolbarIcons%
-IniWrite,%ConfigFile%,"GUI","toolbar",%ToolbarIcons%
+// Register Shell Ext.
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","","OpenHashTab Shell Extension"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","","%PEPrograms%\%ProgramFolder%\OpenHashTab.dll"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","ThreadingModel","Apartment"
 
-// Hints
-If,%cb_ShowHints%,Equal,True,IniWrite,%ConfigFile%,"COMMON","stephints",1
-Else,IniWrite,%ConfigFile%,"COMMON","stephints",0
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","",""
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\AllFilesystemObjects\shellex\PropertySheetHandlers\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","",""
 
-// Exclude our PE drives (logical drives X:,Y:,Z:)
-IniWrite,%ConfigFile%,"COMMON","exclude","lX-Z"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","OpenHashTab Shell Extension"
 
-///////////////////////////////////////////////////////////////////////////////////
-// Shortcuts
+// Register Sumfile Assoc
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\OpenHashTab","","Checksum file"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\OpenHashTab\DefaultIcon","","%PEPrograms%\%ProgramFolder%\OpenHashTab.dll#$c0"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\OpenHashTab\shell\open\command","","%PEPrograms%\%ProgramFolder%\OpenHashTab.dll#$cStandaloneEntry #$q%1#$q"
 
-If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.blake3","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.blake2sp","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.hash","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.k12-264","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.md4","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.md5","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.md5sum","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.md5sums","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ph128-264","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ph256-528","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ripemd160","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha1","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha1sum","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha1sums","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha224","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha224sum","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha256","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha256sum","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha256sums","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha384","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha512","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha512sum","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha512sums","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3-512","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3-224","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3-256","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3-384","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sums","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xxh32","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xxh64","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xxh3-64","","OpenHashTab"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xxh3-128","","OpenHashTab"
+
+RegHiveUnLoad,Tmp_Software
 
 [#ExtractProgram#]
 // ===============================================================================================================================
@@ -113,7 +176,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -128,46 +191,8 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
-
-[#SetProgramArch#]
-// ===============================================================================================================================
-// Name...........: SetProgramArch
-// Description....: Configure the script for the correct source architecture.
-// Syntax.........: Run,%ScriptFile%,SetProgramArch
-// Parameters.....: 
-// Return values..: Sets the following local variables:
-//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
-// Author.........: Homes32
-// Remarks........:
-// Related........: 
-// ===============================================================================================================================
-[SetProgramArch]
-If,%SourceArch%,Equal,x64,Begin
-  Set,%DownloadURL%,%DownloadURLx64%
-End  
-Else,Begin
-  Set,%DownloadURL%,%DownloadURLx86%
-End
-
-[#LaunchProgram#]
-// ===============================================================================================================================
-// Name...........: LaunchProgram
-// Description....: Unpack and launch the program.
-// Syntax.........: Run,%ScriptFile%,LaunchProgram
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: btn_LaunchProgram
-// ===============================================================================================================================
-[LaunchProgram]
-Run,%ScriptFile%,SetProgramArch
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================
@@ -196,17 +221,15 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // ===============================================================================================================================
 [SetDefaultOptions]
 System,Cursor,Wait
-WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
-WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
-WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
-WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Recovery"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"DMDE"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [en]"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_ToolbarIcons,"2 - Medium Icons"
-WriteInterface,Value,%ScriptFile%,Interface,cb_AcceptEULA,False
-WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHints,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_LowercaseHashes,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_CRC32,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_CRC64,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_MD5,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA-1,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA-256,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA-512,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA3-256,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_SHA3-512,False
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -235,7 +258,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"DMDE is a powerful software for data searching, editing, and recovery on disks. Features include disk editor, simple partition manager (e.g. allows partition undeleting), a tool to create disk images and clones, RAID constructor, and file recovery.#$x#$xOn first run this script will download the setup file (~2 MB) and cache it for future builds.#$x#$xDMDE will run in Free mode with some restrictions."
+Message,"OpenHashTab is a shell extension for conveniently calculating and checking file hashes from file properties.#$x#$xOn first run this script will download the setup file (~3 MB) and cache it for future builds.#$x#$xOpenHashTab is Free and Open Source software."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -249,33 +272,26 @@ Message,"DMDE is a powerful software for data searching, editing, and recovery o
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch Program",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://dmde.com/
+web_Homepage=Homepage,1,10,377,9,60,18,https://github.com/namazso/OpenHashTab
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
-bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
-cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
-bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
-cb_DesktopShc=Desktop,1,3,12,104,122,18,False
-cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
-cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
-cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"File Recovery"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,DMDE
-bvl_Options=Options,1,12,150,90,197,184,8,Bold
-lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language="English [en]",1,4,160,126,150,21,"Chinese (Simplified) [zh-cn]","English [en]","French [fr]","German [de]","Italian [it]","Persian [fa]","Polish [pl]","Portuguese (Brazil) [pt-br]","Portuguese (Portugal) [pt-pt]","Russian [ru]","Spanish [es]"
-lbl_ToolbarIcons="Toolbar Icons",1,1,160,160,176,16,8,Normal
-cmb_ToolbarIcons="2 - Medium Icons",1,4,160,175,150,21,"0 - No Icons","1 - Small Icons","2 - Medium Icons"
-cb_AcceptEULA="Accept EULA",1,3,160,215,178,18,False
-cb_ShowHints="Show Step-by-Step Hints",1,3,160,235,177,18,False
+bvl_Options=Options,1,12,5,49,320,268,8,Bold
+cb_LowercaseHashes="Use lowercase hash values",1,3,19,77,155,18,False
+bvl_HashType="Display Hashes",1,12,18,121,153,185,8,Bold
+cb_CRC32=CRC32,1,3,29,137,59,18,True
+cb_CRC64=CRC64,1,3,29,157,95,18,False
+cb_MD5=MD5,1,3,29,177,47,18,True
+cb_SHA-1=SHA-1,1,3,29,197,53,18,True
+cb_SHA-256=SHA-256,1,3,29,217,64,18,True
+cb_SHA-512=SHA-512,1,3,29,236,76,18,False
+cb_SHA3-256=SHA3-256,1,3,29,257,76,18,False
+cb_SHA3-512=SHA3-512,1,3,29,277,76,18,False
 
 [InterfaceEncoded]
-play-hot.png=841,1220
 Trash.ico=1150,1212
 SetDefaults_16.png=2475,3404
 Advanced_16.png=2000,2768
@@ -283,12 +299,8 @@ Help_16.png=2830,3868
 VistalcoDownload_16.png=927,1348
 
 [AuthorEncoded]
-DMDE_80.png=5097,6892
-Logo=DMDE_80.png
-
-[EncodedFile-InterfaceEncoded-play-hot.png]
-lines=0
-0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+OpenHashTab_80.png=1464,2056
+Logo=OpenHashTab_80.png
 
 [EncodedFile-InterfaceEncoded-Trash.ico]
 lines=0
@@ -310,7 +322,6 @@ lines=0
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
 
-[EncodedFile-AuthorEncoded-DMDE_80.png]
-lines=1
-0=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
-1=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
+[EncodedFile-AuthorEncoded-OpenHashTab_80.png]
+lines=0
+0=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
