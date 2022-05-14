@@ -28,6 +28,10 @@ Download the [latest release]() and unpack it in the desired location. Please re
 1. …
 1. Profit!
 
+## Contributing
+
+Interested in contributing to PhoenixPE? Check out our [guidelines](https://github.com/PhoenixPE/PhoenixPE/wiki/ContributionGuidelines).
+
 # Frequently Asked Questions
 
 ### Can I use Winbuilder to build PhoenixPE?
