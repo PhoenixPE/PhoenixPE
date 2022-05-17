@@ -1,0 +1,27 @@
+---
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+﻿<!--PLEASE READ THIS CAREFULLY: You *MUST* read and complete the checklist below, by placing an x into each [ ] (so that it shows '[x]', NOT '[ x]' or '[x ]'), BEFORE clicking on 'Submit new issue'. Failure to perform these steps, WHICH ARE ONLY THERE TO HELP *YOU*, will result in the issue being dismissed without warning.-->
+
+Checklist
+---------
+- [ ] I performed a search in the issue tracker to see if my suggestion has already been asked/answered by somebody else.
+
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
+<!-- DO NOT make requests for obscure, proprietary or licensed/commercial software that can not be legally distributed. Likewise do not suggest features/scripts that are unlikely to be useful to the community at large. Your issue will be dismissed without warning.-->
+
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
+
+**Additional context**
+Add any other context or screenshots about the feature request here.
