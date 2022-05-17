@@ -13,20 +13,22 @@ PhoenixPE is a Pre-Install Environment based on Win10.
 
 ## Installation
 
-Download the [latest release]() and unpack it in the desired location. Please remember to use `7z x` when unpacking the archive from the command line to ensure full file paths remain intact.
-
-## Building PhoenixPE
-
-Build instructions are available [here](https://github.com/PhoenixPE/PhoenixPE/wiki/Building-PhoenixPE).
+Download the [latest release]() and unpack it in the desired location. Please remember to use `7z x` when unpacking the archive from the command line to ensure full file paths remain intact. To uninstall, simply delete the PhoenixPE folder.
 
 ## Documentation
 
 Documentation is available on the [PhoenixPE Wiki](https://github.com/PhoenixPE/PhoenixPE/wiki).
 
-## Contributing
+## Development
+
+PhoenixPE is developed and mantained by a community of developers/volunteers who enjoy sharing their ideas and work in their free time. 
 
 Interested in contributing to PhoenixPE? Check out our [guidelines](https://github.com/PhoenixPE/PhoenixPE/wiki/ContributionGuidelines).
 
-# Frequently Asked Questions (FAQ)
+## Enhancements/Bugs
+
+Please use the [GitHub issue tracker](https://github.com/PhoenixPE/PhoenixPE/issues) for reporting problems or suggesting new features.
+
+## Frequently Asked Questions (FAQ)
 
 Please check out our [Frequently Asked Questions](https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ) before posting an issue or asking for help in the fourms.
