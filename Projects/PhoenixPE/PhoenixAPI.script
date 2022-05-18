@@ -1641,7 +1641,7 @@ System,EndLocal
 // Syntax.........: JSONWrite,<JSONFile>,<Path>,<Value>
 // Parameters.....: #1 JSONFile - Full path to the JSON filed to edit.
 //                  #2 Path - GJSON Path notation used to locate the value to write.
-//                  #3 Value - The value to write.
+//                  #3 Value - The value to write. (Can be empty)
 // Return values..: #r - Returns 
 // Author.........: Homes32
 // Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj
@@ -1656,7 +1656,6 @@ GetParam,3,%Value%
 
 If,Not,ExistFile,%JSONFile%,Halt,"JSONWrite Syntax Error: The file [%JSONFile%] does not exist."
 If,%Path%,Equal,"",Halt,"JSONWrite Syntax Error: You must specify an JSON Path."
-If,%Value%,Equal,"",Halt,"JSONWrite Syntax Error: You must specify an value to write."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-v #$q%Value%#$q -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q #$q%Path%#$q"
 If,Not,#r,Equal,0,Halt,"JSONWrite ERROR: Failed to write the value of [%Value%] to [%Path%] in [%JSONFile%]."
