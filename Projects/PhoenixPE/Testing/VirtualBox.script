@@ -110,8 +110,11 @@ ShellExecute,Hide,%VBoxManage.exe%,"closemedium disk #$q%fb_VirtualHDD%#$q"
 ShellExecute,Hide,%VBoxManage.exe%,"createvm --name #$q%vmName%#$q --basefolder #$q%VMPath%#$q --ostype Windows10_64 --register"
 ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --description #$qCreated by %ProjectTitle% VirtualBox script.#$q"
 
-// VirtualBox needs at least 27MB Video RAM for fullscreen or seamless mode. 64MB ought to be enough for anybody ;)
-ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --vram 64"
+// VirtualBox needs at least 27MB Video RAM for fullscreen or seamless mode.
+ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --vram 128"
+
+// Set graphics controller to the recommended SVGA
+ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --graphicscontroller vboxsvga"
 
 // SATA Controller
 ShellExecute,Hide,%VBoxManage.exe%,"storagectl #$q%vmName%#$q --name #$qSATA Controller#$q --add sata --controller IntelAHCI"
@@ -136,17 +139,28 @@ Else,Begin
   ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --usb on"
 End
 
+// Enable the High Precision Event Timer (HPET). This avoids BSOD issues with multiple vCPU's (System Thread Exception) and VM performance issues.
+ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --hpet on"
+
 // Processor
 If,%cmb_numProc%,Equal,Auto,Begin
   System,GetEnv,"NUMBER_OF_PROCESSORS",%numProcessors%
   If,%numProcessors%,Equal,"",Set,%numProcessors%,1
    Else,Begin
-	// Set to n-1 to reserve an entire processor for the host system
-	Math,Sub,%numProcessors%,%numProcessors%,1
+	// Assign the VM half of the total CPU's, reserving the other half for the host system. IntDiv used to prevent error if NUM_OF_PROCESSORS returns an odd number.
+	Math,IntDiv,%numProcessors%,%remainder%,%numProcessors%,2
+	Set,%remainder%,Nil
   End
 End
 Else,Set,%numProcessors%,%cmb_numProc%
 ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --cpus %numProcessors%"
+
+// Specify the paravirtualization interface to provide to the guest. none|default|legacy|minimal|hyperv|kvm
+// Normally you would choose Default/Hyper-V for Windows OS, but this seems to be unstable in WinPE when more then 1 CPU is assigned.
+ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --paravirtprovider none"
+
+// Turn off Physical Address Extensions (PAE)
+ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --pae off"
 
 // Memory
 ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --memory %cmb_MemSize%"
@@ -304,6 +318,7 @@ WriteInterface,Value,%ScriptFile%,Interface,num_BootDelay,0
 WriteInterface,Value,%ScriptFile%,Interface,cmb_SharedFolder,"Disabled"
 WriteInterface,Value,%ScriptFile%,Interface,fb_SharedFolder,"#$pBaseDir#$p\Workbench\VM-Shared"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_VirtualHDD,"Disabled"
+// Toggle cmb_Firmware to visible so we force ToggleAdvancedOptions to hidden
 WriteInterface,Visible,%ScriptFile%,Interface,cmb_Firmware,True
 
 Run,%ScriptFile%,ToggleAdvancedOptions
@@ -321,7 +336,7 @@ Run,%ScriptFile%,ToggleAdvancedOptions
 // ===============================================================================================================================
 [ToggleAdvancedOptions]
 System,SetLocal
-ReadInterface,Visible,%ScriptFile%,Interface,num_BootDelay,%state%
+ReadInterface,Visible,%ScriptFile%,Interface,cmb_Firmware,%state%
 If,%state%,Equal,False,Begin
   If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Begin
 	Set,%Toggle%,True
