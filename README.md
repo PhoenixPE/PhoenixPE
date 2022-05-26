@@ -1,11 +1,26 @@
 # PhoenixPE
 
+[![Latest Release](https://img.shields.io/github/release-pre/phoenixpe/phoenixpe.svg?style=flat-square&label=Latest%20Release)](https://github.com/phoenixpe/phoenixpe/releases)
+[![Licence](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&label=License)](https://opensource.org/licenses/MIT)
+[![Download Stats](https://img.shields.io/github/downloads/phoenixpe/phoenixpe/total.svg?label=Downloads&style=flat-square)](https://github.com/phoenixpe/phoenixpe/releases)
+[![Contributors](https://img.shields.io/github/contributors/phoenixpe/phoenixpe.svg?style=flat-square&label=Contributors)](https://github.com/phoenixpe/phoenixpe/graphs/contributors)
+
 PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10. It can be booted via USB, CD/DVD, PXE/Network, or hard disk.
 
 * PhoenixPE uses the "next-generation" PEBakery engine resulting in faster build times and advanced features compared to legacy Winbuilder projects.
 * Designed from the ground up to be developer/contributor friendly and use clean, well documented code.
 * Easy to understand options and uncluttered user interface.
 * Flexible and fully customizable.
+
+## Features
+
+* Drive Backup/Cloneing/Imaging
+* Malware Removal
+* Password Recovery
+* Drive Partitioning/Install Prep.
+* Hardware Diagnostics
+* Offline OS Troubleshooting/Repair/Recovery
+* And more...
 
 ## License
 
