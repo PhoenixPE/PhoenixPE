@@ -5,16 +5,17 @@
 [![Download Stats](https://img.shields.io/github/downloads/phoenixpe/phoenixpe/total.svg?label=Downloads&style=flat-square)](https://github.com/phoenixpe/phoenixpe/releases)
 [![Contributors](https://img.shields.io/github/contributors/phoenixpe/phoenixpe.svg?style=flat-square&label=Contributors)](https://github.com/phoenixpe/phoenixpe/graphs/contributors)
 
-PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10. It can be booted via USB, CD/DVD, PXE/Network, or hard disk.
+PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10/Win11. It can be booted via USB, CD/DVD, PXE/Network, or hard disk.
 
 * PhoenixPE uses the "next-generation" PEBakery engine resulting in faster build times and advanced features compared to legacy Winbuilder projects.
+* Build from Win10/Win11 sources using either boot.wim or WinRE.wim as a base.
 * Designed from the ground up to be developer/contributor friendly and use clean, well documented code.
 * Easy to understand options and uncluttered user interface.
 * Flexible and fully customizable.
 
 ## Features
 
-* Drive Backup/Cloneing/Imaging
+* Drive Backup/Clone/Imaging
 * Malware Removal
 * Password Recovery
 * Drive Partitioning/Install Prep.
@@ -28,7 +29,7 @@ PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10. It can be boote
 
 ## Installation
 
-Download the [latest release]() and unpack it in the desired location. Please remember to use `7z x` when unpacking the archive from the command line to ensure full file paths remain intact. To uninstall, simply delete the PhoenixPE folder.
+Download the [latest release]() and unpack it in the desired location. To uninstall, simply delete the PhoenixPE folder.
 
 ## Documentation
 
