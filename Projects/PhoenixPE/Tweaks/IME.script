@@ -37,8 +37,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=2.0.0.0
-Date=2020-05-06
+Version=2.0.1.0
+Date=2022-05-28
 
 [Variables]
 %Debug%=False
@@ -263,6 +263,7 @@ End
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
+//                  joveler - Disable Old Hangul IME, cleanup en-US reg keys
 // Remarks........: 
 // Related........: Called from [Process]
 // ===============================================================================================================================
@@ -308,33 +309,29 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
   RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IMEKR",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IMEKR"
 End
 
-// Set keyboard to ko-KR;en-US - User
+// Set keyboard to ko-KR - User
 RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000412
-RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",2,00000409
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
 RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
 RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",68289554
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",0x04120412
 RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",67699721
 RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
 RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
 RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
 RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000412
 RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
 
-// Set keyboard to ko-KR;en-US - System
+// Set keyboard to ko-KR - System
 RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",1,00000412
-RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",2,00000409
 RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
 RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",68289554
+RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",0x04120412
 RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
 RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
+
+// Disable Hangul IME in StartCTFMon.cmd.
+// - `regsvr32` call generates Old Hangul IME registry key, "HKCU\SOFTWARE\Microsoft\CTF\TIP\{a1e2b86b-924a-4d43-80f6-8a820df7190f}".
+// - The key is deleted with `REG DELETE` to disable Old Hangul IME.
 
 [#Process-zh-CN#]
 // ===============================================================================================================================
@@ -604,7 +601,7 @@ btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_ToolbarOptions="Language Toolbar Settings",1,12,5,50,412,181,8,Bold
 lbl_LangBar=Position:,1,1,15,80,86,16,8,Normal
-cmb_LangBarPos="Docked in the TaskBar",1,4,64,75,155,21,"Docked in the TaskBar","Floating On Desktop",Hidden
+cmb_LangBarPos=Hidden,1,4,64,75,155,21,"Docked in the TaskBar","Floating On Desktop",Hidden
 cb_LangBarTransparent="Show the Language bar as transparent when inactive",1,3,15,110,286,18,True
 cb_LangBarShowAdditionalIcons="Show additional Language bar icons in the taskbar",1,3,15,130,271,18,True
 cb_LangBarShowTxtLbls="Show text labels on the Language bar",1,3,15,150,200,18,True
@@ -630,11 +627,11 @@ lines=0
 Cmd
 
 [Cmd]
-StartCTFMon.cmd=443,580
+StartCTFMon.cmd=676,752
 
 [EncodedFile-Cmd-StartCTFMon.cmd]
 lines=0
-0=/Td6WFoAAATm1rRGBMCkArsDIQEWAAAAAAAAAJT+vxrgAboBHF0AHWB8pGUx/g6oiqbPs2Y14X+dU4RgEN5Pv+bVOgT4AUztpY3kbtoXNJP92h1GctZyFMjSCoPK1v5M8p29WQoGQS9nOyKetm/SIGcXXs5juhQuTBsQjuEV118vD/VXbYbpQiS2lT6UQ7XcworaqReZBRKP3WHseUdtYB2yMmweZBwY95pf0T/rzFJaY4gjy73g9xCAkhRXGOHRr3+wyRVZW3qNnC2pal603VjK2CZs7Fwm4rE7izB2yvAWcgLODJW8WRELw4F/bqVeAKnKiXee77XQxVKOTXPjW4Ez3jpOKmOvUn1Fl/UxI9dq4mvouIRMLGUWP04CQDGRz5/rt9gBh4/S2IwtxKl5jsGtzjfIWIeNK/jcyf9mb2cK4sAACFvJKRVwAuwAAcACuwMAAMvuSGCxxGf7AgAAAAAEWVp4nOMPLkksKnEOcfPNz9NLzk1hGAUjCuxmhNApjNjlZ/Isb2JiAwDlKwh+ozjp6AEAAAACAAAAKwAAAGQBAAAAAAAAAQAAAAAAAAAAAAAA
+0=/Td6WFoAAATm1rRGBMCkA6QFIQEWAAAAAAAAAN+fEFHgAqMBnF0AHWB8pGUx/g6oiqbPs2Y14X+dU4RgEN5Pv+bVOgT4AUztpY3kbtoXNJP92h1GctZyFMjSCoPK1v5M8p29WQoGQS9nOyKetm/SIGcXXs5juhQuTBsQjuEV118vD/VXbYbpQiS2lT6UQ7XcworaqReZBRKP3WHseUdtYB2yMmweZBwY95pf0T/rzFJaY4gjy73g9xCAhmuUvFtdv5QpEomz8IKQHviG7r7UgkV0uvkGjW5gDnhl5G8DPDltTvl/vAAsnTu9X6UmA99DA7Hcx1wuTgcZ0W+LeQaD/6S0lr2H5qmshx+MZbhwZIUxh5l+wdSn88xL7O69DxMR9E6QGbkop2kjR38MKo/B4N5L4bpJruWB/asA9kIl8Enpx4ljM7aUDjlY0oVoNdlWUgkjSxdKszQBg9ijApOW1f60UYTadglKbYyNiqbgXDgpch/t3OhtN7F+rxkvmUcj91xyznqIdoMampZWWweJqlELtztJyLETXRIcTi454ivp1PqH2L/WvnSEe6dt3RszSZLQ5yRvOcKDwniGfc636wYMwADqjL1p6Cv+qQABwAOkBQAAAPzfUbHEZ/sCAAAAAARZWnic4w8uSSwqcQ5x883P00vOTWEYBSMKLGGC0E8YsctLnFxrxsQGAPDFCN645VfBAQAAAAIAAAArAAAA5AEAAAAAAAABAAAAAAAAAAAAAAA
 
 [EncodedFile-AuthorEncoded-WIRELESS_KBD_80.png]
 lines=2
