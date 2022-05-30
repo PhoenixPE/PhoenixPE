@@ -37,8 +37,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=2.0.2.0
-Date=2022-05-28
+Version=2.0.2.1
+Date=2022-05-30
 
 [Variables]
 %Debug%=False
@@ -238,10 +238,34 @@ End
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: WARNING: This section is incomplete has not been tested.
+//                  joveler - Preliminary file & registry setup
+// Remarks........: WARNING: This section is incomplete.
+//                  ctfmon.exe is loaded, but crashes on kana input.
 // Related........: Called from [Process]
 // ===============================================================================================================================
 [Process-ja-JP]
+
+Echo,"Processing Japanese IME components..."
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+RequireFileEx,AppendList,\Windows\System32\tsf3gip.dll
+RequireFileEx,AppendList,\Windows\IME\IMEJP\DICTS
+RequireFileEx,AppendList,\Windows\System32\IME\IMEJP
+// RequireFileEx,AppendList,\Windows\System32\ja-JP\JpnComponentLayouts.dgml
+// RequireFileEx,AppendList,\Windows\System32\ja-JP\JpnComponentLayoutsHwkb.dgml
+
+// WoW64
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RequireFileEx,AppendList,\Windows\SysWOW64\IME\IMEJP\IMJPAPI.DLL
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Registry
 
 Echo,"Registering Japanese IME components..."
 
@@ -254,6 +278,15 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
   RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IME\15.0\IMEJP",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IME\15.0\IMEJP"
   RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IMEJP",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IMEJP"
 End
+
+// Set keyboard to ja-JP - User
+RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000411
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000411,00000411
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{03B5835F-F03C-411B-9CE2-AA23E1171E36}"
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{A76C93D9-5523-4E90-AAFA-4DB112F9AC76}"
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
+RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000411
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
 
 [#Process-ko-KR#]
 // ===============================================================================================================================
@@ -329,7 +362,7 @@ RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{3474
 RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
 RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
 
-// Disable Hangul IME in StartCTFMon.cmd.
+// Disable Old Hangul IME in StartCTFMon.cmd.
 // - `regsvr32` call generates Old Hangul IME registry key, "HKCU\SOFTWARE\Microsoft\CTF\TIP\{a1e2b86b-924a-4d43-80f6-8a820df7190f}".
 // - The key is deleted with `REG DELETE` to disable Old Hangul IME.
 
@@ -627,11 +660,7 @@ lines=0
 Cmd
 
 [Cmd]
-StartCTFMon.cmd=676,752
-
-[EncodedFile-Cmd-StartCTFMon.cmd]
-lines=0
-0=/Td6WFoAAATm1rRGBMCkA6QFIQEWAAAAAAAAAN+fEFHgAqMBnF0AHWB8pGUx/g6oiqbPs2Y14X+dU4RgEN5Pv+bVOgT4AUztpY3kbtoXNJP92h1GctZyFMjSCoPK1v5M8p29WQoGQS9nOyKetm/SIGcXXs5juhQuTBsQjuEV118vD/VXbYbpQiS2lT6UQ7XcworaqReZBRKP3WHseUdtYB2yMmweZBwY95pf0T/rzFJaY4gjy73g9xCAhmuUvFtdv5QpEomz8IKQHviG7r7UgkV0uvkGjW5gDnhl5G8DPDltTvl/vAAsnTu9X6UmA99DA7Hcx1wuTgcZ0W+LeQaD/6S0lr2H5qmshx+MZbhwZIUxh5l+wdSn88xL7O69DxMR9E6QGbkop2kjR38MKo/B4N5L4bpJruWB/asA9kIl8Enpx4ljM7aUDjlY0oVoNdlWUgkjSxdKszQBg9ijApOW1f60UYTadglKbYyNiqbgXDgpch/t3OhtN7F+rxkvmUcj91xyznqIdoMampZWWweJqlELtztJyLETXRIcTi454ivp1PqH2L/WvnSEe6dt3RszSZLQ5yRvOcKDwniGfc636wYMwADqjL1p6Cv+qQABwAOkBQAAAPzfUbHEZ/sCAAAAAARZWnic4w8uSSwqcQ5x883P00vOTWEYBSMKLGGC0E8YsctLnFxrxsQGAPDFCN645VfBAQAAAAIAAAArAAAA5AEAAAAAAAABAAAAAAAAAAAAAAA
+StartCTFMon.cmd=579,720
 
 [EncodedFile-AuthorEncoded-WIRELESS_KBD_80.png]
 lines=2
@@ -642,3 +671,7 @@ lines=2
 [AuthorEncoded]
 WIRELESS_KBD_80.png=7618,10264
 Logo=WIRELESS_KBD_80.png
+
+[EncodedFile-Cmd-StartCTFMon.cmd]
+lines=0
+0=/Td6WFoAAATm1rRGBMCMA8MEIQEWAAAAAAAAAHajaTLgAkIBhF0AHWB8pGUx/g6oiqbPs2Y14X+dU4RgEN5Pv+bVOgT4AUztpY3kbtoXNJP92h1GctZyFMjSCoPK1v5M8p29WQoGQS9nOyKetm/SIGcXXs5juhQuTBsQjuEV118vD/VXbYbpQiS2lT6UQ7XcworaqReZBRKP3WHseUdtYB2yMmweZBwY95pf0T/rzFJaY4gjy73g9xCAhmuUvFtdv5QpEomz8IKQHviG7r7UgkV0uvkGjW5gDnhl5G8DPDltTvl/vAAsnTu9X6UmA99DA7Hcx1wuTgcZ0W+LeQaD/6S0lr2H5qmshx+MZbhwZIUxh5l+wdSn88xL7O69DxMR9E6QGbkop2kjR38MKo/B4N5L4bpJruWB/asA9kIl8Enpx4ljM7aUDjlY0oVoNdlWUgkjSxdKszQBg9ijApOW1f60UYTadglKbYyNiqbgXDgpch/t3OhtN7F+rxkvmUcj91xyznqIdoMampZWWweJqlELtztJyLETXRIcTi454ivp1PqH2GnTdOS4QAAxpgBnCo/QUQABqAPDBAAAutRLErHEZ/sCAAAAAARZWnic4w8uSSwqcQ5x883P00vOTWEYBSMKODNB6DOM2OXPZpy7wsQGAORGCXhkE8YnAQAAAAIAAAArAAAAzAEAAAAAAAABAAAAAAAAAAAAAAA
