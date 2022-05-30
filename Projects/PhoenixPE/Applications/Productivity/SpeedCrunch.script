@@ -29,23 +29,24 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=SumatraPDF
+Title=SpeedCrunch
 Author=Homes32
 Level=5
-Version=1.0.4.0
-Description=(v3.3.3) Sumatra PDF is a free PDF, eBook (ePub, Mobi), XPS, DjVu, CHM, Comic Book (CBZ and CBR) reader for Windows.
-Date=2022-05-29
+Version=1.0.0.0
+Description=(v0.12 x86) SpeedCrunch is a high-precision scientific calculator featuring a fast, keyboard-driven user interface.
+Date=2022-05-27
 Selected=False
 Mandatory=False
 
 [Variables]
-%ProgramFolder%="SumatraPDF"
-%ProgramVersion%=3.3.2
-%ProgramExex86%="SumatraPDF-%ProgramVersion%-86.exe"
-%ProgramExex64%="SumatraPDF-%ProgramVersion%-64.exe"
-%DownloadURLx86%=https://kjkpubsf.sfo2.digitaloceanspaces.com/software/sumatrapdf/rel/SumatraPDF-%ProgramVersion%.zip
-%DownloadURLx64%=https://kjkpubsf.sfo2.digitaloceanspaces.com/software/sumatrapdf/rel/SumatraPDF-%ProgramVersion%-64.zip
-%SetupFile%="Sumatra.zip"
+%ProgramFolder%="SpeedCrunch"
+%ProgramExe%="SpeedCrunch.exe"
+%ProgramVersion%=0.12
+// Only x86 builds are provided at this time
+%DownloadURLx86%=https://bitbucket.org/heldercorreia/speedcrunch/downloads/SpeedCrunch-%ProgramVersion%-win32.zip
+%DownloadURLx64%=https://bitbucket.org/heldercorreia/speedcrunch/downloads/SpeedCrunch-%ProgramVersion%-win32.zip
+%SetupFile%="SpeedCrunch-%SourceArch%.zip"
+%ConfigFile%="%TargetPrograms%\%ProgramFolder%\SpeedCrunch.ini"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -62,21 +63,10 @@ Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
-// Language
-StrFormat,SPLIT,%cmb_Language%,"[",2,%lng%
-StrFormat,RTRIM,%lng%,1,%lng%
-TXTAddLine,"%TargetPrograms%\%ProgramFolder%\SumatraPDF-settings.txt","UiLanguage=%lng%",APPEND
-
-// File Associations
-RegHiveLoad,Tmp_Software,%RegSoftware%
-If,%cb_cbr%,Equal,True,Associate,".cbr","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_cbz%,Equal,True,Associate,".cbz","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_chm%,Equal,True,Associate,".chm","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_djvu%,Equal,True,Associate,".djvu","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_epub%,Equal,True,Associate,".epub","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_mobi%,Equal,True,Associate,".mobi","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_pdf%,Equal,True,Associate,".pdf","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_xps%,Equal,True,Associate,".xps","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+IniWrite,%ConfigFile%,"General","ConfigVersion",1200
+IniWrite,%ConfigFile%,"SpeedCrunch","Display\ColorSchemeName",%cmb_ColorScheme%
+IniWrite,%ConfigFile%,"SpeedCrunch","General\Language","C"
+IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",%cb_ShowKeypad%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -98,7 +88,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
+FileCopy,"%ProjectTemp%\%ProgramFolder%\speedcrunch-%ProgramVersion%-win32\*.*",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -133,11 +124,9 @@ If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned wa
 [SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
   Set,%DownloadURL%,%DownloadURLx64%
-  Set,%ProgramExe%,%ProgramExex64%
 End  
 Else,Begin
   Set,%DownloadURL%,%DownloadURLx86%
-  Set,%ProgramExe%,%ProgramExex86%
 End
 
 [#LaunchProgram#]
@@ -185,22 +174,16 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // ===============================================================================================================================
 [SetDefaultOptions]
 System,Cursor,Wait
-WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Productivity"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"SumatraPDF"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [en]"
-WriteInterface,Value,%ScriptFile%,Interface,cb_cbr,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_cbz,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_chm,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_djvu,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_epub,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_mobi,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_pdf,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_xps,True
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"SpeedCrunch"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"System Default"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_ColorScheme,"Terminal"
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowKeypad,False
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -229,7 +212,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"Sumatra PDF is a free PDF, eBook (ePub, Mobi), XPS, DjVu, CHM, Comic Book (CBZ and CBR) reader for Windows.#$x#$xOn first run this script will download the setup file (~6 MB) and cache it for future builds."
+Message,"SpeedCrunch is a high-precision scientific calculator featuring a fast, keyboard-driven user interface. It is free and open-source software, licensed under the GPL.#$x#$xOn first run this script will download the setup file (~20 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -243,39 +226,33 @@ Message,"Sumatra PDF is a free PDF, eBook (ePub, Mobi), XPS, DjVu, CHM, Comic Bo
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch SumatraPDF",1,8,5,5,130,25,LaunchProgram,play-hot.png,False
+btn_LaunchProgram="Launch SpeedCrunch",1,8,5,5,130,25,LaunchProgram,play-hot.png,True
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://www.sumatrapdfreader.org
+web_Homepage=Homepage,1,10,377,9,60,18,http://speedcrunch.org/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
-cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,True,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
 bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
 cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,Productivity
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,SumatraPDF
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,SpeedCrunch
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language="English [en]",1,4,160,126,150,21,"Afrikaans [af]","Albanian [sq]","Arabic [ar]","Armenian [am]","Azerbaijani [az]","Basque [eu]","Belarusian [by]","Bengali [bn]","Bosnian [bs]","Bulgarian [bg]","Burmese [mm]","Catalan [ca]","Catalan-Valencian [ca-xv]","Chinese Simplified [cn]","Chinese Traditional [tw]","Cornish [kw]","Croatian [hr]","Czech [cz]","Danish [dk]","Dutch [nl]","English [en]","Estonian [et]","Finnish [fi]","French [fr]","Frisian [fy-nl]","Galician [gl]","Georgian [ka]","German [de]","Greek [el]","Hebrew [he]","Hindi [hi]","Hungarian [hu]","Indonesian [id]","Irish [ga]","Italian [it]","Japanese [ja]","Javanese [jv]","Korean [kr]","Kurdish [ku]","Latvian [lv]","Lithuanian [lt]","Macedonian [mk]","Malayalam [ml]","Malaysian [my]","Nepali [ne]","Norwegian [no]","Norwegian [nn]","Persian [fa]","Polish [pl]","Portuguese - Brazil [br]","Portuguese - Portugal [pt]","Punjabi [pa]","Romanian [ro]","Russian [ru]","Serbian - Cyrillic [sr-rs]","Serbian - Latin [sp-rs]","Shona [sn]","Sinhala [si]","Slovak [sk]","Slovenian [sl]","Spanish [es]","Swedish [sv]","Tagalog [tl]","Tamil [ta]","Thai [th]","Turkish [tr]","Ukrainian [uk]","Uzbek [uz]","Vietnamese [vn]","Welsh [cy]"
-lbl_FileAssociations="File Associations:",1,1,160,180,174,16,8,Bold
-cb_cbr=.cbr,1,3,160,195,50,18,True
-cb_cbz=.cbz,1,3,160,214,49,18,True
-cb_chm=.chm,1,3,160,232,53,18,True
-cb_djvu=.djvu,1,3,160,250,52,18,True
-cb_epub=.epub,1,3,223,195,56,18,True
-cb_mobi=.mobi,1,3,223,214,52,18,True
-cb_pdf=.pdf,1,3,223,232,55,18,True
-cb_xps=.xps,1,3,223,250,48,18,True
+cmb_Language="System Default",1,4,160,126,165,21,"System Default"
+lbl_ColorScheme="Color Scheme",1,1,159,160,153,16,8,Normal
+cmb_ColorScheme=Terminal,1,4,160,176,165,21,"Solarized Dark","Solarized Light",Standard,Sublime,Terminal,Tomorrow,"Tomorrow Night","Tomorrow Night Blue","Tomorrow Night Bright","Tomorrow Night Eighties"
+cb_ShowKeypad="Show Keypad",1,3,160,205,176,18,False
 
 [AuthorEncoded]
-SumatraPDF.png=7244,9760
-Logo=SumatraPDF.png
+SpeedCrunch_80.png=9700,13040
+Logo=SpeedCrunch_80.png
 
 [InterfaceEncoded]
 play-hot.png=841,1220
@@ -288,12 +265,6 @@ Trash.ico=1150,1212
 [EncodedFile-InterfaceEncoded-play-hot.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
-
-[EncodedFile-AuthorEncoded-SumatraPDF.png]
-lines=2
-0=iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAIh2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOS0xMS0xNFQyMDoyODoxNS0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTEtMTRUMjA6Mjk6NDItMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTEtMTRUMjA6Mjk6NDItMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOmNhYTg0Y2Y1LTg1YTctYTQ0ZC05OTE5LWY0MjI2MzlhNjgzYiIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjdkMGNhM2NlLTFkOWYtZDE0MC1hM2M0LWQ4MWUyODlkNjQ4NSIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjE4Mjg2ODQwLTQ0N2MtNjY0ZS05YTdmLWVjZWE2NTYxZTc1NyI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MTgyODY4NDAtNDQ3Yy02NjRlLTlhN2YtZWNlYTY1NjFlNzU3IiBzdEV2dDp3aGVuPSIyMDE5LTExLTE0VDIwOjI4OjE1LTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjEuMCAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjZiNGMwZjkyLTRjMDYtY2E0NS1hYTE3LTE0MzFkMGQxODE4OCIgc3RFdnQ6d2hlbj0iMjAxOS0xMS0xNFQyMDoyOTo0Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjb252ZXJ0ZWQiIHN0RXZ0OnBhcmFtZXRlcnM9ImZyb20gYXBwbGljYXRpb24vdm5kLmFkb2JlLnBob3Rvc2hvcCB0byBpbWFnZS9wbmciLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImRlcml2ZWQiIHN0RXZ0OnBhcmFtZXRlcnM9ImNvbnZlcnRlZCBmcm9tIGFwcGxpY2F0aW9uL3ZuZC5hZG9iZS5waG90b3Nob3AgdG8gaW1hZ2UvcG5nIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpjYWE4NGNmNS04NWE3LWE0NGQtOTkxOS1mNDIyNjM5YTY4M2IiIHN0RXZ0OndoZW49IjIwMTktMTEtMTRUMjA6Mjk6NDItMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMS4wIChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6NmI0YzBmOTItNGMwNi1jYTQ1LWFhMTctMTQzMWQwZDE4MTg4IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjE4Mjg2ODQwLTQ0N2MtNjY0ZS05YTdmLWVjZWE2NTYxZTc1NyIgc3RSZWY6b3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjE4Mjg2ODQwLTQ0N2MtNjY0ZS05YTdmLWVjZWE2NTYxZTc1NyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PirbhH0AABNrSURBVHja7Zx5kBzlecaf7p7puXZn70OrRfdqJcXisERJKgRKdCAQRUxIQXEpuBKFBIPB8EfssknlAMrGSTCEglQCruCKSWLH4NjEFFUphzgOlCG4wBRIHLrQSnvNzM7Z3dPd09153z52Z3dntCMJYVHMV/XVzM709HT/+nnPr2cFx3HQHKc/xCaCJsAmwCbAJsDmaAJsAmwCbAJsjibAJsBP2gjVejEWi9X9ANfOiUQCkiTBsiyEw2GEQqHp57ZtQ1VVdx/8d6VSgWEYaGlpcT+jKArK5TLa29vd56Ioup/hffDrgiCgr68P77//Pvr7+yHLMiYnJ93vpc+0xOPxlkKhkKR9yvRZmQ4pTtOuf7zTU7QsoWzZKBumrUWiMTMaTTi2LWSymawKx+StIUXa0d3Tg2w2B0MZxbLlA+jrbaPzcPD66683BvDjGAyK4ZmmGcAbJODnEZjFBOi8rq6uRbqu99GF6SdwHQS5jf5O0HYJ2q6VLpDEUHkSf1i2Q/tyaD+gC8YshAChP2kjgS+yjUQUuiRlK5I1ic5kaGrFQFgJSY7RkkDattI6kFYiK8NpOPJUqhR7PJUqjFqW3rgCz9ZgWKRIkU56WNO08wngRQRjmFQ2zPBotrC6eTtWLCuTJ8NmUKxoi/62KoCqOSgqBM6YASRHbHR12OjvsTHQZ7mP3Z30d7eFvi4bHW02WhIOQXMirQknIoeBSMhMyGENIQn0eV/LFk3WdhS442uDo3/3tPJ4IlH4+AAGLTIGwWZJ0FZFIpFtBOrStra2LfTWaobCJs3qY0iBKfNnq1/j7dh8iiUgXxBgV0hZoo2eLgsb1leweoWBlcsqWEVz2WIL5y3ywEXa6FtafC8vseRpVnw4waPtP7erwAWi5c8lgRWDxtJEey/a4sLZB8gny76QfRs9ruvu7v4c+bE9pKotBEtioOwPeZtAXewjGVrw6JmkTfCBXEFEPs+mbmNwwMCWjTo2XqBj/Vod64ZMDC2vINzjqyUYbGllvno0Mz4U9oG2D6baqlH/NYF5USjobJN6S7k8StnjZw8gg2Mw+XxeSiaT111wwQWfX7x48W4OFK
-1=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
-2=VNMUXAVyY/LXPeIxLzq6DeTay7VuHsjbVawzW1Dimc2HcqYpNp5I+3eaTlAd+kpXV9c23gvfGNTebpwTqjt2AnjtJc9Vfe/fa29zyYUUnJbAbUqc6dJmUYvnR0+MNw6QC3ivblR+RKa8LRqNulE4HrfOCYAvv0ZRc/vJt7n3HlKfdvrBblqBFfaBIcrolcbXhf1UhrspP+TlS0kKuQcSjTYOsN6B6yRis0Eh2/apn3MnlWL/+SzQtRoYGT1JpaTOuIH61YCXjyoa8pHWlsYBcueEIzFVI0cLhcLPvBvARcRijQNU6wTrRf1AR+8CeaTveybTpwbvpmuBt0mdO68NSs/6265cXpXCnAwg7WNsUkj3dHc0bsLcPQ5KOTLn75ISt4XD/Q3lGcG9xTt3AI8/QimR7CWqtuUp6opdpI7+qntlasrUT3YfAI58yAs+NZpsfv+O98lqP38tsPlK/6SPe8n4qhXAkw950ZhX5Hi7Mu17M/nHjZtnVt3qh3g+FgmZnJQeO3aocYBBIPF/5PJv5AsfEUUh0ahJcUI8tM6bNd8vYqYRW+t9/677q2441eSu6p5D+o5uUvq+P6lV7NMc82tf4eQK1PUQyoaYtSy1cYDBbRtsuvF4PE8A/0UQ1H2GITfsfJ3ybKXMei404Ly5n5epsw/U6CI7VWbn3xTkpr7HTrKPhe5PpLIzlQvpuWJkYsmypY37QO4M8wz77RDKB58olQpkAhF8qgZdhHwpnj0xUU5l0qONAwzWHtgPclVCdfEbqqr8PJu1PjXsBN8KssXIJJWxmbKmNG7CcxfQTZPXcwsPjY4Kl3qe1Vr4y2uZJeqYcq3FnEZvBqr1uo1ZP9LE3B/mzLnJyTmJKzk2Gj6hlEWtr6+7cYCcOFcPrzuNn4yMlD8geG7jSTgbP9U2sfBdWAu9bnu+y73O9ow/nQYpVV0o3wcK1T86DPbBkzxWthQfz2XzyFdOnHoQqTZpvi3k+PHI1w4fFr+/YoWAVCpkG+Worhth1V1EswS7WIJSLNhqsRjPVyoRnV1AWRcVwYFNtaSRmbJzvLxLEZ1vTJKKxbBSUkKlkOiItptiSAqdkMH3a9aUxUJVBac19F1yyI5QzR6vVAQnGrGk9qTZxlkZL022t1ptHUmpQxQESQ5bMUmEHI+q0ZZ4uaOzVUyGJDEcDtlyW1JLJpSycGgkfKi9PYSWSO37A2uuvvEtErOrCu9m88HBpVi/PrkrFLJastnwRCplFlW1olC+aNk2H15Yk+WENjmplFLpPAUhqWofNvinYDJV+bZlQ6LEjLve6cmR2XL46LzYtEQ7ewfd3Da4bXkqm/XXvAV36XNRf5vQ2RFrMY1S0ratkCA44b4udC7ujQx8OC68+fb+g0etiluZNQawORofzX860QTYBNgE2ATYHE2ATYBNgE2AzdEE2ATYBNgE2BxNgE2ATYCfnvH/ZNO39BMFN7IAAAAASUVORK5CYIJ4nOMLLs1NLClKDHBx0yvIS2cYBSML+Mjgl5dIzTVjZAAAJ58GwrZ7xDsBAAAAAgAAACYAAABMHAAAAAAAAAEAAAAAAAAAAAAAAA
 
 [EncodedFile-InterfaceEncoded-SetDefaults_16.png]
 lines=0
@@ -314,3 +285,10 @@ lines=0
 [EncodedFile-InterfaceEncoded-Trash.ico]
 lines=0
 0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-SpeedCrunch_80.png]
+lines=3
+0=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
+1=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
+2=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
+3=KFqSMfyCt//6x75pGXOYkSDnQTWYPLl3HzBTRqVc/0Cnd9tfV3SDYNI/3I+iFMTxeyUMTMFzDGkNowzLq1gwxvXc1QEJBzDusUacTSSdkhfmwt0k6k3NBWGUGk0eGTHI0uLGPiV432NuJsT4J3s0FNaFPPJD5JklwqompQZ4xG5bLmz12SqcuLZuLcJTO2UKrW+rsit6oHVw9xF6fRiVm0UGl1wV2t9nNdS/w8C71dyHA/rFmFjPQj/d1IsYy5MInM5ZHRSUylhilWmuGhtIWKZpmdFRERa20z72mMkWY3lkjjubRX8UREG48JoA3dVMBp/OdixoxzzqmqRqrqnHMu7Ycum1LdMOxcf07dqu5Qi+VIJ+fUjc84JubQhQLUr/N/KbhuAJsxsSCpAO1Kx5LZlYZMCvHiGo9U61CsINMLmHoIYYRUa3G2nc4H1lrjeV4skokBblTe2kEUEXzf17aWEDXGNNrrky2+ElboIoeqWqPqWeeEOj2Zukt5To04DSOo1NSVykqxCsWy00KpTj28sZ3YOzVMKh/PLiZyjeZEaTlkwRgjQRCQANl4X4wxWGvV9/12KaQBlmn2CwqJtGlCVWJRbHaquvi5c+q0EcZJHCM7R61Wo16v3/Ag/x9+ctdirlitlgAAAABJRU5ErkJggnicEwouSE1NcS4qzUvOiLcw0CvIS2cYBSMHPFHFL7+5Nf4iIwMANAUKE/oGc9ABAAAAAgAAACoAAADkJQAAAAAAAAEAAAAAAAAAAAAAAA
