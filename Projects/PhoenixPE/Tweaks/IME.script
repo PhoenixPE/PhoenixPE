@@ -43,6 +43,14 @@ Date=2022-05-30
 [Variables]
 %Debug%=False
 
+[#WinRT-Remarks#]
+// ===============================================================================================================================
+// Starting from v19H1, Windows IME depends on `Windows.UI.Core.TextInput` WinRT API.
+// WinRT API is used to draw popup window of IME, and breaks several IME features.
+// - Korean IME: Basic hangul typing works. Hanja conversion, special character input is broken.
+// - Japanese IME: Kana typing crashes ctfmon.
+// ===============================================================================================================================
+
 [Process]
 Echo,"Configuring IME common components..."
 
@@ -239,8 +247,8 @@ End
 // Return values..: 
 // Author.........: Homes32
 //                  joveler - Preliminary file & registry setup
-// Remarks........: WARNING: This section is incomplete.
-//                  ctfmon.exe is loaded, but crashes on kana input.
+// Remarks........: WARNING: kana-mode only works on v1809 or lower.
+//                  On v19H1 or higher, ctfmon.exe is loaded but crashes on kana-mode.
 // Related........: Called from [Process]
 // ===============================================================================================================================
 [Process-ja-JP]
@@ -252,8 +260,6 @@ Echo,"Building a list of required files...#$x#$xThis can take awhile, please be 
 RequireFileEx,AppendList,\Windows\System32\tsf3gip.dll
 RequireFileEx,AppendList,\Windows\IME\IMEJP\DICTS
 RequireFileEx,AppendList,\Windows\System32\IME\IMEJP
-// RequireFileEx,AppendList,\Windows\System32\ja-JP\JpnComponentLayouts.dgml
-// RequireFileEx,AppendList,\Windows\System32\ja-JP\JpnComponentLayoutsHwkb.dgml
 
 // WoW64
 If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
@@ -297,7 +303,7 @@ RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99
 // Return values..: 
 // Author.........: Homes32
 //                  joveler - Disable Old Hangul IME, cleanup en-US reg keys
-// Remarks........: 
+// Remarks........: WARNING: Hanja/Special character input only works on v1809 or lower.
 // Related........: Called from [Process]
 // ===============================================================================================================================
 [Process-ko-KR]
@@ -638,11 +644,13 @@ cmb_LangBarPos=Hidden,1,4,64,75,155,21,"Docked in the TaskBar","Floating On Desk
 cb_LangBarTransparent="Show the Language bar as transparent when inactive",1,3,15,110,286,18,True
 cb_LangBarShowAdditionalIcons="Show additional Language bar icons in the taskbar",1,3,15,130,271,18,True
 cb_LangBarShowTxtLbls="Show text labels on the Language bar",1,3,15,150,200,18,True
+rtf_WinRTRemarks=WinRTRemarks.rtf,1,6,5,250,412,130
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
 Advanced_16.png=2000,2768
 Help_16.png=2830,3868
+WinRTRemarks.rtf=484,564
 
 [EncodedFile-InterfaceEncoded-SetDefaults_16.png]
 lines=0
@@ -675,3 +683,8 @@ Logo=WIRELESS_KBD_80.png
 [EncodedFile-Cmd-StartCTFMon.cmd]
 lines=0
 0=/Td6WFoAAATm1rRGBMCMA8MEIQEWAAAAAAAAAHajaTLgAkIBhF0AHWB8pGUx/g6oiqbPs2Y14X+dU4RgEN5Pv+bVOgT4AUztpY3kbtoXNJP92h1GctZyFMjSCoPK1v5M8p29WQoGQS9nOyKetm/SIGcXXs5juhQuTBsQjuEV118vD/VXbYbpQiS2lT6UQ7XcworaqReZBRKP3WHseUdtYB2yMmweZBwY95pf0T/rzFJaY4gjy73g9xCAhmuUvFtdv5QpEomz8IKQHviG7r7UgkV0uvkGjW5gDnhl5G8DPDltTvl/vAAsnTu9X6UmA99DA7Hcx1wuTgcZ0W+LeQaD/6S0lr2H5qmshx+MZbhwZIUxh5l+wdSn88xL7O69DxMR9E6QGbkop2kjR38MKo/B4N5L4bpJruWB/asA9kIl8Enpx4ljM7aUDjlY0oVoNdlWUgkjSxdKszQBg9ijApOW1f60UYTadglKbYyNiqbgXDgpch/t3OhtN7F+rxkvmUcj91xyznqIdoMampZWWweJqlELtztJyLETXRIcTi454ivp1PqH2GnTdOS4QAAxpgBnCo/QUQABqAPDBAAAutRLErHEZ/sCAAAAAARZWnic4w8uSSwqcQ5x883P00vOTWEYBSMKODNB6DOM2OXPZpy7wsQGAORGCXhkE8YnAQAAAAIAAAArAAAAzAEAAAAAAAABAAAAAAAAAAAAAAA
+
+
+[EncodedFile-InterfaceEncoded-WinRTRemarks.rtf]
+lines=0
+0=eJxVUMFuGkEM7RmJf/C5UtHMQtoiTgmqSoqaQxKpB5yDmfUuUwZ7NTNLVCH+vcOGHHKxLPv5ved3wpgbiyTJD8V17Xw2x5qbxqBo750eOsqXQSBprZlO3/uGrZlVJ2xUct6G0hhsxAds3I5i4mxgqZI0UFqcz+PRCZ0GjQUKC4xcVzc32EZmMbgNPZvFgPmMLQtHyhrh0btdwRmwZmImdm5m9oxHz697L/UMe2dhPMKOYo2JKmMwherb11IPfcgWXXlsO7hKlcHB/nf4c/v4cP/wsyyLbJl6YXjSA8P97x8JdnRk8Cn1nEAFjna+slCcBMocIWkfHU8uiuPRZq2RSS53L280X+COSoKwKkp9gPyv89LCq8Z9mrwjyu4vAUkNTx07TwGWJSxyF3ovXZ+LOmyj7lmuN5tf1JFw4g9Kz2/kXmBNQnDQmqHW4lo0D5JXlyXTT/8BIYCmbnic4w3PzAsKCU8sytMrKkljGAUjDDxhhNBRjNjl535csoOBDQC7xwkk+j+LUgEAAAACAAAAKQAAAFoBAAAAAAAAAQAAAAAAAAAAAAAA
