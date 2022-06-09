@@ -35,8 +35,8 @@ Author=Homes32
 Level=1
 Selected=True
 Mandatory=True
-Version=1.1.0.0
-Date=2020-11-19
+Version=1.1.1.0
+Date=2022-06-01
 
 [Variables]
 
@@ -125,7 +125,46 @@ Run,%ScriptFile%,ResetVars
 StrFormat,CTrim,%fb_SrcPath%,"\",%fb_SrcPath%
 Set,%SourceDir%,%fb_SrcPath%,PERMANENT
 
+///////////////////////////////////////////////////////////////////////////////////
+// Base Wim - Boot.wim/WinRE.wim
+
+If,%cmb_BaseWim%,Equal,"WinRE.wim",Begin
+  // WinRE selected as base.
+  // Note that we don't check if WinRE exists here or enum. it's images, as it may not have been extract yet. (210-Core.script)
+  Set,%SourceBaseWimName%,WinRE.wim,PERMANENT
+  Set,%SourceBaseWim%,%ProjectCache%\WinRE.wim,PERMANENT
+  Set,%SourceBaseWimImage%,1,PERMANENT
+  WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcBaseImage,"1 - Microsoft Windows Recovery Environment"
+  WriteInterface,Value,%ScriptFile%,Interface,cmb_SrcBaseImage,"1 - Microsoft Windows Recovery Environment"
+End
+Else,If,%cmb_BaseWim%,Equal,"Boot.wim",Begin
+  // Boot.wim selected as base
+  If,ExistFile,%SourceDir%\Sources\Boot.wim,Begin
+    Set,%SourceBaseWimName%,Boot.wim,PERMANENT
+    Set,%SourceBaseWim%,%SourceDir%\Sources\Boot.wim,PERMANENT
+    // Get the number of images in the wim file.
+    WimInfo,%SourceBaseWim%,0,ImageCount,%imgCount%
+    Set,%imgIndexList%,""
+    Set,%imgNameList%,""
+    // Loop through each image and get the information.
+    Loop,%ScriptFile%,GetImgInfo_Loop,1,%imgCount%,%SourceBaseWim%
+    // Populate cmb_SrcBaseImage
+    WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcBaseImage,%imgIndexList%
+    // Select the highest number image as the default.
+    List,Count,%imgIndexList%,%SrcBaseImageCount%
+    List,Get,%imgIndexList%,%SrcBaseImageCount%,%indexSelected%
+    WriteInterface,Value,%ScriptFile%,Interface,cmb_SrcBaseImage,%indexSelected%
+  End
+  Else,Begin
+    Message,"Invalid Source!#$x#$x  %SourceDir%\Sources\Boot.wim#$x#$xcould not be found."
+    Halt
+  End
+End
+Else,Halt,"LOGIC ERROR: Invalid Base Wim selected."
+
+///////////////////////////////////////////////////////////////////////////////////
 // Install.wim
+
 If,ExistFile,%SourceDir%\Sources\Install.wim,Begin
   Set,%SourceInstallWim%,%SourceDir%\Sources\Install.wim,PERMANENT
 End
@@ -134,47 +173,11 @@ Else,If,ExistFile,%SourceDir%\Sources\Install.esd,Begin
   Message,"Warning:#$xYou have selected a source with [Install.esd] present.#$x.esd files MAY be encrypted. If you encounter problems building please select a different source which contains an unencrypted Install.esd or Install.wim",Warning
 End
 Else,Begin
-  Message,"Invalid Source!#$x#$x%SourceDir%\Sources\Install.wim#$x#$xcould not be found."
+  Message,"Invalid Source!#$x#$x  %SourceDir%\Sources\Install.wim#$x#$xcould not be found."
   Halt
 End
 
-If,%cmb_BaseWim%,Equal,"WinRE.wim",Begin
-  // WinRE selected as base.
-  WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcBaseImage,"1 - Microsoft Windows Recovery Environment"
-  Set,%SourceBaseWimName%,WinRE.wim,PERMANENT
-  Set,%SourceBaseWim%,%ProjectCache%\WinRE.wim,PERMANENT
-  Set,%SourceBaseWimImage%,1,PERMANENT
-End
-Else,Begin
-  // Boot.wim selected as base
-  If,ExistFile,%SourceDir%\Sources\Boot.wim,Begin
-    Set,%SourceBaseWimName%,Boot.wim,PERMANENT
-    Set,%SourceBaseWim%,%SourceDir%\Sources\Boot.wim,PERMANENT
-  End
-  Else,Begin
-    Message,"Invalid Source!#$x#$x%SourceDir%\Sources\Boot.wim#$x#$xcould not be found."
-    Halt
-  End
-End
-
-// Boot.wim only
-If,%cmb_BaseWim%,Equal,"Boot.wim",Begin
-  // Get the number of images in the wim file.
-  WimInfo,%SourceBaseWim%,0,ImageCount,%imgCount%
-  Set,%imgIndexList%,""
-  Set,%imgNameList%,""
-  // Loop through each image and get the information.
-  Loop,%ScriptFile%,GetImgInfo_Loop,1,%imgCount%,%SourceBaseWim%
-  // Populate cmb_SrcBaseImage
-  WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcBaseImage,%imgIndexList%
-  // Select the highest number image as the default.
-  List,Count,%imgIndexList%,%SrcBaseImageCount%
-  List,Get,%imgIndexList%,%SrcBaseImageCount%,%indexSelected%
-  WriteInterface,Value,%ScriptFile%,Interface,cmb_SrcBaseImage,%indexSelected%
-End
-
-// Install.wim
-// Get the number of images in the wim file.
+// Get the number of images in Install.wim.
 WimInfo,%SourceInstallWim%,0,ImageCount,%imgCount%
 Set,%imgIndexList%,""
 Set,%imgNameList%,""
@@ -199,9 +202,11 @@ End
 Else,List,Get,%imgIndexList%,%ProPos%,%indexSelected%
 WriteInterface,Value,%ScriptFile%,Interface,cmb_SrcInstallImage,%indexSelected%
 
-// Populate ImgInfo for the selected image
+///////////////////////////////////////////////////////////////////////////////////
+// Populate ImgInfo for the selected images and save the info into GLOBAL vars
 Run,%ScriptFile%,GetSourceWimImage
 
+///////////////////////////////////////////////////////////////////////////////////
 // Reset Cache
 Echo,"The source files have been modified. Clearing the project cache..."
 If,ExistDir,%ProjectCache%,DirDeleteEx,%ProjectCache%
@@ -256,7 +261,7 @@ StrFormat,CTrim,%imgFallbackLang%,|,%imgFallbackLang%
 If,%imgArch%,Equal,0,Set,%imgArch%,"x86"
 Else,Set,%imgArch%,"x64"
 
-
+// Setup %imgNameList% with friendly image names
 If,%imgDisplayName%,Equal,"",Begin
   List,Append,%imgIndexList%,"#c - %imgName%"
   List,Append,%imgNameList%,"%imgName%"
@@ -484,9 +489,9 @@ fb_SrcPath=,1,20,94,93,500,20,dir,"Title=Select the directory containing your ex
 btn_SrcSave=,1,8,599,93,20,20,SaveSource,Refresh.ico,False,"__Rescan Source"
 bvl_ImageCfg="Configure Source Image",1,12,5,169,625,130,8,Bold
 lbl_BaseWim="Base Wim:",0,1,69,189,54,18,8,Normal
-cmb_BaseWim=WinRE.wim,0,4,130,185,100,21,Boot.wim,WinRE.wim,_SaveSource_,False
+cmb_BaseWim=WinRE.wim,0,4,130,185,100,21,Boot.wim,WinRE.wim,_SaveSource_,True
 lbl_SrcBaseImg="'Base' Image:",1,1,56,216,92,18,8,Normal
-cmb_SrcBaseImage="[Please select a valid source]",1,4,130,211,474,21,"[Please select a valid source]",_UpdateBaseWimLabel_,True
+cmb_SrcBaseImage="[Please select a valid source]",1,4,130,211,474,21,"[Please select a valid source]"
 lbl_SrcInstallImage="'install.wim' Image:",1,1,29,244,94,18,8,Normal
 cmb_SrcInstallImage="[Please select a valid source]",1,4,130,237,474,21,"[Please select a valid source]",_GetSourceWimImage_,True
 lbl_ImageInfo="Image Info:",1,1,64,274,60,16,8,Normal
