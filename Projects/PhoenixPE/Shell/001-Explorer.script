@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.3.0.0
-Date=2022-02-02
+Version=1.4.0.0
+Date=2022-06-10
 
 [Variables]
 
@@ -66,6 +66,10 @@ Run,%ScriptFile%,Reg-Themes
 Run,%ScriptFile%,Reg-BitLocker
 Run,%ScriptFile%,Reg-Search
 Run,%ScriptFile%,Reg-Options
+
+// Win11 explorer.exe workaround check.
+FileVersion,"%TargetWindows%\Explorer.exe",%TargetExplorerVer%
+If,%TargetExplorerVer%,>=,"10.0.22000.0",Run,%ScriptFile%,Process-Win11-Explorer-Workaround
 
 RegHiveUnload,Tmp_Software
 RegHiveUnload,Tmp_Default
@@ -463,7 +467,7 @@ Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Ex
 If,%rGrp_TaskbarIcons%,Equal,0,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",0
 Else,If,%rGrp_TaskbarIcons%,Equal,1,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",1
 Else,If,%rGrp_TaskbarIcons%,Equal,2,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",2
-Else,Halt,"Logic Error: No action configured for option [%rGrp_TaskbarIcons%]"
+Else,Halt,"INTERNAL LOGIC ERROR: No action configured for option [%rGrp_TaskbarIcons%]"
 
 // Hidden files
 If,%cb_ShowHiddenFiles%,Equal,True,Begin
@@ -860,6 +864,37 @@ ExtractAllFiles,%ScriptFile%,Files-System32,%TargetSystem32%
 // We need Windows.CloudStore.dll.mui for pintool, but the actual .dll crashes explorer and StartIsBack so delete it.
 FileDelete,"%TargetSystem32%\Windows.CloudStore.dll"
 
+[#Process-Win11-Explorer-Workaround#]
+// ===============================================================================================================================
+// Name...........: Process-Win11-Explorer-Workaround
+// Description....: Temporary workaround for Win11 explorer.exe crashing in WinPE. The workaround substitutes explorer.exe from Win10
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: 
+// ===============================================================================================================================
+[Process-Win11-Explorer-Workaround]
+If,%cmb_Win11ExplorerOpt%,Equal,"from Win11 source image",Return
+Else,If,%cmb_Win11ExplorerOpt%,Equal,"from Win10 host",Begin
+  // Copy Win10 Explorer from host. (Must build from Win10 Source)
+  FileVersion,"C:\Windows\explorer.exe",%HostExplorerVer%
+  If,%HostExplorerVer%,Smaller,"10.0.22000.0",FileCopy,"C:\Windows\explorer.exe",%TargetWindows%
+  Else,Echo,"You must build from a Win10 host to include explorer.exe in Win11.",WARN
+End
+Else,If,%cmb_Win11ExplorerOpt%,Equal,"provided below",Begin
+  // Copy from Path Box
+  If,ExistFile,%pb_Win10Explorer%,Begin
+    Echo,"Copy user provided explorer.exe..."
+	// Log file version
+	FileVersion,%pb_Win10Explorer%,%HostExplorerVer%
+    FileCopy,%pb_Win10Explorer%,%TargetWindows%
+  End
+  Else,Halt,"You must provide the full path to the explorer.exe application."
+End
+Else,Halt,"INTERNAL LOGIC ERROR: Invalid selection."
+
 [#SetDefaultOptions#]
 // ===============================================================================================================================
 // Name...........: SetDefaultOptions
@@ -893,6 +928,8 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_SmallIconsOnDesktop,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_DisableDPIScaling,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ExpandOpStatusDlg,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHiddenFiles,True
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Win11ExplorerOpt,"from Win11 source image"
+WriteInterface,Value,%ScriptFile%,Interface,pb_Win10Explorer,""
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -960,6 +997,12 @@ cb_SmallIconsOnDesktop="Small Icons On Desktop",1,3,370,97,146,18,True
 cb_DisableDPIScaling="Disable DPI Scaling",1,3,370,81,171,18,True,"__Select this option to show larger Icons on high resolution displays."
 cb_ExpandOpStatusDlg="Expand Operation Status",1,3,160,145,200,18,True,"__Expand the modern FileCopy/Delete/Etc. dialog by default."
 cb_ShowHiddenFiles="Show Hidden & System Files",1,3,160,97,200,18,True
+bvl_Win11Support="Win11 Support",1,12,151,275,403,94,8,Bold
+lbl_Win11Explorer="This option will only be processed if building from a Win11 source.",1,1,160,290,380,16,8,Normal
+lbl_Win11ExpOpt="Include Explorer.exe",1,1,160,315,97,16,8,Normal
+cmb_Win11ExplorerOpt="from Win11 source image",1,4,261,310,168,21,"from Win11 source image","from Win10 host","provided below"
+web_WhatIsThis="What is this?",1,10,450,312,67,18,https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ#building-from-a-win11-source-with-explorer-shell-causes-blackscreen-on-boot
+pb_Win10Explorer=,1,20,160,340,380,20,file,"Title=Select the explorer.exe executable to include",Filter=explorer.exe|explorer.exe
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
