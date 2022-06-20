@@ -168,13 +168,13 @@ If,Not,%cmb_NetworkAdapter%,Equal,Disabled,Begin
   TXTAddLine,%VMCfg%,"Ethernet0.present = #$qTRUE#$q",Append
   If,%cmb_NetworkMode%,Equal,Bridged,TXTAddLine,%VMCfg%,"Ethernet0.connectionType = #$qbridged#$q",Append
   Else,If,%cmb_NetworkMode%,Equal,NAT,TXTAddLine,%VMCfg%,"Ethernet0.connectionType = #$qnat#$q",Append
-  Else,Halt,"Logic Error: No configuration has been defined for Network Connection [%cmb_NetworkMode%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Network Connection [%cmb_NetworkMode%]"
  
   TXTAddLine,%VMCfg%,"Ethernet0.addressType = #$qgenerated#$q",Append
   If,%cmb_NetworkAdapter%,Equal,"Intel 82545EM",TXTAddLine,%VMCfg%,"Ethernet0.virtualDev = #$qe1000#$q",Append
   Else,If,%cmb_NetworkAdapter%,Equal,"AMD 79C970",TXTAddLine,%VMCfg%,"Ethernet0.virtualDev = #$qvlance#$q",Append
   Else,If,%cmb_NetworkAdapter%,Equal,"VMXNET 3",TXTAddLine,%VMCfg%,"Ethernet0.virtualDev = #$qvmxnet3#$q",Append
-  Else,Halt,"Logic Error: No configuration has been defined for Network Adapter [%cmb_NetworkAdapter%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Network Adapter [%cmb_NetworkAdapter%]"
 	//TXTAddLine,%VMCfg%,Ethernet0.virtualDev=#$qvmxnet#$q,Append
 End
 
@@ -185,7 +185,7 @@ If,Not,%cmb_Audio%,Equal,Disabled,Begin
   TXTAddLine,%VMCfg%,"sound.autodetect = #$qTRUE#$q",Append
   If,%cmb_Audio%,Equal,"Creative ES1371",TXTAddLine,%VMCfg%,"sound.virtualDev = #$qes1371#$q",Append
   Else,If,%cmb_Audio%,Equal,"Intel HD Audio",TXTAddLine,%VMCfg%,"sound.virtualDev = #$qhdaudio#$q",Append
-  Else,Halt,"Logic Error: No configuration has been defined for Audio Driver [%cmb_Audio%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Audio Driver [%cmb_Audio%]"
 End
 
 // USB 1/2/3
@@ -199,7 +199,7 @@ Else,If,%cmb_USB%,Equal,"USB 3.0",Begin
   TXTAddLine,%VMCfg%,"ehci.present = #$qTRUE#$q",Append
   TXTAddLine,%VMCfg%,"usb_xhci.present = #$qTRUE#$q",Append
 End
-Else,Halt,"Logic Error: No configuration has been defined for USB [%cmb_USB%]"
+Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for USB [%cmb_USB%]"
 
 // Boot Delay
 Math,Mul,%tmp_Delay%,%num_BootDelay%,1000
@@ -209,7 +209,7 @@ Set,%tmp_Delay%,Nil
 // Firmware
 If,%cmb_Firmware%,Equal,"UEFI",TxtAddLine,%VMCfg%,"firmware = #$qefi#$q",Append
 Else,If,%cmb_Firmware%,Equal,"BIOS",TxtAddLine,%VMCfg%,"firmware = #$qbios#$q",Append
-Else,Halt,"Logic Error: No configuration has been defined for Firmware [%cmb_Firmware%]"
+Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Firmware [%cmb_Firmware%]"
 
 // Trusted Platform Module (TPM) - This setting is not available in VMWare Player Pref. -- We should check and make sure Firmware is UEFI...)
 If,%cb_EnableTPM%,Equal,True,TxtAddLine,%VMCfg%,"managedvm.autoAddVTPM = #$qsoftware#$q",Append
@@ -235,7 +235,7 @@ If,Not,%cmb_SharedFolder%,Equal,Disabled,Begin
     TXTAddLine,%VMCfg%,"sharedFolder0.readAccess = #$qTRUE#$q",Append
     TXTAddLine,%VMCfg%,"sharedFolder0.writeAccess = #$qTRUE#$q",Append
   End
-  Else,Halt,"Logic Error: No configuration exists for [%cmb_SharedFolder%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration exists for [%cmb_SharedFolder%]"
   
   TXTAddLine,%VMCfg%,"sharedFolder0.hostPath = #$q%fb_SharedFolder%#$q",Append
   TXTAddLine,%VMCfg%,"sharedFolder0.guestName = #$q%SharedFolderName%#$q",Append
@@ -261,7 +261,7 @@ If,Not,%cmb_VirtualHDD%,Equal,Disabled,Begin
     If,ExistFile,%fb_VirtualHDD%,TXTAddLine,%VMCfg%,"sata0:0.fileName = #$q%fb_VirtualHDD%#$q",Append
 	Else,Halt,"Error: The virtual hard disk [%fb_VirtualHDD%] does not exist."
   End
-  Else,Halt,"Logic Error: No configuration exists for [%cmb_VirtualHDD%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration exists for [%cmb_VirtualHDD%]"
 End
 
 [#RebuildWIM+ISO#]

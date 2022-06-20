@@ -129,7 +129,7 @@ If,%ExtensionPackInstalled%,Equal,True,Begin
   If,%cmb_USB%,Equal,"USB 1.1",Set,%tmp_USB%,"--usb on"
   Else,If,%cmb_USB%,Equal,"USB 2.0",Set,%tmp_USB%,"--usb on --usbehci on"
   Else,If,%cmb_USB%,Equal,"USB 3.0",Set,%tmp_USB%,"--usb on --usbehci on --usbxhci on"
-  Else,Halt,"Logic Error: No configuration has been defined for USB [%cmb_USB%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for USB [%cmb_USB%]"
   
   ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q %tmp_USB%"
   Set,%tmp_USB%,Nil
@@ -170,7 +170,7 @@ If,%cmb_Audio%,Equal,Disabled,ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%v
 Else,Begin  
   If,%cmb_Audio%,Equal,"Intel HD Audio",ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --audio dsound --audiocontroller hda --audioout on"
   Else,If,%cmb_Audio%,Equal,"ICH AC'97",ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --audio dsound --audiocontroller ac97 --audioout on"
-  Else,Halt,"Logic Error: No configuration has been defined for Audio Driver [%cmb_Audio%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Audio Driver [%cmb_Audio%]"
 End
 
 // Network
@@ -178,17 +178,17 @@ If,%cmb_NetworkAdapter%,Equal,Disabled,ShellExecute,Hide,%VBoxManage.exe%,"modif
 Else,Begin
   If,%cmb_NetworkMode%,Equal,Bridged,ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --nic1 bridged"
   Else,If,%cmb_NetworkMode%,Equal,NAT,ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --nic1 nat"
-  Else,Halt,"Logic Error: No configuration has been defined for Network Connection [%cmb_NetworkMode%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Network Connection [%cmb_NetworkMode%]"
   
   If,%cmb_NetworkAdapter%,Equal,"Intel PRO/1000 MT",ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --nictype1 82540EM --cableconnected1 on"
   Else,If,%cmb_NetworkAdapter%,Equal,"PCnet-Fast III",ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --nictype1 Am79C973 --cableconnected1 on"
-  Else,Halt,"Logic Error: No configuration has been defined for Network Adapter [%cmb_NetworkAdapter%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Network Adapter [%cmb_NetworkAdapter%]"
 End
 
 // Firmware
 If,%cmb_Firmware%,Equal,"UEFI",ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --firmware efi"
 Else,If,%cmb_Firmware%,Equal,"BIOS",ShellExecute,Hide,%VBoxManage.exe%,"modifyvm #$q%vmName%#$q --firmware bios"
-Else,Halt,"Logic Error: No configuration has been defined for Firmware [%cmb_Firmware%]"
+Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Firmware [%cmb_Firmware%]"
 
 // Boot Delay
 Math,Mul,%tmp_Delay%,%num_BootDelay%,1000
@@ -204,7 +204,7 @@ If,Not,%cmb_SharedFolder%,Equal,Disabled,Begin
 
   If,%cmb_SharedFolder%,Equal,"Read-Only",ShellExecute,Hide,%VBoxManage.exe%,"sharedfolder add #$q%vmName%#$q --name #$q%SharedFolderName%#$q --hostpath #$q%fb_SharedFolder%#$q --automount --readonly"
   Else,If,%cmb_SharedFolder%,Equal,"Read/Write",ShellExecute,Hide,%VBoxManage.exe%,"sharedfolder add #$q%vmName%#$q --name #$q%SharedFolderName%#$q --hostpath #$q%fb_SharedFolder%#$q --automount"
-  Else,Halt,"Logic Error: No configuration exists for [%cmb_SharedFolder%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration exists for [%cmb_SharedFolder%]"
 End
 
 // Virtual HDD (sata0:0)
@@ -221,7 +221,7 @@ If,Not,%cmb_VirtualHDD%,Equal,Disabled,Begin
     If,ExistFile,%fb_VirtualHDD%,ShellExecute,Hide,%VBoxManage.exe%,"storageattach #$q%vmName%#$q --storagectl #$qSATA Controller#$q --port 0 --device 0 --type hdd --medium #$q%fb_VirtualHDD%#$q"
 	Else,Halt,"Error: The virtual hard disk [%fb_VirtualHDD%] does not exist."
   End
-  Else,Halt,"Logic Error: No configuration exists for [%cmb_VirtualHDD%]"
+  Else,Halt,"INTERNAL LOGIC ERROR: No configuration exists for [%cmb_VirtualHDD%]"
 End
 
 // Misc. Settings (Enable Copy/Paste, Disable mouse capture)
