@@ -876,24 +876,81 @@ FileDelete,"%TargetSystem32%\Windows.CloudStore.dll"
 // Related........: 
 // ===============================================================================================================================
 [Process-Win11-Explorer-Workaround]
-If,%cmb_Win11ExplorerOpt%,Equal,"from Win11 source image",Return
-Else,If,%cmb_Win11ExplorerOpt%,Equal,"from Win10 host",Begin
-  // Copy Win10 Explorer from host. (Must build from Win10 Source)
+If,%cmb_Win10ExplorerSource%,Equal,"Use explorer.exe from the Win11 source image",Return
+Else,If,%cmb_Win10ExplorerSource%,Equal,"Use explorer.exe from my Win10 host",Begin
+  // Copy Win10 Explorer from host. (Must build from a computer running Win10)
+  Echo,"Copying explorer.exe from Host..."
   FileVersion,"C:\Windows\explorer.exe",%HostExplorerVer%
   If,%HostExplorerVer%,Smaller,"10.0.22000.0",FileCopy,"C:\Windows\explorer.exe",%TargetWindows%
-  Else,Echo,"You must build from a Win10 host to include explorer.exe in Win11.",WARN
+  Else,Halt,"You must build from a Win10 host in order to copy explorer.exe from your host."
 End
-Else,If,%cmb_Win11ExplorerOpt%,Equal,"provided below",Begin
+Else,If,%cmb_Win10ExplorerSource%,Equal,"Extract explorer.exe from a Win10 ISO",Begin
+    // Extract Explorer from the provided .wim file + index
+    Echo,"Extracting explorer.exe from .wim image..."
+	If,ExistFile,"%pb_Win10ExplorerWIM%Sources\Install.wim",Begin
+	  WimExtract,"%pb_Win10ExplorerWIM%Sources\Install.wim",%num_WimImage%,"\Windows\explorer.exe",%TargetWindows%
+	End
+	Else,If,ExistFile,"%SourceDir%\Sources\Install.esd",Begin
+	  Echo,"Warning:#$xYou have selected a source with [Install.esd] present.#$x.esd files MAY be encrypted. If you encounter problems building please select a different source which contains an unencrypted Install.esd or Install.wim",WARN
+	  WimExtract,"%pb_Win10ExplorerWIM%Sources\Install.esd",%num_WimImage%,"\Windows\explorer.exe",%TargetWindows%
+	End
+	Else,Halt,"Invalid Source!#$x#$x  Could not extract explorer.exe because %pb_Win10ExplorerWIM%Sources\Install.wim#$x#$xcould not be found."
+End
+Else,If,%cmb_Win10ExplorerSource%,Equal,"Use the explorer.exe application provided below",Begin
   // Copy from Path Box
-  If,ExistFile,%pb_Win10Explorer%,Begin
-    Echo,"Copy user provided explorer.exe..."
+  If,ExistFile,%pb_Win10ExplorerEXE%,Begin
+    Echo,"Copying user provided explorer.exe..."
 	// Log file version
-	FileVersion,%pb_Win10Explorer%,%HostExplorerVer%
+	FileVersion,%pb_Win10ExplorerEXE%,%HostExplorerVer%
     FileCopy,%pb_Win10Explorer%,%TargetWindows%
   End
   Else,Halt,"You must provide the full path to the explorer.exe application."
 End
 Else,Halt,"INTERNAL LOGIC ERROR: Invalid selection."
+
+[#CheckWin10ExplorerSource#]
+// ===============================================================================================================================
+// Name...........: CheckWin10ExplorerSource
+// Description....: Check for a valid install.wim or install.esd file.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: pb_Win10ExplorerWIM
+// ===============================================================================================================================
+[CheckWin10ExplorerSource]
+If,ExistFile,"%pb_Win10ExplorerWIM%Sources\Install.wim",Return
+Else,If,ExistFile,"%SourceDir%Sources\Install.esd",Message,"Warning:#$xYou have selected a source with [Install.esd] present.#$x.esd files MAY be encrypted. If you encounter problems building please select a different source which contains an unencrypted Install.esd or Install.wim",Warning
+Else,Message,"Invalid Source!#$x#$x  %pb_Win10ExplorerWIM%Sources\Install.wim#$x#$xcould not be found.",ERROR
+
+[#ToggleWin10ExplorerSource#]
+// ===============================================================================================================================
+// Name...........: ToggleWin10ExplorerSource
+// Description....: Toggle the visibility of the pb_Win10ExplorerEXE and pb_Win10ExplorerWIM depending on the selection.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: cmb_Win10ExplorerSource
+// ===============================================================================================================================
+[ToggleWin10ExplorerSource]
+If,%cmb_Win10ExplorerSource%,Equal,"Extract explorer.exe from a Win10 ISO",Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerEXE,False
+  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerWIM,True
+  WriteInterface,Visible,%ScriptFile%,Interface,num_WimImage,True
+End
+Else,If,%cmb_Win10ExplorerSource%,Equal,"Use the explorer.exe application provided below",Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerEXE,True
+  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerWIM,False
+  WriteInterface,Visible,%ScriptFile%,Interface,num_WimImage,False
+End
+Else,Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerEXE,False
+  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerWIM,False
+  WriteInterface,Visible,%ScriptFile%,Interface,num_WimImage,False
+End
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
@@ -928,8 +985,10 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_SmallIconsOnDesktop,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_DisableDPIScaling,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ExpandOpStatusDlg,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHiddenFiles,True
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Win11ExplorerOpt,"from Win11 source image"
-WriteInterface,Value,%ScriptFile%,Interface,pb_Win10Explorer,""
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Win10ExplorerSource,"Use explorer.exe from the Win11 source image"
+WriteInterface,Value,%ScriptFile%,Interface,pb_Win10ExplorerEXE,""
+WriteInterface,Value,%ScriptFile%,Interface,pb_Win10ExplorerWIM,""
+WriteInterface,Value,%ScriptFile%,Interface,num_WimImage,1
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -999,10 +1058,11 @@ cb_ExpandOpStatusDlg="Expand Operation Status",1,3,160,145,200,18,True,"__Expand
 cb_ShowHiddenFiles="Show Hidden & System Files",1,3,160,97,200,18,True
 bvl_Win11Support="Win11 Support",1,12,151,275,403,94,8,Bold
 lbl_Win11Explorer="This option will only be processed if building from a Win11 source.",1,1,160,290,380,16,8,Normal
-lbl_Win11ExpOpt="Include Explorer.exe",1,1,160,315,97,16,8,Normal
-cmb_Win11ExplorerOpt="from Win11 source image",1,4,261,310,168,21,"from Win11 source image","from Win10 host","provided below"
-web_WhatIsThis="What is this?",1,10,450,312,67,18,https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ#building-from-a-win11-source-with-explorer-shell-causes-blackscreen-on-boot
-pb_Win10Explorer=,1,20,160,340,380,20,file,"Title=Select the explorer.exe executable to include",Filter=explorer.exe|explorer.exe
+cmb_Win10ExplorerSource="Use explorer.exe from the Win11 source image",1,4,160,310,311,21,"Use explorer.exe from the Win11 source image","Use explorer.exe from my Win10 host","Extract explorer.exe from a Win10 ISO","Use the explorer.exe application provided below",_ToggleWin10ExplorerSource_,True
+web_WhatIsThis="What is this?",1,10,480,312,67,18,https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ#building-from-a-win11-source-with-explorer-shell-causes-blackscreen-on-boot
+pb_Win10ExplorerEXE=,0,20,160,340,380,20,file,"Title=Select the explorer.exe to include in your build",Filter=explorer.exe|explorer.exe,"__Select the explorer.exe to include in your build"
+pb_Win10ExplorerWIM=,0,20,160,340,329,20,dir,"Title=Select the directory containing your extracted Win10 ISO image.",_CheckWin10ExplorerSource_,True,"__Select the directory containing your extracted Win10 ISO image."
+num_WimImage=num_WimImage,0,2,500,340,40,20,1,1,99,1,"__Select the index of the image to extract"
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
