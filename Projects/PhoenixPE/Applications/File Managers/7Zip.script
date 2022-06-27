@@ -32,16 +32,16 @@
 Title=7-Zip
 Author=Homes32
 Level=5
-Version=1.1.1.0
-Description=(v21.07) 7-Zip is a free and open-source file archiver capable of reading and writing many archive formats.
-Date=2022-01-07
+Version=1.1.2.0
+Description=(v22.00) 7-Zip is a free and open-source file archiver capable of reading and writing many archive formats.
+Date=2022-06-22
 Selected=False
 Mandatory=False
 
 [Variables]
 %ProgramFolder%="7-Zip"
 %ProgramExe%="7zFM.exe"
-%ProgramVersion%=2107
+%ProgramVersion%=2200
 %DownloadURL86%=https://www.7-zip.org/a/7z%ProgramVersion%.exe
 %DownloadURL64%=https://www.7-zip.org/a/7z%ProgramVersion%-x64.exe
 
@@ -441,8 +441,7 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // ===============================================================================================================================
 [LaunchProgram]
 System,SetLocal
-System,GetEnv,PROCESSOR_ARCHITECTURE,%HostArch%
-If,%HostArch%,Equal,AMD64,Set,%SetupFile%,Setup-x64.exe
+If,%HostArch%,Equal,x64,Set,%SetupFile%,Setup-x64.exe
 Else,Set,%SetupFile%,Setup-x86.exe
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.exe -o#$q%ProjectTemp%\%ProgramFolder%#$q"
