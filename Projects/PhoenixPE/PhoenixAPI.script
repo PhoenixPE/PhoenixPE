@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.5.1.0
-Date=2022-06-16
+Version=1.6.0.0
+Date=2022-06-27
 Level=0
 Selected=None
 
@@ -219,7 +219,7 @@ End
 // ===============================================================================================================================
 [_PhoenixAPI_RegCopyDriver]
 System,SetLocal
-Set,%Debug%,True
+Set,%Debug%,False
 
 If,#1,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to register."
 GetParam,1,%InfFile%
@@ -675,40 +675,22 @@ If,Not,%WildCard%,Equal,0,Halt,"FileCopyEx Syntax Error: Wildcards are not suppo
 StrFormat,Pos,%SrcFile%,?,%WildCard%
 If,Not,%WildCard%,Equal,0,Halt,"FileCopyEx Syntax Error: Wildcards are not supported."
 
-List,Count,%SourceFallbackLang%,%LangCount%
-
 FileCopy,%SrcFile%,%DestPath%
 
 StrFormat,FileName,%SrcFile%,%Filename%
 StrFormat,Split,%DestPath%,"\",1,%DriveLtr%
 If,ExistFile,"%DriveLtr%\Windows\SystemResources\%Filename%.mun",FileCopy,"%DriveLtr%\Windows\SystemResources\%Filename%.mun",APPEND
 
-Loop,%API%,__PhoenixAPI_FileCopyEx_mui_Loop,1,%LangCount%,%SrcFile%,%SourceFallbackLang%,%DestPath%
+StrFormat,FileName,%SrcFile%,%FileName%
+StrFormat,Ext,%SrcFile%,%FileExt%
+StrFormat,DirPath,%SrcFile%,%SrcDirPath%
+StrFormat,DirPath,%DestPath%,%DestDirPath%
 
-System,EndLocal
+ForEach,%Language%,%SourceFallbackLang%,Begin
+  If,%FileExt%,Equal,.msc,FileCopy,"%SrcDirPath%%Language%\%FileName%","%DestPath%\%Language%\%FileName%"
+  Else,If,ExistFile,"%SrcDirPath%%Language%\%FileName%.mui",FileCopy,"%SrcDirPath%%Language%\%FileName%.mui","%DestDirPath%%Language%\%FileName%.mui"
+End
 
-[#__PhoenixAPI_FileCopyEx_mui_Loop#]
-// ===============================================================================================================================
-// Name...........: FileCopyEx_mui_Loop
-// Description....: Loop to copy a file's .mui
-// Syntax.........: FileCopyEx_mui_Loop,<FilePath>,<Language>,<DestPath>
-// Parameters.....: #1 FilePath - Path to the parent file
-//                  #2 Language - Language to copy
-//                  #3 DestPath - Destination path
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: Internal Function
-// Related........: FileCopyEx
-// ===============================================================================================================================
-[__PhoenixAPI_FileCopyEx_mui_Loop]
-System,SetLocal
-List,Get,#2,#c,%Language%
-StrFormat,FileName,#1,%FileName%
-StrFormat,Ext,#1,%FileExt%
-StrFormat,DirPath,#1,%SrcDirPath%
-StrFormat,DirPath,#3,%DestDirPath%
-If,%FileExt%,Equal,.msc,FileCopy,"%SrcDirPath%%Language%\%FileName%","#3\%Language%\%FileName%"
-Else,If,ExistFile,"%SrcDirPath%%Language%\%FileName%.mui",FileCopy,"%SrcDirPath%%Language%\%FileName%.mui","%DestDirPath%%Language%\%FileName%.mui"
 System,EndLocal
 
 [#_PhoenixAPI_RequireFile#]
@@ -765,8 +747,6 @@ Else,Set,%ExtractMui%,True
 Set,%BulkFileList%,%ProjectTemp%\RequireFileEx-BulkFileList.txt
 Set,%SingleFileList%,%ProjectTemp%\RequireFileEx-SingleFileList.txt
 
-List,Count,%SourceFallbackLang%,%LangCount%
-
 // For .mun file check
 StrFormat,FileName,%GLOB%,%FileName%
 
@@ -775,7 +755,7 @@ If,%Action%,Equal,"AppendList",Begin
   If,Not,ExistFile,%BulkFileList%,FileCreateBlank,%BulkFileList%
   TXTAddLine,%BulkFileList%,%GLOB%,APPEND
   TXTAddLine,%BulkFileList%,\Windows\SystemResources\%FileName%.mun,APPEND
-  If,%ExtractMui%,Equal,True,Loop,%API%,__PhoenixAPI_RequireFileEx_mui_Loop,1,%LangCount%,%GLOB%,%SourceFallbackLang%,%BulkFileList%
+  If,%ExtractMui%,Equal,True,ForEach,%Language%,%SourceFallbackLang%,Run,%API%,__PhoenixAPI_RequireFileEx_ProcessMUI,%GLOB%,%Language%,%BulkFileList%
 End
 Else,If,%Action%,Equal,"ExtractFile",Begin
   Echo,"Extracting required file(s) [%GLOB%]..."
@@ -783,7 +763,7 @@ Else,If,%Action%,Equal,"ExtractFile",Begin
   If,Not,ExistFile,%SingleFileList%,FileCreateBlank,%SingleFileList%
   TXTAddLine,%SingleFileList%,%GLOB%,APPEND
   TXTAddLine,%SingleFileList%,\Windows\SystemResources\%FileName%.mun,APPEND
-  If,%ExtractMui%,Equal,True,Loop,%API%,__PhoenixAPI_RequireFileEx_mui_Loop,1,%LangCount%,%GLOB%,%SourceFallbackLang%,%SingleFileList%
+  If,%ExtractMui%,Equal,True,ForEach,%Language%,%SourceFallbackLang%,Run,%API%,__PhoenixAPI_RequireFileEx_ProcessMUI,%GLOB%,%Language%,%SingleFileList%
   WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%SingleFileList%,%TargetDir%,NOACL,NOATTRIB,NOERR,NOWARN
   FileDeleteEx,%SingleFileList%
 End
@@ -797,11 +777,11 @@ Else,Halt,"RequireFileEx Syntax Error: Invalid Action [#1]."
 
 System,EndLocal
 
-[#__PhoenixAPI_RequireFileEx_mui_Loop#]
+[#__PhoenixAPI_RequireFileEx_ProcessMUI#]
 // ===============================================================================================================================
-// Name...........: RequireFileEx_mui_Loop
-// Description....: Loop to extract a file's .mui from Install.wim
-// Syntax.........: RequireFileEx_mui_Loop,<FilePath>,<Language>,<ListFile>
+// Name...........: RequireFileEx_ProcessMUI
+// Description....: Extract a file's .mui from Install.wim
+// Syntax.........: RequireFileEx_ProcessMUI,<FilePath>,<Language>,<ListFile>
 // Parameters.....: #1 FilePath - Path to the file relative to the root of Install.wim
 //                  #2 Language - Language to extract
 //                  #3 ListFile - ListFile to write the MUI path
@@ -813,19 +793,22 @@ System,EndLocal
 //                  we should check if the files exist first using WimExistFile, but it slows things down too much with large lists.
 // Related........: RequireFileEx
 // ===============================================================================================================================
-[__PhoenixAPI_RequireFileEx_mui_Loop]
+[__PhoenixAPI_RequireFileEx_ProcessMUI]
 System,SetLocal
-List,Get,#2,#c,%Language%
-StrFormat,FileName,#1,%FileName%
-StrFormat,Ext,#1,%FileExt%
-StrFormat,DirPath,#1,%DirPath%
+GetParam,1,%GLOB%
+GetParam,2,%Language%
+GetParam,3,%FileList%
+
+StrFormat,FileName,%GLOB%,%FileName%
+StrFormat,Ext,%GLOB%,%FileExt%
+StrFormat,DirPath,%GLOB%,%DirPath%
 
 StrFormat,Len,%FileExt%,%FileExtLen%
 StrFormat,RTrim,%FileName%,%FileExtLen%,%FileNameNoExt%
 
-If,%FileExt%,Equal,.mof,TXTAddLine,#3,"%DirPath%%Language%\%FileNameNoExt%.mfl",APPEND
-Else,If,%FileExt%,Equal,.msc,TXTAddLine,#3,"%DirPath%%Language%\%FileName%",APPEND
-Else,TXTAddLine,#3,"%DirPath%%Language%\%FileName%.mui",APPEND
+If,%FileExt%,Equal,".mof",TXTAddLine,%FileList%,"%DirPath%%Language%\%FileNameNoExt%.mfl",APPEND
+Else,If,%FileExt%,Equal,".msc",TXTAddLine,%FileList%,"%DirPath%%Language%\%FileName%",APPEND
+Else,TXTAddLine,%FileList%,"%DirPath%%Language%\%FileName%.mui",APPEND
 System,EndLocal
 
 [#_PhoenixAPI_AddAutoRun#]
@@ -1105,17 +1088,24 @@ If,"%Shell%-%PinLocation%",Equal,"WinXShell-Taskbar",Begin
   AddShortcut,"QuickLaunch",,%ProgramTitle%,%ProgramExe%
 End
 Else,Begin
+  // Explorer Taskbar
   If,%PinPos%,Equal,"Auto",Begin
     // Find an unused pin position
-    Loop,%Api%,__PhoenixAPI_PinShortcut_FindOpenPos_Loop,0,99,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%
-    Set,%PinPos%,#r  
+	ForRange,%i%,0,100,1,Begin
+	  IniRead,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%i%,%CurrentPos%
+	  If,%CurrentPos%,Equal,"",Begin
+	    Set,%PinPos%,%i%
+	    Break
+	  End
+	  Else,Set,%PinPos%,-1
+	End
   End
   Else,If,%PinPos%,Smaller,0,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
   Else,If,%PinPos%,Bigger,99,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
 
   If,%PinPos%,Equal,-1,Begin
     Echo,"PinShortcut Warning: Could not find an open [%PinLocation%] position for [%ProgramExe%].",Warn
-    // Return without doing anything.
+    Return
   End
   Else,Begin
     // Check if user specified position will be overwritten
@@ -1133,32 +1123,6 @@ Else,Begin
     IniWrite,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
   End
 End
-System,EndLocal
-
-[#__PhoenixAPI_PinShortcut_FindOpenPos_Loop#]
-// ===============================================================================================================================
-// Name...........: PinShortcut_FindOpenPos_Loop
-// Description....: Loop to 
-// Syntax.........: PinShortcut_FindOpenPos_Loop,<FilePath>,<Section>,<PinLocation>
-// Parameters.....: #1 FilePath - Path to the config file
-//                  #2 Section - Section in the config file
-//                  #3 PinLocation - Location of Pin [StartMenu | Taskbar]
-// Return values..: #r - Success: Returns an int specifying the first open position found
-//                       Failure: Returns -1 indicating no open positions were found
-// Author.........: Homes32
-// Remarks........: Internal Function
-// Related........: PinShortcut
-// ===============================================================================================================================
-[__PhoenixAPI_PinShortcut_FindOpenPos_Loop]
-System,SetLocal
-IniRead,#1,#2,#3#c,%CurrentPos%
-
-If,%CurrentPos%,Equal,"",Begin
-  Set,#r,#c
-  Loop,Break
-End
-Else,Return,-1
-
 System,EndLocal
 
 [#_PhoenixAPI_RunFromRam#]
@@ -1199,25 +1163,21 @@ System,ErrorOff
 If,ExistDir,#1,DirDelete,#1
 // If Dir still exists wait a few more seconds to give async tasks time to complete before we bother the user...
 If,ExistDir,#1,Wait,5
-If,ExistDir,#1,Begin
+
+While,ExistDir,#1,Begin
+
   If,Question,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer.#$x#$xRetry?",Begin
     // User clicked 'Yes'
 	System,ErrorOff
-    If,ExistDir,#1,Begin
-	  DirDelete,#1
-	  // Wait a few seconds to give async tasks time to complete...
-	  Wait,5
-	End
-	
-    If,ExistDir,#1,Begin
-	  Message,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer then try building again.",Error
-	  Halt,"Error: The specified folder could not be deleted."
-	End
+	DirDelete,#1
+	// Wait a few seconds to give async tasks time to complete...
+	Wait,5
   End
   Else,Begin
     // User clicked 'No'
     Halt,"Error: The specified folder could not be deleted."
   End
+  
 End
 
 [#_PhoenixAPI_FileDeleteEx#]
@@ -1238,21 +1198,20 @@ If,#1,Equal,"",Halt,"Syntax Error: File was not specified."
 
 System,ErrorOff
 If,ExistFile,#1,FileDelete,#1
-If,ExistFile,#1,Begin
+
+While,ExistFile,#1,Begin
+
   If,Question,"Error: The specified file could not be deleted.#$x#$x#1#$x#$xPlease make sure the file is not running or in use by another application (eg. Text Editor/vmWare/VirtualBox).#$x#$xRetry?",Begin
     // User clicked 'Yes'
 	Wait,3
 	System,ErrorOff
     If,ExistFile,#1,FileDelete,#1
-    If,ExistFile,#1,Begin
-	  Message,"Error: The specified file could not be deleted.#$x#$x#1#$x#$xPlease make sure the file is not running or in use by another application (eg. Text Editor/vmWare/VirtualBox) then try building again.",Error
-	  Halt,"Error: The specified file could not be deleted."
-	End
   End
   Else,Begin
     // User clicked 'No'
     Halt,"Error: The specified file could not be deleted."
   End
+  
 End
 
 [#_PhoenixAPI_InnoCleanup#]
