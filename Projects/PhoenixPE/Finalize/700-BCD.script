@@ -104,39 +104,40 @@ FileCopyEx,"%TargetDir%\Windows\Boot\EFI\memtest.efi","%OutputDir%\efi\microsoft
 FileCopy,"%TargetDir%\Windows\Boot\Fonts\*.*","%OutputDir%\efi\microsoft\boot\Fonts\"
 
 // Press Any Key...
-List,Count,%SourceFallbackLang%,%LangCount%
 If,%cb_BootFix%,Equal,True,Begin
   FileDeleteEx,"%OutputDir%\efi\microsoft\boot\efisys_noprompt.bin"
-  Loop,%ScriptFile%,CopyBootfix_Loop,1,%LangCount%,"%TargetDir%\Windows\Boot\DVD\PCAT\bootfix.bin",%SourceFallbackLang%,"%OutputDir%\boot"
-  Loop,%ScriptFile%,CopyBootfix_Loop,1,%LangCount%,"%TargetDir%\Windows\Boot\DVD\EFI\efisys.bin",%SourceFallbackLang%,"%OutputDir%\efi\microsoft\boot"
+  ForEach,%Language%,%SourceFallbackLang%,Run,%ScriptFile%,CopyBootfix,"%TargetDir%\Windows\Boot\DVD\PCAT\bootfix.bin",%Language%,"%OutputDir%\boot"
+  ForEach,%Language%,%SourceFallbackLang%,Run,%ScriptFile%,CopyBootfix,"%TargetDir%\Windows\Boot\DVD\EFI\efisys.bin",%Language%,"%OutputDir%\efi\microsoft\boot"
 End
 Else,Begin
   FileDeleteEx,"%OutputDir%\boot\bootfix.bin"
   FileDeleteEx,"%OutputDir%\efi\microsoft\boot\efisys.bin"
-  Loop,%ScriptFile%,CopyBootfix_Loop,1,%LangCount%,"%TargetDir%\Windows\Boot\DVD\EFI\efisys_noprompt.bin",%SourceFallbackLang%,"%OutputDir%\efi\microsoft\boot"
+  ForEach,%Language%,%SourceFallbackLang%,Run,%ScriptFile%,CopyBootfix,"%TargetDir%\Windows\Boot\DVD\EFI\efisys_noprompt.bin",%Language%,"%OutputDir%\efi\microsoft\boot"
   FileRename,"%OutputDir%\efi\microsoft\boot\efisys_noprompt.bin","%OutputDir%\efi\microsoft\boot\efisys.bin"
 End
 
-[#CopyBootfix_Loop#]
+[#CopyBootfix#]
 // ===============================================================================================================================
-// Name...........: CopyBootfix_Loop
+// Name...........: CopyBootfix
 // Description....: Copy language specific bootfix files.
-// Syntax.........: Loop,%ScriptFile%,CopyBootfix_Loop,1,<LangCount>,<binFile>,<SourceFallbackLang>,<Dest>
-// Parameters.....: <LangCount> - Number of languages in the <SourceFallbackLang> list
-//                  #1 <binFile> - The *.bin file to process. (bootfix.bin/efisys_noprompt.bin/etc.)
-//                  #2 <SourceFallbackLang> - A pipe delimited list of languages to include.
-//                  #3 <Dest> - Full path to the directory where the files will be copied.
+// Syntax.........: Run,%ScriptFile%,CopyBootfix,<binFile>,<Language>,<Dest>
+// Parameters.....: #1 <binFile> - The *.bin file to process. (bootfix.bin/efisys_noprompt.bin/etc.)
+//                  #2 <Language> - Language to include.
+//                  #3 <Dest> - Full path to the directory where the files will be copied.   
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
 // Related........: [ProcessBootloader]
 // ===============================================================================================================================
-[CopyBootfix_Loop]
+[CopyBootfix]
 System,SetLocal
-List,Get,#2,#c,%Language%
-StrFormat,FileName,#1,%FileName%
-StrFormat,DirPath,#1,%SrcDirPath%
-If,ExistFile,"%SrcDirPath%%Language%\%FileName%",FileCopy,"%SrcDirPath%%Language%\%FileName%","#3\%FileName%"
+GetParam,1,%binFile%
+GetParam,2,%Language%
+GetParam,3,%Dest%
+
+StrFormat,FileName,%binFile%,%FileName%
+StrFormat,DirPath,%binFile%,%SrcDirPath%
+If,ExistFile,"%SrcDirPath%%Language%\%FileName%",FileCopy,"%SrcDirPath%%Language%\%FileName%","%Dest%\%FileName%"
 System,EndLocal
 
 [#ConfigBcd#]

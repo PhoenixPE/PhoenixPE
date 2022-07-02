@@ -35,11 +35,13 @@ Author=Homes32
 Level=7
 Selected=True
 Mandatory=False
-Version=1.0.2.0
-Date=2019-10-20
+Version=1.1.0.0
+Date=2022-07-01
 
 [Variables]
 %LangList%=ar-SA|bg-BG|cs-CZ|da-DK|de-DE|el-GR|en-GB|en-US|es-ES|es-MX|et-EE|fi-FI|fr-CA|fr-FR|he-IL|hr-HR|hu-HU|it-IT|ja-JP|ko-KR|lt-LT|lv-LV|nb-NO|nl-NL|pl-PL|pt-BR|pt-PT|qps-ploc|ro-RO|ru-RU|sk-SK|sl-SI|sr-Latn-CS|sr-Latn-RS|sv-SE|th-TH|tr-TR|uk-UA|zh-CN|zh-HK|zh-TW
+
+CleanupMui=Run,%ScriptFile%,CleanupMui
 
 [Process]
 Echo,"Cleaning up [TargetDir]..."
@@ -51,28 +53,28 @@ FileDeleteEx,"%TargetDir%\Users\Public\Desktop\Desktop.ini"
 // Just to make sure some other script didn't add them....
 
 // Causes Explorer hang on boot
-FileDeleteEx,%TargetSystem32%\WallpaperHost.exe
+FileDeleteEx,"%TargetSystem32%\WallpaperHost.exe"
 // Crashes Explorer, Pintool, StartIsBack
-FileDeleteEx,%TargetSystem32%\Windows.CloudStore.dll
+FileDeleteEx,"%TargetSystem32%\Windows.CloudStore.dll"
 // Causes Issues with Pintool
-FileDeleteEx,%TargetSystem32%\windows.immersiveshell.serviceprovider.dll
+FileDeleteEx,"%TargetSystem32%\windows.immersiveshell.serviceprovider.dll"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Misc Cleanup 
 
 // Disable Diagnostic Telemetry Service
 // DiagTrack and diagnosticshub.standardcollector.service are disabled Shell Config
-DirDeleteEx,%TargetWindows%\DiagTrack
-DirDeleteEx,%TargetSystem32%\DiagSvcs
-FileDeleteEx,%TargetSystem32%\diagER.dll
-FileDeleteEx,%TargetSystem32%\diagtrack.dll
+DirDeleteEx,"%TargetWindows%\DiagTrack"
+DirDeleteEx,"%TargetSystem32%\DiagSvcs"
+FileDeleteEx,"%TargetSystem32%\diagER.dll"
+FileDeleteEx,"%TargetSystem32%\diagtrack.dll"
 
 // WMI Repository will be rebuilt at startup
-DirDeleteEx,%TargetSystem32%\wbem\AutoRecover
-DirDeleteEx,%TargetSystem32%\wbem\Logs
-DirDeleteEx,%TargetSystem32%\wbem\Repository
-DirDeleteEx,%TargetSystem32%\wbem\tmf
-DirDeleteEx,%TargetSystem32%\wbem\xml
+DirDeleteEx,"%TargetSystem32%\wbem\AutoRecover"
+DirDeleteEx,"%TargetSystem32%\wbem\Logs"
+DirDeleteEx,"%TargetSystem32%\wbem\Repository"
+DirDeleteEx,"%TargetSystem32%\wbem\tmf"
+DirDeleteEx,"%TargetSystem32%\wbem\xml"
 
 // Edge web platform
 //FileDeleteEx,%TargetSystem32%\edgehtml.dll
@@ -85,12 +87,12 @@ DirDeleteEx,%TargetSystem32%\wbem\xml
 // Unused Language (MUI) Folders 
 
 If,%cb_CleanupLangFolders%,Equal,True,Begin
-  Run,%ScriptFile%,CleanupMui,%TargetSystem32%
-  Run,%ScriptFile%,CleanupMui,%TargetWindows%\Boot\EFI
-  Run,%ScriptFile%,CleanupMui,%TargetWindows%\Boot\PCAT
-  Run,%ScriptFile%,CleanupMui,%TargetWindows%\Boot\PXE
-  Run,%ScriptFile%,CleanupMui,%TargetWindows%\System32\wbem
-  If,%SourceArch%,Equal,x64,Run,%ScriptFile%,CleanupMui,%TargetWindows%\SysWOW64
+  CleanupMui,%TargetSystem32%
+  CleanupMui,"%TargetWindows%\Boot\EFI"
+  CleanupMui,"%TargetWindows%\Boot\PCAT"
+  CleanupMui,"%TargetWindows%\Boot\PXE"
+  CleanupMui,"%TargetWindows%\System32\wbem"
+  If,%SourceArch%,Equal,x64,CleanupMui,"%TargetWindows%\SysWOW64"
 End
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -124,28 +126,28 @@ Run,%ScriptFile%,RemovePaint3DAssociations
 
 Echo,"Cleaning up transaction logs..."
 // Reg Cache
-FileDeleteEx,%RegistryCache%\*.LOG1
-FileDeleteEx,%RegistryCache%\*.LOG2
-FileDeleteEx,%RegistryCache%\*.blf
-FileDeleteEx,%RegistryCache%\*.regtrans-ms
+FileDeleteEx,"%RegistryCache%\*.LOG1"
+FileDeleteEx,"%RegistryCache%\*.LOG2"
+FileDeleteEx,"%RegistryCache%\*.blf"
+FileDeleteEx,"%RegistryCache%\*.regtrans-ms"
 
 // Target
-FileDeleteEx,%TargetSystem32%\config\*.LOG1
-FileDeleteEx,%TargetSystem32%\config\*.LOG2
-FileDeleteEx,%TargetSystem32%\config\*.blf
-FileDeleteEx,%TargetSystem32%\config\*.regtrans-ms
+FileDeleteEx,"%TargetSystem32%\config\*.LOG1"
+FileDeleteEx,"%TargetSystem32%\config\*.LOG2"
+FileDeleteEx,"%TargetSystem32%\config\*.blf"
+FileDeleteEx,"%TargetSystem32%\config\*.regtrans-ms"
 
 // SMI
-FileDeleteEx,%TargetSystem32%\SMI\Store\Machine\*.LOG1
-FileDeleteEx,%TargetSystem32%\SMI\Store\Machine\*.LOG2
-FileDeleteEx,%TargetSystem32%\SMI\Store\Machine\*.blf
-FileDeleteEx,%TargetSystem32%\SMI\Store\Machine\*.regtrans-ms
+FileDeleteEx,"%TargetSystem32%\SMI\Store\Machine\*.LOG1"
+FileDeleteEx,"%TargetSystem32%\SMI\Store\Machine\*.LOG2"
+FileDeleteEx,"%TargetSystem32%\SMI\Store\Machine\*.blf"
+FileDeleteEx,"%TargetSystem32%\SMI\Store\Machine\*.regtrans-ms"
 
 // User
-FileDeleteEx,%TargetDir%\Users\Default\*.LOG1
-FileDeleteEx,%TargetDir%\Users\Default\*.LOG2
-FileDeleteEx,%TargetDir%\Users\Default\*.blf
-FileDeleteEx,%TargetDir%\Users\Default\*.regtrans-ms
+FileDeleteEx,"%TargetDir%\Users\Default\*.LOG1"
+FileDeleteEx,"%TargetDir%\Users\Default\*.LOG2"
+FileDeleteEx,"%TargetDir%\Users\Default\*.blf"
+FileDeleteEx,"%TargetDir%\Users\Default\*.regtrans-ms"
 
 [#Remove3D#]
 // ===============================================================================================================================
@@ -191,60 +193,18 @@ RegHiveUnload,Tmp_Software
 // Parameters.....: #1 <Path> - Full path to the directory containing the root .mui folders.
 // Return values..: 
 // Author.........: Homes32
-// Remarks........:
-// Related........: CleanupMui_CreateList_Loop, CleanupMui_ExcludeFallback_Loop
+// Remarks........: Removal is accomplished by running DirDeleteEx on each folder for each language in the language list
+//                  excluding languages in the source image's fallback language list.
+// Related........: 
 // ===============================================================================================================================
 [CleanupMui]
-FileDeleteEx,%ProjectTemp%\CleanupMui.script
-FileCreateBlank,%ProjectTemp%\CleanupMui.script
-TXTAddLine,%ProjectTemp%\CleanupMui.script,"[Process]",Append
-
-// Get count of # of supported languages
-List,Count,%LangList%,%LangCount%
-List,Count,%SourceFallbackLang%,%FBLangCount%
-
-// Loop through each supported language
-Loop,%ScriptFile%,CleanupMui_CreateList_Loop,1,%LangCount%,#1
-Loop,%ScriptFile%,CleanupMui_ExcludeFallback_Loop,1,%FBLangCount%,#1
-
 Echo,"Cleaning up unused languages in:#$x#$x[#1]..."
-Run,%ProjectTemp%\CleanupMui.script,Process
+GetParam,1,%MuiPath%
 
-[#CleanupMui_CreateList_Loop#]
-// ===============================================================================================================================
-// Name...........: CleanupMui_CreateList_Loop
-// Description....: Builds a temporary .script containing delete commands for all supported languages.
-// Syntax.........: CleanupMui_ExcludeFallback_Loop,<Path>
-// Parameters.....: #1 <Path> - Full path to the directory containing the root .mui folders.
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: CleanupMui
-// ===============================================================================================================================
-[CleanupMui_CreateList_Loop]
-System,SetLocal
-// get the current supported language we are testing
-StrFormat,SPLIT,%LangList%,|,#c,%Language%
-TXTAddLine,%ProjectTemp%\CleanupMui.script,"DirDeleteEx,#1\%Language%",Append
-System,EndLocal
-
-[#CleanupMui_ExcludeFallback_Loop#]
-// ===============================================================================================================================
-// Name...........: CleanupMui_ExcludeFallback_Loop
-// Description....: Removes Source Language and Fallback Languages delete commands from the temporary
-//                  .script created by CleanupMui_CreateList_Loop 
-// Syntax.........: CleanupMui_ExcludeFallback_Loop,<Path>
-// Parameters.....: #1 <Path> - Full path to the directory containing the root .mui folders.
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: CleanupMui
-// ===============================================================================================================================
-[CleanupMui_ExcludeFallback_Loop]
-System,SetLocal
-StrFormat,SPLIT,%SourceFallbackLang%,|,#c,%Language%
-TXTDelLine,%ProjectTemp%\CleanupMui.script,"DirDeleteEx,#1\%Language%"
-System,EndLocal
+ForEach,%Language%,%LangList%,Begin
+  List,Pos,%SourceFallbackLang%,%Language%,%LangPos%
+  If,%LangPos%,Equal,0,DirDeleteEx,"%MuiPath%\%Language%"
+End
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================

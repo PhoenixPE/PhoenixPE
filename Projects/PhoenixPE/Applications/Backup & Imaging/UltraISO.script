@@ -33,10 +33,10 @@ Title=UltraISO
 Description=UltraISO is an tool for creating/editing/converting ISO image files and bootable CD/DVD images.
 Author=Homes32
 Level=5
-Selected=False
+Selected=True
 Mandatory=False
-Version=1.0.0.0
-Date=2021-03-05
+Version=1.0.1.0
+Date=2022-06-27
 Interface=Interface
 
 [Variables]
@@ -83,8 +83,10 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\shell\open","","Open with &Ultr
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 StrFormat,REPLACE,%txt_RegisterFileExt%,#$s,"",%txt_RegisterFileExt%
-List,Count,%txt_RegisterFileExt%,%ExtCount%,Delim=#$c
-Loop,%ScriptFile%,RegisterFileExtensions_Loop,1,%ExtCount%
+ForEach,%Ext%,%txt_RegisterFileExt%,Delim=#$c,Begin
+  StrFormat,CTRIM,%Ext%,".",%FileExt%
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.%FileExt%","","UltraISO"
+End
 
 // License
 If,%cmb_SoftwareLicense%,Equal,"Use Host License",Begin
@@ -172,24 +174,6 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\DefaultIcon","","#$q%PEPrograms
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shell\Convert to ISO\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -bin2iso #$q#$p1#$q"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shellex\ContextMenuHandlers\ISOShell","","{AD392E40-428C-459F-961E-9B147782D099}"
-
-[#RegisterFileExtensions_Loop#]
-// ===============================================================================================================================
-// Name...........: RegisterFileExtensions_Loop
-// Description....: Register each file extension in %txt_RegisterFileExt%.
-// Syntax.........: Loop,%ScriptFile%,RegisterFileExtensions_Loop,1,%ExtCount%
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: Internal Function
-// Related........: %txt_RegisterFileExt%
-// ===============================================================================================================================
-[RegisterFileExtensions_Loop]
-List,Get,%txt_RegisterFileExt%,#c,%Ext%,Delim=#$c
-
-// Remove . from the file extension if present.
-StrFormat,CTRIM,%Ext%,".",%FileExt%
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.%FileExt%","","UltraISO"
 
 [#ExtractProgram#]
 // ===============================================================================================================================
