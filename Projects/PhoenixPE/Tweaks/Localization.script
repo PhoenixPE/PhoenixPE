@@ -114,7 +114,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%WinDir%\System32\
 // Related........:
 // ===============================================================================================================================
 [GetHostInternationalSettings]
-Echo,"Retrieving Host International Settings...#$x#$xThis can take awhile, please be patient."
+Echo,"Retrieving Host International Settings..."
 ShellExecute,Hide,"cmd.exe","/D /C dism.exe /online /Get-Intl /English /LogPath:#$q%DismLog%#$q > #$q%ProjectTemp%\Get-Intl.ini#$q"
 If,Not,%ExitCode%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%ExitCode%]. Check the log for details."
 
@@ -164,7 +164,7 @@ If,Not,%TimeZone%,Equal,Default,Set,%DismArg%,"%DismArg% /Set-TimeZone:#$q%TimeZ
 
 // Set Keyboard, Format and Timezone with DISM
 If,Not,%DismArg%,Equal,"",Begin
-  Echo,"Configuring International Settings...#$x#$xThis can take awhile, please be patient."
+  Echo,"Configuring International Settings..."
   DISM,"/image:#$q%TargetDir%#$q %DismArg% /LogPath:#$q%DismLog%#$q"
   If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
 End

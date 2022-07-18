@@ -125,7 +125,7 @@ System,SetLocal
 If,Not,ExistFile,%SourceBaseWim%,Run,%ScriptFile%,ExtractWinRE
 
 StrFormat,FileName,%SourceBaseWim%,%tmp_BaseFileName%
-Echo,"Extracting [%tmp_BaseFileName%:%SourceBaseWimImage%] to [%TargetDir%]...#$x#$xThis can take awhile, please be patient."
+Echo,"Extracting [%tmp_BaseFileName%:%SourceBaseWimImage%] to [%TargetDir%]..."
 WimApply,%SourceBaseWim%,%SourceBaseWimImage%,%TargetDir%,NOACL,NOATTRIB
 
 // If building with boot.wim we need to extract additional files to get up to the level of WinRE
@@ -148,7 +148,7 @@ System,EndLocal
 // Related........:
 // ===============================================================================================================================
 [ExtractWinRE]
-Echo,"Extracting [WinRE.wim] from [%SourceInstallWim%:%SourceInstallWimImage%]...#$x#$xThis can take awhile, please be patient."
+Echo,"Extracting [WinRE.wim] from [%SourceInstallWim%:%SourceInstallWimImage%]..."
 WimExtract,%SourceInstallWim%,%SourceInstallWimImage%,Windows\System32\Recovery\WinRE.wim,%ProjectCache%,NOACL,NOATTRIB
 
 // Sanity Check
@@ -168,7 +168,7 @@ Run,"%ProjectDir%\Core\200-PreFlight.script",CheckWinREVersion
 // ===============================================================================================================================
 [CleanupWinSxS]
 System,SetLocal
-Echo,"Cleaning up Windows SidebySide Components...#$x#$xThis can take awhile, please be patient."
+Echo,"Cleaning up Windows SidebySide Components..."
 Set,%WinSxS-Listfile%,%ProjectTemp%\WinSxS-ListFile.txt
 FileDeleteEx,%WinSxS-Listfile%
 
@@ -205,7 +205,7 @@ TxtAddline,%WinSxS-Listfile%,"\Windows\WinSxS\manifests\%SxSArch%_microsoft.wind
 TxtAddline,%WinSxS-Listfile%,"\Windows\WinSxS\manifests\%SxSArch%_microsoft.windows.s..se.scsi_port_driver_*.manifest",Append
 TxtAddline,%WinSxS-Listfile%,"\Windows\WinSxS\manifests\%SxSArch%_microsoft-windows-servicingstack_*.manifest",Append
 
-Echo,"Extracting Essential Windows SidebySide Components...#$x#$xThis can take awhile, please be patient."
+Echo,"Extracting Essential Windows SidebySide Components..."
 WimExtractBulk,%SourceBaseWim%,%SourceBaseWimImage%,%WinSxS-Listfile%,%TargetDir%,NOACL,NOATTRIB,NOERR
 If,Not,ExistDir,%TargetWindows%\WinSxS\Catalogs,DirMake,%TargetWindows%\WinSxS\Catalogs
 
