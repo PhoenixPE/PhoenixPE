@@ -1,0 +1,451 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2022 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=LibreOffice
+Author=Homes32
+Level=5
+Version=1.0.0.0
+Description=(v7.3.4) LibreOffice is a free and powerful office suite.
+Date=2022-07-27
+Selected=True
+Mandatory=False
+
+[Variables]
+%ProgramFolder%="LibreOffice"
+%ProgramVersion%=7.3.4
+%ProgramExe%="program\soffice.exe"
+%DownloadURL-Std%=http://download.documentfoundation.org/libreoffice/portable/%ProgramVersion%/LibreOfficePortable_%ProgramVersion%_MultilingualStandard.paf.exe
+%DownloadURL-AllLang%=http://download.documentfoundation.org/libreoffice/portable/%ProgramVersion%/LibreOfficePortable_%ProgramVersion%_MultilingualStandard.paf.exe
+%SetupFile%="LibreOfficePortable-Std.paf.exe"
+%registrymodifications.xcu%="%TargetAppData%\%ProgramFolder%\user\registrymodifications.xcu"
+%StdLangList%=Arabic [ar]|Chinese (Simplified) [zh-CN]|Chinese (Traditional) [zh-TW]|English (United Kingdom) [en-GB]|English [en-US]|French [fr]|German [de]|Italian [it]|Japanese [ja]|Korean [ko]|Portuguese (Brazil) [pt-BR]|Portuguese [pt]|Russian [ru]|Spanish [es]
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+Run,%ScriptFile%,SetProgramRelease
+
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+
+DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+FileCopy,"%ProjectTemp%\%ProgramFolder%\App\libreoffice\*.*","%TargetPrograms%\%ProgramFolder%"
+
+// Default Settings
+FileCopy,"%ProjectTemp%\%ProgramFolder%\App\DefaultData\settings\*.*","%TargetAppData%\%ProgramFolder%"
+
+// Dependencies
+RequireFileEx,AppendList,\Windows\System32\DiagnosticDataSettings.dll
+RequireFileEx,AppendList,\Windows\System32\fontsub.dll
+RequireFileEx,AppendList,\Windows\System32\opencl.dll
+RequireFileEx,AppendList,\Windows\System32\umpdc.dll
+RequireFileEx,AppendList,\Windows\System32\wer.dll
+
+// WoW64
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RequireFileEx,AppendList,\Windows\SysWOW64\DiagnosticDataSettings.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\fontsub.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\opencl.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\umpdc.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\wer.dll
+End
+
+// Extract
+RequireFileEx,ExtractList
+
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+Echo,"Configuring LibreOffice..."
+
+// Configure our settings folder. Note: Use UNIX style path!
+IniWrite,"%TargetPrograms%\%ProgramFolder%\program\bootstrap.ini","Bootstrap","UserInstallation","$SYSUSERCONFIG/%ProgramFolder%"
+
+// Language
+StrFormat,SPLIT,%cmb_Language%,"[",2,%lng%
+StrFormat,RTRIM,%lng%,1,%lng%
+
+IniWrite,"%TargetPrograms%\%ProgramFolder%\program\soffice.ini","Bootstrap","STARTLANG",%lng%
+XMLUpdate,%registrymodifications.xcu%,"/oor:items/item/prop[@oor:name='UILocale']/value",%lng%
+XMLUpdate,%registrymodifications.xcu%,"/oor:items/item/prop[@oor:name='ooLocale']/value",%lng%
+
+// Disable file ext check, TipOfTheDay, etc.
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.Common/Help#$q><prop oor:name=#$qBuiltInHelpNotInstalledPopUp#$q oor:op=#$qfuse#$q><value>false</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.Common/Misc#$q><prop oor:name=#$qFirstRun#$q oor:op=#$qfuse#$q><value>false</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.Common/Misc#$q><prop oor:name=#$qPerformFileExtCheck#$q oor:op=#$qfuse#$q><value>false</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.Common/Misc#$q><prop oor:name=#$qShowTipOfTheDay#$q oor:op=#$qfuse#$q><value>false</value></prop></item>#$x</oor:items>"
+
+// Default Folders
+TXTReplace,%registrymodifications.xcu%,"<value>XXX</value>","<value>$TEMP</value>"
+TXTReplace,%registrymodifications.xcu%,"<value>DEFAULT--WORK--PATH</value>","<value>$SYSUSERHOME</value>"
+
+// Disable Update Check
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.Jobs/Jobs/org.openoffice.Office.Jobs:Job['UpdateCheck']/Arguments#$q><prop oor:name=#$qAutoCheckEnabled#$q oor:op=#$qfuse#$q oor:type=#$qxs:boolean#$q><value>false</value></prop></item>#$x</oor:items>"
+
+// Set MS Office as default document types
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Setup/Office/Factories/org.openoffice.Setup:Factory['com.sun.star.text.TextDocument']#$q><prop oor:name=#$qooSetupFactoryDefaultFilter#$q oor:op=#$qfuse#$q><value>MS Word 2007 XML</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Setup/Office/Factories/org.openoffice.Setup:Factory['com.sun.star.sheet.SpreadsheetDocument']#$q><prop oor:name=#$qooSetupFactoryDefaultFilter#$q oor:op=#$qfuse#$q><value>Calc MS Excel 2007 XML</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Setup/Office/Factories/org.openoffice.Setup:Factory['com.sun.star.presentation.PresentationDocument']#$q><prop oor:name=#$qooSetupFactoryDefaultFilter#$q oor:op=#$qfuse#$q><value>Impress MS PowerPoint 2007 XML</value></prop></item>#$x</oor:items>"
+
+// Toolbar Mode
+If,%cmb_UIMode%,Equal,"Standard Toolbar",Set,%ToolbarMode%,"Default"
+Else,If,%cmb_UIMode%,Equal,"Tabbed",Set,%ToolbarMode%,"notebookbar.ui"
+Else,If,%cmb_UIMode%,Equal,"Single Toolbar",Set,%ToolbarMode%,"Single"
+Else,If,%cmb_UIMode%,Equal,"Sidebar",Set,%ToolbarMode%,"Sidebar"
+Else,If,%cmb_UIMode%,Equal,"Tabbed Compact",Set,%ToolbarMode%,"notebookbar_compact.ui"
+Else,If,%cmb_UIMode%,Equal,"Groupedbar Compact",Set,%ToolbarMode%,"notebookbar_groupedbar_compact.ui"
+Else,If,%cmb_UIMode%,Equal,"Contextual Single",Set,%ToolbarMode%,"notebookbar_single.ui"
+Else,Halt,"INTERNAL LOGIC ERROR: Invalid UI Mode [%cmb_UIMode%] Selected."
+
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.UI.ToolbarMode#$q><prop oor:name=#$qActiveCalc#$q oor:op=#$qfuse#$q><value>%ToolbarMode%</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.UI.ToolbarMode/Applications/org.openoffice.Office.UI.ToolbarMode:Application['Calc']#$q><prop oor:name=#$qActive#$q oor:op=#$qfuse#$q><value>%ToolbarMode%</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.UI.ToolbarMode#$q><prop oor:name=#$qActiveDraw#$q oor:op=#$qfuse#$q><value>%ToolbarMode%</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.UI.ToolbarMode/Applications/org.openoffice.Office.UI.ToolbarMode:Application['Draw']#$q><prop oor:name=#$qActive#$q oor:op=#$qfuse#$q><value>%ToolbarMode%</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.UI.ToolbarMode#$q><prop oor:name=#$qActiveImpress#$q oor:op=#$qfuse#$q><value>%ToolbarMode%</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.UI.ToolbarMode/Applications/org.openoffice.Office.UI.ToolbarMode:Application['Impress']#$q><prop oor:name=#$qActive#$q oor:op=#$qfuse#$q><value>%ToolbarMode%</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.UI.ToolbarMode#$q><prop oor:name=#$qActiveWriter#$q oor:op=#$qfuse#$q><value>%ToolbarMode%</value></prop></item>#$x</oor:items>"
+TXTReplace,%registrymodifications.xcu%,"</oor:items>","<item oor:path=#$q/org.openoffice.Office.UI.ToolbarMode/Applications/org.openoffice.Office.UI.ToolbarMode:Application['Writer']#$q><prop oor:name=#$qActive#$q oor:op=#$qfuse#$q><value>%ToolbarMode%</value></prop></item>#$x</oor:items>"
+
+// File Associations
+If,%cb_AssociateFiles%,Equal,True,Begin
+RegHiveLoad,Tmp_Software,%RegSoftware%
+  ExtractFile,%ScriptFile%,Reg,LibreOffice-Classes.reg,%ProjectTemp%
+
+  // .reg files require escaping `\`
+  StrFormat,REPLACE,%PEPrograms%,"\","\\",%esc_PEPrograms%
+  StrFormat,REPLACE,%ProgramFolder%,"\","\\",%esc_ProgramFolder%
+  TXTReplace,"%ProjectTemp%\LibreOffice-Classes.reg","C:\\Program Files\\LibreOffice","%esc_PEPrograms%\\%esc_ProgramFolder%"
+
+  RegImport,"%ProjectTemp%\LibreOffice-Classes.reg"
+  RegHiveUnLoad,Tmp_Software
+End
+
+// Exclude from Windows Error Reporting, LibreOffice has it's own crash handler.
+RegHiveLoad,Tmp_Default,%RegDefault%
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\Windows Error Reporting\ExcludedApplications","SOFFICE.EXE",1
+RegHiveUnLoad,Tmp_Default
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
+// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting program files...#$x#$xThis can take awhile, please be patient."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!$PLUGINSDIR -o#$q#1#$q"
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramRelease
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+
+[#SetLangRelease#]
+// ===============================================================================================================================
+// Name...........: SetLangRelease
+// Description....: Configure the script for the selected program release (Std/AllLang) based on the Language selection.
+// Syntax.........: Run,%ScriptFile%,SetLangRelease
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: At present, this function is only attached to cmb_Language, in order to allow users to override the
+//                  auto language selection via the Advanced Options button, and directly set rbt_Release-Std or rbtn_Release-AllLang
+// Related........: cmb_Language, rbtn_Release-AllLang, rbtn_Release-Std
+// ===============================================================================================================================
+[SetLangRelease]
+List,Pos,%StdLangList%,%cmb_Language%,%IsLangStd%
+
+If,%IsLangStd%,Equal,0,Begin
+  // Needs All Language Package
+  WriteInterface,Value,%ScriptFile%,Interface,rbtn_Release-Std,False
+  WriteInterface,Value,%ScriptFile%,Interface,rbtn_Release-AllLang,True
+End  
+Else,Begin
+  // Std Package
+  WriteInterface,Value,%ScriptFile%,Interface,rbtn_Release-Std,True
+  WriteInterface,Value,%ScriptFile%,Interface,rbtn_Release-AllLang,False
+End
+
+[#SetProgramRelease#]
+// ===============================================================================================================================
+// Name...........: SetProgramRelease
+// Description....: Configure the script for the selected program release (Std/AllLang).
+// Syntax.........: Run,%ScriptFile%,SetProgramRelease
+// Parameters.....: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The Std or AllLang download URL for %SetupFile%.
+//                  %SetupFile%      - The Std or AllLang setup file.
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[SetProgramRelease]
+If,%rbtn_Release-Std%,Equal,True,Begin
+  Set,%DownloadURL%,%DownloadURL-Std%
+  Set,%SetupFile%,"LibreOfficePortable-Std.paf.exe"
+End  
+Else,If,%rbtn_Release-AllLang%,Equal,True,Begin
+  Set,%DownloadURL%,%DownloadURL-AllLang%
+  Set,%SetupFile%,"LibreOfficePortable-AllLang.paf.exe"
+End
+Else,Halt,"INTERNAL LOGIC ERROR: Invalid Release Selected."
+
+[#LaunchProgram#]
+// ===============================================================================================================================
+// Name...........: LaunchProgram
+// Description....: Unpack and launch the program.
+// Syntax.........: Run,%ScriptFile%,LaunchProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_LaunchProgram
+// ===============================================================================================================================
+[LaunchProgram]
+Echo,"Launching %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramRelease
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+ShellExecuteEx,Open,"%ProgramsCache%\%ProgramFolder%\%SetupFile%"
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Productivity"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"LibreOffice"
+WriteInterface,Value,%ScriptFile%,Interface,rbtn_Release-Std,True
+WriteInterface,Value,%ScriptFile%,Interface,rbtn_Release-AllLang,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [en-US]"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_UIMode,"Standard Toolbar"
+WriteInterface,Value,%ScriptFile%,Interface,cb_AssociateFiles,True
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,bvl_DownloadRelease,%state%
+If,%state%,Equal,False,Begin
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Begin
+	Set,%Toggle%,True
+    WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_Exit_16.png
+	WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Hide Advanced Options"
+  End
+  Else,Set,%Toggle%,False
+End
+Else,Begin
+  Set,%Toggle%,False
+  WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_16.png
+  WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
+End
+
+WriteInterface,Visible,%ScriptFile%,Interface,lbl_Release,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,rbtn_Release-Std,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,rbtn_Release-AllLang,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_DownloadRelease,%Toggle%
+System,EndLocal
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"LibreOffice is a free and powerful office suite#$x#$xOn first run this script will download the setup file (~185-244 MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_LaunchProgram="Launch LibreOffice",1,8,5,5,130,25,LaunchProgram,play-hot.png,False
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.libreoffice.org/
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_DownloadRelease=,0,12,150,50,198,25
+lbl_Release=Release:,0,1,157,58,48,16,8,Bold
+rbtn_Release-Std=Standard,0,11,205,53,66,20,True,"__The standard download includes support for English (US and GB), Arabic (if available), Chinese (Simplified and Traditional),#$xFrench, German, Italian, Japanese, Korean, Portuguese (Brazilian and Portugal), Russian, and Spanish.#$x#$x185MB download / 584-734MB installed"
+rbtn_Release-AllLang="All Lang",0,11,276,53,62,20,False,"__The All Languages download includes all languages supported.#$x#$x244MB download / 700-1200MB installed"
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,Productivity
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,LibreOffice
+bvl_Options=Options,1,12,150,90,197,184,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language="English [en-US]",1,4,160,126,150,21,"Afrikaans [af]","Arabic [ar]","Belarusian [be]","Bengali [bn]","Bulgarian [bg]","Catalan [ca]","Chinese (Simplified) [zh-CN]","Chinese (Traditional) [zh-TW]","Croatian [hr]","Czech [cs]","Danish [da]","Dutch [nl]","English (United Kingdom) [en-GB]","English [en-US]","Estonian [et]","Finnish [fi]","Finnish [fi] (2)","French [fr]","Gaelic [gd]","Galician [gl]","German [de]","Greek [el]","Gujarati [gu]","Hebrew [he]","Hindi [hi]","Hungarian [hu]","Italian [it]","Japanese [ja]","Korean [ko]","Latvian [lv]","Lithuanian [lt]","Nepali [ne]","Norwegian [no]","Polish [pl]","Portuguese (Brazil) [pt-BR]","Portuguese [pt]","Romanian [ro]","Russian [ru]","Serbian (Latin) [sh]","Serbian [sr]","Sinhalese [si]","Slovak [sk]","Slovenian [sl]","Spanish [es]","Swedish [sv]","Teluga [te]","Thai [th]","Turkish [tr]","Ukrainian [uk]","Vietnamese [vi]","Zulu [zu]",_SetLangRelease_,True
+lbl_UIMode="UI Mode",1,1,159,160,153,16,8,Normal
+cmb_UIMode="Standard Toolbar",1,4,160,176,150,21,"Standard Toolbar",Tabbed,"Single Toolbar",Sidebar,"Tabbed Compact","Groupedbar Compact","Contextual Single"
+cb_AssociateFiles="Associate with office files",1,3,160,207,176,18,True,"__Open MS Office and Open Document files with LibreOffice"
+
+[AuthorEncoded]
+appicon_75.png=1936,2680
+Logo=appicon_75.png
+
+[InterfaceEncoded]
+play-hot.png=841,1220
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+Trash.ico=1150,1212
+Advanced_Exit_16.png=705,1048
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-appicon_75.png]
+lines=0
+0=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
+
+[EncodedFolders]
+Reg
+
+[Reg]
+LibreOffice-Classes.reg=422176,14320
+
+[EncodedFile-Reg-LibreOffice-Classes.reg]
+lines=3
+0=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
+1=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
+2=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
+3=b66vP3WS6ZRZpSLCU8uO+zS5vtrsYcUOFv3zbb14txYMEx7DSEX8N8i7bj+qfmFdcnCo+thKL2D3oe3jojavyMsKdN6swkWp1JHyRLTqFsCLTqRbMa2FoYOX3NbLbVWN5xDqBVvrshffCG3joqNrT2L5Qd3x7mMMT0LAcQ2aL5zLQvGig5RgrbZzeyZhKIFp/g08i6TqPu2w1xHF9nM3FP2bQR3MU25Aer8TrpTcnw9WUcFWhI6yRmNoTh3nSKoqDRzcBgJv3yD84Ex4bgWmfB81SuMl9Z7pQPDaKJStBpdJ5ETB35XIdQ12tt6IdJ4Jz1vcwhhsNI4krUP8MqxvUwFOAeX3Ip4BKgSSsWJfCkLLFv3+9semLQ71ynEyyjSmVPx7RrV87aOxhlOazP6jijpZeIun05IqzN4V8348N7MgUNK4+YKGjYnC0OReacKgIMkFbkKPUrkY5S/kTNg8XbWeORaT+3K0T1OLOiNOQ8brBfKBjai5JFe7LiOhDM6RDTylVoFEdY99h0fawynbUNNKt83X0cbS2gbdQz27ficLZOgOEcAyFG5gS1gca8H7iVVIXqtXrC5k6dEHWkeQnSP2zSOoETapnQxqb+ac4GpC+lQ1Oe52C/25W6eaCePHf+IbG5FvjRSjYgDMfCn6xlGHmHfINrMlHrLXeX4LVudMnTDT/Bj3sK/ehykRCw2No8cz4sYip6yGF32VByLoaWbWYsmaey3lKSmnRr/VH2XE96oNjoGpeTsKqPNCvNISB4qfGTUcIf1QPm33WOaXwkydvZC2HOr7rVz8OW+pEEasC1v+RtOpZJd1AmzC2CI5P2LZx/ShlhuTtCZMWayMmDlY8cgJPqSq5/wi7JtMecbTUeFz3nXZqT2w5unV+79ZweqvV1WVPynwUx0KTIijduXozNvO54om7RDGPoEEGveYt79crS5GvWr00LN3kazpv1RqkJbfgJfC15FTbiI+NDk6kuFn1km9cjuOiE6gU+UmquOAYk+jj6fpw0TlhgrhvaFiLVUEXTU5WdixralsVqauYEbiYKXWAcCWzW9v+yokY5dVSH5ZnDyWo1IgNUl+Wq1a7OynhJlbhFhzZ7d/7pfB3P7vGvMBW5JK+v86eQNzv7LakeQ00DkxnPYywFvyQnDFjLA5qn/sf3ZMT0vhR/8kh8MmA95lIK81qg9i6d6MUVestCkoKs5qK41gHmPMOF72fQTYLD4CZ5QkBM25o5T25vWBrEigbN2g9cfeDIsF9Yt9QVi12Y2uTBnFaLaFybPo7CllvO8Z1FMro8GAbKiE4fiVH8XQffCyE8RUewNnDxm1JAsl3ZagcVOoj34Tjw+IjM0bCotezVJXf7X4i55kLLz2QVsx5LbmQzWTOcw97nbiz1kteTS1cLGaQSrVzBMTEOPqFtersAohW6qUWjNQagJzKtK1tJ9IwRsf/uGuLVjw37fR+gc1/bebFRre81eA80HJKdl/4SRLwtkFF9YtyVzcC3GNSx6OnkNEGEkbJy9jhvQsNh8rjaH2gEMDPS65LqnrmHx4dWAnuyg30M9RPqT527uS8vb7RgKeg/SNoWwSJ6Ev/5AssJyQAnOWh69XcfmEHyysdNFJj6MlJEDxOmJ2MRMwPbuZ8zLxUq7AAqUjZxrNVxly4+cX67ORKibash65qeJ4E7F50yezUIbjIsox+4I1AEPExEaC2aS3CEAX2w1SDkkCN+wJhv4TOZqciQ9ZfkUcLVFBWaNhrBulMmpEIlVq3rNDE40uPryoX/aPtn5CWWhKm4r7zo0DH07MwKOOzWwOSH2LYH8lhYSU651xRHqD/LmxzXlEG5n9bER+4Jgk8LWOrBtJRm5oQ8y0o90ZOoslYTBp7K1b1ZCC0uxvAAAAAAO5THOxCj2CwAAfVSoOIZAA901LixxGf7AgAAAAAEWVp4nBP3yUwqSvVPS8tMTtV1zkksLk4t1itKTWcYBSMCKBSygek5mtjlBZlO/WBiAwCJuAvyz57ZuQEAAAACAAAANAAAAJwpAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
