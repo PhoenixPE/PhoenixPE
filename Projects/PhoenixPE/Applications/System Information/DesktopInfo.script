@@ -30,19 +30,19 @@
 
 [Main]
 Title=DesktopInfo
-Description=(v3.5.0) A lightweight application that displays real-time system information on your desktop.
+Description=(v3.6.0) A lightweight application that displays real-time system information on your desktop.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.2.0
-Date=2022-04-11
+Version=1.1.3.0
+Date=2022-08-12
 
 [Variables]
 %ProgramFolder%="DesktopInfo"
 %ProgramExe86%="DesktopInfo32.exe"
 %ProgramExe64%="DesktopInfo64.exe"
-%ProgramVersion%=3050
+%ProgramVersion%=3060
 %DownloadURL%=https://www.glenn.delahoy.com/downloads/desktopinfo/DesktopInfo%ProgramVersion%.zip
 %SetupFile%="DesktopInfo.zip"
 
@@ -161,6 +161,8 @@ ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\DesktopInfo.ini"
 Echo,"Launching %ScriptTitle%..."
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+If,%SouceArch%,Equal,x64,Set,%ProgramExe%,DesktopInfo64.exe
+Else,Set,%ProgramExe%,DesktopInfo32\DesktopInfo32.exe
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
 [#ClearDownloadCache#]

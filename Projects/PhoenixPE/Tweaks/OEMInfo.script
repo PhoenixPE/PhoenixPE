@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.1.0.0
-Date=2020-03-01
+Version=1.1.0.1
+Date=2022-08-01
 
 [Variables]
 
@@ -49,6 +49,7 @@ System,GetEnv,COMPUTERNAME,%ComputerName%
 System,GetEnv,USERNAME,%UserName%
 StrFormat,Date,%Date%,"yyyy-mm-dd"
 StrFormat,Date,%Time%,"hh:nn"
+StrFormat,Date,%TimeStamp%,"YYYYMMDDHHNNSS"
 
 // apply Model field txt macros
 IniWrite,"%ProjectTemp%\OEMInfo.ini","Info","Model",%txt_Model%
@@ -58,6 +59,7 @@ TxtReplace,"%ProjectTemp%\OEMInfo.ini","{Username}",%UserName%
 TxtReplace,"%ProjectTemp%\OEMInfo.ini","{ComputerName}",%ComputerName%
 TxtReplace,"%ProjectTemp%\OEMInfo.ini","{Date}",%Date%
 TxtReplace,"%ProjectTemp%\OEMInfo.ini","{Time}",%Time%
+TxtReplace,"%ProjectTemp%\ISO.ini","{TimeStamp}",%TimeStamp%
 IniRead,"%ProjectTemp%\OEMInfo.ini","Info","Model",%Model%
 
 RegLoadHives
@@ -144,7 +146,7 @@ btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_OEMInfo="OEM Information",1,12,5,50,440,206,8,Bold
 txt_Manufacturer=Manufacturer,1,0,16,82,200,21,PhoenixPE,"__Manufacturer name"
-txt_Model=Model,1,0,230,82,200,21,"{ProjectTitle} (Build {Date} {Time})","__Model information#$xThe following text macros may be used to include additional information: {ProjectTitle}, {ProjectVer}, {Username}, {ComputerName}, {Date}, {Time}#$x#$xeg.Build Info: {ProjectTitle} v{ProjectVer} {Date}"
+txt_Model=Model,1,0,230,82,200,21,"{ProjectTitle} (Build {Date} {Time})","__Model information#$xThe following text macros may be used to include additional information:#$x  {ProjectTitle} - Project Title#$x  {ProjectVer} - Project Version#$x  {Username} - HostOS Username#$x  {ComputerName} - HostOS Computer Name#$x  {Date} - Current Date (YYYY-MM-DD)#$x  {Time} - Current Time (HH:NN)#$x  {TimeStamp} - Current Date/Time (YYYYMMDDHHNNSS)#$x#$xeg.Build Info: {ProjectTitle} v{ProjectVer} {Date}"
 txt_SupportHrs="Support Hours",1,0,16,126,200,21,,"__Hours support is available#$x#$xeg. 24-Hrs or Mon-Fri 8am to 5pm"
 txt_SupportPh="Support Phone",1,0,230,126,200,21,,"__Support Phone Number#$x#$xeg. 1-800-555-5555"
 txt_SupportURL="Support URL",1,0,16,172,415,21,https://www.github.com/PhoenixPE,"__URL of the support website.#$xThis will be a clickable link titled 'Online Support'.#$x#$xeg. https://github.com/PhoenixPE"
