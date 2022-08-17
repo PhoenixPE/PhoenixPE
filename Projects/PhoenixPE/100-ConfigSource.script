@@ -131,17 +131,17 @@ Set,%SourceDir%,%fb_SrcPath%,PERMANENT
 If,%cmb_BaseWim%,Equal,"WinRE.wim",Begin
   // WinRE selected as base.
   // Note that we don't check if WinRE exists here or enum. it's images, as it may not have been extract yet. (210-Core.script)
-  Set,%SourceBaseWimName%,WinRE.wim,PERMANENT
-  Set,%SourceBaseWim%,%ProjectCache%\WinRE.wim,PERMANENT
+  Set,%SourceBaseWimName%,"WinRE.wim",PERMANENT
+  Set,%SourceBaseWim%,"%ProjectCache%\WinRE.wim",PERMANENT
   Set,%SourceBaseWimImage%,1,PERMANENT
   WriteInterface,Items,%ScriptFile%,Interface,cmb_SrcBaseImage,"1 - Microsoft Windows Recovery Environment"
   WriteInterface,Value,%ScriptFile%,Interface,cmb_SrcBaseImage,"1 - Microsoft Windows Recovery Environment"
 End
 Else,If,%cmb_BaseWim%,Equal,"Boot.wim",Begin
   // Boot.wim selected as base
-  If,ExistFile,%SourceDir%\Sources\Boot.wim,Begin
-    Set,%SourceBaseWimName%,Boot.wim,PERMANENT
-    Set,%SourceBaseWim%,%SourceDir%\Sources\Boot.wim,PERMANENT
+  If,ExistFile,"%SourceDir%\Sources\Boot.wim",Begin
+    Set,%SourceBaseWimName%,"Boot.wim",PERMANENT
+    Set,%SourceBaseWim%,"%SourceDir%\Sources\Boot.wim",PERMANENT
     // Get the number of images in the wim file.
     WimInfo,%SourceBaseWim%,0,ImageCount,%imgCount%
     Set,%imgIndexList%,""
@@ -156,20 +156,20 @@ Else,If,%cmb_BaseWim%,Equal,"Boot.wim",Begin
     WriteInterface,Value,%ScriptFile%,Interface,cmb_SrcBaseImage,%indexSelected%
   End
   Else,Begin
-    Message,"Invalid Source!#$x#$x  %SourceDir%\Sources\Boot.wim#$x#$xcould not be found."
+    Message,"Invalid Source!#$x#$x  %SourceDir%\Sources\Boot.wim#$x#$xcould not be found.",ERROR
     Halt
   End
 End
-Else,Halt,"LOGIC ERROR: Invalid Base Wim selected."
+Else,Halt,"INTERNAL LOGIC ERROR: Invalid Base Wim selected."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Install.wim
 
-If,ExistFile,%SourceDir%\Sources\Install.wim,Begin
-  Set,%SourceInstallWim%,%SourceDir%\Sources\Install.wim,PERMANENT
+If,ExistFile,"%SourceDir%\Sources\Install.wim",Begin
+  Set,%SourceInstallWim%,"%SourceDir%\Sources\Install.wim",PERMANENT
 End
-Else,If,ExistFile,%SourceDir%\Sources\Install.esd,Begin
-  Set,%SourceInstallWim%,%SourceDir%\Sources\Install.esd,PERMANENT
+Else,If,ExistFile,"%SourceDir%\Sources\Install.esd",Begin
+  Set,%SourceInstallWim%,"%SourceDir%\Sources\Install.esd",PERMANENT
   Message,"Warning:#$xYou have selected a source with [Install.esd] present.#$x.esd files MAY be encrypted. If you encounter problems building please select a different source which contains an unencrypted Install.esd or Install.wim",Warning
 End
 Else,Begin
