@@ -30,22 +30,22 @@
 
 [Main]
 Title=DiskGenius
-Description=DiskGenius is an all-in-one Data Recovery, Partition Manager, and Backup/Cloning Utility for IT Professionals.
+Description=(v5.4.5.1412) DiskGenius is an all-in-one Data Recovery, Partition Manager, and Backup/Cloning Utility for IT Professionals.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2022-03-03
+Version=1.1.0.0
+Date=2022-08-18
 
 [Variables]
 %ProgramFolder%="DiskGenius"
 %ProgramExe%="DiskGenius.exe"
-%ProgramVersion%=5431328
+%ProgramVersion%=5451412
 %SetupFile%="DiskGenius_%SourceArch%.zip"
 %DownloadURLx86%=http://engdownload.eassos.cn/winpe/DGEng%ProgramVersion%_x86.zip
 %DownloadURLx64%=http://engdownload.eassos.cn/winpe/DGEng%ProgramVersion%_x64.zip
-%aLangMap%=English|1252|Japanese|932
+%aLangMap%=Arabic|العربية|Dutch|Nederlands|English||French|Français|German|Deutsch|Italian|Italian|Japanese|日本語|Korean|한국어|Polish|Polski|Portuguese|Português|Russian|Русский|Spanish|Español
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -63,17 +63,19 @@ FileCopy,"%ProjectTemp%\%ProgramFolder%\DiskGenius\*.*","%TargetPrograms%\%Progr
 
 Echo,"Configuring %ScriptTitle%..."
 
+FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\Options.ini",Encoding=UTF16
+
 // Language
 List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
 If,Not,%LangPos%,Equal,0,Begin
   Math,Add,%LangPos%,%LangPos%,1
   List,Get,%aLangMap%,%LangPos%,%LangCode%
-  IniWrite,"%TargetPrograms%\%ProgramFolder%\Options.ini","Settings","Language","%LangCode%"
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\Options.ini","Settings","Language","#$q1252#$q"
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\Options.ini","Settings","LanguagePack","#$q%LangCode%#$q"
 End
 Else,Halt,"INTERNAL LOGIC ERROR: The specified language is not defined."
 
 // Don't show nag screen
-FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\Options.ini"
 IniWrite,"%TargetPrograms%\%ProgramFolder%\Options.ini","LicenseInfo","Show","#$qN#$q"
 IniWrite,"%TargetPrograms%\%ProgramFolder%\Options.ini","LicenseInfo","Remind","#$qN#$q"
   
@@ -295,7 +297,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Disk Management"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,DiskGenius
 bvl_Options=Options,1,12,145,90,197,184,8,Bold
 lbl_Language=Language,1,1,154,110,153,16,8,Normal
-cmb_Language=English,1,4,155,126,150,21,English,Japanese
+cmb_Language=English,1,4,155,126,150,21,Arabic,Dutch,English,French,German,Italian,Japanese,Korean,Polish,Portuguese,Russian,Spanish
 lbl_RegEdition="Software Edition",1,1,155,160,153,16,8,Normal
 cmb_RegEdition=Free,1,4,155,175,171,21,Free,"Use Host License","Enter Registration Info",_ToggleProductReg_,True
 bvl_Registration="Product Registration",0,12,349,90,226,184,8,Bold

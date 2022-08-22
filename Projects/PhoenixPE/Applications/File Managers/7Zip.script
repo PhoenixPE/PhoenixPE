@@ -32,16 +32,16 @@
 Title=7-Zip
 Author=Homes32
 Level=5
-Version=1.1.2.0
-Description=(v22.00) 7-Zip is a free and open-source file archiver capable of reading and writing many archive formats.
-Date=2022-06-22
+Version=1.2.0.0
+Description=(v22.01) 7-Zip is a free and open-source file archiver capable of reading and writing many archive formats.
+Date=2022-08-18
 Selected=False
 Mandatory=False
 
 [Variables]
 %ProgramFolder%="7-Zip"
 %ProgramExe%="7zFM.exe"
-%ProgramVersion%=2200
+%ProgramVersion%=2201
 %DownloadURL86%=https://www.7-zip.org/a/7z%ProgramVersion%.exe
 %DownloadURL64%=https://www.7-zip.org/a/7z%ProgramVersion%-x64.exe
 
@@ -55,13 +55,8 @@ StrFormat,RTRIM,%7zLang%,1,%7zLang%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe",Run,%ScriptFile%,DownloadProgram
-Echo,"Extracting files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe#$q * -xr!uninstall.exe -o#$q%ProjectTemp%\%ProgramFolder%#$q"
-DirMake,"%TargetPrograms%\%ProgramFolder%"
-If,#r,Equal,0,FileCopy,"%ProjectTemp%\%ProgramFolder%\*.*","%TargetPrograms%\%ProgramFolder%"
-Else,Halt,"Error: Failed to extract files."
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
@@ -394,6 +389,22 @@ If,%cb_ExtZip%,Equal,True,Begin
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.zip","","zip Archive"
 End
 
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestPath>
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting files..."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe#$q * -xr!uninstall.exe -o#$q#1#$q"
+If,Not,#r,Equal,0,Halt,"Error: Failed to extract program files."
+
 [#DownloadProgram#]
 // ===============================================================================================================================
 // Name...........: DownloadProgram
@@ -407,10 +418,9 @@ End
 // ===============================================================================================================================
 [DownloadProgram]
 System,SetLocal
-Echo,"Downloading 7-Zip [%SourceArch%]..."
-If,%SourceArch%,Equal,x64,Set,%URL%,%DownloadURL64%
-Else,Set,%URL%,%DownloadURL86%
-WebGet,"%URL%","%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe",NOERR
+Echo,"Downloading %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramArch
+WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 System,EndLocal
 
@@ -428,6 +438,28 @@ System,EndLocal
 [ClearDownloadCache]
 DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 
+[#SetProgramArch#]
+// ===============================================================================================================================
+// Name...........: SetProgramArch
+// Description....: Configure the script for the correct source architecture.
+// Syntax.........: Run,%ScriptFile%,SetProgramArch
+// Parameters.....: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[SetProgramArch]
+If,%SourceArch%,Equal,x64,Begin
+  Set,%SetupFile%,Setup-x64.exe
+  Set,%DownloadURL%,%DownloadURL64%
+End
+Else,Begin
+  Set,%SetupFile%,Setup-x86.exe
+  Set,%DownloadURL%,%DownloadURL86%
+End
+
 [#LaunchProgram#]
 // ===============================================================================================================================
 // Name...........: LaunchProgram
@@ -441,11 +473,9 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // ===============================================================================================================================
 [LaunchProgram]
 System,SetLocal
-If,%HostArch%,Equal,x64,Set,%SetupFile%,Setup-x64.exe
-Else,Set,%SetupFile%,Setup-x86.exe
+Run,%ScriptFile%,SetProgramArch
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.exe -o#$q%ProjectTemp%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 System,EndLocal
 
