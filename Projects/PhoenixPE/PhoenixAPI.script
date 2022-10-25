@@ -483,7 +483,10 @@ End
 //                  #2 DestDir - The full path to the directory where the files will be unpacked.
 // Return values..: 
 // Author.........: Homes32
-// Remarks........:                      *** Experimental - May be changed or removed without notice ***
+// Remarks........: Note: DestDir MUST end with a \ or lessmsi will consider it a file name to extract. We play it safe by trimming
+//                  any \ from the user provided directory and add it ourselves.
+//                  In the future it would be nice to have the option to extract individual files. lessmsi supports this but
+//                  does not provide a usable exit code if the file can't be found.
 // Related........: Depends on lessmsi.exe for extraction. (http://lessmsi.activescott.com/)
 // ===============================================================================================================================
 [_PhoenixAPI_MSIExtract]
@@ -492,7 +495,7 @@ If,#1,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the setup file."
 If,#2,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the destination directory."
 
 GetParam,1,%SetupFile%
-Getparam,2,%DestDir%
+GetParam,2,%DestDir%
 
 StrFormat,CTrim,%DestDir%,"\","%DestDir%"
 
