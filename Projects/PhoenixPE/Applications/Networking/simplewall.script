@@ -30,20 +30,20 @@
 
 [Main]
 Title=simplewall
-Description=(v3.6.1) A simple tool for configuring the Windows Filtering Platform (WFP).
+Description=(v3.6.7) A simple tool for configuring the Windows Filtering Platform (WFP).
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.2.0
-Date=2022-02-00
+Version=1.0.3.0
+Date=2022-11-12
 Interface=Interface
 
 [Variables]
 %ProgramFolder%="simplewall"
-%ProgramVersion%=3.6.1
+%ProgramVersion%=3.6.7
 %DownloadURL%=https://github.com/henrypp/simplewall/releases/download/v.%ProgramVersion%/simplewall-%ProgramVersion%-bin.zip
-%DownloadProfilesURL%=https://github.com/henrypp/simplewall/blob/master/bin/profile_internal.xml
+%DownloadProfilesURL%=https://github.com/henrypp/simplewall/blob/master/bin/profile_internal.sp
 %DownloadLangURL%=https://github.com/henrypp/simplewall/blob/master/bin/simplewall.lng
 %ProgramExe%="simplewall.exe"
 %SetupFile%="simplewall.zip"
@@ -146,7 +146,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 [DownloadUpdates]
 Echo,"Downloading the latest rules and translations..."
 WebGet,"%DownloadProfilesURL%","%TargetPrograms%\%ProgramFolder%",NOERR
-If,Not,#r,Equal,200,Echo,"Download profile_internal.xml failed: The code returned was [#r].",Warn
+If,Not,#r,Equal,200,Echo,"Download profile_internal.sp failed: The code returned was [#r].",Warn
 
 // .lng file has Read-Only filesystem attribs so we run into issues if we try to copy over it
 FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\simplewall.lng"
