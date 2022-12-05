@@ -52,7 +52,8 @@ Echo,"Processing %ScriptTitle%..."
 If,%cb_RunFromRam%,Equal,True,RunFromRam
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Extract
+// Download & Extract
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +170,6 @@ RegHiveUnLoad,Tmp_Software
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
 
 [#DownloadProgram#]
