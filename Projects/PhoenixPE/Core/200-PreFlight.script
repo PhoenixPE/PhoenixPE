@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.1.1.0
-Date=2020-07-12
+Version=1.1.2.0
+Date=2022-12-21
 
 [Variables]
 // Minimum PEBakery version that has the command/feature set that is compatible with PhoenixPE.
@@ -49,7 +49,7 @@ Run,%ScriptFile%,CheckEngine
 Run,%ScriptFile%,CheckOutputDir
 If,%cb_CheckFreeSpace%,Equal,True,Run,%ScriptFile%,CheckDiskSpace
 Run,%ScriptFile%,CheckTools
-If,%cb_CheckForSupportedBuildVer%,Equal,True,Run,%ScriptFile%,CheckKnownBuilds
+If,%cb_CheckForSupportedBuildVer%,Equal,True,Run,%ScriptFile%,CheckVerifiedBuilds
 Run,%ScriptFile%,CheckWinREVersion
 
 [#CheckOutputDir#]
@@ -230,24 +230,30 @@ DirDeleteEx,"%Tools%\x86\BCDBOOT"
 DirDeleteEx,"%Tools%\x64\BCDBOOT"
 
 
-[#CheckKnownBuilds#]
+[#CheckVerifiedBuilds#]
 // ===============================================================================================================================
-// Name...........: CheckKnownBuilds
+// Name...........: CheckVerifiedBuilds
 // Description....: Verify if the source is a known working version. If not warn the user that there may be issues.
 //
-//                  Version  OS Build     Release Date  Codename      Marketing Name
-//                  -------  -----------  ------------  ------------- -------------------------
-//                  1507     10.0.10240   07/29/2015     Threshold 1   RTM
-//                  1511     10.0.15086   07/29/2015     Threshold 2   November Update
-//                  1607     10.0.14393   08/02/2016     Redstone 1    Anniversary Update
-//                  1703     10.0.15063   04/05/2017     Redstone 2    Creators Update
-//                  1709     10.0.16299   10/17/2017     Redstone 3    Fall Creators Update
-//                  1803     10.0.17134   04/30/2018     Redstone 4    Spring Creators Update
-//                  1809     10.0.17763   11/13/2018     Redstone 5    October 2018 Update
-//                  1903     10.0.18362   04/21/2019     19H1          May 2019 Update
-//                  1909     10.0.18363   11/12/2019     19H2          November 2019 Update
-//                  2004     10.0.19041   05/28/2020     20H1          May 2020 Update
-//                  2009     10.0.19042   10/20/2020     20H2          October 2020 Update
+//                  Version  OS Build     Release Date  Codename      Marketing Name             Support Status
+//                  -------  -----------  ------------  ------------- -------------------------  -------------------------
+//           Win10  1507     10.0.10240   07/29/2015     Threshold 1   RTM                        Not Verified
+//                  1511     10.0.15086   07/29/2015     Threshold 2   November Update            Not Verified
+//                  1607     10.0.14393   08/02/2016     Redstone 1    Anniversary Update         Not Verified
+//                  1703     10.0.15063   04/05/2017     Redstone 2    Creators Update            Not Verified
+//                  1709     10.0.16299   10/17/2017     Redstone 3    Fall Creators Update       Verified
+//                  1803     10.0.17134   04/30/2018     Redstone 4    Spring Creators Update     Verified
+//                  1809     10.0.17763   11/13/2018     Redstone 5    October 2018 Update        Verified
+//                  1903     10.0.18362   04/21/2019     19H1          May 2019 Update            Verified
+//                  1909     10.0.18363   11/12/2019     19H2          November 2019 Update       Verified
+//                  2004     10.0.19041   05/28/2020     20H1          May 2020 Update            Verified
+//                  2009     10.0.19042   10/20/2020     20H2          October 2020 Update        Not Verified
+//                           10.0.19043   05/18/2021     21H1          May 2021 Update            Not Verified
+//                           10.0.19044   11/16/2021     21H1          November 2021 Update       Not Verified
+//                           10.0.19045   06/28/2022     22H2          Windows 10 2022 Update     Not Verified   
+//           Win11  21H2     10.0.22000   10/04/2021     Sun Valley                               Experimental
+//                  22H2     10.0.22621   09/20/2022     Sun Valley 2                             Verified
+//
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -255,17 +261,17 @@ DirDeleteEx,"%Tools%\x64\BCDBOOT"
 // Remarks........: As a general rule PhoenixPE will attempt to support the 2 most recent verified builds.
 // Related........: Called by [Process]
 // ===============================================================================================================================
-[CheckKnownBuilds]
+[CheckVerifiedBuilds]
 System,SetLocal
 
 // Minimum supported version
 Set,%MinimumSourceVer%,"10.0.16299.0"
 
 // Supported Sources (x.x.x - do not include SPbuild)
-Set,%aSupportedVersions%,10.0.17634|10.0.17763|10.0.18362|10.0.18363|10.0.19041
+Set,%aSupportedVersions%,10.0.17634|10.0.17763|10.0.18362|10.0.18363|10.0.19041|10.0.22621
 
 // Latest Verified Source - This string is used in the warning message if the user is attempting to use an unverified source.
-Set,%MostRecentVerifiedSource%,"10.0.19041 - May 2020 Update (20H1) 2004"
+Set,%MostRecentVerifiedSource%,"* Win10: 10.0.19041 - May 2020 Update (20H1) 2004#$x* Win11: 10.0.22621 - 22H2"
 
 Echo,"Checking source version against known working builds..."
 If,%SourceVer%,Smaller,%MinimumSourceVer%,Begin
@@ -280,7 +286,7 @@ StrFormat,CTrim,%tmp_SourceVer%,".",%tmp_SourceVer%
 List,Pos,%aSupportedVersions%,%tmp_SourceVer%,%VerPos%
 If,%VerPos%,Equal,0,Begin
   Echo,"Warning: This Windows source version [%SourceVer%] has not been tested.",Warn
-  Message,"This Windows source version [%SourceVer%] has not been tested. This doesn't necessarily mean the build will fail, but if you run into problems you will be on your own.#$x#$xSome project scripts might not work with an untested/unknown source!#$x#$xIf possible please use the most recent verified source - #$x#$x  * %MostRecentVerifiedSource%",Warning,10
+  Message,"This Windows source version [%SourceVer%] has not been tested and verified to be compatible with PhoenixPE. This doesn't necessarily mean the build will fail, but if you run into problems you will be on your own.#$x#$xSome project scripts might not work with an untested/unknown source!#$x#$xIf possible please use the most recent verified source - #$x#$x%MostRecentVerifiedSource%",Warning,10
 End
 
 System,EndLocal
