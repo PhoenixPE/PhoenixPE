@@ -2,6 +2,16 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release UNRELEASED
+
+### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
 ## Release 2022-12-25
 
 ### Added
@@ -14,6 +24,7 @@ Notable changes to the PhoenixPE project.
 ### Changed
 - Added a comment to the Acronis True Image script that the program has been re-branded by the author
 - Modified the behavior of Explorer Win11 support. The default has been changed to use explorer.exe included with install.wim, as of Win11 22H2 explorer no longer results in a blackscreen on boot.
+- Add missing DLLs for file open dialog in some apps, e.g. notepad++
 - .Net6 updated to v6.0.10
 - Advanced IP Scanner updated to v2.5.4594.1
 - AgentRansack updated to v2022 build 3349
@@ -49,6 +60,7 @@ Notable changes to the PhoenixPE project.
 - Fixed an issue with AcronisTrueImage that could occur if drivers already existed in the target.
 - Fixed an issue with AcronisCyberProtect that could occur if drivers already existed in the target.
 - Fixed an issue with the DiskCyptor script where drivers were not correctly renamed after extraction.
+- Fixed some URL and path names for x86/32 bit builds
 
 ### Removed
 - Homepage link in Windows Login Unlocker script as the forum thread has been deleted :(
