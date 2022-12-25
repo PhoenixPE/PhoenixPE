@@ -38,8 +38,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2022-07-31
+Version=1.0.2.0
+Date=2022-12-24
 Interface=Interface
 
 [Variables]
@@ -296,6 +296,7 @@ If,%SourceArch%,Equal,x64,Begin
   If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\Drivers\snapapint64.bin -o#$q%TargetSystem32%\#$q"
   If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,ExistFile,"%TargetSystem32%\snapapint64.dll",FileDeleteEx,"%TargetSystem32%\snapapint64.dll"
   FileRename,"%TargetSystem32%\snapapint64.bin","%TargetSystem32%\snapapint64.dll"
 End
 Else,Begin
@@ -314,6 +315,7 @@ Else,Begin
   If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\Drivers\snapapint.bin -o#$q%TargetSystem32%\#$q"
   If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,ExistFile,"%TargetSystem32%\snapapint.dll",FileDeleteEx,"%TargetSystem32%\snapapint.dll"
   FileRename,"%TargetSystem32%\snapapint.bin","%TargetSystem32%\snapapint.dll"
 End
 

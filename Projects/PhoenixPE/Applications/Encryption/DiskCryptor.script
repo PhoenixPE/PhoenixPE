@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2022-03-06
+Version=1.0.1.0
+Date=2022-12-24
 
 [Variables]
 %ProgramFolder%="DiskCryptor"
@@ -58,9 +58,9 @@ Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ///////////////////////////////////////////////////////////////////////////////////
 // Copy Files
 
-If,%SourceArch%,Equal,x64,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe",2
-Else,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe",1
-InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe"
+If,%SourceArch%,Equal,x64,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe,*.sys",2
+Else,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe,*.sys",1
+InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe,*.sys"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
 FileCopy,"%TargetPrograms%\%ProgramFolder%\dcrypt.sys","%TargetSystem32%\Drivers"
 
