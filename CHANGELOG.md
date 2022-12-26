@@ -9,6 +9,7 @@ Notable changes to the PhoenixPE project.
 ### Changed
 
 ### Fixed
+- Fixed an issue preventing network services from being installed if no NIC's were present.
 
 ### Removed
 
