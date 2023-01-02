@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.6.0.0
-Date=2022-06-27
+Version=1.6.1.0
+Date=2022-12-30
 Level=0
 Selected=None
 
@@ -1254,8 +1254,8 @@ Else,Set,%Recurse%,True
 StrFormat,Replace,%Filter%," ","",%Filter%
 StrFormat,Replace,%Filter%,",","#$c",%Filter%
 
-If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | Where-Object {$_.Name -Like '*#$c?.*'} | Remove-Item -Force#$q","%Path%"
-Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | Where-Object {$_.Name -Like '*#$c?.*'} | Remove-Item -Force#$q","%Path%"
+If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | Where-Object {$_.Name -Like '*#$c*.*'} | Remove-Item -Force#$q","%Path%"
+Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | Where-Object {$_.Name -Like '*#$c*.*'} | Remove-Item -Force#$q","%Path%"
 If,Not,%ExitCode%,Equal,0,Halt,"InnoCleanup Error: Failed to rename files. [%ExitCode%]."
 
 System,EndLocal
@@ -1283,6 +1283,7 @@ System,EndLocal
 //                  of files, instead of having to copy and rename each file individually.
 //
 //                  Dev Note: We are using `Move-Item -Force` as `Rename-Item -Force` can't overwrite files that already exist. Brilliant M$.
+//
 // Related........: InnoExtract, InnoCleanup
 // ===============================================================================================================================
 [_PhoenixAPI_InnoRename]
@@ -1301,8 +1302,8 @@ Else,Set,%Recurse%,True
 StrFormat,Replace,%Filter%," ","",%Filter%
 StrFormat,Replace,%Filter%,",","#$c",%Filter%
 
-If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | ForEach { Move-Item -Force $_ $_.Name.Replace('#$c%Suffix%.','.') }#$q","%Path%"
-Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | ForEach { Move-Item -Force $_ $_.Name.Replace('#$c%Suffix%.','.') }#$q","%Path%"
+If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | ForEach { $NewName = $_.Name.Replace('#$c%Suffix%.','.'); $Destination = Join-Path -Path $_.Directory.FullName -ChildPath $NewName; Move-Item -Path $_.FullName -Destination $Destination -Force }#$q","%Path%"
+Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | ForEach { Move-Item $_ $_.Name.Replace('#$c%Suffix%.','.') -Force }#$q","%Path%"
 If,Not,%ExitCode%,Equal,0,Halt,"InnoRename Error: Failed to cleanup files. [%ExitCode%]."
 
 System,EndLocal

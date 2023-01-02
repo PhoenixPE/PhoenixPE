@@ -15,6 +15,8 @@ Notable changes to the PhoenixPE project.
 ### Fixed
 - Fixed an issue preventing network services from being installed if no NIC's were present.
 - Fixed an issue with the Media Transfer Profile script that caused the mtp_helper.sys driver to be extracted to the wrong folder.
+- Fixed a bug in InnoCleanup that did not cleanup files with suffixes greater then 1 digit.
+- Fixed a bug in InnoRename that caused renamed files to be moved to the base path instead of the correct sub-folder when the NOREC parameter was not used.
 
 ### Removed
 
