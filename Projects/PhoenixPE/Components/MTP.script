@@ -36,7 +36,7 @@ Selected=False
 Level=4
 Author=Homes32
 Version=1.1.0.0
-Date=2022-01-21
+Date=2023-01-02
 Mandatory=False
 
 [Variables]
@@ -91,6 +91,8 @@ RegUnloadHives
 // ===============================================================================================================================
 // Name...........: Process_mtpHelper
 // Description....: Load a kernel driver that allows bypassing restrictions that prevent the MTP services from starting in WinPE.
+//                  The driver works by removing the HKLM\System\Control\MinNT key while InitWudfDriverManager() is called
+//                  then restoring the key once UMDF has initialized.
 //
 //                  Reference:
 //                            http://theoven.org/index.php?topic=1639.0
@@ -106,8 +108,8 @@ RegUnloadHives
 // ===============================================================================================================================
 [Process_mtpHelper]
 Echo,"Registering mtpHelper..."
-If,%SourceVer%,BiggerEqual,10.0.22000.0,ExtractFile,%ScriptFile%,mtpHelper_Win11,"mtpHelper_%SourceArch%.sys","TargetSystem32\Drivers\mtphelper.sys"
-Else,ExtractFile,%ScriptFile%,mtpHelper_Win10,"mtpHelper_%SourceArch%.sys","TargetSystem32\Drivers\mtphelper.sys"
+If,%SourceVer%,BiggerEqual,10.0.22000.0,ExtractFile,%ScriptFile%,mtpHelper_Win11,"mtpHelper_%SourceArch%.sys","%TargetSystem32%\Drivers\mtphelper.sys"
+Else,ExtractFile,%ScriptFile%,mtpHelper_Win10,"mtpHelper_%SourceArch%.sys","%TargetSystem32%\Drivers\mtphelper.sys"
 
 RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\mtpHelper","ImagePath","System32\Drivers\mtpHelper.sys"
 RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\mtpHelper","Start",1
