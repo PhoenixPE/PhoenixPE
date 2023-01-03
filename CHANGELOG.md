@@ -8,10 +8,16 @@ Notable changes to the PhoenixPE project.
 - StartAllBack (Win11 successor to StartIsBack) as an alternative start menu to OpenShell and StartIsBack++.
 - New script that allows the option to use the modern Task Manager instead of the default Task Manger included in boot.wim/WinRE.wim.
 - HxD Hex Editor
+- MonitorTestUtility script that allows you to run various pattern and motion tests on your display.
+- grepWin search and replace
 
 ### Changed
 - Updated PinUtil (1.4.1.1-Homes32) to support pinning to StartAllBack.
-
+- Updated KeyboardTestUtility to v2.0.0
+- Updated Open-Shell to v4.4.186
+  * rewrote the extraction routines to make future updates easier
+  * added Win11 start button option
+  
 ### Fixed
 - Fixed an issue preventing network services from being installed if no NIC's were present.
 - Fixed an issue with the Media Transfer Profile script that caused the mtp_helper.sys driver to be extracted to the wrong folder.
