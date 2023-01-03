@@ -5,6 +5,8 @@
 [![Download Stats](https://img.shields.io/github/downloads/phoenixpe/phoenixpe/total.svg?label=Downloads&style=flat-square)](https://github.com/phoenixpe/phoenixpe/releases)
 [![Contributors](https://img.shields.io/github/contributors/phoenixpe/phoenixpe.svg?style=flat-square&label=Contributors)](https://github.com/phoenixpe/phoenixpe/graphs/contributors)
 
+![PhoenixPE Logo](https://github.com/PhoenixPE/PhoenixPE/blob/master/.github/Images/PhoenixPE.png)
+
 PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10/Win11. It can be booted via USB, CD/DVD, PXE/Network, or hard disk.
 
 * PhoenixPE uses the "next-generation" PEBakery engine resulting in faster build times and advanced features compared to legacy Winbuilder projects.
