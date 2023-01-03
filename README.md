@@ -37,7 +37,7 @@ Documentation is available on the [PhoenixPE Wiki](https://github.com/PhoenixPE/
 
 ## Development
 
-PhoenixPE is developed and mantained by a community of developers/volunteers who enjoy sharing their ideas and work in their free time. 
+PhoenixPE is developed and maintained, and supported by a community of developers/volunteers who enjoy sharing their ideas and work in their free time. 
 
 Interested in contributing to PhoenixPE? Check out our [guidelines](https://github.com/PhoenixPE/PhoenixPE/wiki/ContributionGuidelines).
 
@@ -47,4 +47,4 @@ Please use the [GitHub issue tracker](https://github.com/PhoenixPE/PhoenixPE/iss
 
 ## Frequently Asked Questions (FAQ)
 
-Please check out our [Frequently Asked Questions](https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ) before posting an issue or asking for help in the fourms.
+Please check out our [Frequently Asked Questions](https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ) before posting an issue or asking for help in the forums.
