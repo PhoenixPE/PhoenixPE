@@ -27,7 +27,7 @@ PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10/Win11. It can be
 
 ## License
 
-**PhoenixPE** is licensed under the MIT license. Refer to [license](license) for more information.
+**PhoenixPE** is licensed under the MIT license. Refer to [license](LICENSE) for more information.
 
 ## Installation
 
