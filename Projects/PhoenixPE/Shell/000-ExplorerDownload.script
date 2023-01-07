@@ -1,0 +1,124 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2022 c't Magazin, Hannover, Germany
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// The idea behind this script: a compressed file stream stuck in any wim archive
+// does not change, only its offset. It can be easily found by looking up its
+// position by referencing the lookup table. Entries in the lookup table of the 
+// offical wim aren't compressed in contrast to other wim metadata. To find the 
+// right entry one needs to know the SHA-1 of the file. The lookup entry describes 
+// the start of the chunk table of any compressed file. The compressed stream of
+// the file directly follows the chunktable. With the lookup table and chunktable
+// one can calculate the offset of the bare compressed stream.
+//
+// So what we did: Grab original explorer.exe somewhere (download the iso), build 
+// a local wim file containing just explorer.exe, locate the compressed stream of 
+// explorer.exe within wim file and cut this local wim file into three pieces: the 
+// wim header including the wim specific chunk table of compressed explorer.exe,
+// the compressed explorer.exe and the footer. Voila: header and footer contain 
+// only metadata and may be distributed without any concerns. So they are attached
+// to this script.
+
+// The middle part, the compressed stream of explorer.exe can be downloaded from 
+// official iso file. To get the offset of compressed explorer.exe stream within 
+// the iso file a simple search for the first 16 bytes of the compressed stream 
+// suffices - it's unique within the whole iso. As the SHA-1 of explorer.exe is the 
+// same across some official wim/iso files we checked (en-US, de-DE, it-IT), but the
+// offsets differ. So the script uses the de-DE and the calculated offsets to 
+// download the compressed stream of explorer.exe and puts it in the middle of
+// the wim fragements attached to this script. Closing note: The download address
+// for official isos hasn't changed for years.
+
+[Main]
+Title=Explorer Download
+Description=Fetch Windows 10 explorer.exe by selective download from eval ISO.
+Author=psct
+Level=3
+Selected=True
+Mandatory=False
+Version=1.0.0.0
+Date=2023-01-07
+
+[Variables]
+%myTargetScript%=%ProjectDir%\Shell\001-Explorer.script
+%iso_x64%="https://software-download.microsoft.com/download/pr/19041.264.200511-0456.vb_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_de-de.iso"
+%iso_x86%="https://software-download.microsoft.com/download/pr/19041.264.200511-0456.vb_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x86FRE_de-de.iso"
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+// just needed for Windows 11 sources
+If,%SourceVer%,BiggerEqual,10.0.22000.194,Begin
+    Run,%ScriptFile%,DownloadExplorerExe
+    Run,%ScriptFile%,PrepareExplorerScript
+End
+
+[DownloadExplorerExe]
+// extract wim file fragments
+ExtractFile,%ScriptFile%,%SourceArch%,wimheader.bin,%ProjectTemp%
+ExtractFile,%ScriptFile%,%SourceArch%,wimfooter.bin,%ProjectTemp%
+// download compressed fragment of explorer.exe
+If,%SourceArch%,Equal,x64,ShellExecute,Hide,"curl.exe","--location-trusted --raw -s -S -r 1056726048-1058673403 -o %ProjectTemp%\expfrag.bin %iso_x64%"
+If,%SourceArch%,Equal,x86,ShellExecute,Hide,"curl.exe","--location-trusted --raw -s -S -r 833910694-835684471 -o %ProjectTemp%\expfrag.bin %iso_x86%"
+// combine those parts
+If,#r,Equal,0,Begin
+    ShellExecute,Hide,"cmd.exe","/D /C copy /b %ProjectTemp%\wimheader.bin+%ProjectTemp%\expfrag.bin+%ProjectTemp%\wimfooter.bin %ProjectTemp%\explorer.wim"
+    WimExtract,%ProjectTemp%\explorer.wim,1,explorer.exe,%ProjectTemp%,NOACL,NOATTRIB
+End
+Else,Begin
+    Echo,"Error downloading explorer parts from official Windows Eval ISO",WARN
+    Message,"Scripted download of compressed stream of explorer.exe failed. If so provide the file manually.",ERROR
+    Halt
+End
+
+[PrepareExplorerScript]
+// prepare interface elements of real script
+WriteInterface,Value,%myTargetScript%,Interface,cmb_Win10ExplorerSource,"Use the explorer.exe application provided below"
+WriteInterface,Visible,%myTargetScript%,Interface,pb_Win10ExplorerEXE,True
+WriteInterface,Visible,%myTargetScript%,Interface,pb_Win10ExplorerWIM,False
+WriteInterface,Visible,%myTargetScript%,Interface,num_WimImage,False
+WriteInterface,Value,%myTargetScript%,Interface,pb_Win10ExplorerEXE,"%ProjectTemp%\explorer.exe"
+System,RefreshScript,%myTargetScript%
+
+[EncodedFolders]
+x64
+x86
+
+[x86]
+
+[x64]
+wimfooter.bin=1216,984
+wimheader.bin=752,852
+
+[EncodedFile-x64-wimfooter.bin]
+lines=0
+0=eJxTUWBgZGAwYkgLcGD4x//yqxzbl6rW6l63g4eUivRERVgKPnObS5pN3PtArtCfS2lFgJKGyboiwVbDMyduSKSZGaSp5DEoMDBksDEwNLLNqW4tTgj3i7k8w9VIVG9up1awBodAy3/1Lf9BakCqEjj45nVoscb7fL+fcv++xwkehVcStm1sixxv2meocaXNudO6gO22hPw2W13DmOyq3d58m88efh7Kd4d5K9uVOqV9HP8rumpO/mI1r669vu5f/JmLMxc/y+XdM/3vvmvHHcu0Uo7rzX9XVHx40dH77w/aTy88OdX87/8rJRe3B2v9vCw4bYnhddOoFXo1d5eFL31Xf9prouKPRSEdJ7juGfIJHzIW7r1nuNdguQAjyKUMbGd2yoIZDkxgChhIIIkOj5b7X/sNfFc71Ku++e33OEaX+/6fHWCVLBcgChkiMlyQdCxlCXvo+ixvc2lc2IkdRytm7TaeMuH/PxuGcAZPBl8GOwYbhhAGfyB2ZPBhcGKIBLJcGYKB4oYMlgwmDBZgbABUpY9DnQ3YHEcGdyBfAcj2Y3ABsiIYbBmUgGYogVW4AMWDGJyB+kOB8iFAMYiJmOI2DG5AMR+gCciihmDV2GRwud4E7G5joE4zAq73AIoFAV3iA3a7N4osRCc+FTZA1wQB2Y5AEU+gDX5g2hcoAjHbExguHgwBYBMg/q4AYkOgaRZA/5gDXekGtQNdpQ3QPn9gLKHqNQSSLkB9zkBsCowhkF50dSAxfK7yAYoHA0V8gTKgGACFqzOdfWAJzPHmwPhxwekDUlwJSctOQHF/pNSFLmoD1OUI1ZMKdEkBQw5DPkMRkF3EEM9QDnZZPFDcDOgnkH6EahAPkcrtkEy3YwAASzoHBXic4y3PzE3Lzy9JLdJLysxjGAUjDBxggdBTmbDLG+Ts2s3ABgCAAwjDyBR1LwEAAAACAAAAKQAAAJUCAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-x64-wimheader.bin]
+lines=0
+0=eJy9iOtLU3EAhp+zi9vOrufs4uZ+k+hCEhFhMbQPMkdFhRZYaYTIjAwRESmhC/uQIhRFRRndkJDQsBuEDAuVELUlCDKsTEWExEwyRKLMLKJlfegv6H15eC/5e4t25gOJJFgl6tDBaXiywtBQeqVlT7tnbtO1SJ4k8dtwmGVpxjsCy+XvJk/75w91Bv7d/13GMNTXwkIPxDUSkS0SokLiw0OJ4CeJyaAGW1RD4zMN9yUt82EtjfVabHEt6RodTTk6dCd0TLXpKBjWUZOmZ0OhnsoGPQsDeibkFCq2pbDyTAqugRR+Kgam9xs4eN1A1qgBkWpkpsDI1gtGov1GJrUmynNN9NSZyIibCEkygzky3VGZkk6Zo19lmoJm2o+baYqZiS6aubrRQle1hZmYhaovFmLZVtqiVlZ3Wln8ZqU1x4an1kZ7t43QDxvF2XbW1dhRH9upnrVzcZWDG6UObjUn872DkbUK4TKFkRYFuVeh/I3CqRGF9aMKu8cUHLMKSz6VjLBKsFpl5rxK5J7KuWmVs14nU7lOdhxzcveBk13vnFQGXDiKXAzWu2h+5KJ/1kVijZsjZW4OXHIz3+cm/srNosGDutmDXONh6LYH18sktlS8BanELidRvPSc9DLX4SU9y0f6Ux+t330kitNIjKcxLvwMZ/rJOOQnNORnLCTQ3RR09Qq29wmmngsyXwiW+gVVQ4LC14LIqODOhGDfW0HJR0HWvGDws6BNCtBXEuAXIj6i6nic4y3PzM1ITUxJLdJLysxjGAUjDHxggtBGTNjlWwTYQxnYACa3B0e7tOSaAQAAAAIAAAAoAAAAMgIAAAAAAAABAAAAAAAAAAAAAAA
