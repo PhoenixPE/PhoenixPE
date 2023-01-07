@@ -70,7 +70,7 @@ ExtractFile,%ScriptFile%,Folder,%SetupFile%,"%ProgramsCache%\%ProgramFolder%"
 
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebDownload,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [SetProgramArch]
@@ -93,9 +93,9 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 Echo,"Updating %ScriptTitle%"
 If,ExistDir,%ProgramsCache%\%ProgramFolder%,DirDelete,%ProgramsCache%\%ProgramFolder%
 DirMake,%ProgramsCache%\%ProgramFolder%
-WebDownload,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
-WebDownload,%DownloadURLx64%,"%ProgramsCache%\%ProgramFolder%\%SetupFilex64%",NOERR
+WebGet,%DownloadURLx64%,"%ProgramsCache%\%ProgramFolder%\%SetupFilex64%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 Encode,%ScriptFile%,Folder,%ProgramsCache%\%ProgramFolder%\%SetupFilex64%
 Encode,%ScriptFile%,Folder,%ProgramsCache%\%ProgramFolder%\%SetupFile%
