@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-06
+Version=1.1.0.0
+Date=2023-01-08
 
 [Variables]
 %ProgramFolder%="AutoBackup7Pro"
@@ -54,8 +54,7 @@ If,%fb_SrcFiles%,Equal,"",Halt,"ERROR: You must specify the path to AutoBackup s
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 
-// %ProgramFolder% is already included inside the archive so don't specify it here
-Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%"
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
@@ -102,8 +101,23 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting files..."
 Set,%SetupFile%,%fb_SrcFiles%
-7z,"x -r -y #$q%SetupFile%#$q -xr!#$qCommand Line Builder 7.exe#$q -xr!#$qTranslation Tool.exe#$q -xr!Updater.exe -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code returned was [#r]"
+
+StrFormat,Ext,%SetupFile%,%Ext%
+StrFormat,Pos,".7z|.rar|.zip",%Ext%,%IsArchive%
+
+If,%IsArchive%,Bigger,0,Begin
+  // Unpack user supplied archive
+  Decompress,%SetupFile%,#1
+End
+Else,If,%Ext%,Equal,".exe",Begin
+  // Unpack InnoSetup
+  InnoExtract,%SetupFile%,"%ProjectTemp%\%ProgramDir%"
+  FileCopy,"%ProjectTemp%\%ProgramDir%\{App}\*.*",#1
+End
+Else,Begin
+  StrFormat,FileName,%SetupFile%,%FileName%
+  Halt,"ERROR: [%FileName%] is not a supported setup file. Please provide a [.exe, .7z, .rar, .zip] file."
+End
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
@@ -157,7 +171,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"Fab's AutoBackup allows users to backup and restore personal files and settings.#$x#$xAutobackup is commercial software developed by Fabrice PARISOT. You must purchases a software license from https://store.fpnet.fr and download the program files required by this script."
+Message,"Fab's AutoBackup allows users to backup and restore personal files and settings.#$x#$xAutobackup is commercial software developed by Fabrice PARISOT. You must purchase a software license from https://store.fpnet.fr and download the program files required by this script."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -189,11 +203,11 @@ bvl_Options=Options,1,12,150,212,477,62,8,Bold
 lbl_Language=Language,1,1,159,227,153,16,8,Normal
 cmb_Language=English,1,4,160,243,150,21,čeština,Czech,Dansk,Deutsch,English,Español,Français,Hrvatski,Italiano,Magyar,Nederlands,Norsk,Polski,"Portugues Brasileiro",Svenska,Türkçe,ελληνικά,русский,Українська
 bvl_SrcFiles="Source Files",1,12,150,90,477,110,8,Bold
-fb_SrcFiles=,1,13,158,132,460,20,file
-lbl_SelectSrcFiles="Select the path to the AutoBackup7Pro.exe self-extracting archive file you downloaded from the Autobackup store. Do not unpack the archive.",1,1,158,105,435,28,8,Normal
+fb_SrcFiles=,1,13,158,132,460,20,file,"Title=Select the AutoBackup installer or an archive containing the program files.","Filter=Setup Files|*.exe;*.7z;*.rar;*.zip;|Installer|*.exe|Archive Files|*.7z;*.rar;*.zip"
+lbl_SelectSrcFiles="Select the path to the AutoBackup7Pro.exe setup file you downloaded from the Autobackup store, or an archive file (7z/rar/zip) containing the AutoBackup program files.",1,1,158,105,435,28,8,Normal
 url_AutobackupStore="Fab's Autobackup Online Store",1,10,205,9,148,18,http://store.fpnet.fr
 txt_OrderNumber="Order Number",1,0,158,172,108,21,
-txt_OrderEmailAddress="Order E-Mail Address (used to purchess the product)",1,0,276,172,342,21,
+txt_OrderEmailAddress="Order E-Mail Address (used to purchase the product)",1,0,276,172,342,21,
 bvl_Store=bvl_Store,1,12,198,5,162,25
 
 [InterfaceEncoded]

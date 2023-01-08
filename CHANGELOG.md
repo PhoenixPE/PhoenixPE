@@ -17,6 +17,12 @@ Notable changes to the PhoenixPE project.
 - Updated Open-Shell to v4.4.186
   * rewrote the extraction routines to make future updates easier
   * added Win11 start button option
+- **Script Breaking Change:** Fab's Auto Backup extraction routines were re-written because author of AutoBackup7 switched to distributing the program in an InnoSetup installer instead of a self-extracting 7z archive.  
+  * Support extracting the official InnoSetup installer.
+  * Added support for extracting Autobackup files from a .7z/.rar/.zip archive.
+  
+  Due to the changes the previous self extracting archives can no longer be used. Users must either provide the new InnoSetup package or construct an archive containing their AutoBackup7 program files.
+  
   
 ### Fixed
 - Fixed an issue preventing network services from being installed if no NIC's were present.
