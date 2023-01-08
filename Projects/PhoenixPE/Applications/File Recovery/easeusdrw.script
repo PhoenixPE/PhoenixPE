@@ -63,13 +63,17 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 Echo,"Extracting files..."
 If,ExistDir,"%ProjectTemp%\%ProgramFolder%\Temp",DirDelete,"%ProjectTemp%\%ProgramFolder%\Temp"
 DirMake,"%ProjectTemp%\%ProgramFolder%\Temp"
-ShellExecute,Hide,"%Tools%\x86\innoextract.exe","-e #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q#$s-d#$q%ProjectTemp%\%ProgramFolder%\Temp#$q"
+InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%\Temp"
+Set,%Suffix%,1
+If,%SourceArch%,Equal,x64,Set,%Suffix%,2
+InnoRename,"%ProjectTemp%\%ProgramFolder%\Temp\{app}","*.exe,*.dll,*.manifest",%Suffix%
+InnoCleanup,"%ProjectTemp%\%ProgramFolder%\Temp\{app}","*.exe,*.dll,*.manifest"
 ExtractFile,%ScriptFile%,Folder,config.ini,"%ProjectTemp%\%ProgramFolder%\Temp\app\config"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Copy Files
 
-FileCopy,"%ProjectTemp%\%ProgramFolder%\Temp\app\*.*","%TargetPrograms%\%ProgramFolder%"
+FileCopy,"%ProjectTemp%\%ProgramFolder%\Temp\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
 // clean up
 DirDelete,"%ProjectTemp%\%ProgramFolder%\Temp"
 
