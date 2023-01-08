@@ -29,31 +29,34 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=AutoBackup7Pro
-Description=Fab's AutoBackup allows users to backup and restore personal files and settings.
+Title=EaseUS Data Recovery Wizard
+Description=(v15.8.0.0) Data Recovery Software for Windows.
 Author=Homes32
 Level=5
-Selected=False
+Selected=True
 Mandatory=False
-Version=1.1.1.0
-Date=2023-01-08
+Version=1.0.0.0
+Date=2022-12-30
 
 [Variables]
-%ProgramFolder%="AutoBackup7Pro"
-%ProgramExe%="AutoBackup7pro.exe"
-%ProgramIni%="AutoBackup.ini"
+%ProgramFolder%="EaseUS DRW"
+%ProgramExe%="DRW.exe"
+%ProgramVersion%=15.8.0.0
+%DownloadURL%=http://download2.easeus.com/free/drw%ProgramVersion%_free.exe
+%SetupFile%="drw_setup.exe"
+%aLangMap%=Arabic|Arabic|Chinese (Simplified)|Chinese|Chinese (Traditional)|ChineseTrad|Danish|Danish|Dutch|Dutch|English|English|French|French|German|Deutsch|Hungarian|Mungarian|Indonesian|Indonesian|Italian|Italian|Japanese|Japanese|Korean|Korean|Malaysian|Malay|Norwegian|Norwegian|Polish|Polish|Portuguese|Portuguesa|Russian|Russian|Spanish|Spanish|Swedish|Svenska|Thai|Thai|Turkish|Turkish
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
 
-// Validate Src File Input
-If,%fb_SrcFiles%,Equal,"",Halt,"ERROR: You must specify the path to AutoBackup source files."
+StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
+StrFormat,RTRIM,%Lang%,1,%Lang%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -61,23 +64,12 @@ Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 Echo,"Configuring %ScriptTitle%..."
 
-// Create UTF-8 file
-FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%"
-
 // Language
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","CONFIG","LastLanguage",%cmb_Language%
-If,%cmb_Language%,Equal,"Français",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\Fab's AutoBackup 7 Pro - User's guide.pdf"
-Else,FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\Fab's AutoBackup 7 Pro - Manuel d'utilisation.pdf"
+List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+Math,Add,%Pos%,%LangPos%,1
+List,Get,%aLangMap%,%Pos%,%Language%
 
-// Registration
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","ORDER-AUTOBACKUP7PRO.EXE","OrderID",%txt_OrderNumber%
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","ORDER-AUTOBACKUP7PRO.EXE","CustomerEmailAddress",%txt_OrderEmailAddress%
-
-// Accept EULA
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","CONFIG","AcceptedV7PROEULA",1
-
-// Disable Updates
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramIni%","UPDATE","CheckForUpdates",0
+IniWrite,"%TargetPrograms%\%ProgramFolder%\config\config.ini","User","CurrentLanguage",%Language%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -100,24 +92,68 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-Set,%SetupFile%,%fb_SrcFiles%
+InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%\"
 
-StrFormat,Ext,%SetupFile%,%Ext%
-StrFormat,Pos,".7z|.rar|.zip",%Ext%,%IsArchive%
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%\{app}\aliyun\"
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%\{app}\BUILDPE\"
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%\{app}\ChromeInnerBuy\"
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%\{app}\EUENS\"
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%\{app}\InnerBuyRSS\"
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%\{app}\UserRate\"
 
-If,%IsArchive%,Bigger,0,Begin
-  // Unpack user supplied archive
-  Decompress,%SetupFile%,#1
-End
-Else,If,%Ext%,Equal,".exe",Begin
-  // Unpack InnoSetup
-  InnoExtract,%SetupFile%,"%ProjectTemp%\%ProgramFolder%"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{App}\*.*",#1
-End
-Else,Begin
-  StrFormat,FileName,%SetupFile%,%FileName%
-  Halt,"ERROR: [%FileName%] is not a supported setup file. Please provide a [.exe, .7z, .rar, .zip] file."
-End
+If,%SourceArch%,Equal,x64,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.exe,*.dll,*.manifest",2
+Else,InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.exe,*.dll,*.manifest",1
+
+InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.exe,*.dll,*.manifest"
+
+FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*",#1
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#LaunchProgram#]
+// ===============================================================================================================================
+// Name...........: LaunchProgram
+// Description....: Unpack and launch the program.
+// Syntax.........: Run,%ScriptFile%,LaunchProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_LaunchProgram
+// ===============================================================================================================================
+[LaunchProgram]
+Echo,"Launching %ScriptTitle%..."
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
@@ -132,16 +168,13 @@ End
 // ===============================================================================================================================
 [SetDefaultOptions]
 System,Cursor,Wait
-WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Backup & Imaging"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Fabs AutoBackup7 Pro"
-WriteInterface,Value,%ScriptFile%,Interface,fb_SrcFiles,""
-WriteInterface,Value,%ScriptFile%,Interface,txt_OrderNumber,""
-WriteInterface,Value,%ScriptFile%,Interface,txt_OrderEmailAddress,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Recovery"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"EaseUS Data Recovery Wizard"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
 System,Cursor,Normal
 
@@ -171,7 +204,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"Fab's AutoBackup allows users to backup and restore personal files and settings.#$x#$xAutobackup is commercial software developed by Fabrice PARISOT. You must purchase a software license from https://store.fpnet.fr and download the program files required by this script."
+Message,"EaseUS Data Recovery Wizard is a Data Recovery Software for Windows.#$x#$xThe free edition allows you to recover up to 2GB of data.#$x#$xOn first run this script will download the setup file (~105 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -185,39 +218,46 @@ Message,"Fab's AutoBackup allows users to backup and restore personal files and 
 // Related........:
 // ===============================================================================================================================
 [Interface]
+btn_LaunchProgram="Launch DRW",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,http://www.fpnet.fr/?page=ab7presentation&lang=en
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.easeus.com/datarecoverywizard/free-data-recovery-software.htm
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
-cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,True,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
 bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
 cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"Backup & Imaging"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Fabs AutoBackup7 Pro"
-bvl_Options=Options,1,12,150,212,477,62,8,Bold
-lbl_Language=Language,1,1,159,227,153,16,8,Normal
-cmb_Language=English,1,4,160,243,150,21,čeština,Czech,Dansk,Deutsch,English,Español,Français,Hrvatski,Italiano,Magyar,Nederlands,Norsk,Polski,"Portugues Brasileiro",Svenska,Türkçe,ελληνικά,русский,Українська
-bvl_SrcFiles="Source Files",1,12,150,90,477,110,8,Bold
-fb_SrcFiles=,1,13,158,132,460,20,file,"Title=Select the AutoBackup installer or an archive containing the program files.","Filter=Setup Files|*.exe;*.7z;*.rar;*.zip;|Installer|*.exe|Archive Files|*.7z;*.rar;*.zip"
-lbl_SelectSrcFiles="Select the path to the AutoBackup7Pro.exe setup file you downloaded from the Autobackup store, or an archive file (7z/rar/zip) containing the AutoBackup program files.",1,1,158,105,435,28,8,Normal
-url_AutobackupStore="Fab's Autobackup Online Store",1,10,205,9,148,18,http://store.fpnet.fr
-txt_OrderNumber="Order Number",1,0,158,172,108,21,
-txt_OrderEmailAddress="Order E-Mail Address (used to purchase the product)",1,0,276,172,342,21,
-bvl_Store=bvl_Store,1,12,198,5,162,25
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"File Recovery"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"EaseUS Data Recovery Wizard"
+bvl_Options=Options,1,12,150,90,197,184,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Danish,Dutch,English,French,German,Hungarian,Indonesian,Italian,Japanese,Korean,Malaysian,Norwegian,Polish,Portuguese,Russian,Spanish,Swedish,Thai,Turkish
 
 [InterfaceEncoded]
+play-hot.png=841,1220
+Trash.ico=1150,1212
 SetDefaults_16.png=2475,3404
 Advanced_16.png=2000,2768
 Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
 
 [AuthorEncoded]
-autobackup_80.png=8373,11268
-Logo=autobackup_80.png
+DRW_80.png=1953,2700
+Logo=DRW_80.png
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
 
 [EncodedFile-InterfaceEncoded-SetDefaults_16.png]
 lines=0
@@ -231,8 +271,10 @@ lines=0
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
 
-[EncodedFile-AuthorEncoded-autobackup_80.png]
-lines=2
-0=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
-1=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
-2=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
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-DRW_80.png]
+lines=0
+0=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

@@ -10,6 +10,8 @@ Notable changes to the PhoenixPE project.
 - HxD Hex Editor
 - MonitorTestUtility script that allows you to run various pattern and motion tests on your display.
 - grepWin search and replace
+- Macrium Reflect backup.
+- EaseUS Data Recovery Wizard
 
 ### Changed
 - Updated PinUtil (1.4.1.1-Homes32) to support pinning to StartAllBack.
