@@ -41,7 +41,7 @@ Documentation is available on the [PhoenixPE Wiki](https://github.com/PhoenixPE/
 
 PhoenixPE is developed and maintained, and supported by a community of developers/volunteers who enjoy sharing their ideas and work in their free time. 
 
-Interested in contributing to PhoenixPE? Check out our [guidelines](CONTRIBUTING.md).
+Interested in contributing to PhoenixPE? Check out our [guidelines](https://github.com/PhoenixPE/PhoenixPE/blob/master/docs/CONTRIBUTING.md).
 
 ## Enhancements/Bugs
 
