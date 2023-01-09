@@ -20,6 +20,8 @@ PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10/Win11. It can be
 * Drive Backup/Clone/Imaging
 * Malware Removal
 * Password Recovery
+* File Recovery
+* Forensics Tools
 * Drive Partitioning/Install Prep.
 * Hardware Diagnostics
 * Offline OS Troubleshooting/Repair/Recovery
@@ -41,7 +43,7 @@ Documentation is available on the [PhoenixPE Wiki](https://github.com/PhoenixPE/
 
 PhoenixPE is developed and maintained, and supported by a community of developers/volunteers who enjoy sharing their ideas and work in their free time. 
 
-Interested in contributing to PhoenixPE? Check out our [guidelines](https://github.com/PhoenixPE/PhoenixPE/wiki/ContributionGuidelines).
+Interested in contributing to PhoenixPE? Check out our [guidelines](https://github.com/PhoenixPE/PhoenixPE/blob/master/docs/CONTRIBUTING.md).
 
 ## Enhancements/Bugs
 

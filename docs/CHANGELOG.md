@@ -10,6 +10,8 @@ Notable changes to the PhoenixPE project.
 - HxD Hex Editor
 - MonitorTestUtility script that allows you to run various pattern and motion tests on your display.
 - grepWin search and replace
+- Macrium Reflect backup.
+- EaseUS Data Recovery Wizard
 
 ### Changed
 - Updated PinUtil (1.4.1.1-Homes32) to support pinning to StartAllBack.
@@ -17,12 +19,18 @@ Notable changes to the PhoenixPE project.
 - Updated Open-Shell to v4.4.186
   * rewrote the extraction routines to make future updates easier
   * added Win11 start button option
+- Fab's Auto Backup extraction routines were re-written because author of AutoBackup7 switched to distributing the program in an InnoSetup installer instead of a self-extracting 7z archive.  
+  * Support extracting the official InnoSetup installer.
+  * Added support for extracting Autobackup files from a .7z/.rar/.zip archive.
+  
+  **Script Breaking Change:** Due to the changes the previous self extracting archives can no longer be used. Users must either provide the new InnoSetup package or construct an archive containing their AutoBackup7 program files.
   
 ### Fixed
 - Fixed an issue preventing network services from being installed if no NIC's were present.
 - Fixed an issue with the Media Transfer Profile script that caused the mtp_helper.sys driver to be extracted to the wrong folder.
 - Fixed a bug in InnoCleanup that did not cleanup files with suffixes greater then 1 digit.
 - Fixed a bug in InnoRename that caused renamed files to be moved to the base path instead of the correct sub-folder when the NOREC parameter was not used.
+- Fixed a bug in Driver Integration where the start menu shortcut would not be created.
 
 ### Removed
 
