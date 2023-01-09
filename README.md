@@ -20,6 +20,8 @@ PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10/Win11. It can be
 * Drive Backup/Clone/Imaging
 * Malware Removal
 * Password Recovery
+* File Recovery
+* Forensics Tools
 * Drive Partitioning/Install Prep.
 * Hardware Diagnostics
 * Offline OS Troubleshooting/Repair/Recovery

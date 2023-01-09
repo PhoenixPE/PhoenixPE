@@ -35,8 +35,8 @@ Description=The Media Transfer Protocol allows media files to be transferred to 
 Selected=False
 Level=4
 Author=Homes32
-Version=1.1.0.0
-Date=2023-01-02
+Version=1.1.1.0
+Date=2023-01-08
 Mandatory=False
 
 [Variables]
@@ -82,7 +82,7 @@ RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WUDFRd",HKLM,"Tmp_System
 Run,%ScriptFile%,Process_mtpHelper
 
 // PnP & drvload
-AddAutoRun,PostShell,HideWait,"Initializing Portable Device Support...","PnPutil.exe","-i -a #$pWindir#$p\inf\WpdFs.inf"
+AddAutoRun,PostShell,HideWait,"Initializing Portable Device Support...","PnPutil.exe","/add-driver #$pWindir#$p\inf\WpdFs.inf /install"
 AddAutoRun,PostShell,HideWait,"Initializing Media Transport Protocol...","drvload.exe","#$pWindir#$p\inf\wpdmtp.inf"
 
 RegUnloadHives
