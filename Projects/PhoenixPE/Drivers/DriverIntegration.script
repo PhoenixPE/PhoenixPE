@@ -50,6 +50,10 @@ Echo,"Preparing for driver integration..."
 If,%SourceArch%,Equal,x86,Set,%DriversSrc%,%fb_DriversX86%
 Else,Set,%DriversSrc%,%fb_DriversX64%
 
+// Start Menu Shortcut
+If,%cb_StartMenuShortcut%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"#$pWinDir#$p\System32\pnputil.exe","/add-driver #$pWinDir#$p\inf\oem*.inf /install",,"#$pWinDir#$p\System32\hdwwiz.exe"
+
+// Integrate drivers if any exist
 If,ExistDir,%DriversSrc%,Begin
   DirSize,%DriversSrc%,%DirSize%
   StrFormat,Bytes,%DirSize%,%StrDirSize%
@@ -254,7 +258,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_LoadDriversOnStartup,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_ForceUnsignedDrivers,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PatchDrvInst,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShortcut,True
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Driver Management"
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"System Tools\Drivers"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Load Integrated Drivers"
 
 [#ToggleAdvancedOptions#]
@@ -336,7 +340,7 @@ cb_ForceUnsignedDrivers="Force Install Unsigned Drivers (x64)",0,3,167,200,200,1
 cb_PatchDrvInst="Bypass Catalog Signature Check",0,3,380,200,173,18,False,"__Patch Drvinst.exe to disable signature checking for catalog files.#$xAmong other things this allows you to use modified *.inf files."
 bvl_Shortcuts=Shortcuts,1,12,5,246,198,130,8,Bold
 cb_StartMenuShortcut="Startmenu Shortcut",1,3,15,263,131,18,True
-txt_StartMenuFolder="Start Menu folder:",1,0,26,301,168,21,"Driver Management"
+txt_StartMenuFolder="Start Menu folder:",1,0,26,301,168,21,"System Tools\Drivers"
 txt_ShortcutName="Shortcut name:",1,0,26,341,168,21,"Load Integrated Drivers"
 rtf_DriverNotes=DriversNotes.rtf,1,6,215,246,415,130
 
