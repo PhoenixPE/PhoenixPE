@@ -40,8 +40,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.3.0.0
-Date=2021-10-31
+Version=1.3.1.0
+Date=2023-01-02
 
 [Variables]
 %DismLog%="%TargetWindows%\Logs\DISM\dism.log"
@@ -126,6 +126,21 @@ If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Begin
   If,%cmb_InputLocale1%,Equal,HostOS,Begin
     IniRead,"%ProjectTemp%\Get-Intl.ini","International","Active keyboard(s)",%InputLocale1%
     StrFormat,Replace,%InputLocale1%,", ",;,%InputLocale1%
+    // check for entries like:
+    // Active keyboard(s)=0407:00000407, 0407:{FE0420F1-38D1-4B4C-96BF-E7E20A74CFB7}{64D7E8FF-F5F8-4B63-B47F-F4059F73A7E4}
+    // dism won't accept those guid based keyboard settings and will fail with error 87
+    // to reproduce: install keyman or use a grown up windows installation with many language setting changes over time
+    // so just drop them
+    StrFormat,Pos,%InputLocale1%,"{",%Pos%
+    Set,%CleanInputLocale1%,""
+    If,%Pos%,Bigger,0,Begin
+      ForEach,%Element%,%InputLocale1%,Delim=;,Begin
+        StrFormat,Pos,%Element%,"{",%Pos%
+        If,%Pos%,Equal,0,List,Append,%CleanInputLocale1%,%Element%,Delim=;
+      End
+      Set,%InputLocale1%,%CleanInputLocale1%
+      Echo,"Dropped invalid input locales",WARN
+    End
   End
   
   If,%cmb_InputLocale2%,Equal,HostOS,Begin
@@ -135,7 +150,10 @@ If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Begin
   
   If,%cmb_UserLocale%,Equal,HostOS,Begin
     IniRead,"%ProjectTemp%\Get-Intl.ini","International","User locale for default user",%UserLocale%
+    // Fallback to another term in Get-Intl.ini 
+    If,%UserLocale%,Equal,"",IniRead,"%ProjectTemp%\Get-Intl.ini","International","Default system UI language",%UserLocale%
     // Fallback to LocaleName from HKCU\Control Panel\International
+    // sometimes fails due to invalid content like de-EN that breaks dism call
     If,%UserLocale%,Equal,"",RegRead,HKCU,"Control Panel\International","LocaleName",%UserLocale%
   End
 
