@@ -49,6 +49,13 @@ Interested in contributing to PhoenixPE? Check out our [guidelines](https://gith
 
 Please use the [GitHub issue tracker](https://github.com/PhoenixPE/PhoenixPE/issues) for reporting problems or suggesting new features.
 
+## Support
+
+PhoenixPE is supported by a vibrant community of developers, boot disk/WinPE enthusiasts, and volunteers. Please post general questions and support requests in one of our forums.
+
+* [The Oven](https://theoven.org/viewforum.php?f=17)
+* [reboot.pro](http://reboot.pro/index.php?showforum=147)
+
 ## Frequently Asked Questions (FAQ)
 
 Please check out our [Frequently Asked Questions](https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ) before posting an issue or asking for help in the forums.
