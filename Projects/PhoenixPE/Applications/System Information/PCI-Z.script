@@ -35,14 +35,15 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-07-27
+Version=1.1.0.0
+Date=2023-01-10
 
 [Variables]
 %ProgramFolder%="PCI-Z"
 %ProgramExe%="PCI-Z.exe"
 %DownloadURLx86%=https://www.pci-z.com/current/PCI-Z.zip
 %DownloadURLx64%=https://www.pci-z.com/current/x64/PCI-Z.zip
+%DatabaseURL%=https://github.com/pciutils/pciids/raw/master/pci.ids
 %SetupFile%="PCI-Z_%SourceArch%.zip"
 
 [Process]
@@ -51,12 +52,16 @@ Echo,"Processing %ScriptTitle%..."
 If,%cb_RunFromRam%,Equal,True,RunFromRam
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+If,%cb_DownloadLatestDB%,Equal,True,Run,%ScriptFile%,DownloadDatabase
+
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
 Echo,"Program version: v%ProgramExeVer%"
+If,ExistFile,"%ProgramsCache%\%ProgramFolder%\pci.ids",FileCopy,"%ProgramsCache%\%ProgramFolder%\pci.ids","%TargetPrograms%\%ProgramFolder%\pci.ids"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
@@ -104,6 +109,22 @@ Else,Set,%DownloadURL%,%DownloadURLx86%
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
+[#DownloadDatbase#]
+// ===============================================================================================================================
+// Name...........: DownloadDatbase
+// Description....: Download the latest pci.ids database from the PCI ID Repository and cache it
+// Syntax.........: Run,%ScriptFile%,DownloadDatabase
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadDatabase]
+Echo,"Downloading the latest pci.ids database..."
+WebGet,%DatabaseURL%,"%ProgramsCache%\%ProgramFolder%\pci.ids",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
 [#LaunchProgram#]
 // ===============================================================================================================================
 // Name...........: LaunchProgram
@@ -119,6 +140,8 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 Echo,"Launching %ScriptTitle%..."
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+If,%cb_DownloadLatestDB%,Equal,True,Run,%ScriptFile%,DownloadDatabase
+If,ExistFile,"%ProgramsCache%\%ProgramFolder%\pci.ids",FileCopy,"%ProgramsCache%\%ProgramFolder%\pci.ids","%ProjectTemp%\%ProgramFolder%\pci.ids"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
 [#ClearDownloadCache#]
@@ -156,6 +179,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"System Information"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"PCI-Z"
 WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DownloadLatestDB,True
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -216,6 +240,8 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"System Information"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,PCI-Z
+bvl_Options=Options,1,12,150,90,197,184,8,Bold
+cb_DownloadLatestDB="Download latest PCI ID database",1,3,157,104,181,18,True,"__Select this option to download the latest pci.ids database from the PCI ID Repository on each build. (~1.5 MB)"
 
 [InterfaceEncoded]
 play-hot.png=841,1220
@@ -252,7 +278,6 @@ lines=0
 [EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
-
 
 [EncodedFile-AuthorEncoded-PCI-Z_80.png]
 lines=1
