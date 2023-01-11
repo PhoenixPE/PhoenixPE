@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2022-03-05
+Version=1.0.1.0
+Date=2023-10-10
 
 [Variables]
 %ProgramFolder%="HDDClone"
@@ -62,7 +62,6 @@ If,%cb_SupplyProgramFiles%,Equal,True,Begin
     Echo,"Extracting program files from [%fb_HDDCloneFiles%]..."
     7z,"x -r -y #$q%fb_HDDCloneFiles%#$q -xr!$* -xr!uninst.exe -o#$q%TargetPrograms%\%ProgramFolder%#$q"
     If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code returned was [#r]."
-	FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
   End
   Else,Halt,"ERROR: The specified program files do not exist! [%fb_IncludeSettingsDir%]"
 End
@@ -71,8 +70,10 @@ Else,Begin
   If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
   Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
-  FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
 End
+
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Config

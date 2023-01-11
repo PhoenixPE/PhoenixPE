@@ -30,13 +30,13 @@
 
 [Main]
 Title=PuTTY
+Description=PuTTY is a free and open-source terminal emulator, serial console and network file transfer application.
 Author=Homes32
 Level=5
-Version=1.0.0.0
-Description=PuTTY is a free and open-source terminal emulator, serial console and network file transfer application.
-Date=2019-12-29
 Selected=False
 Mandatory=False
+Version=1.0.1.0
+Date=2023-01-10
 
 [Variables]
 %ProgramFolder%="PuTTY"
@@ -84,8 +84,13 @@ Else,If,%SourceArch%,Equal,x86,Begin
 End
 Else,Halt,"ERROR: [%SourceArch%] is not a supported architecture."
 
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
+
 ///////////////////////////////////////////////////////////////////////////////////
 // Options
+
+Echo,"Configuring %ScriptTitle%..."
 
 If,Not,%fb_puttySettingsReg%,Equal,"",If,ExistFile,%fb_puttySettingsReg%,Begin
   StrFormat,Ext,"%fb_puttySettingsReg%","%fb_puttySettingsRegExt%"

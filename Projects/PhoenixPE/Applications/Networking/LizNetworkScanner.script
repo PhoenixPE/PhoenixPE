@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-10-14
+Version=1.0.1.0
+Date=2022-01-10
 
 [Variables]
 %ProgramFolder%="Network Scanner"
@@ -54,8 +54,8 @@ If,%cb_RunFromRam%,Equal,True,RunFromRam
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
-FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
-Echo,"Program Version: %ProgramVer%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
 
 DirCopy,"%TargetPrograms%\%ProgramFolder%\languages","%TargetAppData%\LizardSystems\Network Scanner\"
 FileCopy,"%TargetPrograms%\%ProgramFolder%\Default\options.xml","%TargetAppData%\LizardSystems\Network Scanner\"
@@ -71,6 +71,8 @@ RequireFileEx,AppendList,\windows\SysWOW64\snmpapi.dll
 RequireFileEx,ExtractList
 
 // Options
+
+Echo,"Configuring %ScriptTitle%..."
 
 // Language
 XMLUpdate,%CfgFile%,"Options/Defaults/DefaultLang","%cmb_Language%.lng"

@@ -30,13 +30,13 @@
 
 [Main]
 Title=WinContig
+Description=WinContig is an easy-to-use stand-alone defragmentation tool. Its purpose is to quickly defragment files without the need to defragment the whole disk.
 Author=Homes32
 Level=5
-Version=1.0.1.0
-Description=WinContig is an easy-to-use stand-alone defragmentation tool. Its purpose is to quickly defragment files without the need to defragment the whole disk.
-Date=2022-05-29
 Selected=False
 Mandatory=False
+Version=1.0.2.0
+Date=2023-01-10
 
 [Variables]
 %ProgramFolder%="WinContig"
@@ -59,11 +59,13 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
-// Write the .exe version to the log to aid in debugging
-FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
+
+Echo,"Configuring %ScriptTitle%..."
 
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%lng%

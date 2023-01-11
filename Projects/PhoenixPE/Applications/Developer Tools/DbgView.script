@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2020-12-04
+Version=1.0.2.0
+Date=2023-01-10
 
 [Variables]
 %ProgramFolder%="DbgView"
@@ -60,6 +60,8 @@ If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",Run,%ScriptFile%,DownloadProgram
 FileCopy,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%","%TargetPrograms%\%ProgramFolder%\%ProgramExe%"
 FileCopy,"%ProgramsCache%\%ProgramFolder%\DbgView.chm","%TargetPrograms%\%ProgramFolder%\DbgView.chm"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
 
 // Kernel Mode Driver
 ShellExecute,Hide,"%Tools%\%HostArch%\GetBinaryResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q BINRES RCDBGSYS #$q%TargetSystem32%\drivers\Dbgv.sys#$q"
@@ -67,6 +69,8 @@ If,Not,#r,Equal,0,Halt,"ERROR: Unable to extract DbgView driver. GetBinaryResour
   
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
+
+Echo,"Configuring %ScriptTitle%..."
 
 RegLoadHives
 

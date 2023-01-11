@@ -57,9 +57,13 @@ If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\release\*.*","%TargetPrograms%\%ProgramFolder%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
+
+Echo,"Configuring %ScriptTitle%..."
 
 // This .ini files needs to exist or the launcher will crash if the directory is not writable.
 IniWrite,"%TargetPrograms%\%ProgramFolder%\x96dbg.ini","Launcher","x32dbg","%PEPrograms%\%ProgramFolder%\x32\x32dbg.exe"

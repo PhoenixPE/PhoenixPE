@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-01
+Version=1.0.1.0
+Date=2023-01-10
 
 [Variables]
 %ProgramFolder%="Dialupass"
@@ -58,11 +58,13 @@ Run,%ScriptFile%,SetProgramArch
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
-FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
-Echo,"Program Version: %ProgramVer%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
+
+Echo,"Configuring %ScriptTitle%..."
 
 // Language
 If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\BrowsingHistoryView_lng.ini"

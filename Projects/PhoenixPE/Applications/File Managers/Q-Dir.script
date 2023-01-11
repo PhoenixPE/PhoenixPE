@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.0.0
-Date=2021-11-07
+Version=1.1.1.0
+Date=2023-01-10
 
 [Variables]
 %ProgramFolder%="Q-Dir"
@@ -60,9 +60,13 @@ Run,%ScriptFile%,SetProgramArch
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\Q-Dir\*.*","%TargetPrograms%\%ProgramFolder%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
+
+Echo,"Configuring %ScriptTitle%..."
 
 RegLoadHives
 // Add the program dir to the System PATH so we can launch from anywhere
