@@ -14,6 +14,8 @@ Notable changes to the PhoenixPE project.
 - EaseUS Data Recovery Wizard
 
 ### Changed
+- PCI-Z script now has the option to download the latest pci.ids database from the PCI ID Repository. This vastly improves identification as the database that ships with PCI-Z 2.0.0 is from 2017.
+- Apps that dynamically download the latest version now log the program version during build.
 - Updated PinUtil (1.4.1.1-Homes32) to support pinning to StartAllBack.
 - Updated KeyboardTestUtility to v2.0.0
 - Updated Open-Shell to v4.4.186

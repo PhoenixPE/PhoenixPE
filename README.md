@@ -13,7 +13,8 @@ PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10/Win11. It can be
 * Build from Win10/Win11 sources using either boot.wim or WinRE.wim as a base.
 * Designed from the ground up to be developer/contributor friendly and use clean, well documented code.
 * Easy to understand options and uncluttered user interface.
-* Flexible and fully customizable.
+* Flexible architecture.
+* PEBakery's powerful scripting language allows extensive customization.
 
 ## Features
 
@@ -26,6 +27,8 @@ PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10/Win11. It can be
 * Hardware Diagnostics
 * Offline OS Troubleshooting/Repair/Recovery
 * And more...
+
+PhoenixPE includes a variety of carefully selected applications to get you started and PEBakery's user friendly scripting language makes it easy for you create your own scripts and customize PhoenixePE with your favorite apps and settings.
 
 ## License
 
@@ -43,7 +46,13 @@ Documentation is available on the [PhoenixPE Wiki](https://github.com/PhoenixPE/
 
 PhoenixPE is developed and maintained, and supported by a community of developers/volunteers who enjoy sharing their ideas and work in their free time. 
 
-Interested in contributing to PhoenixPE? Check out our [guidelines](https://github.com/PhoenixPE/PhoenixPE/blob/master/docs/CONTRIBUTING.md).
+Interested in contributing to PhoenixPE? Please read our [contributor guidelines](https://github.com/PhoenixPE/PhoenixPE/blob/master/docs/CONTRIBUTING.md).
+
+Want to create your own scripts, include additional applications, and personalize PhoenixPE to your taste?
+
+Check out the following resources:
+* [PEBakery Documentation](https://github.com/pebakery/pebakery-docs)
+* [PhoenixPE API](https://github.com/PhoenixPE/PhoenixPE/wiki/PhoenixAPI)
 
 ## Enhancements/Bugs
 
