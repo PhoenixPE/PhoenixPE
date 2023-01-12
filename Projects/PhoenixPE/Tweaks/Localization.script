@@ -128,7 +128,7 @@ If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Begin
     StrFormat,Replace,%InputLocale1%,", ",;,%InputLocale1%
     // check for entries like: 
     // Active keyboard(s)=0407:00000407, 0407:{FE0420F1-38D1-4B4C-96BF-E7E20A74CFB7}{64D7E8FF-F5F8-4B63-B47F-F4059F73A7E4}
-    // dism won't accept guid based keyboard settings and will fail with error 87 so just drop them
+    // DISM won't accept guid based keyboard settings and will fail with error 87 so just drop them
     // to reproduce: install keyman or use a grown up windows installation with many language setting changes over time
     StrFormat,Pos,%InputLocale1%,"{",%Pos%
     Set,%CleanInputLocale1%,""
@@ -136,7 +136,7 @@ If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Begin
       ForEach,%Element%,%InputLocale1%,Delim=;,Begin
         StrFormat,Pos,%Element%,"{",%Pos%
         If,%Pos%,Equal,0,List,Append,%CleanInputLocale1%,%Element%,Delim=;
-        Else,Echo,"Dropped invalid input locale [%Element%]",WARN
+        Else,Echo,"Input locale [%Element%] has been excluded because the format is not supported. Please set the Keyboard 1 option manually.",WARN
       End
       Set,%InputLocale1%,%CleanInputLocale1%
     End
@@ -145,6 +145,20 @@ If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Begin
   If,%cmb_InputLocale2%,Equal,HostOS,Begin
     IniRead,"%ProjectTemp%\Get-Intl.ini","International","Active keyboard(s)",%InputLocale2%
     StrFormat,Replace,%InputLocale2%,", ",;,%InputLocale2%
+	// check for entries like: 
+    // Active keyboard(s)=0407:00000407, 0407:{FE0420F1-38D1-4B4C-96BF-E7E20A74CFB7}{64D7E8FF-F5F8-4B63-B47F-F4059F73A7E4}
+    // DISM won't accept guid based keyboard settings and will fail with error 87 so just drop them
+    // to reproduce: install keyman or use a grown up windows installation with many language setting changes over time
+    StrFormat,Pos,%InputLocale2%,"{",%Pos%
+    Set,%CleanInputLocale2%,""
+    If,%Pos%,Bigger,0,Begin
+      ForEach,%Element%,%InputLocale2%,Delim=;,Begin
+        StrFormat,Pos,%Element%,"{",%Pos%
+        If,%Pos%,Equal,0,List,Append,%CleanInputLocale2%,%Element%,Delim=;
+        Else,Echo,"Input locale [%Element%] has been excluded because the format is not supported. Please set the Keyboard 2 option manually.",WARN
+      End
+      Set,%InputLocale2%,%CleanInputLocale2%
+    End
   End
   
   If,%cmb_UserLocale%,Equal,HostOS,Begin
