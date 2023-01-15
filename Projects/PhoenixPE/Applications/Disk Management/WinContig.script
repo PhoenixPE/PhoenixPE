@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.2.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2023-01-14
 
 [Variables]
 %ProgramFolder%="WinContig"
@@ -67,6 +67,9 @@ Echo,"Program version: v%ProgramExeVer%"
 
 Echo,"Configuring %ScriptTitle%..."
 
+// WinContig wants to see UTF16-LE or it discards the config file and enforces defaults
+FileCreateBlank,%ConfigFile%,Encoding=UTF16LE
+
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%lng%
 StrFormat,RTRIM,%lng%,1,%lng%
@@ -76,12 +79,68 @@ IniWrite,%ConfigFile%,"Options","Language",%lng%
 If,%cmb_DriveTemp%,Equal,"Celsius (°C)",IniWrite,%ConfigFile%,"Options","ShowTemperatureInCelsius",1
 Else,IniWrite,%ConfigFile%,"Options","ShowTemperatureInCelsius",0
 
+// ShellExt
+If,%cb_RegisterShellExt%,Equal,True,Run,%ScriptFile%,RegisterShellExtension
+
+// We take care of this so no need to bother the user
+IniWrite,%ConfigFile%,"Options","PromptToInstallShellEx",0
+
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#RegisterShellExtension#]
+// ===============================================================================================================================
+// Name...........: RegisterShellExtension
+// Description....: Register the WinContig Shell Extension
+// Syntax.........: Run,%ScriptFile%,RegisterShellExtension
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: 
+// ===============================================================================================================================
+[RegisterShellExtension]
+
+If,%SourceArch%,Equal,x64,Begin
+  Set,%ShellExtDll%,"wcshellext64.dll"
+  FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\wcshellext32.dll"
+End
+Else,Begin
+  Set,%ShellExtDll%,"wcshellext32.dll"
+  FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\wcshellext64.dll"
+End
+
+RegHiveLoad,Tmp_Software,%RegSoftware%
+
+// Register Shell Extension
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}","","wcshellext extension"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt\%ShellExtDll%"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
+RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
+RegWrite,HKLM,0x1,"Tmp_Software\\Microsoft\Windows\CurrentVersion\Extensions\Approved\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}","","wcshellext extension"
+
+// Configure Shell Extension
+RegWrite,HKLM,0x4,"Tmp_Software\WinContig","ShowMenuIcons",1
+RegWrite,HKLM,0x4,"Tmp_Software\WinContig","ShowCascadingMenu",1
+RegWrite,HKLM,0x4,"Tmp_Software\WinContig","ShowAnalyzeItem",1
+RegWrite,HKLM,0x4,"Tmp_Software\WinContig","ShowDefragItem",1
+RegWrite,HKLM,0x1,"Tmp_Software\WinContig","ExeFullPath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+// Configure ShellExt with the correct language strings
+FileCopy,"%TargetPrograms%\%ProgramFolder%\Lang\WinContig_%lng%.lng","%ProjectTemp%\%ProgramFolder%\WinContig_%lng%.lng"
+TXTAddLine,"%ProjectTemp%\%ProgramFolder%\WinContig_%lng%.lng","[WinContig]",Prepend
+IniRead,"%ProjectTemp%\%ProgramFolder%\WinContig_%lng%.lng","WinContig",109,%AnalyzeMenuText%,"Default=Analyze with WinContig"
+IniRead,"%ProjectTemp%\%ProgramFolder%\WinContig_%lng%.lng","WinContig",116,%DefragMenuText%,"Default=Defragment with WinContig"
+RegWrite,HKLM,0x1,"Tmp_Software\WinContig","AnalyzeMenuText",%AnalyzeMenuText%
+RegWrite,HKLM,0x1,"Tmp_Software\WinContig","DefragMenuText",%DefragMenuText%
+
+RegHiveUnLoad,Tmp_Software
 
 [#ExtractProgram#]
 // ===============================================================================================================================
@@ -183,7 +242,7 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // ===============================================================================================================================
 [SetDefaultOptions]
 System,Cursor,Wait
-WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
@@ -245,7 +304,7 @@ btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
-cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,True,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
 bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
 cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
@@ -259,6 +318,7 @@ lbl_Language=Language,1,1,159,110,153,16,8,Normal
 cmb_Language="English [en-US]",1,4,160,126,155,21,"Afrikaans [af-ZA]","Bulgarian [bg-BG]","Chinese Simplified [zh-CN]","Chinese Traditional [zh-TW]","Czech [cs-CZ]","Dutch [nl-NL]","English [en-US]","Finnish [fi-FI]","French [fr-FR]","Georgian [ka-GE]","German [de-DE]","Greek [el-GR]","Hungarian [hu-HU]","Italian [it-IT]","Japanese [ja-JP]","Korean [ko-KR]","Polish [pl-PL]","Portuguese - Brazil [pt-BR]","Portuguese - Portugal [pt-PT]","Romanian [ro-RO]","Russian [ru-RU]","Slovak [sk-SK]","Slovenian [sl-SL]","Spanish [es-ES]","Swedish [sv-SE]","Turkish [tr-TR]","Vietnamese [vi-VN]"
 lbl_ShowTemp="Show tempature in",1,1,161,165,101,16,8,Normal
 cmb_DriveTemp="Celsius (°C)",1,4,160,181,125,21,"Fahrenheit (°F)","Celsius (°C)"
+cb_RegisterShellExt="Register Shell Extension",1,3,160,210,174,18,True,"__Show Defrag and Analyze options in Explorer context menu"
 
 [AuthorEncoded]
 WinContig.png=4137,5616
