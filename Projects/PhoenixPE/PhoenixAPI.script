@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.6.1.0
-Date=2022-12-30
+Version=1.7.0.0
+Date=2023-01-15
 Level=0
 Selected=None
 
@@ -76,10 +76,12 @@ RequireFileEx=Run,%API%,_PhoenixAPI_RequireFileEx
 ConvertImage=Run,%API%,_PhoenixAPI_ConvertImage
 DISM=Run,%API%,_PhoenixAPI_DISM
 AddPostProcess=Run,%API%,_PhoenixAPI_AddPostProcess
+GetBinaryResource=Run,%API%,_PhoenixAPI_GetBinaryResource
+//GetStringResource=Run,%API%,_PhoenixAPI_GetStringResource
 
 // Compression/Decompression
 7z=Run,%API%,_PhoenixAPI_7z
-//7zExtract=
+//7zExtract=NOT IMPLIMENTED
 InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
 Innounp=Run,%API%,_PhoenixAPI_Innounp
 MSIExtract=Run,%API%,_PhoenixAPI_MSIExtract
@@ -90,8 +92,8 @@ JSONCompact=Run,%API%,_PhoenixAPI_JSONCompact
 JSONDelete=Run,%API%,_PhoenixAPI_JSONDelete
 JSONPretty=Run,%API%,_PhoenixAPI_JSONPretty
 JSONRead=Run,%API%,_PhoenixAPI_JSONRead
-//JSON2INI=
-//INI2JSON=
+//JSON2INI=NOT IMPLIMENTED
+//INI2JSON=NOT IMPLIMENTED
 JSONWrite=Run,%API%,_PhoenixAPI_JSONWrite
 
 // XML
@@ -471,7 +473,7 @@ If,Not,%ArgKey%,Equal,"",Begin
 	  StrFormat,Split,#1,"=",2,%ListFile%
 	  Set,%ListFile%," #$q@%ListFile%#$q"
   End
-  Else,Halt,"InnoExtract SYNTAX ERROR: Invalid Argument [#1]"
+  Else,Halt,"InnoExtract SYNTAX ERROR: Invalid Argument [#1]."
 End
 
 [#_PhoenixAPI_MSIExtract#]
@@ -542,22 +544,76 @@ System,EndLocal
 // Name...........: ConvertImage
 // Description....: Convert an image to the specified format.
 // Syntax.........: ConvertImage,<Source>,<Target>[,<Resize>]
-// Parameters.....: #1 <Source> - The full path to the image file.
-//                  #2 <Target> - The full path to the converted image file. 
-//                  #3 <Resize> - (Optional) Resize the image.
+// Parameters.....: #1 Source - The full path to the image file.
+//                  #2 Target - The full path to the converted image file. 
+//                  #3 Resize - (Optional) Resize the image.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Depends on ImageConvert.exe in %Tools%.
-//                  ImageConvert.exe <input_image> <output_image>
+//                  ImageConvert.exe <input_image> <output_image> [--resize:WxH]
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_ConvertImage]
-// Convert images to the specified format...
-StrFormat,EXT,#2,%NewImageExt%
-Echo,"Converting [#1] to a [%NewImageExt%] image..."
-If,Not,#3,Equal,"",Set,%ResizeParam%," --resize:#3"
-ShellExecute,Hide,"%Tools%\%HostArch%\ImageConvert.exe","#$q#1#$q #$q#2#$q --silent%ResizeParam%"
+System,SetLocal
+If,#1,Equal,"",Halt,"ConvertImage Syntax Error: You must specify the path to the source image."
+If,#2,Equal,"",Halt,"ConvertImage Syntax Error: You must specify the path to the destination image."
+
+GetParam,1,%SourceImage%
+Getparam,2,%TargetImage%
+Getparam,3,%ResizeTo%
+
+StrFormat,EXT,%TargetImage%,%NewImageExt%
+Echo,"Converting [%SourceImage%] to a [%NewImageExt%] image..."
+If,Not,%ResizeTo%,Equal,"",Set,%ResizeParam%," --resize:%ResizeTo%"
+ShellExecute,Hide,"%Tools%\%HostArch%\ImageConvert.exe","#$q%SourceImage%#$q #$q%TargetImage%#$q --silent%ResizeParam%"
 If,Not,%ExitCode%,Equal,0,Halt,"ERROR: Image conversion failed. [%ExitCode%]"
+
+System,EndLocal
+
+[#_PhoenixAPI_GetBinaryResource#]
+// ===============================================================================================================================
+// Name...........: GetBinaryResource
+// Description....: Extract a binary resource from an executable file.
+// Syntax.........: GetBinaryResource,<Source>,<ResourceType>,<ResourceID>,<OutputPath>[,NOERR]
+// Parameters.....: #1 Source - The full path to the source file (.exe, .dll, .mui, .mun, .sys, etc.).
+//                  #2 ResourceType - Can be a named resource type eg. RT_RCDATA or an ordinal number prefixed with # eg. #100
+//                  #3 ResourceID - ID of the resource to extract. eg. NTDRIVER or #1000
+//                  #4 OutputPath - The full path where the resource will be saved.
+//                  #5 NOERR - (Optional) Do not Halt on error, just return the exit code passed by GetBinaryResource.exe
+// Return values..: 0 - Success
+//                  1 - Could not load exe
+//                  2 - Could not find resource
+//                  3 - Could not load resource
+//                  4 - Could not lock resource
+//                  5 - Could not save resource to file
+//                 99 - Syntax Error
+// Author.........: Homes32
+// Remarks........: Depends on GetBinaryResource.exe in %Tools%.
+//                  GetBinaryResource.exe <Source> <ResourceType> <ResourceID> <OutputPath>
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_GetBinaryResource]
+System,SetLocal
+
+If,#1,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the path to the source file."
+If,#2,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the resource type."
+If,#3,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the ID of the string to extract."
+If,#4,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the path to extract the file."
+
+GetParam,1,%Source%
+GetParam,2,%ResourceType%
+GetParam,3,%ResourceID%
+GetParam,4,%OutputPath%
+GetParam,5,%Arg5%
+
+If,%Arg5%,Equal,"NOERR",Set,%NOERR%,"True"
+
+ShellExecute,Hide,"%Tools%\%HostArch%\GetBinaryResource.exe","#$q%Source%#$q %ResourceType% %ResourceID% #$q%OutputPath%#$q"
+If,%ExitCode%,Equal,0,Return,%ExitCode%
+Else,If,%NOERR%,Equal,"True",Return,%ExitCode%
+Else,Halt,"GetBinaryResource Error: Unable to extract resource [%ResourceID%]. The command returned [%ExitCode%]."
+
+System,EndLocal
 
 [#_PhoenixAPI_Associate#]
 // ===============================================================================================================================
@@ -624,7 +680,7 @@ If,#1,Equal,"",Halt,"SetFileACL Syntax Error: You must specify the file or direc
 
 Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe," -ot #$qfile#$q -on #$q#1#$q -actn ace -actn setprot -op #$qdacl:p_nc#$q -ace #$qn:S-1-1-0;p:full;s:y#$q"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]."
 
 System,EndLocal
 
@@ -645,10 +701,10 @@ If,#1,Equal,"",Halt,"SetRegACL Syntax Error: You must specify the Registry Key t
 
 Echo,"Taking ownership of [#1] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
-If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
+If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of#$x#$x#1#$x#$xThe command returned: [%ExitCode%]."
 Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]."
 
 System,EndLocal
 

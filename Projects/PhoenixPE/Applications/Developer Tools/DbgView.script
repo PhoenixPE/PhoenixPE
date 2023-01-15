@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.2.0
-Date=2023-01-10
+Version=1.0.3.0
+Date=2023-01-15
 
 [Variables]
 %ProgramFolder%="DbgView"
@@ -64,8 +64,8 @@ FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
 Echo,"Program version: v%ProgramExeVer%"
 
 // Kernel Mode Driver
-ShellExecute,Hide,"%Tools%\%HostArch%\GetBinaryResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q BINRES RCDBGSYS #$q%TargetSystem32%\drivers\Dbgv.sys#$q"
-If,Not,#r,Equal,0,Halt,"ERROR: Unable to extract DbgView driver. GetBinaryResource.exe returned [#r]"
+GetBinaryResource,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%","BINRES","RCDBGSYS","%TargetSystem32%\drivers\Dbgv.sys",NOERR
+If,Not,#r,Equal,0,Halt,"ERROR: Unable to extract DbgView driver. [#r]"
   
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
