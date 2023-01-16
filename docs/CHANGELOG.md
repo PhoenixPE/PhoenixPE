@@ -10,22 +10,30 @@ Notable changes to the PhoenixPE project.
 - HxD Hex Editor
 - MonitorTestUtility script that allows you to run various pattern and motion tests on your display.
 - grepWin search and replace
-- Macrium Reflect backup.
-- EaseUS Data Recovery Wizard
+- Macrium Reflect - Well known backup/imaging solution.
+- EaseUS Data Recovery Wizard - Free version allows you to recover up to 2GB of deleted data.
+- Double Driver - A user friendly tool for offline driver backup.
+- Nirsoft's ExtPassword! - A tool for recovering password from offline systems.
+- Nirsoft's WinMailPassRec - A tool for recovering passwords from Win10/Win11 WinMail.
+- Nirsoft's ShadowCopyView - Restore files from Volume Shadow Copy snapshots.
+- GetBinaryResource command added to PhoenixAPI - Allows extracting of binary resources from exe, dll, etc.
 
 ### Changed
 - PCI-Z script now has the option to download the latest pci.ids database from the PCI ID Repository. This vastly improves identification as the database that ships with PCI-Z 2.0.0 is from 2017.
 - Apps that dynamically download the latest version now log the program version during build.
-- Updated PinUtil (1.4.1.1-Homes32) to support pinning to StartAllBack.
-- Updated KeyboardTestUtility to v2.0.0
-- Updated Open-Shell to v4.4.186
-  * rewrote the extraction routines to make future updates easier
-  * added Win11 start button option
+- PinUtil (1.4.1.1-Homes32) updated to support pinning to StartAllBack.
+- KeyboardTestUtility updated to v2.0.0
+- HWinfo updated to v7.36
+- WinContig added an option to register the WinContig shell extension.
+- Open-Shell updated to v4.4.186
+  * rewrote the extraction routines to make future updates easier.
+  * added Win11 start button option.
 - Fab's Auto Backup extraction routines were re-written because author of AutoBackup7 switched to distributing the program in an InnoSetup installer instead of a self-extracting 7z archive.  
   * Support extracting the official InnoSetup installer.
   * Added support for extracting Autobackup files from a .7z/.rar/.zip archive.
   
   **Script Breaking Change:** Due to the changes the previous self extracting archives can no longer be used. Users must either provide the new InnoSetup package or construct an archive containing their AutoBackup7 program files.
+- Improved handling of unsupported keyboard ID's in Localization script. Previously when one or more of the keyboard inputs were set to use HostOS and the language/keyboard pair contained a GUID it would cause DISM to fail with error code 87.
   
 ### Fixed
 - Fixed an issue preventing network services from being installed if no NIC's were present.
@@ -33,6 +41,7 @@ Notable changes to the PhoenixPE project.
 - Fixed a bug in InnoCleanup that did not cleanup files with suffixes greater then 1 digit.
 - Fixed a bug in InnoRename that caused renamed files to be moved to the base path instead of the correct sub-folder when the NOREC parameter was not used.
 - Fixed a bug in Driver Integration where the start menu shortcut would not be created.
+- Fixed encoding on WinContig.ini that caused the config to be discarded in newer WinContig versions (5.0.0+).
 
 ### Removed
 
