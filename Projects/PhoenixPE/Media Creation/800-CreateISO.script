@@ -35,19 +35,21 @@ Author=Homes32
 Level=8
 Selected=True
 Mandatory=False
-Version=1.1.0.1
-Date=2022-08-01
+Version=1.2.0.0
+Date=2023-01-17
 
 [Variables]
 %mkISOfs.exe%="%Tools%\x86\mkISOfs.exe"
 %oscdimg.exe%="%Tools%\%HostArch%\oscdimg\oscdimg.exe"
+
+// Space delimited list of illegal file name characters
+%IllegalChars%="\ / : * ? #$q < > |"
 
 [Process]
 Echo,"Preparing to create bootable ISO file..."
 
 // Sanity Check 
 If,Not,ExistFile,"%OutputDir%\sources\boot.wim",Halt,"ERROR: Boot.wim is missing from [%OutputDir%\Sources]. Please rebuild your project."
-
 
 // Get ISO File Name txt Macros
 IniRead,"%ProjectDir%\script.project","Main","Version",%ProjectVer%
@@ -56,28 +58,22 @@ StrFormat,Date,%Time%,"hhnn"
 StrFormat,Date,%TimeStamp%,"YYYYMMDDHHNNSS"
 
 // Set ISO File Name
-IniWrite,"%ProjectTemp%\ISO.ini","FileName","FileName",%in_ISOFilename%
-// Process Txt Macros
-TxtReplace,"%ProjectTemp%\ISO.ini","{ProjectTitle}",%ProjectTitle%
-TxtReplace,"%ProjectTemp%\ISO.ini","{ProjectVer}",%ProjectVer%
-TxtReplace,"%ProjectTemp%\ISO.ini","{Date}",%Date%
-TxtReplace,"%ProjectTemp%\ISO.ini","{Time}",%Time%
-TxtReplace,"%ProjectTemp%\ISO.ini","{TimeStamp}",%TimeStamp%
-TxtReplace,"%ProjectTemp%\ISO.ini","{SourceArch}",%SourceArch%
-TxtReplace,"%ProjectTemp%\ISO.ini","{SourceLang}",%SourceLang%
-// Strip illegal chars
-TxtReplace,"%ProjectTemp%\ISO.ini","\",""
-TxtReplace,"%ProjectTemp%\ISO.ini","/",""
-TxtReplace,"%ProjectTemp%\ISO.ini",":",""
-TxtReplace,"%ProjectTemp%\ISO.ini","*",""
-TxtReplace,"%ProjectTemp%\ISO.ini","?",""
-TxtReplace,"%ProjectTemp%\ISO.ini","#$q",""
-TxtReplace,"%ProjectTemp%\ISO.ini","<",""
-TxtReplace,"%ProjectTemp%\ISO.ini",">",""
-TxtReplace,"%ProjectTemp%\ISO.ini","|",""
-IniRead,"%ProjectTemp%\ISO.ini","FileName","FileName",%ISOFilename%
+Set,%ISOFilename%,%in_ISOFilename%
 
-// Fallback ISO Name
+// Strip illegal chars
+ForEach,%Char%,%IllegalChars%,Delim=#$s,StrFormat,Replace,%ISOFilename%,%Char%,"",%ISOFilename%
+WriteInterface,Value,%ScriptFile%,Interface,in_ISOFilename,%ISOFilename%
+
+// Process Txt Macros
+StrFormat,Replace,%ISOFilename%,"{ProjectTitle}",%ProjectTitle%,%ISOFilename%
+StrFormat,Replace,%ISOFilename%,"{ProjectVer}",%ProjectVer%,%ISOFilename%
+StrFormat,Replace,%ISOFilename%,"{Date}",%Date%,%ISOFilename%
+StrFormat,Replace,%ISOFilename%,"{Time}",%Time%,%ISOFilename%
+StrFormat,Replace,%ISOFilename%,"{TimeStamp}",%TimeStamp%,%ISOFilename%
+StrFormat,Replace,%ISOFilename%,"{SourceArch}",%SourceArch%,%ISOFilename%
+StrFormat,Replace,%ISOFilename%,"{SourceLang}",%SourceLang%,%ISOFilename%
+
+// Fallback ISO Name - just in case
 If,%ISOFilename%,Equal,"",Set,%ISOFilename%,%ProjectTitle%
 
 Set,%ISOFilename%,"%ISOFilename%.iso"

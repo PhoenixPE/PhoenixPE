@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.1.0.1
-Date=2022-08-01
+Version=1.1.1.0
+Date=2023-01-23
 
 [Variables]
 
@@ -51,16 +51,15 @@ StrFormat,Date,%Date%,"yyyy-mm-dd"
 StrFormat,Date,%Time%,"hh:nn"
 StrFormat,Date,%TimeStamp%,"YYYYMMDDHHNNSS"
 
-// apply Model field txt macros
-IniWrite,"%ProjectTemp%\OEMInfo.ini","Info","Model",%txt_Model%
-TxtReplace,"%ProjectTemp%\OEMInfo.ini","{ProjectTitle}",%ProjectTitle%
-TxtReplace,"%ProjectTemp%\OEMInfo.ini","{ProjectVer}",%ProjectVer%
-TxtReplace,"%ProjectTemp%\OEMInfo.ini","{Username}",%UserName%
-TxtReplace,"%ProjectTemp%\OEMInfo.ini","{ComputerName}",%ComputerName%
-TxtReplace,"%ProjectTemp%\OEMInfo.ini","{Date}",%Date%
-TxtReplace,"%ProjectTemp%\OEMInfo.ini","{Time}",%Time%
-TxtReplace,"%ProjectTemp%\ISO.ini","{TimeStamp}",%TimeStamp%
-IniRead,"%ProjectTemp%\OEMInfo.ini","Info","Model",%Model%
+// Apply Model field txt macros
+Set,%Model%,%txt_Model%
+StrFormat,Replace,%Model%,"{ProjectTitle}",%ProjectTitle%,%Model%
+StrFormat,Replace,%Model%,"{ProjectVer}",%ProjectVer%,%Model%
+StrFormat,Replace,%Model%,"{Username}",%UserName%,%Model%
+StrFormat,Replace,%Model%,"{ComputerName}",%ComputerName%,%Model%
+StrFormat,Replace,%Model%,"{Date}",%Date%,%Model%
+StrFormat,Replace,%Model%,"{Time}",%Time%,%Model%
+StrFormat,Replace,%Model%,"{TimeStamp}",%TimeStamp%,%Model%
 
 RegLoadHives
 
