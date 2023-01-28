@@ -29,23 +29,23 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=Zulu JRE 11
-Description=(11.62.17) Azul Zulu OpenJDK Java 11 (LTS) Runtime Environment
+Title=Zulu JRE 17
+Description=(17.40.19) Azul Zulu OpenJDK Java 17 (LTS) Runtime Environment
 Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.0.5.0
+Version=1.0.0.0
 Date=2023-01-27
 
 [Variables]
-%ProgramFolder%="Zulu11"
-%ZuluVersionx86%="11.62.17"
-%ZuluVersionx64%="11.62.17"
-%JREVersion%="11.0.18"
+%ProgramFolder%="Zulu17"
+%ZuluVersionx86%="17.40.19"
+%ZuluVersionx64%="17.40.19"
+%JREVersion%="17.0.6"
 %DownloadURLx86%=https://cdn.azul.com/zulu/bin/zulu%ZuluVersionx86%-ca-jre%JREVersion%-win_i686.zip
 %DownloadURLx64%=https://cdn.azul.com/zulu/bin/zulu%ZuluVersionx64%-ca-jre%JREVersion%-win_x64.zip
-%SetupFile%="zulu-11-%SourceArch%.zip"
+%SetupFile%="zulu-17-%SourceArch%.zip"
 %ZipFolder86%="zulu%ZuluVersionx86%-ca-jre%JREVersion%-win_i686"
 %ZipFolder64%="zulu%ZuluVersionx64%-ca-jre%JREVersion%-win_x64"
 
@@ -73,17 +73,17 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\Zulu.jarfile\shell\open","","Open"
 RegWrite,HKLM,0x1,"Tmp_Software\Classes\Zulu.jarfile\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\bin\javaw.exe#$q -jar #$q#$p1#$q #$p*"
 
 If,%SourceArch%,Equal,x86,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu 32-bit\zulu-11-jre","CurrentVersion","%ZuluVersionx86%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu 32-bit\zulu-11-jre","InstallationPath","%PEPrograms%\%ProgramFolder%\"
-  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu 32-bit\zulu-11-jre","MajorVersion",11
-  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu 32-bit\zulu-11-jre","MinorVersion",0
+  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","CurrentVersion","%ZuluVersionx86%"
+  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","InstallationPath","%PEPrograms%\%ProgramFolder%\"
+  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","MajorVersion",17
+  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","MinorVersion",0
 End
 Else,Begin
   // x64
-  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\zulu-11-jre","CurrentVersion","%ZuluVersionx64%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\zulu-11-jre","InstallationPath","%PEPrograms%\%ProgramFolder%\"
-  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\zulu-11-jre","MajorVersion",11
-  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\zulu-11-jre","MinorVersion",0
+  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","CurrentVersion","%ZuluVersionx64%"
+  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","InstallationPath","%PEPrograms%\%ProgramFolder%\"
+  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","MajorVersion",17
+  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","MinorVersion",0
 End
 
 // Add Java to system Path
@@ -100,12 +100,12 @@ If,%cb_AddJavaHomeVar%,Equal,True,RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Co
 // Create Oracle Keys
 If,%cb_CreateOracleJavaSoftKeys%,Equal,True,Begin
   RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment","CurrentVersion","%JREVersion%"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.11","JavaHome","%PEPrograms%\%ProgramFolder%\"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.11","MicroVersion","0"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.11","RuntimeLib","%PEPrograms%\%ProgramFolder%\bin\client\jvm.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","JavaHome","%PEPrograms%\%ProgramFolder%\"
+  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","MicroVersion","0"
+  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","RuntimeLib","%PEPrograms%\%ProgramFolder%\bin\server\jvm.dll"
   RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","JavaHome","%PEPrograms%\%ProgramFolder%\"
   RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","MicroVersion","0"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","RuntimeLib","%PEPrograms%\%ProgramFolder%\bin\client\jvm.dll"
+  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","RuntimeLib","%PEPrograms%\%ProgramFolder%\bin\server\jvm.dll"
 End
 
 RegUnloadHives
@@ -205,7 +205,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"Azul Zulu Java 11 Runtime Environment Community Access build.#$x#$xOn first run this script will download the setup file (~40 MB) and cache it for future builds."
+Message,"Azul Zulu Java 17 Runtime Environment Community Access build.#$x#$xOn first run this script will download the setup file (~43 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================

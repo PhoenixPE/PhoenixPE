@@ -34,8 +34,8 @@ Description=Add support for Microsoft Management Console (MMC) Snap-Ins
 Selected=True
 Level=4
 Author=Homes32
-Version=1.3.0.0
-Date=2022-07-31
+Version=1.4.0.0
+Date=2023-01-27
 Mandatory=False
 
 [Variables]
@@ -65,7 +65,9 @@ RequireFileEx,AppendList,\windows\system32\certenc.dll
 RequireFileEx,AppendList,\windows\system32\CertEnroll.dll
 RequireFileEx,AppendList,\windows\system32\CertEnrollCtrl.exe
 RequireFileEx,AppendList,\windows\system32\CertEnrollUI.dll
+RequireFileEx,AppendList,\windows\system32\certlm.msc
 RequireFileEx,AppendList,\windows\system32\certmgr.dll
+RequireFileEx,AppendList,\windows\system32\certmgr.msc
 RequireFileEx,AppendList,\windows\system32\CertPKICmdlet.dll
 RequireFileEx,AppendList,\windows\system32\CertPolEng.dll
 RequireFileEx,AppendList,\windows\system32\certreq.exe
@@ -142,6 +144,16 @@ If,%cb_services_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_services_Sta
 If,%cb_services_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pWinDir#$p\System32\services.msc"
 If,%cb_services_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pWinDir#$p\System32\services.msc"
 
+If,%cb_certmgr_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_certmgr_ShortcutName%,"#$pWinDir#$p\System32\certmgr.msc"
+If,%cb_certmgr_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_certmgr_StartMenuFolder%,%txt_certmgr_ShortcutName%,"#$pWinDir#$p\System32\certmgr.msc"
+If,%cb_certmgr_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pWinDir#$p\System32\certmgr.msc"
+If,%cb_certmgr_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pWinDir#$p\System32\certmgr.msc"
+
+If,%cb_certlm_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_certlm_ShortcutName%,"#$pWinDir#$p\System32\certlm.msc"
+If,%cb_certlm_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_certlm_StartMenuFolder%,%txt_certlm_ShortcutName%,"#$pWinDir#$p\System32\certlm.msc"
+If,%cb_certlm_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pWinDir#$p\System32\certlm.msc"
+If,%cb_certlm_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pWinDir#$p\System32\certlm.msc"
+
 [#SetDefaultOptions#]
 // ===============================================================================================================================
 // Name...........: SetDefaultOptions
@@ -179,6 +191,18 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_services_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_services_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_services_StartMenuFolder,"Windows Administrative Tools"
 WriteInterface,Value,%ScriptFile%,Interface,txt_services_ShortcutName,Services
+WriteInterface,Value,%ScriptFile%,Interface,cb_certmgr_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_certmgr_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_certmgr_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_certmgr_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_certmgr_StartMenuFolder,"Windows Administrative Tools"
+WriteInterface,Value,%ScriptFile%,Interface,txt_certmgr_ShortcutName,"Certificate Management (User)"
+WriteInterface,Value,%ScriptFile%,Interface,cb_certlm_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_certlm_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_certlm_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_certlm_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_certlm_StartMenuFolder,"Windows Administrative Tools"
+WriteInterface,Value,%ScriptFile%,Interface,txt_certlm_ShortcutName,"Certificate Management (Computer)"
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -256,6 +280,22 @@ cb_services_PinToTaskbar="Pin to Taskbar",1,3,432,102,122,18,False
 cb_services_PinToStartMenu="Pin to Start Menu",1,3,432,121,122,18,False
 txt_services_StartMenuFolder="Start Menu Folder:",1,0,432,161,119,21,"Windows Administrative Tools"
 txt_services_ShortcutName="Shortcut Name:",1,0,432,203,119,21,Services
+
+bvl_certmgr_Shortcuts="CertMgr (User)",1,12,5,250,133,184,8,Bold
+cb_certmgr_DesktopShc=Desktop,1,3,12,264,122,18,False
+cb_certmgr_StartMenuShc="Start Menu",1,3,12,283,122,18,True
+cb_certmgr_PinToTaskbar="Pin to Taskbar",1,3,12,302,122,18,False
+cb_certmgr_PinToStartMenu="Pin to Start Menu",1,3,12,321,122,18,False
+txt_certmgr_StartMenuFolder="Start Menu Folder:",1,0,12,361,119,21,"Windows Administrative Tools"
+txt_certmgr_ShortcutName="Shortcut Name:",1,0,12,403,119,21,"Certificate Management (User)"
+
+bvl_certlm_Shortcuts="CertMgr (Computer)",1,12,145,250,133,184,8,Bold
+cb_certlm_DesktopShc=Desktop,1,3,152,264,122,18,False
+cb_certlm_StartMenuShc="Start Menu",1,3,152,283,122,18,True
+cb_certlm_PinToTaskbar="Pin to Taskbar",1,3,152,302,122,18,False
+cb_certlm_PinToStartMenu="Pin to Start Menu",1,3,152,321,122,18,False
+txt_certlm_StartMenuFolder="Start Menu Folder:",1,0,152,361,119,21,"Windows Administrative Tools"
+txt_certlm_ShortcutName="Shortcut Name:",1,0,152,403,119,21,"Certificate Management (Computer)"
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
