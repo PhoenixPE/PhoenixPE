@@ -2,14 +2,14 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release UNRELEASED
+## Release 2023-01-30
 
 ### Added
 - StartAllBack (Win11 successor to StartIsBack) as an alternative start menu to OpenShell and StartIsBack++.
 - New script that allows the option to use the modern Task Manager instead of the default Task Manger included in boot.wim/WinRE.wim.
 - HxD Hex Editor
 - MonitorTestUtility script that allows you to run various pattern and motion tests on your display.
-- grepWin search and replace
+- grepWin search and replace script
 - Macrium Reflect - Well known backup/imaging solution.
 - EaseUS Data Recovery Wizard - Free version allows you to recover up to 2GB of deleted data.
 - Double Driver - A user friendly tool for offline driver backup.
@@ -17,7 +17,7 @@ Notable changes to the PhoenixPE project.
 - Nirsoft's WinMailPassRec - A tool for recovering passwords from Win10/Win11 WinMail.
 - Nirsoft's ShadowCopyView - Restore files from Volume Shadow Copy snapshots.
 - GetBinaryResource command added to PhoenixAPI - Allows extracting of binary resources from exe, dll, etc.
-- Zulu JRE 17
+- Zulu JRE 17 LTS script
 - Options in MMC script for Certificate Management shortcuts
 - Added "Remount Boot Media as Y:" to PECMD SysTray menu.
 - Added an option in Misc Shortcuts script to Remount CD/USB as Y (some partition utilities have been known to unmount Y:)
@@ -39,12 +39,23 @@ Notable changes to the PhoenixPE project.
   * Added support for extracting Autobackup files from a .7z/.rar/.zip archive.  
   
   **Note:** Due to the changes the previous self extracting archives can no longer be used. Users must either provide the new InnoSetup package or construct an archive containing their AutoBackup7 program files.
-- Improved handling of unsupported keyboard ID's in Localization script. Previously when one or more of the keyboard inputs were set to use HostOS and the language/keyboard pair contained a GUID it would cause DISM to fail with error code 87.
+- Improved handling of unsupported keyboard ID's in Localization script. Previously when one or more of the keyboard inputs were set to use HostOS and the language/keyboard pair contained a GUID it would cause DISM to fail with error code 87 (Thanks psct!).
 - Set the My Computer > Properties context menu to open the classic System Properties dialog instead of failing to open the Settings App.
 - AddShortcut will now detect and remove invalid characters from shortcut names and folders.
 - Performance optimizations in CreateISO and OEMInfo scripts
 - LetterSwap.exe (Mount CD/USB as Y:) updated to v2019.2.10.1
 - Additional audio dll for extended application support.
+- HeavyLoad/TreeSizeFree only supports x64 download. Added error message if x86 source is used.
+- WinMerge updated to v2.16.26
+- AgentRansack updated to v2022 Build 3349
+- DMDE updated to v4.0.2.804
+- Trellix (Formally McAfee) Stinger download URL's updated.
+- Google Chrome updated to v109.0.5414.120
+- WinSCP updated to v5.21.7
+- Notepad3 updated to v6.23.118.1
+- CUP-Z update to v2.04
+- Attribute Changer update to v11.10
+- PowerShell Core updated to v7.3.2
 
 ### Fixed
 - Fixed an issue preventing network services from being installed if no NIC's were present.
