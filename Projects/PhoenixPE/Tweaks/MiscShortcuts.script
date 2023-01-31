@@ -43,20 +43,23 @@ Mandatory=False
 [Process]
 Echo,"Processing Shortcuts..."
 
-If,%cb_notepad_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_notepad_ShortcutName%,"#$pWinDir#$p\System32\notepad.exe"
-If,%cb_notepad_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_notepad_StartMenuFolder%,%txt_notepad_ShortcutName%,"#$pWinDir#$p\System32\notepad.exe"
-If,%cb_notepad_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pWinDir#$p\System32\notepad.exe"
-If,%cb_notepad_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pWinDir#$p\System32\notepad.exe"
+If,%cb_notepad_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_notepad_ShortcutName%,"#$pWinDir#$p\notepad.exe"
+If,%cb_notepad_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_notepad_StartMenuFolder%,%txt_notepad_ShortcutName%,"#$pWinDir#$p\notepad.exe"
+If,%cb_notepad_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pWinDir#$p\notepad.exe"
+If,%cb_notepad_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pWinDir#$p\notepad.exe"
 
-If,%cb_regedit_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_regedit_ShortcutName%,"#$pWinDir#$p\System32\regedit.exe"
-If,%cb_regedit_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_regedit_StartMenuFolder%,%txt_regedit_ShortcutName%,"#$pWinDir#$p\System32\regedit.exe"
-If,%cb_regedit_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pWinDir#$p\System32\regedit.exe"
-If,%cb_regedit_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pWinDir#$p\System32\regedit.exe"
+If,%cb_regedit_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_regedit_ShortcutName%,"#$pWinDir#$p\regedit.exe"
+If,%cb_regedit_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_regedit_StartMenuFolder%,%txt_regedit_ShortcutName%,"#$pWinDir#$p\regedit.exe"
+If,%cb_regedit_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pWinDir#$p\regedit.exe"
+If,%cb_regedit_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pWinDir#$p\regedit.exe"
 
 If,%cb_RecEnv_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_RecEnv_ShortcutName%,"X:\Sources\Recovery\RecEnv.exe"
 If,%cb_RecEnv_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_RecEnv_StartMenuFolder%,%txt_RecEnv_ShortcutName%,"X:\Sources\Recovery\RecEnv.exe"
 If,%cb_RecEnv_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"X:\Sources\Recovery\RecEnv.exe"
 If,%cb_RecEnv_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"X:\Sources\Recovery\RecEnv.exe"
+
+If,%cb_LetterSwap_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_LetterSwap_ShortcutName%,"#$pWinDir#$p\System32\LetterSwap.exe","/auto /bootdrive Y: /Log LetterSwap.log"
+If,%cb_LetterSwap_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_LetterSwap_StartMenuFolder%,%txt_LetterSwap_ShortcutName%,"#$pWinDir#$p\System32\LetterSwap.exe","/auto /bootdrive Y: /Log LetterSwap.log"
 
 If,%cb_Custom01_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_Custom01_ShortcutName%,%txt_Custom01_Target%,%txt_Custom01_Param%,%txt_Custom01_StartIn%,%txt_Custom01_Icon%,%txt_Custom01_IconIdx%,%cmb_Custom01_Run%,%txt_Custom01_ShortcutKey%,%txt_Custom01_Comment%
 If,%cb_Custom01_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_Custom01_StartMenuFolder%,%txt_Custom01_ShortcutName%,%txt_Custom01_Target%,%txt_Custom01_Param%,%txt_Custom01_StartIn%,%txt_Custom01_Icon%,%txt_Custom01_IconIdx%,%cmb_Custom01_Run%,%txt_Custom01_ShortcutKey%,%txt_Custom01_Comment%
@@ -89,7 +92,7 @@ WriteInterface,Value,%ScriptFile%,Interface,txt_notepad_StartMenuFolder,"Product
 WriteInterface,Value,%ScriptFile%,Interface,txt_notepad_ShortcutName,"Notepad"
 
 WriteInterface,Value,%ScriptFile%,Interface,cb_regedit_DesktopShc,False
-WriteInterface,Value,%ScriptFile%,Interface,cb_regedit_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_regedit_StartMenuShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_regedit_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_regedit_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_regedit_StartMenuFolder,"Windows Administrative Tools"
@@ -102,10 +105,17 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_RecEnv_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_RecEnv_StartMenuFolder,"Windows Administrative Tools"
 WriteInterface,Value,%ScriptFile%,Interface,txt_RecEnv_ShortcutName,"System Recovery"
 
+WriteInterface,Value,%ScriptFile%,Interface,cb_LetterSwap_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_LetterSwap_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,txt_LetterSwap_StartMenuFolder,"System Tools"
+WriteInterface,Value,%ScriptFile%,Interface,txt_LetterSwap_ShortcutName,"Remount Boot Media as Y"
+
 WriteInterface,Value,%ScriptFile%,Interface,cb_Custom01_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_Custom01_StartMenuShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_Custom01_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_Custom01_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_Custom01_StartMenuFolder,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_Custom01_ShortcutName,""
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Custom01_Run,"Normal Window"
 WriteInterface,Value,%ScriptFile%,Interface,txt_Custom01_Target,""
 WriteInterface,Value,%ScriptFile%,Interface,txt_Custom01_Param,""
@@ -115,8 +125,6 @@ WriteInterface,Value,%ScriptFile%,Interface,txt_Custom01_Comment,""
 WriteInterface,Value,%ScriptFile%,Interface,txt_Custom01_Icon,""
 WriteInterface,Value,%ScriptFile%,Interface,txt_Custom01_IconIdx,""
 
-WriteInterface,Value,%ScriptFile%,Interface,txt_Custom02_StartMenuFolder,""
-WriteInterface,Value,%ScriptFile%,Interface,txt_Custom02_ShortcutName,""
 WriteInterface,Value,%ScriptFile%,Interface,cb_Custom02_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_Custom02_StartMenuShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_Custom02_PinToTaskbar,False
@@ -187,7 +195,7 @@ txt_notepad_ShortcutName="Shortcut Name:",1,0,12,203,119,21,Notepad
 
 bvl_regedit_Shortcuts=Regedit,1,12,145,50,133,184,8,Bold
 cb_regedit_DesktopShc=Desktop,1,3,152,64,122,18,False
-cb_regedit_StartMenuShc="Start Menu",1,3,152,83,122,18,True
+cb_regedit_StartMenuShc="Start Menu",1,3,152,83,122,18,False
 cb_regedit_PinToTaskbar="Pin to Taskbar",1,3,152,102,122,18,False
 cb_regedit_PinToStartMenu="Pin to Start Menu",1,3,152,121,122,18,False
 txt_regedit_StartMenuFolder="Start Menu Folder:",1,0,152,161,119,21,"Windows Administrative Tools"
@@ -201,13 +209,19 @@ cb_RecEnv_PinToStartMenu="Pin to Start Menu",1,3,292,121,122,18,False
 txt_RecEnv_StartMenuFolder="Start Menu Folder:",1,0,292,161,119,21,"Windows Administrative Tools"
 txt_RecEnv_ShortcutName="Shortcut Name:",1,0,292,203,119,21,"System Recovery"
 
+bvl_LetterSwap_Shortcuts="Remount CD/USB",1,12,425,50,133,184,8,Bold
+cb_LetterSwap_DesktopShc=Desktop,1,3,432,64,122,18,False
+cb_LetterSwap_StartMenuShc="Start Menu",1,3,432,83,122,18,True
+txt_LetterSwap_StartMenuFolder="Start Menu Folder:",1,0,432,161,119,21,"System Tools"
+txt_LetterSwap_ShortcutName="Shortcut Name:",1,0,432,203,119,21,"Remount Boot Media as Y"
+
 bvl_Custom01_Shortcuts="Custom Shortcut #1",1,12,5,251,413,221,8,Bold
 cb_Custom01_DesktopShc=Desktop,1,3,12,264,122,18,False
 cb_Custom01_StartMenuShc="Start Menu",1,3,12,283,122,18,False
 cb_Custom01_PinToTaskbar="Pin to Taskbar",1,3,12,302,122,18,False
 cb_Custom01_PinToStartMenu="Pin to Start Menu",1,3,12,321,122,18,False
 txt_Custom01_StartMenuFolder="Start Menu Folder:",1,0,12,361,119,21,
-txt_Custom01_ShortcutName="Shortcut Name:",1,0,12,403,119,21,"Test Explr"
+txt_Custom01_ShortcutName="Shortcut Name:",1,0,12,403,119,21,
 lbl_Custom01_Run=Run:,1,1,12,430,47,16,8,Normal
 cmb_Custom01_Run="Normal Window",1,4,12,443,119,21,"Normal Window",Minimized,Maximized
 txt_Custom01_Target=Target:,1,0,170,279,240,21,

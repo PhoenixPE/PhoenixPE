@@ -17,9 +17,15 @@ Notable changes to the PhoenixPE project.
 - Nirsoft's WinMailPassRec - A tool for recovering passwords from Win10/Win11 WinMail.
 - Nirsoft's ShadowCopyView - Restore files from Volume Shadow Copy snapshots.
 - GetBinaryResource command added to PhoenixAPI - Allows extracting of binary resources from exe, dll, etc.
+- Zulu JRE 17
+- Options in MMC script for Certificate Management shortcuts
+- Added "Remount Boot Media as Y:" to PECMD SysTray menu.
+- Added an option in Misc Shortcuts script to Remount CD/USB as Y (some partition utilities have been known to unmount Y:)
 
 ### Changed
-- PCI-Z script now has the option to download the latest pci.ids database from the PCI ID Repository. This vastly improves identification as the database that ships with PCI-Z 2.0.0 is from 2017.
+- Zulu JRE11 updated to v11.62.17
+- Additional Files script defaults to no selected directories. Clicking the browse button creates a default structure in Workbench, but boot.wim and CD/USB now have their own folders. Previously the same directories were defaulted for both CD/USB and boot.wim.
+- PCI-Z script now has the option to download the latest pci.ids database directly from the PCI ID Repository. This vastly improves identification as the database that ships with PCI-Z 2.0.0 is from 2017.
 - Apps that dynamically download the latest version now log the program version during build.
 - PinUtil (1.4.1.1-Homes32) updated to support pinning to StartAllBack.
 - KeyboardTestUtility updated to v2.0.0
@@ -28,13 +34,18 @@ Notable changes to the PhoenixPE project.
 - Open-Shell updated to v4.4.186
   * rewrote the extraction routines to make future updates easier.
   * added Win11 start button option.
-- Fab's Auto Backup extraction routines were re-written because author of AutoBackup7 switched to distributing the program in an InnoSetup installer instead of a self-extracting 7z archive.  
+- [**Script Breaking Change**] Fab's Auto Backup extraction routines were re-written because author of AutoBackup7 switched to distributing the program in an InnoSetup installer instead of a self-extracting 7z archive.  
   * Support extracting the official InnoSetup installer.
-  * Added support for extracting Autobackup files from a .7z/.rar/.zip archive.
+  * Added support for extracting Autobackup files from a .7z/.rar/.zip archive.  
   
-  **Script Breaking Change:** Due to the changes the previous self extracting archives can no longer be used. Users must either provide the new InnoSetup package or construct an archive containing their AutoBackup7 program files.
+  **Note:** Due to the changes the previous self extracting archives can no longer be used. Users must either provide the new InnoSetup package or construct an archive containing their AutoBackup7 program files.
 - Improved handling of unsupported keyboard ID's in Localization script. Previously when one or more of the keyboard inputs were set to use HostOS and the language/keyboard pair contained a GUID it would cause DISM to fail with error code 87.
-  
+- Set the My Computer > Properties context menu to open the classic System Properties dialog instead of failing to open the Settings App.
+- AddShortcut will now detect and remove invalid characters from shortcut names and folders.
+- Performance optimizations in CreateISO and OEMInfo scripts
+- LetterSwap.exe (Mount CD/USB as Y:) updated to v2019.2.10.1
+- Additional audio dll for extended application support.
+
 ### Fixed
 - Fixed an issue preventing network services from being installed if no NIC's were present.
 - Fixed an issue with the Media Transfer Profile script that caused the mtp_helper.sys driver to be extracted to the wrong folder.
@@ -42,8 +53,11 @@ Notable changes to the PhoenixPE project.
 - Fixed a bug in InnoRename that caused renamed files to be moved to the base path instead of the correct sub-folder when the NOREC parameter was not used.
 - Fixed a bug in Driver Integration where the start menu shortcut would not be created.
 - Fixed encoding on WinContig.ini that caused the config to be discarded in newer WinContig versions (5.0.0+).
+- Fixed a bug that prevented Mouse ClickLock from being enabled/disabled
+- Fixed a bug in Zulu JRE 11 that prevented the JRE from being added to the system PATH
 
 ### Removed
+- Removed depreciated Techbench ISO download link in Config Source. Replaced with alternative ISO download source.
 
 ## Release 2022-12-25
 
