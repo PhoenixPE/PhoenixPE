@@ -1037,6 +1037,16 @@ GetParam,9,%WindowState%
 GetParam,10,%Hotkey%
 GetParam,11,%Tooltip%
 
+// Space delimited list of illegal file name characters
+Set,%IllegalFileNameChars%,"\ / : * ? #$q < > |"
+// Strip illegal chars from Title
+ForEach,%Char%,%IllegalFileNameChars%,Delim=#$s,StrFormat,Replace,%Title%,%Char%,"",%Title%
+
+// Space delimited list of illegal directory name characters (\ is allowed here as we use it to signify a subdir)
+Set,%IllegalDirNameChars%,"/ : * ? #$q < > |"
+// Strip illegal chars from Folder
+ForEach,%Char%,%IllegalDirNameChars%,Delim=#$s,StrFormat,Replace,%Folder%,%Char%,"",%Folder%
+
 If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
 
   If,%Folder%,Equal,".",Set,%Folder%,""
@@ -1072,7 +1082,6 @@ If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
   
   // Final LINK command
   TXTReplace,"%TargetSystem32%\pecmd.ini","_END Shortcuts","%Cmd%#$x#$x_END Shortcuts"
-
 End
 Else,Begin
   // Shortcuts.exe
