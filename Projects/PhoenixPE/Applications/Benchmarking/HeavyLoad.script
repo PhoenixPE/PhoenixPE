@@ -30,19 +30,18 @@
 
 [Main]
 Title=HeavyLoad
-Description=HeavyLoad puts your workstation or server PC under a heavy load and lets you test whether they will still run reliably. TreeSizeFree quickly scans directories and generates a visual representation of your disk space.
+Description=(x64 Only) HeavyLoad puts your workstation or server PC under a heavy load and lets you test whether they will still run reliably. TreeSizeFree quickly scans directories and generates a visual representation of your disk space.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2023-01-30
 
 [Variables]
 %ProgramFolder%="HeavyLoad"
 %ProgramExe%="HeavyLoad.exe"
 %ConfigFile%="prime.txt"
-%DownloadURLx86%=https://downloads.jam-software.de/heavyload/HeavyLoad-x86.zip
 %DownloadURLx64%=https://downloads.jam-software.de/heavyload/HeavyLoad-x64.zip
 %SetupFilex86%="HeavyLoad-x86.zip"
 %SetupFilex64%="HeavyLoad-x64.zip"
@@ -142,10 +141,7 @@ If,%SourceArch%,Equal,x64,Begin
   Set,%DownloadURL%,%DownloadURLx64%
   Set,%SetupFile%,%SetupFilex64%
 End  
-Else,Begin
-  Set,%DownloadURL%,%DownloadURLx86%
-  Set,%SetupFile%,%SetupFilex86%
-End
+Else,Halt,"ERROR: HeavyLoad requires a x64 version of Windows."
 
 [#LaunchProgram_HeavyLoad#]
 // ===============================================================================================================================
@@ -270,7 +266,7 @@ Message,"HeavyLoad puts your workstation or server PC under a heavy load and let
 btn_LaunchProgram_HeavyLoad="Launch HeavyLoad",1,8,5,5,132,25,LaunchProgram_HeavyLoad,play-hot.png,False
 btn_LaunchProgram_TreeSizeFree="Launch TreeSizeFree",1,8,145,5,132,25,LaunchProgram_TreeSizeFree,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://downloads.jam-software.de
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.jam-software.com
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
