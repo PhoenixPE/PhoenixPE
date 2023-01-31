@@ -332,8 +332,9 @@ Set,%imgTemp%,Nil
 // Related........: btn_DownloadWithFido
 // ===============================================================================================================================
 [DownloadWithFido]
+Echo,"Launching Fido..."
 Set,%FidoURL%,"https://github.com/pbatard/Fido/releases/latest/download/Fido.ps1.lzma"
-If,QUESTION,"This will download and run the open source Fido powershell script and allow you to choose which ISO images to download from Microsoft's servers.#$x#$xFor more info please visit [https://github.com/pbatard/Fido].#$x#$xAre you ready to continue?",Begin
+If,QUESTION,"You are about to download and run the open source Fido powershell script, which will allow you to choose which Windows ISO image to download from Microsoft's servers.#$x#$xFor more info please visit [https://github.com/pbatard/Fido].#$x#$xAre you ready to continue?",Begin
   WebGet,%FidoURL%,"%ProjectTemp%\Fido.ps1.lzma"
   7z,"x -y #$q%ProjectTemp%\Fido.ps1.lzma#$q -o#$q%ProjectTemp%#$q"
   ShellExecuteEx,Open,"powershell.exe","-noexit –ExecutionPolicy Bypass & #$q%ProjectTemp%\Fido.ps1#$q"
@@ -435,6 +436,8 @@ Else,Begin
   WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
 End
 
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_TechBench,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,web_TechBench,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_BaseWim,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cmb_BaseWim,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,bvl_DestCfg,%Toggle%
@@ -473,10 +476,10 @@ Message,"Configure the source directory and Wim images used for building the pro
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_GetISOFido="Download Source ISO",1,8,5,5,140,25,DownloadWithFido,VistalcoDownload_16.png,False,"__Download ISO Images with FIDO"
+btn_GetISOFido="Download Source ISO",1,8,5,5,140,25,DownloadWithFido,VistalcoDownload_16.png,False,"__Download Official Windows ISO Images with FIDO"
 btn_ExtractISO="Extract Source ISO",1,8,151,5,140,25,ExtractISO,Images_Iso_16.png,False,"__Extract a downloaded ISO file to use as source."
-bvl_Homepage=bvl_Homepage,1,12,380,5,121,25
-web_TechBench="Techbench ISO Images",1,10,387,9,113,18,https://tb.rg-adguard.net/public.php
+bvl_TechBench=bvl_Homepage,0,12,357,5,144,25
+web_TechBench="More Windows ISO Images",0,10,365,9,135,18,https://files.rg-adguard.net/
 btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,False,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
