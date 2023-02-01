@@ -32,9 +32,9 @@
 Title=PotPlayer
 Author=Homes32
 Level=5
-Version=1.0.0.0
+Version=1.1.0.0
 Description=PotPlayer is a freeware multimedia player known for it's wide range of settings and customizations, as well as its lightweight nature and its support for a large variety of media formats.
-Date=2020-09-17
+Date=2023-01-31
 Selected=False
 Mandatory=False
 
@@ -64,6 +64,32 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,
 Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
 
 Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+RequireFileEx,AppendList,\Windows\System32\devenum.dll
+RequireFileEx,AppendList,\Windows\System32\evr.dll
+RequireFileEx,AppendList,\Windows\System32\l3codeca.acm
+RequireFileEx,AppendList,\Windows\System32\l3codecp.acm
+RequireFileEx,AppendList,\Windows\System32\mfplat.dll
+RequireFileEx,AppendList,\Windows\System32\MP3DMOD.DLL
+RequireFileEx,AppendList,\Windows\System32\MP43DECD.DLL
+RequireFileEx,AppendList,\Windows\System32\MP4SDECD.DLL
+RequireFileEx,AppendList,\Windows\System32\Mpeg2Data.ax
+RequireFileEx,AppendList,\Windows\System32\mpg2splt.ax
+RequireFileEx,AppendList,\Windows\System32\MPG4DECD.DLL
+RequireFileEx,AppendList,\Windows\System32\msmpeg2adec.dll
+RequireFileEx,AppendList,\Windows\System32\msmpeg2vdec.dll
+RequireFileEx,AppendList,\Windows\System32\qasf.dll
+RequireFileEx,AppendList,\Windows\System32\unregmp2.exe
+RequireFileEx,AppendList,\Windows\System32\wmdrmsdk.dll
+RequireFileEx,AppendList,\Windows\System32\wmploc.DLL
+RequireFileEx,AppendList,\Windows\System32\WMSPDMOD.DLL
+RequireFileEx,AppendList,\Windows\System32\WMVCORE.DLL
+RequireFileEx,AppendList,\Windows\System32\WMVDECOD.DLL
+RequireFileEx,AppendList,\Windows\System32\wmvdspa.dll
+RequireFileEx,AppendList,\Windows\System32\WMVSDECD.DLL
+
+// Extract
+RequireFileEx,ExtractList
 
 // Write the .exe version to the log to aid in debugging
 If,%SourceArch%,Equal,"x86",FileVersion,"%TargetPrograms%\%ProgramFolder%\PotPlayer.dll",%ProgramVer%

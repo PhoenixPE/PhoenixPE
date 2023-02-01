@@ -2,6 +2,18 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release UNRELEASED
+
+### Added
+
+### Changed
+
+### Fixed
+
+- Fixed dependencies for newer versions of PotPlayer
+
+### Removed
+
 ## Release 2023-01-30
 
 ### Added
@@ -66,9 +78,10 @@ Notable changes to the PhoenixPE project.
 - Fixed encoding on WinContig.ini that caused the config to be discarded in newer WinContig versions (5.0.0+).
 - Fixed a bug that prevented Mouse ClickLock from being enabled/disabled
 - Fixed a bug in Zulu JRE 11 that prevented the JRE from being added to the system PATH
+- Fixed an intermittent issue with the transparent icon overlay that caused black icon on explorer refresh. 
 
 ### Removed
-- Removed depreciated Techbench ISO download link in Config Source. Replaced with alternative ISO download source.
+- Removed depreciated Techbench ISO download link in Config Source. Replaced with alternative ISO download link (https://files.rg-adguard.net/). Best practice remains to use the Download Source ISO button to use Fido, and use  rg-adguard as a backup.
 
 ## Release 2022-12-25
 
