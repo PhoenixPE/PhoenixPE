@@ -1,0 +1,551 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=Total Commander
+Description=(v10.52) Total Commander is a file manager for Windows.
+Author=Homes32
+Level=5
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2023-01-10
+
+[Variables]
+%ProgramFolder%="Total Commander"
+%ProgramExex86%="TOTALCMD.EXE"
+%ProgramExex64%="TOTALCMD64.EXE"
+%ProgramVersion%=1052
+%DownloadURLx86%=https://totalcommander.ch/win/tcmd%ProgramVersion%x32.exe
+%DownloadURLx64%=https://totalcommander.ch/win/tcmd%ProgramVersion%x64.exe
+%SetupFile%="tcmd_%SourceArch%.exe"
+%ConfigFile%="wincmd.ini"
+%LangMap%=Chinese (Simplified)|CHN|Czech|CZ|Dutch|DUT|English||French|FRA|German|DEU|Hungarian|HUN|Italian|ITA|Korean|KOR|Norwegian|NOR|Polish|POL|Romanian|ROM|Russian|RUS|Slovak|SK|Slovenian|SVN|Spanish|ESP|Swedish|SWE
+%TreeViewMap%=None|0|One for both panels|1|One for each panel|2
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+Run,%ScriptFile%,SetProgramArch
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
+
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+Run,%ScriptFile%,ConfigSettings
+
+// Autorun
+If,%cb_AutoRun%,Equal,True,AddAutorun,PostShell,NoWait,"Starting %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+
+
+[#ConfigSettings#]
+// ===============================================================================================================================
+// Name...........: ConfigSettings
+// Description....: Configure default and user defined program settings.
+// Syntax.........: Run,%ScriptFile%,ConfigSettings
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ConfigSettings]
+Echo,"Configuring %ScriptTitle%..."
+
+RegLoadHives
+// Add the program dir to the System PATH so we can launch from anywhere
+RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
+StrFormat,Replace,%PathVar%,"%PEPrograms%\%ProgramFolder%;","",%PathVar%
+Set,%PathVar%,"%PEPrograms%\%ProgramFolder%;%PathVar%"
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
+RegUnloadHives
+
+// Total Commander requires the config file to be ANSI or UTF16-LE
+FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%",Encoding=UTF16LE
+
+// Use config in ProgramDir
+IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","UseIniInProgramDir",7
+
+// Language
+List,Pos,%LangMap%,%cmb_Language%,%LangPos%
+Math,Add,%Pos%,%LangPos%,1
+List,Get,%LangMap%,%Pos%,%Lang%
+If,%Lang%,Equal,"",Begin
+  IniDelete,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","LanguageIni"
+  IniDelete,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","Mainmenu"
+End
+Else,Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","LanguageIni","WCMD_%Lang%.LNG"
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","Mainmenu","WCMD_%Lang%.MNU"
+End
+
+// Icon Theme
+If,%cmb_IconTheme%,Equal,"1 - Classic",IniDelete,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Buttonbar","DefaultLib"
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Buttonbar","DefaultLib","wcmicon2"
+
+// View Mode
+If,%cmb_ViewMode%,Equal,"Brief",Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","ShowAllDetails",0
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","SpecialView",0
+End
+Else,If,%cmb_ViewMode%,Equal,"Full",Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","ShowAllDetails",1
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","SpecialView",0
+End
+Else,If,%cmb_ViewMode%,Equal,"Comments",Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","ShowAllDetails",1
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","SpecialView",1
+End
+Else,If,%cmb_ViewMode%,Equal,"Tree",Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","ShowAllDetails",2
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","SpecialView",0
+End
+Else,If,%cmb_ViewMode%,Equal,"Thumbnails",Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","ShowAllDetails",1
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","SpecialView",2
+End
+Else,Halt,"INTERNAL LOGIC ERROR: [%cmb_ViewMode%] is not a valid view mode."
+
+// Separate Tree View
+List,Pos,%TreeViewMap%,%cmb_TreeMode%,%TreeViewPos%
+Math,Add,%Pos%,%TreeViewPos%,1
+List,Get,%TreeViewMap%,%Pos%,%TreeViewMode%
+IniWrite,%TargetPrograms%\%ProgramFolder%\%ConfigFile%,"Configuration","SeparateTree",%TreeViewMode%
+
+// Dark Mode
+If,%cb_DarkMode%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","DarkMode",2
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","DarkMode",0
+
+// Show Hidden Files (0 - None, 1 - Hidden+System, 2 - Hidden, 3 - System)
+If,%cb_ShowHiddenFiles%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","ShowHiddenSystem",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","ShowHiddenSystem",0
+
+// Vertical Panels
+If,%cb_PanelsVertical%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","PanelsVertical",0
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","PanelsVertical",1
+
+// Single Click Open
+If,%cb_SingleClickOpen%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","SingleClickStart",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","SingleClickStart",0
+
+// Button Bar
+If,%cb_ShowButtonBar%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","ButtonBar",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","ButtonBar",0
+
+// Vertical Button Bar
+If,%cb_ShowVerticalButtonBar%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","ButtonBarVertical",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","ButtonBarVertical",0
+
+// Drive Buttons
+If,%cb_ShowDriveButtons%,Equal,True,Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","DriveBar1",1
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","DriveBar2",1
+End  
+Else,Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","DriveBar1",0
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","DriveBar2",0
+End 
+
+// Drive Combo
+If,%cb_ShowDriveCmb%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","DriveCombo",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","DriveCombo",0
+
+// Status Bar
+If,%cb_ShowStatusBar%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","StatusBar",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","StatusBar",0
+
+// Cmd Line
+If,%cb_ShowCmdLine%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","CmdLine",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","CmdLine",0
+
+// Breadcrumbs
+If,%cb_ShowBreadcrumbs%,Equal,True,Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","CurDir",1
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","BreadCrumbBar",1
+End  
+Else,Begin
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","CurDir",0
+  IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","BreadCrumbBar",0
+End 
+
+// Tabstop Header
+If,%cb_ShowTabstop%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","TabHeader",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","TabHeader",0
+
+// Func Buttons
+If,%cb_ShowFuncKeyButtons%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","KeyButtons",1
+Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Layout","KeyButtons",0
+
+// Default Dirs
+IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","left","path","C:\"
+IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","right","path","X:\"
+
+// Misc. Defaults
+IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","FirstTime",0
+IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Configuration","FirstTimeIconLib",0
+
+// License Key
+If,Not,%fb_LicenseKey%,Equal,"",If,ExistFile,%fb_LicenseKey%,FileCopy,"%fb_LicenseKey%","%TargetPrograms%\%ProgramFolder%"
+
+// Additional Files - Keep this after any config changes so if the users wants to provide their own .ini config we don't overwrite it.
+If,Not,%fb_IncludeDir%,Equal,"",If,ExistDir,%fb_IncludeDir%,Begin
+  Echo,"Processing additional include files..."
+  FileCopy,"%fb_IncludeDir%\*.*","%TargetPrograms%\%ProgramFolder%"
+End
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
+// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting files..."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q INSTALL.CAB -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+
+Decompress,"%ProjectTemp%\%ProgramFolder%\INSTALL.CAB",#1
+
+FileDeleteEx,"#1\TCUNIN64.EXE"
+FileDeleteEx,"#1\TCUNINST.EXE"
+FileDeleteEx,"#1\TCUNIN64.WUL"
+FileDeleteEx,"#1\TCUNINST.WUL"
+FileDeleteEx,"#1\WCUNINST.WUL"
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+Run,%ScriptFile%,SetProgramArch
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","Referer=https://www.ghisler.com/",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#SetProgramArch#]
+// ===============================================================================================================================
+// Name...........: SetProgramArch
+// Description....: Configure the script for the correct source architecture.
+// Syntax.........: Run,%ScriptFile%,SetProgramArch
+// Parameters.....: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
+//                  %ProgramExe%     - The x86 or x64 program exe.
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[SetProgramArch]
+If,%SourceArch%,Equal,x64,Begin
+  Set,%DownloadURL%,%DownloadURLx64%
+  Set,%ProgramExe%,%ProgramExex64%
+End  
+Else,Begin
+  Set,%DownloadURL%,%DownloadURLx86%
+  Set,%ProgramExe%,%ProgramExex86%
+End
+
+[#LaunchProgram#]
+// ===============================================================================================================================
+// Name...........: LaunchProgram
+// Description....: Unpack and launch the program.
+// Syntax.........: Run,%ScriptFile%,LaunchProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_LaunchProgram
+// ===============================================================================================================================
+[LaunchProgram]
+Run,%ScriptFile%,SetProgramArch
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+
+[#BrowseIncludeDir#]
+// ===============================================================================================================================
+// Name...........: BrowseIncludeDir
+// Description....: Explore the specified additional files and plugins folder.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_BrowseIncludeDir
+// ===============================================================================================================================
+[BrowseIncludeDir]
+If,ExistDir,%fb_IncludeDir%,ShellExecuteEx,Explore,%fb_IncludeDir%
+Else,Message,"The specified directory does not exist.",ERROR
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Called by btn_SetDefaultOptions
+// Related........: 
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,True
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Managers"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Total Commander"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_IconTheme,"1 - Classic"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_ViewMode,"Full"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TreeMode,"None"
+WriteInterface,Value,%ScriptFile%,Interface,cb_AutoRun,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DarkMode,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PanelsVertical,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_SingleClickOpen,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHiddenFiles,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowButtonBar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowVerticalButtonBar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowDriveButtons,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowDriveCmb,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowStatusBar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowCmdLine,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowBreadcrumbs,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowTabstop,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowFuncKeyButtons,False
+WriteInterface,Value,%ScriptFile%,Interface,fb_LicenseKey,""
+WriteInterface,Value,%ScriptFile%,Interface,fb_IncludeDir,""
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options in the script interface.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%state%
+If,%state%,Equal,False,Begin
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Begin
+	Set,%Toggle%,True
+    WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_Exit_16.png
+	WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Hide Advanced Options"
+  End
+  Else,Set,%Toggle%,False
+End
+Else,Begin
+  Set,%Toggle%,False
+  WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_16.png
+  WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
+End
+
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,lbl_IncludeDir,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,fb_IncludeDir,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,btn_BrowseIncludeDir,%Toggle%
+System,EndLocal
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"Total Commander is an alternative file manager for Windows.#$x#$xOn first run this script will download the setup file (~7 MB) and cache it for future builds.#$x#$xTotal Commander is shareware developed by Ghisler Software GmbH."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_LaunchProgram="Launch TCMD",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.ghisler.com/
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,True,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,True
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,True
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,True
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"File Managers"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Total Commander"
+bvl_Options=Options,1,12,150,90,477,184,8,Bold
+lbl_Language=Language,1,1,159,105,140,16,8,Normal
+cmb_Language=English,1,4,160,118,140,21,"Chinese (Simplified)",Czech,Dutch,English,French,German,Hungarian,Italian,Korean,Norwegian,Polish,Romanian,Russian,Slovak,Slovenian,Spanish,Swedish,"__Select the default language.#$xAdditional translations are available for downlond on the product hompage."
+lbl_IconTheme="Icon Theme",1,1,159,147,140,16,8,Normal
+cmb_IconTheme="1 - Classic",1,4,160,160,140,21,"1 - Classic","2 - New"
+lbl_ViewMode="View Mode",1,1,159,189,140,16,8,Normal
+cmb_ViewMode=Full,1,4,160,202,140,21,Brief,Full,Comments,Tree,Thumbnails
+lbl_TreeMode="Tree Mode",1,1,159,231,140,16,8,Normal
+cmb_TreeMode=None,1,4,160,244,140,21,None,"One for both panels","One for each panel"
+cb_AutoRun="Run on startup",1,3,315,104,142,18,False
+cb_DarkMode="Dark Mode",1,3,315,120,142,18,False
+cb_PanelsVertical="Vertical Panels",1,3,315,137,142,16,True,"__Enabled - Vertical Panels#$xDisabled - Horizontal Panels"
+cb_SingleClickOpen="Single Click Open",1,3,475,104,142,18,False,"__Single click to open file/directory"
+cb_ShowHiddenFiles="Show Hidden Files",1,3,475,120,142,18,True
+cb_ShowButtonBar="Show Button Bar",1,3,315,167,142,18,True
+cb_ShowVerticalButtonBar="Show Vertical Button Bar",1,3,315,183,142,18,True
+cb_ShowDriveButtons="Show Drive Buttons",1,3,315,199,142,18,False
+cb_ShowDriveCmb="Show Drive Combobox",1,3,315,215,142,18,True
+cb_ShowStatusBar="Show Status Bar",1,3,315,231,142,18,True
+cb_ShowCmdLine="Show Command Line",1,3,315,247,142,18,False
+cb_ShowBreadcrumbs="Show Breadcrumbs",1,3,475,169,142,16,True
+cb_ShowTabstop="Show Tabstop Header",1,3,475,184,142,18,True
+cb_ShowFuncKeyButtons="Show Function Buttons",1,3,475,201,142,18,False
+bvl_ProductReg="Product Registration",1,12,5,290,622,74,8,Bold
+lbl_Shareware="Total Commander is not freeware. You may use the fully functional shareware version for 30 days, after which you must purchase a license key in order to continue using the software.",1,1,15,305,597,32,8,Normal
+lbl_ProductKey="License Key:",1,1,15,340,68,16,8,Normal
+fb_LicenseKey=,1,13,85,335,530,20,file,"Title=Select your Total Commander license key","Filter=License Key|wincmd.key|All Files|*.*","__Select your license key file (WINCMD.KEY).#$xThis file is typically located in the directory where Total Commander is installed (eg. C:\Program Files\Total Commander)."
+bvl_AdvancedOptions="Advanced Options",0,12,5,380,622,60,8,Bold
+lbl_IncludeDir="Include these files/addons",0,1,15,398,200,16,8,Normal
+fb_IncludeDir=,0,13,15,411,575,20,dir,"__Files and folders in this directory will be copied to the program folder.#$x#$xYou can use this option to include your license key, custom config, toolbars, languages, viewers, tools, and plugins.#$xIf you include a customized wincmd.ini it will override all setting configured by the script interface."
+btn_BrowseIncludeDir=,0,8,595,411,20,20,BrowseIncludeDir,OpenFolder_16.png,True,__Browse
+
+[InterfaceEncoded]
+play-hot.png=841,1220
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+OpenFolder_16.png=2299,3168
+Advanced_Exit_16.png=705,1048
+
+[AuthorEncoded]
+total_commander_80.png=8294,11168
+Logo=total_commander_80.png
+
+[EncodedFile-InterfaceEncoded-OpenFolder_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAF+mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTA1LTE3VDIxOjQ1OjAzLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMC0yMFQxOTo0Nzo1OS0wNTowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpiMmUxM2M3YS01ODljLWQ0NDItOTQ3MC1lZTI4MGIwNDcyM2IiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0ZmIxZDNiYS00OWNhLTI4NDUtYjQ3My1hMjZjZWRlYWZhMDQiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjRmYjFkM2JhLTQ5Y2EtMjg0NS1iNDczLWEyNmNlZGVhZmEwNCIgc3RFdnQ6d2hlbj0iMjAxOS0wNS0xN1QyMTo0NTowMy0wNTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NzU1MTFmMS0zMGU2LWY1NDMtYjI4YS05NWIxZmU4OTQ5ZDAiIHN0RXZ0OndoZW49IjIwMTktMTAtMjBUMTk6NDc6NTktMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz63gCC6AAACp0lEQVQ4EX3BS2hcVRzA4d//nHMfc28mk45NGo1JpwpFquBKKmh3KggWC6WCbroQVy5EunBTwb0Vl8WKCwUrlEoXPlAkhlqKYqVYFW1jk0jbiXnM3NxJJjP3zn0cKYKL0vH75O33TnMnLQ6hrvLuwmtcbV+jPhLsnaxlvwZ+YbWU3s22fzROnI92VQcX9TMHD3OnkpxQV5mp7GUp+Z2V/vr2+nb5TdQ1HxZ55Y/xID3pKvukq8on5MSpT0jTgVOUpS/8ywJWysFUdSbNyoSL7a/pZB2+jz6j1YuZqHDmoYAj7Uxhsjx/1XWd47XACQUoLSiBbn/QX2wtvFOr1E4eqB1ip3sv6aC3+9utT88FuQnnO/ktpUuRE6dO2xcPPYvxQpIClAKloEgTZufO047iLd/30GJwlFPdSCOk9Ho/RLMvnG2+/52pBe5gYnzM/XwRogSqI5AZaNQdjh55jjilKhqsBS0wauDyz1GQz003xho7vjBJmqUFuI/vgnj9L7T2uE024IZ2sKLBWm7LShitQ9ydp9P++L6XpxYw/ugMq9cvsDR3DMRHtA9YyhIKQAn/sRaWlVDk8PTU6rE0jx82uVVcnX2TB3Y/wsyBtyi3lgBhmMKCF4Qoi3f+7OvPm6h5hWm1yYP7X0GcNbALoCsMVfQheJRB16G/+fefpt/6haDhIyP3wPpXkLRBudydQLYBO/fRal5ja+PGj0b15hmfmAa2yVcugPZBNHdlLeQxBododZ40GfxkArtMfWI/JE3SzeuIN8lQZYo2FUymiJavgHDJ7Kh0pX7/YxBOEjYOg6kxVNGD+j6QGq1blxKl1GUz5nZGSvHJsnFk7CD/z0JlDyu/nSFeay76YaVvunby3JcfvPSUFRcrBqxlKBGwQtZf23Q89w0Q/gH+aSDn8z1ZagAAAABJRU5ErkJggnicE/QvSM1zy89JSS2KNzTTK8hLZxgFIwj85sAvf+m11BRGBgBbPwmoRWA0QwEAAAACAAAAKQAAAPsIAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-total_commander_80.png]
+lines=2
+0=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
+1=138dDuXv7pr0/y4L9dh1LODAYHBgaQmeUYZUCaG7mtSa8RYDQgDHGo0ZUQMWVpBoGUMVKFGCM8YGyhALzB/Zo6eJLEBdeAVDkHb7jK8JE+OrYJsu97ALvjs6TX7aN69SQvnT7Bvu+8QhOwdHGBezc9yMatD7Jp81Y2btzIsmXLZlxYa41jW/zNH/8QL/3kg3zw/TOPuf7265x96wKtH3mCkdeuYqTEqGkKpiTGCLQ2aJKoQQd6xlyJmYrBiBCo3gqUeRVUgSHQCOljhJwCHg0pNAJUPkX1epn+g1dovd+laWU3LR/8GIXoaTqLAwRD71K99halK6/z94de5tlvfBsHWN5V4J4Nm3jgoW1sffAhHnjgAbq7uxtS2NnWxA8+tnpW5v735/+A86NVNvesYCi82LB5N5AUaGHQtUzJIOox/w1kbpKuzkbzKiaA8AQmMbB18KRoMGekAGEIpI3XksWf8AheuErmwjjp9iyptiZS3S1k1j5C89bHWWxCVo0PEAxdxr16jrG3T/DNoyf52388iAS6mxQbtryfLQ9vZ/P7P8CWrVvp6emZwdif/dEX+NXPfZ4Nn/4S2vUIvRDhqISfGwAkcTLGoE1SCTLciHOiwiFCxoAoAeWFArAWSCfV3km1FTXPKFBoRq0CkVR0x6OM5XMMqy4YDWHQo0lNkG0aIFVwSLenSXfmyHS10rR6K4WtO+nSAVFpFL//Eu6lN5m4eJbDZ17im4d/E4DujM36++5l6/Yd3LV2HYHr8a1nv8LfHXyB3h/5aXp2fYQr3z6OXwpxcs7MgpGSaBJ/kYA3W3AvEDJOhMQsLICSxDwDU8ODBDwhYNAusDwa5YuX/4SN3mXesdt5NbuKV7K9nGhaztnMEoZEHsYUDFax3uinkLlOU4uD095EpjtHZnELmVX3U9jyKEtswZqxIbxr71K9fI7xN0/w8umX2fe53wWd2K50vsD9P/VrdH/0x3HHhxg6MzDpgesA1nGSIlFPnahxPCWuuBHpmk0SJgXM9FZ3CGAJxITAJLmwSFQ2uZYglIpIWfzW1b9ie+UcABviq2zwrvIfR76DRnAu3c3R3EpezfVyPLeSM5mljNiLGClKGPaQb/aTT18j25Ii05kh05Ujt6yNzPJ1dG99mCXqGd5XHMW9fIFgeBChLFI9a8isvAvcUS7941uMvzNBqjmVqGoNQFEPvpTAUCvi6sZvMI0EUkUIEWOMKCbrXhgAA6CcFBOixMtN8cAVK8Vd4RC7Km80Tqj/uIn7NqzzrrPOu86/H/4nAK46Lbyav4tXm3s5llvF6dwy+p12JsoOjIXwWj/Z9HWaCxaZzizZpXmyPa1kV60lt/H9YDRxpUTl4kX6XrhK/6vXsPIOxpY3tBHq74wSGGES9TVQC6WZqusGgVARQmqMURPMEUjPvx5Y816JgZ60gUYKhBbIWpplbjzlhvd1p90TjNMzcpwfGkmaXwN2jhP5lbxcWM3x5rs4mV/J5XQHFT8D5wN4a4iU1Udh0TmaOjIoxyL2I8p9JdwRFzvvoKwkTUNMM4BQU+FJGzirAGIwRmKMBEyKBQykobZwg2wAV/fGQgi0gJtV/6aCqKd9Xp+mKyyzZ/Qse0bPAjChHE7kV3Cs0MurLas51byS85nFDLpZuGggquKEZbKOId2WqYUm3Dy/UhKNqIFnbqLCEqVCpIzRsbXgEhgaBEJESaQvZUOclA6pZJsZvf9BCmcP17tEM2y0meU1rg0zZThAIQ7YMX6eHePn4RIUpeJMrodjras50dLL8Za7ON29jhDDIncYI2s5cr1YVJfCmjobWZt/mg2cHsYIGYOMMbG9oDYQYBQjkTJAqCipPNdTpmoVnc5hnt8HuQriuW9jjhyBQ4fg7FlMFN0A3FSaDiokW6ymOkkJ5HXMI8VLPFK8BJf2EQH7W3v5ya2f4ELLXbRV+omFmiXhrH3QCGNqceAsgYygVq4zAgGOWUAv3CCDoNb8qA2BlhJ0jHBdWFSAvXsRe/cmrPf1YY4cwbzwAhw+jDl9Gl2XihvmvRHMqX+HtaGZtKMZ4ENjF9h34JM88vhn6MstptUbS1LM2agmgXpKHDj9SFP3wlJjjCgzRxw43136ssH+FOeha2mTkJOJyQ20dCni6aeRv/d7qJMnUdevY/3VXyE//nHkxo1gWYlkkABUB6k+9LTXutoXgX5gRVjm06/9X7AsYmUlpmW2oWQjjDEYjJ5NI+phjIZEfW+5iXO+Eljz+qZW2ZAYYaaUzxMjPReJri7E3r3IvXuTSfv60EeOEL/wAvrwYaKahE53NrMNSLL9XdeOsmb8Xc4XltISlCbFtH7ylFxda42pSeFsNsWY2+8kzhfAYYNCCQ8hI7SQSXVagpVrohJGjDzzE6zatgyz4wcQW7bALXYl1EksXYp6+mnU008nCxgYID58mOjIEcJDh4jOniWOooYENhZKIpVloDms0u0Nc769F8LyTN0yySaoWvua2CSZyEz8DFKG1NC/ZSUG7sAL169Yz3bqjRthKWIpCQ8ehm9fJeY3oKUF8cEPIh59FLF9O2LTJrDmvqTo6sLauxdr717SgL56leiVVwhffBH/0CHCEycI47gRMlkk6lxyMiB0ragxbVKTmJskDkycSNKjudEOCjRChXVkb1kLrF97PpQ0lWo7nUS9DinACIOwbUTKSXIWwIyPo597DvPcc8kHbW3InTsR27cjt29H3nffbQEqe3pwenpwnnySLKBHRgheeAH/yBG8Q4cQx1/BjSCMYrAVJhA3qnCN6sWEeiVmtjDQJD2B+rm39MAwfwAtMdWJiPp7ajuyYkwY1hiZzhgwMkL41a9ivvpVIFFduWMH6tFHUdu3I++++7aYkG1tpJ94gvQTT1AAGB4gvf8Q1t+VYXwMHDGrCk/awHogPTOIERikiuoLuGVLE+bvhScMEin8WrBZK6pKiTExMp3CWrUSmOlNYSaocV8f/pe/TOUnfoLiPfdQXL6cyjPP4P/JnxCfP3/7XLV3kX/6aZy7lkO50jArk80kUWs5iMTbN+qBs9tAocK6Yt+yqQ7zl8AiCC2IpBAaI6zGryrDgIobUP3zv4TlAdaXn0MfPow+cAAzNtZQl9krcAnY4ZUreF/8IuaLX0y2Gr7vfViPPYazbRvO9u2oWcr9dQoijVv2IGVNxlKzlLMAdGySdmetdTKDjKqftOAqXNtkOVlMNbVXaUlM2aNYCaB9JerjH0d9/OMQx+hXXiHev5/4wAHil18mLpdn5MxTKzdQA/TcOeJz5zBf+AISsNavx9m1i/S2baQfeQS1dGnj/KIfUww12HJmJbruU5Ro1AC1MWijG+2kyesbxKQXnlOF7wBA0ygmmBqOSDA6URM1nXmlkA89hHzoIexf+iVMsUj84ouEBw4QHThAdPw40RSPWl9MI3RjMnD2X3uN4muvYX7/91FK4WzcSGbXLjo/vAu9+n6kY9VamPWZJkljqDOs6yHMNOmr50ZSNVqmC67CnkHGklAhNaa+/29aSHMrEs3NWHv2YO3ZkyxsaIjo8GH8/fsJDx4keP11Amq7BqYtTpCogAbCOMY9doyRY8cofuYz9BfaiZ78bWhrxwSVWcKY5KdJ2uUag2R6HN04xTRcgz0XIPMFcAxkVRLkBfGUjpwA24K8Q/iLn4TtHcQfegr10ENzhimyowPnqadwnnoKgOjCBfwaoN7Bg3hXrxJwo4pPLTBYtc+8ShXt+9CsIJrlR6wXZmopnBZmxl6dugQK1TAwCx5I11iYYgMbPWkDnZ3ok5fg0F9Q/e+/i2hpQe7cifXYY6idO1H33DPn7FZvL1ZvL9lnngEgOH0a9+BBKvv2UX3xRdzh4QagdTnRgFDJXU6NrR2zKUKjujU1kL7xAIFBWkFNYue+Q/SOKtJT+yGiBqbRMeSaUItaGzdSxePjhM8+i/vss4n69fZiPf441s6d2Dt2IDs757ycs2EDzoYNFH72ZzGeh/vqq5QPHqS0fz+ll1+m4rqJBNYq5TezgWBqfeFaHCjFLBjXDIWpW9656Y7KWSKp697Q2pSWAj+kWHQbrNSXIUmkJLhwAffCBfjDP0y2/27ejPOhD+Hs
+2=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
