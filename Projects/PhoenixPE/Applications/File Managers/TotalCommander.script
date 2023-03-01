@@ -36,7 +36,7 @@ Level=5
 Selected=False
 Mandatory=False
 Version=1.0.0.0
-Date=2023-01-10
+Date=2023-02-20
 
 [Variables]
 %ProgramFolder%="Total Commander"
@@ -79,8 +79,6 @@ If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEProgra
 If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-
-
 
 [#ConfigSettings#]
 // ===============================================================================================================================
@@ -255,11 +253,13 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 Decompress,"%ProjectTemp%\%ProgramFolder%\INSTALL.CAB",#1
 
-FileDeleteEx,"#1\TCUNIN64.EXE"
-FileDeleteEx,"#1\TCUNINST.EXE"
-FileDeleteEx,"#1\TCUNIN64.WUL"
-FileDeleteEx,"#1\TCUNINST.WUL"
-FileDeleteEx,"#1\WCUNINST.WUL"
+FileCopy,"#1\e\TOTALCMD.CHM",#1
+FileCopy,"#1\e\KEYBOARD.TXT",#1
+
+DirDeleteEx,"#1\d"
+DirDeleteEx,"#1\e"
+FileDeleteEx,"#1\TCUNIN??.EXE"
+FileDeleteEx,"#1\*.WUL"
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -468,7 +468,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"File Managers"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Total Commander"
 bvl_Options=Options,1,12,150,90,477,184,8,Bold
 lbl_Language=Language,1,1,159,105,140,16,8,Normal
-cmb_Language=English,1,4,160,118,140,21,"Chinese (Simplified)",Czech,Dutch,English,French,German,Hungarian,Italian,Korean,Norwegian,Polish,Romanian,Russian,Slovak,Slovenian,Spanish,Swedish,"__Select the default language.#$xAdditional translations are available for downlond on the product hompage."
+cmb_Language=English,1,4,160,118,140,21,"Chinese (Simplified)",Czech,Dutch,English,French,German,Hungarian,Italian,Korean,Norwegian,Polish,Romanian,Russian,Slovak,Slovenian,Spanish,Swedish,"__Select the default language.#$xAdditional translations are available for download on the product homepage."
 lbl_IconTheme="Icon Theme",1,1,159,147,140,16,8,Normal
 cmb_IconTheme="1 - Classic",1,4,160,160,140,21,"1 - Classic","2 - New"
 lbl_ViewMode="View Mode",1,1,159,189,140,16,8,Normal
