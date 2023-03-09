@@ -35,8 +35,8 @@ Author=Homes32
 Level=8
 Selected=None
 Mandatory=False
-Version=1.0.8.0
-Date=2022-12-02
+Version=1.0.9.0
+Date=2023-03-07
 
 [Variables]
 %Rufus.exe%=%Tools%\x86\Rufus.exe
@@ -61,7 +61,7 @@ End
 If,%cb_RufusDualBoot%,Equal,True,IniWrite,%Rufus.ini%,"Rufus","EnableWindowsDualUefiBiosMode",1
 Else,IniWrite,%Rufus.ini%,"Rufus","EnableWindowsDualUefiBiosMode",0
 
-If,ExistFile,%ISOFile%,ShellExecuteEx,Open,%Rufus.exe%,"--gui --filesystem %cmb_Filesystem% --iso=%ISOFile%",%Tools%
+If,ExistFile,%ISOFile%,ShellExecuteEx,Open,%Rufus.exe%,"--gui --filesystem %cmb_Filesystem% --iso=#$q%ISOFile%#$q",%Tools%
 Else,Begin
   Echo,"The ISO file [%ISOFile%] does not exist. Perhaps you haven't built the project yet?",Warn
   ShellExecuteEx,Open,%Rufus.exe%,"",%Tools%
