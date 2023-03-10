@@ -36,8 +36,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.6.3.0
-Date=2022-07-31
+Version=1.6.4.0
+Date=2023-03-10
 
 [Variables]
 %ProgramFolder%="PENetwork"
@@ -686,31 +686,31 @@ If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\Control
 [PENetwork-AutoConnectWifi]
 Echo,"Configuring Wireless Profiles..."
 If,Not,ExistFile,%fb_WifiConfig%,Halt,"Error: The specified wireless profile does not exist!"
-StrFormat,EXT,%fb_WifiConfig%,%FileExt%
-If,Not,%FileExt%,Equal,".xml",Halt,"Error: The wireless profile must be an .XML file!"
+StrFormat,EXT,%fb_WifiConfig%,%WifiConfig_FileExt%
+If,Not,%WifiConfig_FileExt%,Equal,".xml",Halt,"Error: The wireless profile must be an .XML file!"
 
-StrFormat,FILENAME,%fb_WifiConfig%,%FileName%
-StrFormat,RTRIM,%FileName%,4,%FileNameNoExt%
-FileCopy,%fb_WifiConfig%,"%TargetPrograms%\%ProgramFolder%\WifiProfiles\%FileName%"
+StrFormat,FILENAME,%fb_WifiConfig%,%WifiConfig_FileName%
+StrFormat,RTRIM,%WifiConfig_FileName%,4,%WifiConfig_FileNameNoExt%
+FileCopy,%fb_WifiConfig%,"%TargetPrograms%\%ProgramFolder%\WifiProfiles\%WifiConfig_FileName%"
 
 // These are build time settings so write to %TargetPrograms%\%ProgramFolder%, not %ProgramsCache%\%ProgramFolder%
 
 // Set "Auto Connect Wifi" as active profile
-IniWrite,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","UseProfiles","Yes"
+IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","PENetwork","UseProfiles","Yes"
 IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","PENetwork","ProfileDefault","Auto Connect Wifi"
 
 // Import Wifi Profile 
-IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CMDStart.CMD3","Netsh WLan add profile filename=#$q%PEPrograms%\%ProgramFolder%\WifiProfiles\%fb_WifiConfig%#$q user=all"
+IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CMDStart.CMD3","Netsh WLan add profile filename=#$q%PEPrograms%\%ProgramFolder%\WifiProfiles\%WifiConfig_FileName%#$q user=all"
 IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CMDStart.Start3","Hidden"
 IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CMDStart.Wait3","Yes"
 // Set as default auto connect
-IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CMDStart.CMD4","Netsh WLan set profileparameter name=%FileNameNoExt% connectionmode=auto"
+IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CMDStart.CMD4","Netsh WLan set profileparameter name=%WifiConfig_FileNameNoExt% connectionmode=auto"
 IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CMDStart.Start4","Hidden"
 IniWrite,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CMDStart.Wait4","Yes"
 
-Set,%FileName%,Nil
-Set,%FileNameNoExt%,Nil
-Set,%FileExt%,Nil
+Set,%WifiConfig_FileName%,Nil
+Set,%WifiConfig_FileNameNoExt%,Nil
+Set,%WifiConfig_FileExt%,Nil
 
 [#PENetwork-CreateDefaultConfig#]
 // ===============================================================================================================================
