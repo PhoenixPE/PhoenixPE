@@ -33,10 +33,10 @@ Title=Visual Effects
 Description=Select the settings you want to use for the appearance and performance of PhoenixPE.
 Author=Homes32
 Level=4
-Selected=False
+Selected=True
 Mandatory=False
-Version=1.0.0.0
-Date=2020-11-08
+Version=1.0.1.0
+Date=2023-01-29
 
 [Variables]
 
@@ -124,6 +124,16 @@ Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\V
 // ListviewShadow
 If,%cb_ListviewShadow%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewShadow","DefaultValue",1
 Else,RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewShadow","DefaultValue",0
+
+// Rounded corners (Win11)
+If,%cb_EnableRoundedCorners%,Equal,True,Begin
+  RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\Dwm","ForceEffectMode",2
+  RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","UseOLEDTaskbarTransparency",1
+End
+Else,Begin
+  RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\Dwm","ForceEffectMode",1
+  RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","UseOLEDTaskbarTransparency",1
+End
 
 RegUnloadHives
 
@@ -228,6 +238,7 @@ System,Cursor,Normal
 System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cmb_VisualFXSetting,"0 - Let Windows choose what's best for my computer"
 Run,%ScriptFile%,ToggleVisualFX
+WriteInterface,Value,%ScriptFile%,Interface,cb_EnableRoundedCorners,True
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -292,6 +303,8 @@ cb_ComboBoxAnimation="Slide open combo boxes",1,3,15,360,270,18,True,_SetCustomV
 cb_FontSmoothing="Smooth edges of screen fonts",1,3,15,380,270,18,True,_SetCustomVisualFX_,True
 cb_ListBoxSmoothScrolling="Smooth-scroll list boxes",1,3,15,400,270,18,True,_SetCustomVisualFX_,True
 cb_ListviewShadow="Use drop shadows for icon labels on the desktop",1,3,15,420,270,18,True,_SetCustomVisualFX_,True
+bvl_OtherVisualEffects="Other Visual Effects",1,12,368,50,264,152,8,Bold
+cb_EnableRoundedCorners="Enabled rounded corners (Win11)",1,3,380,70,200,18,True
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
