@@ -34,8 +34,8 @@ Description=Add the Windows Remote Desktop (RDP) Client/Server.
 Selected=False
 Level=4
 Author=Homes32
-Version=1.0.0.0
-Date=2020-06-12
+Version=1.1.0.0
+Date=2023-02-06
 Mandatory=False
 
 [Variables]
@@ -56,10 +56,7 @@ Run,%ScriptFile%,ExtractFiles
 
 Echo,"Configuring %ScriptTitle%..."
 
-RegHiveLoad,Tmp_Software,%RegSoftware%
-RegHiveLoad,Tmp_System,%RegSystem%
-RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
-RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
+RegLoadHives
 
 If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
 
@@ -87,11 +84,19 @@ End
 If,%cb_PatchCredDialogController%,Equal,True,Run,%ScriptFile%,PatchCredDialogController
 
 // Enable/Disable NLA
-If,%cb_EnableNLA%,Equal,True,Begin
+If,%cb_Client_EnableNLA%,Equal,True,Begin
   TXTReplace,"%TargetDir%\Users\Default\Documents\Default.rdp","enablecredsspsupport:i:0","enablecredsspsupport:i:1"
 End
 Else,Begin
   TXTReplace,"%TargetDir%\Users\Default\Documents\Default.rdp","enablecredsspsupport:i:1","enablecredsspsupport:i:0"
+End
+
+// Enable/Disable MultiMon
+If,%cb_Client_UseMultiMon%,Equal,True,Begin
+  TXTReplace,"%TargetDir%\Users\Default\Documents\Default.rdp","multimon:i:0","multimon:i:1"
+End
+Else,Begin
+  TXTReplace,"%TargetDir%\Users\Default\Documents\Default.rdp","multimon:i:1","multimon:i:0"
 End
 
 // Include Additional RDP Profiles
@@ -110,7 +115,7 @@ If,%cb_AutoConnectRDP%,Equal,True,Begin
 End
 
 // Enable RDP Connections
-If,%cb_EnableTSConnections%,Equal,True,Begin
+If,%cb_Server_EnableTSConnections%,Equal,True,Begin
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\SessionEnv",HKLM,"Tmp_System\ControlSet001\Services\SessionEnv"
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TermService",HKLM,"Tmp_System\ControlSet001\Services\TermService"
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\UmRdpService",HKLM,"Tmp_System\ControlSet001\Services\UmRdpService"
@@ -118,12 +123,12 @@ If,%cb_EnableTSConnections%,Equal,True,Begin
 End
 
 // Require NLA for incoming RDP Connections
-If,%cb_ForceNLA%,Equal,True,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server\WinStations\RDP-Tcp","UserAuthentication",0
+If,%cb_Server_ForceNLA%,Equal,True,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server\WinStations\RDP-Tcp","UserAuthentication",0
 
-RegHiveUnload,Tmp_Software
-RegHiveUnload,Tmp_Install_Software
-RegHiveUnload,Tmp_System
-RegHiveUnload,Tmp_Install_System
+// Server
+If,%cb_Server_EnableTSConnections%,Equal,True,Run,%ScriptFile%,EnableTSConnections
+
+RegUnloadHives
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -140,7 +145,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%ProgramFolder%\%P
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
-// Author.........: Homes32
+// Author.........: slore, Homes32
 // Remarks........: 
 // Related........: Called from [Process]
 // ===============================================================================================================================
@@ -158,6 +163,8 @@ RequireFileEx,AppendList,\Windows\System32\d3d11.dll
 RequireFileEx,AppendList,\Windows\System32\dcomp.dll
 RequireFileEx,AppendList,\Windows\System32\DWrite.dll
 RequireFileEx,AppendList,\Windows\System32\dxgi.dll
+RequireFileEx,AppendList,\Windows\System32\FontGlyphAnimator.dll
+RequireFileEx,AppendList,\Windows\System32\MrmCoreR.dll
 RequireFileEx,AppendList,\Windows\System32\msacm32.dll
 RequireFileEx,AppendList,\Windows\System32\msacm32.drv
 RequireFileEx,AppendList,\Windows\System32\mstsc.exe
@@ -165,25 +172,89 @@ RequireFileEx,AppendList,\Windows\System32\mstscax.dll
 RequireFileEx,AppendList,\Windows\System32\ncryptprov.dll
 RequireFileEx,AppendList,\Windows\System32\ncryptsslp.dll
 RequireFileEx,AppendList,\Windows\System32\pdh.dll
+RequireFileEx,AppendList,\Windows\System32\pfclient.dll
+RequireFileEx,AppendList,\Windows\System32\threadpoolwinrt.dll
 RequireFileEx,AppendList,\Windows\System32\TSpkg.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.Globalization.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.Graphics.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.Internal.UI.Logon.ProxyStub.dll
+RequireFileEx,AppendList,\Windows\System32\Windows.UI.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.UI.Cred.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.UI.CredDialogController.dll
+RequireFileEx,AppendList,\Windows\System32\Windows.UI.Immersive.dll
+RequireFileEx,AppendList,\Windows\System32\Windows.UI.Xaml.dll
+RequireFileEx,AppendList,\Windows\System32\Windows.UI.Xaml.Controls.dll
+RequireFileEx,AppendList,\Windows\System32\Windows.UI.Xaml.Resources.dll
+RequireFileEx,AppendList,\Windows\System32\Windows.UI.Xaml.Resources*.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.UI.Xaml.Resources.Common.dll
+RequireFileEx,AppendList,\Windows\System32\Windows.UI.XamlHost.dll
 RequireFileEx,AppendList,\Windows\System32\wuceffects.dll
 RequireFileEx,AppendList,\Windows\SystemResources\Windows.UI.Cred
-
-If,%cb_EnableTSConnections%,Equal,True,Begin
-  RequireFileEx,AppendList,\Windows\System32\SessEnv.dll
-  RequireFileEx,AppendList,\Windows\System32\termsrv.dll
-  RequireFileEx,AppendList,\Windows\System32\umrdp.dll 
-End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 RequireFileEx,ExtractList
+
+[#EnableTSConnections#]
+// ===============================================================================================================================
+// Name...........: EnableTSConnections
+// Description....: Allow RDP connections to this WinPE system.
+// Syntax.........: Run,%ScriptFile%,EnableTSConnections
+// Parameters.....: 
+// Return values..: 
+// Author.........: slore, Homes32
+// Remarks........: This section is a bit of a hot mess right now and needs proper testing.
+// Related........: cb_Server_EnableTSConnections
+// ===============================================================================================================================
+[EnableTSConnections]
+Echo,"Configuring Terminal Server..."
+
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Terminal Server",HKLM,"Tmp_System\ControlSet001\Control\Terminal Server"
+RegWrite,HKLM,0x4,"Tmp_Software\Policies\Microsoft\Windows NT\Terminal Services","fEnableWddmDriver",0
+
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+RequireFileEx,AppendList,\Windows\System32\SessEnv.dll
+RequireFileEx,AppendList,\Windows\System32\termsrv.dll
+RequireFileEx,AppendList,\Windows\System32\umrdp.dll 
+  
+// TEST BELOW
+RequireFileEx,AppendList,\Windows\System32\remotepg.dll
+RequireFileEx,AppendList,\Windows\System32\lsmproxy.dll
+RequireFileEx,AppendList,\Windows\System32\clbcatq.dll
+RequireFileEx,AppendList,\Windows\System32\umb.dll
+RequireFileEx,AppendList,\Windows\System32\rdsdwmdr.dll
+RequireFileEx,AppendList,\Windows\System32\drprov.dll
+RequireFileEx,AppendList,\Windows\System32\iphlpsvc.dll
+  
+RequireFileEx,AppendList,\Windows\System32\rdp*.exe
+RequireFileEx,AppendList,\Windows\System32\rdp*.dll
+RequireFileEx,AppendList,\Windows\System32\rdvvmtransport.dll
+RequireFileEx,AppendList,\Windows\System32\rfxvmt.dll
+RequireFileEx,AppendList,\Windows\System32\tlscsp.dll
+RequireFileEx,AppendList,\Windows\System32\CertProp.dll
+RequireFileEx,AppendList,\Windows\System32\CertPropSvc.dll
+RequireFileEx,AppendList,\Windows\System32\wwancfg.dll
+  
+RequireFileEx,AppendList,\Windows\System32\drivers\terminpt.sys
+RequireFileEx,AppendList,\Windows\System32\drivers\rdpdr.sys
+RequireFileEx,AppendList,\Windows\System32\drivers\rdbss.sys
+RequireFileEx,AppendList,\Windows\System32\drivers\rdpvideominiport.sys
+RequireFileEx,AppendList,\Windows\System32\drivers\ipFltdrv.sys
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+RequireFileEx,ExtractList
+
+// Drivers
+RequireDriver,rdpbus.inf
+RequireDriver,rdlsbuscbs.inf
+RequireDriver,termkbd.inf
+RequireDriver,termmou.inf
+RequireDriver,monitor.inf
+RequireDriver,tsprint.inf
+RequireDriver,tsusbhub.inf
+RequireDriver,tsusbhubfilter.inf
+RequireDriver,tsgenericusbdriver.inf
 
 [#PatchCredDialogController#]
 // ===============================================================================================================================
@@ -223,16 +294,17 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Productivity"
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Networking"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Remote Desktop Connection"
 WriteInterface,Value,%ScriptFile%,Interface,cb_PatchCredDialogController,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_EnableNLA,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Client_EnableNLA,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Client_UseMultiMon,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_IncludeProfilesInThisDir,False
 WriteInterface,Value,%ScriptFile%,Interface,fb_IncludeProfilesInThisDir,""
 WriteInterface,Value,%ScriptFile%,Interface,cb_AutoConnectRDP,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_AutoConnectRDP,""
-WriteInterface,Value,%ScriptFile%,Interface,cb_EnableTSConnections,False
-WriteInterface,Value,%ScriptFile%,Interface,cb_ForceNLA,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Server_EnableTSConnections,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Server_ForceNLA,False
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -265,6 +337,9 @@ End
 
 WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cb_PatchCredDialogController,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_Server_EnableTSConnections,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_Server_ForceNLA,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_ServerOptions,%Toggle%
 
 System,EndLocal
 
@@ -302,19 +377,20 @@ cb_DesktopShc=Desktop,1,3,12,65,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,84,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,103,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,122,122,18,False
-txt_StartMenuFolder="Start Menu Folder:",1,0,12,162,119,21,Productivity
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,162,119,21,Networking
 txt_ShortcutName="Shortcut Name:",1,0,12,204,119,21,"Remote Desktop Connection"
 bvl_AdvancedOptions="Advanced Options",0,12,5,250,133,60,8,Bold
 cb_PatchCredDialogController="Enable Cred Dialog",0,3,15,265,116,18,True,"__Patch CredDialogController to allow GUI authentication."
 bvl_Options="Client Options",1,12,150,50,377,184,8,Bold
-cb_EnableNLA="Enable Network Level Authentication",1,3,160,64,200,18,False,"__If enabled the RDP client will attempt to use NLA when connecting to the server."
-cb_IncludeProfilesInThisDir="Include Additional RDP Profiles",1,3,160,86,235,18,False
-fb_IncludeProfilesInThisDir=,1,13,160,107,358,20,dir,"Title=Select the directory containing additional RDP profiles to include in your build","__Specify the directory containing additional RDP profiles to include in your build."
-cb_AutoConnectRDP="Auto Connect to this computer on Startup",1,3,160,134,235,18,False
-txt_AutoConnectRDP="Hostname/IP Address",1,0,160,174,358,20,,"__Enter the hostname or IP address of the computer you wish to auto-connect on startup."
+cb_Client_EnableNLA="Enable Network Level Authentication",1,3,160,64,200,18,False,"__Determines whether the client will use the Credential Security Support Provider (CredSSP) for authentication if it's available."
+cb_Client_UseMultiMon="Use Multiple Monitors",1,3,160,85,200,18,False,"__Determines whether the remote session will use one or multiple displays from the local computer."
+cb_IncludeProfilesInThisDir="Include Additional RDP Profiles",1,3,160,141,235,18,False
+fb_IncludeProfilesInThisDir=,1,13,160,162,358,20,dir,"Title=Select the directory containing additional RDP profiles to include in your build","__Specify the directory containing additional RDP profiles to include in your build."
+cb_AutoConnectRDP="Auto Connect to this computer on Startup",1,3,160,185,235,18,False
+txt_AutoConnectRDP=,1,0,160,205,358,20,,"__Enter the hostname or IP address of the computer you wish to auto-connect on startup."
 bvl_ServerOptions="Server Options (Experimental)",0,12,150,250,377,60,8,Bold
-cb_EnableTSConnections="Enable Remote Desktop Connections to this computer",0,3,160,265,287,18,False
-cb_ForceNLA="Require Network Layer Authentication",0,3,160,285,250,18,False
+cb_Server_EnableTSConnections="Enable Remote Desktop Connections to this computer",0,3,160,265,287,18,True
+cb_Server_ForceNLA="Require Network Layer Authentication",0,3,160,285,250,18,False
 
 [AuthorEncoded]
 remote_desktop_connection_80.png=8328,11228
@@ -342,12 +418,11 @@ lines=0
 Profiles
 
 [Profiles]
-Default.rdp=2296,1020
+Default.rdp=2266,1028
 
 [EncodedFile-Profiles-Default.rdp]
 lines=0
-0=/Td6WFoAAATm1rRGBMDwBPgRIQEWAAAAAAAAAMV9mjXgCPcCaF0Af7+J7QL+f4tKRcBlgYV60i+J5joHw4yb/eP+fp8psoBOHNZ0pf72JWNc8yaXwZGrh1B/4tf8TrlA5TIzyUoDttN2xCSURcnCYNS8gk3V3XxofPojQcY1RVIia+UUip2X7Nxxx6GquYF6gZ6CE+yVloimG7B+MUhzmaaydS54D2y//ptLmg2QvYzqPEB0ofIXAqzqo6tgfn0AGye3+61enBepLWpNxnKukjJE+iCgidlNgd/6ESHM7vJIyLLnAX9lKdaFw9slWsiGzW8dJwN3uQUwrTI1ZTulrZUTB+5JYdXCHqUn+5zbRcs18l1fEsUv4v2bzAabPTerFe8SX8ZcoGQ/hJgBMgOuFxiAT6rxpr6Sb8YKRrXwkGWIjipuKVehcAMBEQI10FWex9FYKxXLsteIr5HAL01w7xpiQqwwePltiwNABy+sNiKINLncfyGz6+CjNtPQaYfV9ZyLAj9kMBNJ05wxmgwwQyiKUEzryLma3iNSlZQlsAHbs3xh3fGnyjj55+pwLITiLJAXWpEpFAvL7UAIun9T1igvXxWk3pmS5LwbFz6+9cLZfOUayBNFB82nrhY08SelV4fAH+NtHHtvRl4ZAJBF0+owhdr5Ilb1q7+h33Gm0abR0URk22+Ui82M5YO9wcUKpN8XClFs7Rj5clkj5N19cTLABpl45j8brr4BbIsHHJ85ZUViE0pC8XsT8ovW2BDq+x5HqBi8yknyMRX8T4pbkQC5jltz9R6f/DcIDlZZe8Il3vN491SVi6r9tJKHcIwiARIkeiJbIkC30gVzXxMaGsxXDrJ5ssey491R9YvDAAC6Ge22d/WzOgABjAX4EQAAAXjxPLHEZ/sCAAAAAARZWnic43ZJTUsszSnRK0opYBgFIw784IDQG5iwy4cePiHFxAYAVvEH+VA0juABAAAAAgAAACcAAACwAgAAAAAAAAEAAAAAAAAAAAAAAA
-
+0=/Td6WFoAAATm1rRGBMD1BNoRIQEWAAAAAAAAAM9WM0XgCNkCbV0Af7+HvwNIShs0VtabXBhI1ZJXRfysdZjgxVCN17+K+Z0Xcxl9v4O306UCmKJtCXtsgyukL+JFz/i0kSu394ULfa25+mVYFntpww5yaBHTZVjOCuLRoFqjEutUd82z6fb5yHBdOeyMSpUVjO2ev/N34Kr2jwD9FhcVUwLqsYcdqWxm3mdmEJrvNe9DIMlUSDpq8nPk6aqWat7t2pgiNrkIFu5bi1VRTZV7phe3b+1Sb51m8rYGJzwzrY1BmpMrU6V6DQSASikW6RBnW8+EqTXnj72j//X2jVPQWMFZ1l7iWJfhXhMp2Re0RilyphReeyBhES5Sd9zjs9E68jXP+Hi8yIQ4rTGxxLzaPfJBkhk86on9sel5hHZqp6S/Rc/Cx+/zP1AQmcATP9De4eW2b/UkEEozdwCmDG3aywHf7nM/BQJSBG09exa2RR05eM2pB2L7kpRg4dHu5Xh4TZ3BOciED8Yloq5cvrY0TIv1LlhaeCHXcEp6AqQ9b7WgzgL7qsweYkHbE7YI+b7P5Q9DLZQEPz5Au3WUGDEBi+z/d4LMYTRj+LstIpWGz95o40tX6W5rOpaj3iclR1OT41GI11L62W7UTf0s5l6cG+vPKspWKlU6QCSRbCtwIUctT6Q7RjKyjuLfes5QH0jkftwEv02DDomedOuAFHzYyZS92MR4IU6HUqiQhyU8++SenRfZOrhIGctPXA+pLLzerxd4SJ1jArYsWNqDIzrSxte1tSwm+z/tBQ5BWw4k83npvBrNnG7FmbDlDHZFFd7Z8BvOKwZs4VfgboxbYeDYuxvkcBySEovzl0ty/SYRZ0SLXoz+AAAAAHBMscLvrqSyAAGRBdoRAADxDoKJscRn+wIAAAAABFlaeJzjdklNSyzNKdErSilgGAUjDtzigNA7mLDL307ebsjEBgBUsggPuhchIQEAAAACAAAAJwAAALgCAAAAAAAAAQAAAAAAAAAAAAAA
 [EncodedFile-AuthorEncoded-remote_desktop_connection_80.png]
 lines=2
 0=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
