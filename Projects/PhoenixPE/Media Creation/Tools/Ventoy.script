@@ -30,13 +30,13 @@
 
 [Main]
 Title=Ventoy
-Description=(v1.0.89) Ventoy is an open source tool used to create bootable USB devices capable of launching multiple ISO/WIM/IMG/VHD(x)/EFI files.
+Description=(v1.0.90) Ventoy is an open source tool used to create bootable USB devices capable of launching multiple ISO/WIM/IMG/VHD(x)/EFI files.
 Author=Homes32
 Level=8
 Selected=None
 Mandatory=False
-Version=1.1.15.0
-Date=2023-03-25
+Version=1.1.16.0
+Date=2023-03-27
 
 [Variables]
 %ProgramFolder%="%Workbench%\Ventoy"
@@ -48,12 +48,10 @@ Date=2023-03-25
 [Process]
 Echo,"Launching %ScriptTitle%..."
 
-If,Not,ExistFile,"%ProgramFolder%\%ProgramExe%",Begin
-  Run,%ScriptFile%,DownloadProgram
-  // Extract to workbench (instead of temp) to allow the user can customize the boot menu, plugins, etc.
-  Run,%ScriptFile%,ExtractProgram,%ProgramFolder%
-End
+If,Not,ExistFile,"%ProgramFolder%\%ProgramExe%",Run,%ScriptFile%,DownloadProgram
 
+// Extract to workbench (instead of temp) to allow the user can customize the boot menu, plugins, etc.
+Run,%ScriptFile%,ExtractProgram,%ProgramFolder%
 ShellExecuteEx,Open,"%ProgramFolder%\%ProgramExe%","",%ProgramFolder%
 
 [#ExtractProgram#]
