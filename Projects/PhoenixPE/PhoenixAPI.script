@@ -73,6 +73,7 @@ RequireFile=Run,%API%,_PhoenixAPI_RequireFile
 RequireFileEx=Run,%API%,_PhoenixAPI_RequireFileEx
 
 // Utility
+Binmay=Run,%API%,_PhoenixAPI_Binmay
 ConvertImage=Run,%API%,_PhoenixAPI_ConvertImage
 DISM=Run,%API%,_PhoenixAPI_DISM
 AddPostProcess=Run,%API%,_PhoenixAPI_AddPostProcess
@@ -536,6 +537,30 @@ If,Not,%ExitCode%,Equal,0,Begin
   FileVersion,"%Tools%\anycpu\wix\dark.exe",%DarkVer%
   Halt,"WixExtract Error: Failed to unpack the setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using dark.exe version [%DarkVer%]."
 End
+
+System,EndLocal
+
+[#_PhoenixAPI_Binmay#]
+// ===============================================================================================================================
+// Name...........: Binmay
+// Description....: Binary Search and Replace Tool 
+// Syntax.........: Binmay,<Args>[,<WorkDir>]
+// Parameters.....: #1 Args - The arguments to pass to the Binmay executable.
+//                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+// Return values..: ExitCode provided by the Binmay application
+// Author.........: Homes32
+// Remarks........:                      *** Experimental - May be changed or removed without notice ***
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_Binmay]
+System,SetLocal
+If,#1,Equal,"",Halt,"Binmay Syntax Error: You must provide the Binmay.exe arguments."
+
+GetParam,1,%Args%
+Getparam,2,%WorkDir%
+
+ShellExecute,Hide,"%Tools%\%HostArch%\Binmay.exe","%Args%",%WorkDir%
+Return,%ExitCode%
 
 System,EndLocal
 
@@ -1059,8 +1084,8 @@ If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
   Else,Halt,"AddShortcut Syntax Error: Shortcut type [%Type%] is not supported."
 
   // Window State
-  If,%WindowState%,Equal,"Minimized",Set,%Cmd%,"_%Cmd%"
-  Else,If,%WindowState%,Equal,"Maximized",Set,%Cmd%,"^%Cmd%"
+  If,%WindowState%,Equal,"Minimized",StrFormat,Replace,%Cmd%,"LINK ","LINK _ ",%Cmd%
+  Else,If,%WindowState%,Equal,"Maximized",StrFormat,Replace,%Cmd%,"LINK ","LINK ^ ",%Cmd%
   Else,Set,%WindowState%,""
   
   // Icon

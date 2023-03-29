@@ -54,9 +54,9 @@ RegUnloadHives
 // We must trick the service into thinking it is not in WinPE before starting the eventlog service, 
 // otherwise the service will start but no logs will be collected. We accomplish this by removing the
 // HKLM\SYSTEM\CurrentControlSet\Control\MiniNT key, then add it back after the service is started.
-// thanks to noelBlanc for pointing this out and saving me some headaches.
+// thanks to noelBlanc for saving me some headaches with his thorough research.
 // Note that we want to do this early in the startup process, as several network services (nlasvc, netprofm, etc.)
-// depend on evenglog and it can be a pain to try and kill them off once they startup and get all cozy with each other.
+// depend on eventlog and it can be a pain to try and kill them off once they startup and get all cozy with each other.
 ExtractAllFiles,%ScriptFile%,cmd,%TargetSystem32%
 AddAutoRun,PreShell,HideWait,"Starting Windows Event Log Service...","#$pWinDir#$p\system32\StartEventLogging.cmd"
 
@@ -86,7 +86,7 @@ Echo,"Processing Windows Event Viewer..."
 
 // eventvwr launcher, mmc snap-in, and global assemblies
 // Note: wecsvc.dll is already included in WinRE.wim
-RequireFileEx,AppendList,WINDOWS\Microsoft.NET\assembly\GAC_MSIL\EventViewer\v4.0_10.0.0.0__31bf3856ad364e35\EventViewer.dll
+RequireFileEx,AppendList,Windows\Microsoft.NET\assembly\GAC_MSIL\EventViewer\v4.0_10.0.0.0__31bf3856ad364e35\EventViewer.dll
 RequireFileEx,AppendList,Windows\Microsoft.NET\assembly\GAC_MSIL\EventViewer.Resources\
 RequireFileEx,AppendList,Windows\Microsoft.NET\assembly\GAC_MSIL\MiguiControls\
 RequireFileEx,AppendList,Windows\Microsoft.NET\assembly\GAC_MSIL\MiguiControls.Resources\
@@ -99,11 +99,11 @@ RequireFileEx,AppendList,windows\system32\wecutil.exe
 RequireFileEx,AppendList,windows\system32\wevtfwd.dll
 
 // mmc global assemblies
-RequireFileEx,AppendList,WINDOWS\assembly\GAC_MSIL\MMCEx\3.0.0.0__31bf3856ad364e35\MMCEx.dll
-RequireFileEx,AppendList,WINDOWS\assembly\GAC_MSIL\MMCEx.Resources\
-RequireFileEx,AppendList,WINDOWS\assembly\GAC_MSIL\MMCFxCommon\3.0.0.0__31bf3856ad364e35\MMCFxCommon.dll
-RequireFileEx,AppendList,WINDOWS\assembly\GAC_MSIL\MMCFxCommon.Resources\
-RequireFileEx,AppendList,WINDOWS\assembly\GAC_MSIL\Microsoft.ManagementConsole\3.0.0.0__31bf3856ad364e35\Microsoft.ManagementConsole.dll
+RequireFileEx,AppendList,Windows\assembly\GAC_MSIL\MMCEx\3.0.0.0__31bf3856ad364e35\MMCEx.dll
+RequireFileEx,AppendList,Windows\assembly\GAC_MSIL\MMCEx.Resources\
+RequireFileEx,AppendList,Windows\assembly\GAC_MSIL\MMCFxCommon\3.0.0.0__31bf3856ad364e35\MMCFxCommon.dll
+RequireFileEx,AppendList,Windows\assembly\GAC_MSIL\MMCFxCommon.Resources\
+RequireFileEx,AppendList,Windows\assembly\GAC_MSIL\Microsoft.ManagementConsole\3.0.0.0__31bf3856ad364e35\Microsoft.ManagementConsole.dll
 
 // and extract...
 RequireFileEx,ExtractList
