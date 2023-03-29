@@ -35,8 +35,8 @@ Author=Homes32
 Level=1
 Selected=True
 Mandatory=True
-Version=1.1.1.1
-Date=2022-12-21
+Version=1.1.2.0
+Date=2023-03-04
 
 [Variables]
 
@@ -334,7 +334,7 @@ Set,%imgTemp%,Nil
 [DownloadWithFido]
 Echo,"Launching Fido..."
 Set,%FidoURL%,"https://github.com/pbatard/Fido/releases/latest/download/Fido.ps1.lzma"
-If,QUESTION,"You are about to download and run the open source Fido powershell script, which will allow you to choose which Windows ISO image to download from Microsoft's servers.#$x#$xFor more info please visit [https://github.com/pbatard/Fido].#$x#$xAre you ready to continue?",Begin
+If,QUESTION,"You are about to download and run the open source Fido powershell script. This will allow you to choose which Windows ISO image to download from Microsoft's servers.#$x#$xFor more info please visit [https://github.com/pbatard/Fido].#$x#$xAre you ready to continue?",Begin
   WebGet,%FidoURL%,"%ProjectTemp%\Fido.ps1.lzma"
   7z,"x -y #$q%ProjectTemp%\Fido.ps1.lzma#$q -o#$q%ProjectTemp%#$q"
   ShellExecuteEx,Open,"powershell.exe","-noexit –ExecutionPolicy Bypass & #$q%ProjectTemp%\Fido.ps1#$q"
@@ -424,14 +424,18 @@ System,SetLocal
 ReadInterface,Visible,%ScriptFile%,Interface,cmb_BaseWim,%state%
 If,%state%,Equal,False,Begin
   If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Begin
-	Set,%Toggle%,True
+    Set,%Toggle%,True
+    WriteInterface,Visible,%ScriptFile%,Interface,bvl_DestCfg_Basic,False
+    WriteInterface,Visible,%ScriptFile%,Interface,bvl_DestCfg_Advanced,True
     WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_Exit_16.png
-	WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Hide Advanced Options"
+    WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Hide Advanced Options"
   End
   Else,Set,%Toggle%,False
 End
 Else,Begin
   Set,%Toggle%,False
+  WriteInterface,Visible,%ScriptFile%,Interface,bvl_DestCfg_Basic,True
+  WriteInterface,Visible,%ScriptFile%,Interface,bvl_DestCfg_Advanced,False
   WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_16.png
   WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
 End
@@ -440,13 +444,11 @@ WriteInterface,Visible,%ScriptFile%,Interface,bvl_TechBench,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,web_TechBench,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_BaseWim,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cmb_BaseWim,%Toggle%
-WriteInterface,Visible,%ScriptFile%,Interface,bvl_DestCfg,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,fb_OutputDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_OutputDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,fb_IsoOutputDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,lbl_IsoOutputDir,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,txt_YProgramsDirName,%Toggle%
-WriteInterface,Visible,%ScriptFile%,Interface,cb_RunFromWim,%Toggle%
 
 System,EndLocal
 
@@ -499,13 +501,14 @@ lbl_SrcInstallImage="'install.wim' Image:",1,1,29,244,94,18,8,Normal
 cmb_SrcInstallImage="[Please select a valid source]",1,4,130,237,474,21,"[Please select a valid source]",_GetSourceWimImage_,True
 lbl_ImageInfo="Image Info:",1,1,64,274,60,16,8,Normal
 lbl_ImgInfo=,1,1,131,274,474,16,8,Bold
-bvl_DestCfg="Configure Destination",0,12,5,313,625,140,8,Bold
-lbl_OutputDir="Output Dir:",0,1,17,339,70,16,8,Bold
-fb_OutputDir=%BaseDir%\Output\%ProjectTitle%\,0,13,94,333,525,20,dir,"Title=Select the directory where the final build will be saved","__The directory where the final build will be saved. (eg. BOOT.WIM, Programs, etc.)"
-lbl_IsoOutputDir="ISO Dir:",0,1,17,370,70,16,8,Bold
-fb_IsoOutputDir=%BaseDir%\Output\,0,13,94,364,526,20,dir,"Title=Select the directory where the final ISO file will be saved","__The directory where the final ISO file will be saved."
-txt_YProgramsDirName="Ext. Programs folder:",0,0,94,417,200,21,Programs,"__The name of the 'Programs' folder on the final media (CD/DVD/USB).#$xChanging the name of the Programs folder can be useful if you run more then one WinPE from a single USB drive.#$x#$xChanges will take effect on the next build."
-cb_RunFromWim="Run all programs from RAM (Boot.wim)",0,3,341,417,215,18,False,"__Select this option to pack all programs into Boot.wim regardless of individual script settings.#$x#$xRequired for PXE/Network boot."
+bvl_DestCfg_Basic="Configure Destination",1,12,5,313,625,65,8,Bold
+bvl_DestCfg_Advanced="Configure Destination",0,12,5,313,625,140,8,Bold
+cb_RunFromWim="Run all programs from RAM (Boot.wim)",1,3,15,342,215,18,False,"__Select this option to pack all programs into Boot.wim regardless of individual script settings.#$x#$xRequired for PXE/Network boot."
+txt_YProgramsDirName="Ext. Programs folder:",0,0,394,342,200,21,Programs,"__The name of the 'Programs' folder on the final media (CD/DVD/USB).#$xChanging the name of the Programs folder can be useful if you run more then one WinPE from a single USB drive.#$x#$xChanges will take effect on the next build."
+lbl_OutputDir="Output Dir:",0,1,17,389,70,16,8,Bold
+fb_OutputDir=%BaseDir%\Output\%ProjectTitle%\,0,13,94,383,525,20,dir,"Title=Select the directory where the final build will be saved","__The directory where the final build will be saved. (eg. BOOT.WIM, Programs, etc.)"
+lbl_IsoOutputDir="ISO Dir:",0,1,17,420,70,16,8,Bold
+fb_IsoOutputDir=%BaseDir%\Output\,0,13,94,414,526,20,dir,"Title=Select the directory where the final ISO file will be saved","__The directory where the final ISO file will be saved."
 
 [InterfaceEncoded]
 Advanced_Exit_16.png=705,1048

@@ -2,15 +2,60 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release UNRELEASED
+## Release 2023-03-28
 
 ### Added
+- Total Commander script
+- Default Ramdrive now uses Arsenal Image Mounter. This modern driver developed by the author of ImDisk solves some compatibility issues with modern software. The old ImDisk ramdrive script continues to be available in PhoenixPE, though ImDisk development has ceased.
+  * Modern applications that utilize the Windows volume manger API's will work correctly
+  * Dynamically allocated Ramdisks can be used, in addition to traditional fixed-size ramdisks.
+  * Support for mounting BitLocker-protected volumes.
+- New option in Tweaks > Visual Effects to enable/disable rounded corners in Win11. Visual Effects are now enabled by default.
+- Added Multi-Monitor option for RDP client sessions.
+- iSCSI script to include GUI components of the iSCSI Initiator. 
+  * Note: Using iSCSI Initiator with a Win11 source currently requires the Components > Event Logging script to be enabled (Issue #30).
 
 ### Changed
+- Audio script improvements
+  * Updated mpeg123 to v1.31.3
+  * added default startup sound
+- .Net 6 runtime updated to v6.0.15
+- AgentRansack updated to v2022 build 3367
+- Bootice script now makes use of JFX's extensions to support multiple languages, DPI support, and dark mode.
+- CPU-Z updated to v.2.05.1
+- DesktopInfo updated to v3.10.1
+- DiskGenius updated to v5.5.0.1488
+- EaseUS Data Recovery Wizard updated to v15.8.1.0
+- FurMark updated to v1.33.0.0
+- Google Chrome updated to v111.0.5563.111
+- HWinfo updated to v7.40
+- MPC-BE updated to v1.6.6
+- Macrium Reflect updated to v8.1.7279
+- Moved the "Run All Programs from RAM" checkbox from advanced to basic interface on Config Source script.
+- Notepad++ updated to v8.5.1.0
+- Notepad3 updated to 6.23.203.2 - fixed broken download URL
+- OpenShell updated to v4.4.189
+- PowerShell Core updated to v7.3.3
+- Rufus updated to v3.22
+- Switch to Admin now allows swapping back and forth between Admin and SYSTEM sessions.
+- Updated WinNTSetup to 5.3.0
+- Ventoy updated to v1.0.90
+- Visual C++ 14 Runtime updated to v14.34.31938.0
+- WinMerge updated to v2.16.28
+- WizTree updated to v4.13
 
 ### Fixed
-
+- **Audio now works under the SYSTEM account!** Special thanks to Noel Blanc for the hours spent debugging and analyzing the issue.
 - Fixed dependencies for newer versions of PotPlayer
+- Fixed a bug in PhoenixAPI AddShortcut that did not properly handle start Minimized or start Maximized.
+- Fixed an issue that could cause the ISO file not to be pre-selected in Rufus.
+- Fixed %SetupFile% was not defined in Dependencies.script
+- Fixed a bug in Network script that could cause .xml wireless profiles not to import correctly.
+- Fixed theme signature check bypass for newer Win versions
+- Fixed extraction of NSudo binary
+- Fixed download button on WinMailPassView script.
+- Fixed a bug in RDP script that prevented NLA from being configured in the connection profile.
+- Fixed an issue with Ventoy where the latest version was not always extracted after downloading.
 
 ### Removed
 
@@ -81,7 +126,7 @@ Notable changes to the PhoenixPE project.
 - Fixed an intermittent issue with the transparent icon overlay that caused black icon on explorer refresh. 
 
 ### Removed
-- Removed depreciated Techbench ISO download link in Config Source. Replaced with alternative ISO download link (https://files.rg-adguard.net/). Best practice remains to use the Download Source ISO button to use Fido, and use  rg-adguard as a backup.
+- Removed depreciated Techbench ISO download link in Config Source. Replaced with alternative ISO download link (https://files.rg-adguard.net/). Best practice remains to use the Download Source ISO button to use Fido, and use rg-adguard as a backup.
 
 ## Release 2022-12-25
 
