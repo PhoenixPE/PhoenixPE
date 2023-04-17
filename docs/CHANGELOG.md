@@ -5,6 +5,8 @@ Notable changes to the PhoenixPE project.
 ## Release UNRELEASED
 
 ### Added
+- HDDTune - Hard-drive diagnostics
+- Nirsoft MultiMonitorTool - Configure multiple monitors and set max resolution on startup.
 
 ### Changed
 

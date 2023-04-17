@@ -1,0 +1,316 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=HDTune
+Description=(v2.55/v5.75) HD Tune Pro is a hard disk/SSD utility with many functions. It can be used to measure the drive's performance, scan for errors, check the health status (S.M.A.R.T.), securely erase all data and much more.
+Author=Homes32
+Level=5
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2022-12-25
+
+[Variables]
+%ProgramFolder%="HDTune"
+%ProgramExe-Free%="HDTune.exe"
+%ProgramExe-Pro%="HDTunePro.exe"
+%ProgramVersion-Free%=255
+%ProgramVersion-Pro%=575
+%DownloadURL-Free%=http://www.hdtune.com/files/hdtune_%ProgramVersion%.exe
+%DownloadURL-Pro%=http://www.hdtune.com/files/hdtunepro_%ProgramVersion%_trial.exe
+%SetupFile-Free%="hdtune_%ProgramVersion-Free%.exe"
+%SetupFile-Pro%="hdtunepro_%ProgramVersion-Pro%_trial.exe"
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+Run,%ScriptFile%,SelectRelease
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
+
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+Echo,"Configuring %ScriptTitle%..."
+RegLoadHives
+RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\EFD Software\HDTunePro","All Disks",0
+If,%cmb_TempUnits%,Equal,"°C",Begin
+  // Pro
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\EFD Software\HDTunePro","Temperature Units",1
+  // Free
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\WOW6432Node\HDTune","Temperature Units",1
+End
+Else,Begin
+  // Pro
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\EFD Software\HDTunePro","Temperature Units",2
+  // Free
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\WOW6432Node\HDTune","Temperature Units",2
+End
+RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\EFD Software\HDTunePro","Test Parameters 1","F4 95 52 7F 6D 44 04 4A 3E B4 A8 81 2B AB FD 98"
+RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\EFD Software\HDTunePro","Test Parameters 2","F4 95 52 7F 6D 44 04 4A 3E B4 A8 81 2B AB FD 98"
+RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\EFD Software\HDTunePro","Test Parameters 6","F4 95 52 7F 6D 44 04 4A 3E B4 A8 81 2B AB FD 98"
+RegUnloadHives
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
+// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting files..."
+InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1,CDIR={App}
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+Run,%ScriptFile%,SelectRelease
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR,Referer=http://www.hdtune.com/download.html
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#SelectRelease#]
+// ===============================================================================================================================
+// Name...........: SelectRelease
+// Description....: Configure the script to use the selected release.
+// Syntax.........: Run,%ScriptFile%,SelectRelease
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Configures the value of: %DownloadURL%, %ProgramExe%, %SetupFile%, %ProgramVersion%
+// Related........: 
+// ===============================================================================================================================
+[SelectRelease]
+Echo,"Processing the selected release..."
+If,%rbtn_Free%,Equal,True,Begin
+  Set,%ProgramVersion%,%ProgramVersion-Free%
+  Set,%DownloadURL%,%DownloadURL-Free%
+  Set,%SetupFile%,%SetupFile-Free%
+  Set,%ProgramExe%,%ProgramExe-Free%
+End
+Else,If,%rbtn_Pro%,Equal,True,Begin
+  Set,%ProgramVersion%,%ProgramVersion-Pro%
+  Set,%DownloadURL%,%DownloadURL-Pro%
+  Set,%SetupFile%,%SetupFile-Pro%
+  Set,%ProgramExe%,%ProgramExe-Pro%
+End
+Else,Halt,"INTERNAL LOGIC ERROR: Invalid Release selected."
+
+[#LaunchProgram#]
+// ===============================================================================================================================
+// Name...........: LaunchProgram
+// Description....: Unpack and launch the program.
+// Syntax.........: Run,%ScriptFile%,LaunchProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_LaunchProgram
+// ===============================================================================================================================
+[LaunchProgram]
+Echo,"Launching %ScriptTitle%..."
+Run,%ScriptFile%,SelectRelease
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Diagnostics & Repair"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"HDTune"
+WriteInterface,Value,%ScriptFile%,Interface,rbtn_Free,True
+WriteInterface,Value,%ScriptFile%,Interface,rbtn_Pro,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TempUnits,"°C"
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"HD Tune Pro is a hard disk/SSD utility with many functions. It can be used to measure the drive's performance, scan for errors, check the health status (S.M.A.R.T.), securely erase all data and much more.#$x#$xThe HDTune Free edition is free for Personal use.#$x#$xThe HDTune Pro Trial edition may be used for 15 days, after which you must purchases a license.#$x#$xOn first run this script will download the setup file (~2 MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_LaunchProgram="Launch HDTune",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,http://www.hdtune.com/
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show/Hide Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"Diagnostics & Repair"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,HDTune
+bvl_DownloadRelease=,1,12,150,50,230,25
+lbl_Release=Release:,1,1,157,58,48,16,8,Bold
+rbtn_Free=Free,1,11,205,53,48,20,True
+rbtn_Pro="Pro (15-day trial)",1,11,256,53,104,20,False
+bvl_Options=Options,1,12,150,90,230,184,8,Bold
+Lbl_TempUnits="Temp Units:",1,1,160,113,65,16,8,Normal
+cmb_TempUnits=°C,1,4,225,108,53,21,°C,°F
+
+[InterfaceEncoded]
+play-hot.png=841,1220
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Advanced_16.png=2000,2768
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+
+[AuthorEncoded]
+HDTune_80.png=10000,13432
+Logo=HDTune_80.png
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-HDTune_80.png]
+lines=3
+0=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
+1=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
+2=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
+3=nri6XS3wSC1R1t7fi+T6Va4ZUDB+c6uBRAUTVWLF+GaZocPHSISDhEOBqlt7OT3p4eLMtESsFL+/ZRq9eqiwcGbp2azj3hui7xWJTc9DQPP7LnbfnFord02LCzo4NbPnAzqqJRLlebk5h6yDC0L49lJn6+u6tbURWVmUKBVw4caJw3qyq6YXLrLe/H91weeewJqpUKoXCY67ZfTTgSwrZsDh85wsXhocqaVatumSkWn/Zcl0QixsTkJA8/soe3e71l466WaXL1tqtYsngx9fpsK5xKJOz88ujY2B+EwrFEIhYnl5vm9LlzjXZZXaejs4t4PM7o6DC1ao2rNm8kHApx4uRJkqkkx48fZ9PG9XfmctPfqrt1IuEwqVSSv/7m31Eql//tAJxdPd1d3PbBW3BdD7fZNmLoRq/nu9+ZKZS2dHd2I6QkN53DdT1uvfU2bNtm30t7QYKiKjy8ezftHa20t6ZH0un03+Ry+S9Uq1UMQycUcvju/d+jVCrxTqy35TcTHNvmox++jUQ8RqlUAUVFU9Wwbui/nclkfqe1tTNiO3az2ypASkFLKoWUkoce2c261StPKar2MbdeP+8HQdE0DdTmwf47pby3FeBsBnPlurVcs/1qiqVG1VtRVRzHviE3Pf01KVjU1d1DvVbD9zySqRR7Ht/DQP+Cs7ZlX1er14c1VSESjRCLRohEwnz73l2cPHWad3K97T+809XZwS3vvxkVlbrrNcv6RgtS3j0+kf3UggX9eJ7LawdfIxGPnU0mk9srlUpGVaG7s5PpfJ4DBw9z5Ngx/jWsd+y3s2695f0s6OulXK42KzAajmP9UnZq6g8r5XIK5KlwOHJDpVIddj2XttY0pXKZ+3Y9cEm+/O8YIMDSJYu5dvvVKKrWqHpLiRBBGkm3HwQjtVotW6tVm2P2NR5+dM9lnf//7gECpJJJ3nvTDXS0tVMqlQmaDetSNFrYdE1jbDzDY48/NVfmehfgGxQlBhb2E42EL3tLEomCwsHDh9/0SvK769317np3vbveXe/4+n9FT6f7BQKyZQAAAABJRU5ErkJggnic4/VwCSnNS423MNAryEtnGAUjDAio45e3U8+LZmQAAHcABdaxLW7MAQAAAAIAAAAlAAAAECcAAAAAAAABAAAAAAAAAAAAAAA
