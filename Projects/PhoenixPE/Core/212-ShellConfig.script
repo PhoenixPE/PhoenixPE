@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.0.0.0
-Date=2019-10-20
+Version=1.1.0.0
+Date=2023-05-17
 
 [TODO]
 // Finish RunOnceEx
@@ -59,6 +59,13 @@ Run,%ScriptFile%,Personalize
 Run,%ScriptFile%,Config-SoftwareHive
 Run,%ScriptFile%,Config-SystemHive
 Run,%ScriptFile%,RunOnceEx
+
+If,%SourceVer%,Bigger,10.0.19041.0,If,%SourceVer%,Smaller,10.0.19042.0,Begin
+  // Source version is Win 20H2 - See if we need to fix SxS
+  StrFormat,FileName,%SourceBaseWim%,%tmp_BaseFileName%
+  If,%tmp_BaseFileName%,Equal,"WinRE.wim",Run,%ScriptFile%,Fix-20H2-WinRE-SxS
+  Set,%tmp_BaseFileName%,Nil
+End
 
 // Cleanup
 RegHiveUnload,Tmp_Default
@@ -311,6 +318,60 @@ RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Keyboard","InitialKeyboardIndicator
 
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx","Title","RunOnceEx"
 RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx","Flags",16
+
+[#Fix-20H2-WinRE-SxS#]
+// ===============================================================================================================================
+// Name...........: Fix-20H2-WinRE-SxS
+// Description....: Fix SideBySide version mismatch between WinRE.wim and Install.wim
+//
+//                  M$ does not always update WinRE.wim so we can end up with a SideBySide config mismatch between WinRE SOFTWARE
+//                  and the Install.wim SOFTWARE hives. This causes programs like Paint, Wordpad, etc. to crash with errors like
+//                  "The application has failed to start because the side-by-side configuration is incorrect". 
+//                  Because we are using SxS files from the base WinRE.wim and the SOFTWARE hive from Install.wim we need to
+//                  update the registry with the correct .dll versions included in WinRE.wim\Windows\WinSxS folder.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........:
+// ===============================================================================================================================
+[Fix-20H2-WinRE-SxS]
+If,ExistDir,"%TargetWindows%\WinSxS\x86_microsoft.windows.common-controls_*_6.0.19041.1_*",Begin
+  // Fix 10.0.19541.508 Full Software Registry (@="6.0.19041.488" vs WinSxS\x86_microsoft.windows.common-controls_*_6.0.19041.1_none_*)
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","","5.82.19041.1"
+  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","5.82.19041.1",01
+  If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","5.82.19041.488",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","5.82.19041.488"
+  
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","","6.0.19041.1"
+  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","6.0.19041.1",01
+  If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","6.0.19041.488",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","6.0.19041.488"
+End
+
+If,ExistDir,"%TargetWindows%\WinSxS\amd64_microsoft.windows.common-controls_*_6.0.19041.1_*",Begin
+  // Fix 10.0.19541.508 Full Software Registry (@="6.0.19041.488" vs WinSxS\amd64_microsoft.windows.common-controls_*_6.0.19041.1_none_*)
+  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","5.82.19041.1",01
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","","5.82.19041.1"
+  If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","5.82.19041.488",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","5.82.19041.488"
+  
+  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","6.0.19041.1",01
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","","6.0.19041.1"
+  If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","6.0.19041.488",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","6.0.19041.488"
+End
+
+If,ExistDir,"%TargetWindows%\WinSxS\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.0.19041.1_*",Begin
+  // Fix GdiPlus Full Software Registry (@="1.0.19041.264" vs amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_* @="1.0.19041.1)
+  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","1.0.19041.1",01
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","","1.0.19041.1"
+  If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","1.0.19041.264",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","1.0.19041.264"
+End
+
+If,ExistDir,"%TargetWindows%\WinSxS\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.19041.1_*",Begin
+  // Fix GdiPlus Full Software Registry (@="1.1.19041.264" vs amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_* @="1.1.19041.1)
+  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","1.1.19041.1",01
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","","1.1.19041.1"
+  If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","1.1.19041.264",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","1.1.19041.264"
+End
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
