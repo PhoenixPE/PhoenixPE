@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.1.2.0
-Date=2022-12-21
+Version=1.1.3.0
+Date=2023-06-21
 
 [Variables]
 // Minimum PEBakery version that has the command/feature set that is compatible with PhoenixPE.
@@ -46,17 +46,17 @@ Date=2022-12-21
 Echo,"Starting Pre-Flight Check..."
 
 Run,%ScriptFile%,CheckEngine
-Run,%ScriptFile%,CheckOutputDir
+Run,%ScriptFile%,CheckPaths
 If,%cb_CheckFreeSpace%,Equal,True,Run,%ScriptFile%,CheckDiskSpace
 Run,%ScriptFile%,CheckTools
 If,%cb_CheckForSupportedBuildVer%,Equal,True,Run,%ScriptFile%,CheckVerifiedBuilds
 Run,%ScriptFile%,CheckWinREVersion
 
-[#CheckOutputDir#]
+[#CheckPaths#]
 // ===============================================================================================================================
-// Name...........: CheckOutputDir
+// Name...........: CheckPaths
 // Description....: Verify that %OutputDir% is not a root drive (ie. d:\). This will cause issues with creating/cleaning up
-//                  the build environment. 
+//                  the build environment.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -64,11 +64,12 @@ Run,%ScriptFile%,CheckWinREVersion
 // Remarks........: 
 // Related........: Called by [Process]
 // ===============================================================================================================================
-[CheckOutputDir]
+[CheckPaths]
 System,SetLocal
+// Check if output is the root of a drive
 StrFormat,SPLIT,%OutputDir%,"\",0,%NumSplits%
 If,%NumSplits%,Equal,1,Begin
-  Message,"Error: Setting the OutputDir to the root of a drive is not supported.",Error
+  Message,"Setting the OutputDir to the root of a drive is not supported.",Error
   Halt,"Error: Setting the OutputDir to the root of a drive is not supported."
 End
 System,EndLocal
@@ -218,7 +219,7 @@ Halt,"The build cannot continue because [ #1 ] is missing."
 // ===============================================================================================================================
 [GetWaikTools]
 Echo,"Downloading required tools from Windows 10 ADK...#$x#$xThis will only need to be done once."
-ShellExecute,Open,"%Tools%\%HostArch%\GWT.exe","-Win10 -Win10dism -Silent -folder:%ProjectTemp%"
+ShellExecute,Open,"%Tools%\%HostArch%\GWT.exe","-Win10 -Win10dism -Silent -folder:#$q%ProjectTemp%#$q"
 DirCopy,"%ProjectTemp%\ADK_6\x86\*.*","%Tools%\x86"
 DirCopy,"%ProjectTemp%\ADK_6\amd64\*.*","%Tools%\x64"
 If,Not,ExistFile,"%Tools%\x64\Oscdimg\oscdimg.exe",Halt,"Error downloading required Windows 10 ADK tools. The build cannot continue."
