@@ -35,15 +35,14 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.4.0
-Date=2023-04-29
-Interface=Interface
+Version=1.0.5.0
+Date=2023-06-21
 
 [Variables]
 %ProgramFolder%="simplewall"
 %ProgramVersion%=3.6.7
 %DownloadURL%=https://github.com/henrypp/simplewall/releases/download/v.%ProgramVersion%/simplewall-%ProgramVersion%-bin.zip
-%DownloadProfilesURL%=https://raw.githubusercontent.com/henrypp/simplewall/master/bin/profile_internal.sp
+%DownloadProfilesURL%=https://raw.githubusercontent.com/henrypp/simplewall/master/bin/profile_internal.xml
 %DownloadLangURL%=https://raw.githubusercontent.com/henrypp/simplewall/master/bin/simplewall.lng
 %ProgramExe%="simplewall.exe"
 %SetupFile%="simplewall.zip"
@@ -108,7 +107,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"x -y %ProgramsCache%\%ProgramFolder%\%SetupFile% -o%ProjectTemp%\%ProgramFolder%"
+7z,"x -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -o#$q%ProjectTemp%\%ProgramFolder%#$q"
 
 // .lng file has Read-Only filesystem attribs so we run into issues if we try to copy over it
 FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\simplewall.lng"
