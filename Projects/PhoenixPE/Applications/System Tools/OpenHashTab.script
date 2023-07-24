@@ -30,24 +30,25 @@
 
 [Main]
 Title=OpenHashTab
-Description=(v3.0.2) OpenHashTab is a shell extension for conveniently calculating and checking file hashes from file properties.
+Description=(v3.0.4) OpenHashTab is a shell extension for conveniently calculating and checking file hashes from file properties.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.1
-Date=2022-07-08
+Version=1.0.1.0
+Date=2023-07-23
 
 [Variables]
 %ProgramFolder%="OpenHashTab"
 %SetupFile%="OpenHashTab_Setup.exe"
-%ProgramVersion%=3.0.2
+%ProgramVersion%=3.0.4
 %DownloadURL%=https://github.com/namazso/OpenHashTab/releases/download/v%ProgramVersion%/OpenHashTab_setup.exe
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 RunFromRam
+If,%SourceArch%,Equal,x86,Exit,"OpenHashTab does not support building from an x86 source image."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
@@ -56,14 +57,19 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,
 DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 
-// ,1 - x86 | ,2 - x64 | ,3 - ARM64
+// Debug symbols take up alot of space...
+FileDelete,"%ProjectTemp%\%ProgramFolder%\{app}\*.pdb"
+
+// ,1 - x64 | ,2 - ARM64
 If,%SourceArch%,Equal,x64,Begin
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*x64*.dll","%TargetPrograms%\%ProgramFolder%"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\OpenHashTab,2.dll","%TargetPrograms%\%ProgramFolder%\OpenHashTab.dll"
+  InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll, *.exe",1
+  InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
 End
 Else,Begin
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*Win32*.dll","%TargetPrograms%\%ProgramFolder%"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\OpenHashTab,1.dll","%TargetPrograms%\%ProgramFolder%\OpenHashTab.dll"
+  InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll, *.exe",2
+  InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe"
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
 End
 
 ///////////////////////////////////////////////////////////////////////////////////
