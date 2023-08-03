@@ -35,8 +35,8 @@ Author=Homes32
 Level=6
 Selected=False
 Mandatory=False
-Version=1.1.0.0
-Date=2023-07-15
+Version=1.1.1.0
+Date=2023-08-03
 
 [Variables]
 %DismLog%=%TargetWindows%\Logs\DISM\dism.log
@@ -191,7 +191,7 @@ ShellExecute,Hide,%ProjectTemp%\DrvInstPatch.exe,"P %TargetSystem32%\drvinst.exe
 Echo,"Extracting ExportHostDrv.exe..."
 System,ErrorOff,1
 UserInput,DirPath,C:\,%ExtractToPath%,"Title=Select the location to save ExportHostDrv.exe"
-If,Not,%ExtractToPath%,Equal,"",ExtractFile,%ScriptFile%,x86,ExportHostDrv.exe,%ExtractToPath%
+If,ExistVar,%ExtractToPath%,ExtractFile,%ScriptFile%,x86,ExportHostDrv.exe,%ExtractToPath%
 
 [#BrowseX86#]
 // ===============================================================================================================================
