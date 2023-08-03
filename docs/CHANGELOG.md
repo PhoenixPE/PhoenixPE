@@ -2,16 +2,54 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release UNRELEASED
+## Release 2023-08-03
 
 ### Added
-- HDDTune - Hard-drive diagnostics
+- Added "disabled" state icon for scripts with no advanced options.
+- HDDTune - Hard-drive diagnostics.
 - Nirsoft MultiMonitorTool - Configure multiple monitors and set max resolution on startup.
+- Dependencies Added an option to specify default tree build behavior.
+- Added a button in the Driver Integration script that extracts ExtractHostDrv.exe to a user specified directory or USB drive. Useful if you want to extract 3rd party drivers from other systems.
 
 ### Changed
+- .Net 6 runtime updated to v6.0.20
+- 7zip script and tools updated to v23.01
+- AIDA64 updated to v6.90.6500
+- Attribute Changer updated to v11.20
+- CPU-Z updated to v.2.06.1
+- DesktopInfo updated to v3.10.2
+- DMDE updated to v4.0.6.806
+- FurMark updated to v1.35.0.0 (Now embedded in script due to download protections)
+- Google Chrome updated to v115.0.5790.99
+- GPU updated to v2.54.0
+- grepWin updated to v2.0.15
+- HDClone updated to X.4
+- HWInfo updated to v7.60
+- KeyboardTestUtility updated to v2.1.0
+- LibreOffice updated to v7.5.4
+- MPC-BE updated to v1.6.8.5
+- Notepad++ updated to v8.5.4.0
+- Open-Shell updated to v4.4.190
+- OpenHashTab updated to v3.0.4 (Note: OpenHashTab has dropped x86 support as of this release)
+- Powershell Core updated to v7.3.6
+- WinMerge updated to v2.16.30
+- WinSCP updated to v6.1.1
+- WizTree updated to v4.14
+- Zulu JRE11 updated to v11.66.15
+- Zulu JRE17 updated to v17.44.15
+- Visual C++ 14 Runtime updated to v14.36.32532.0
 
 ### Fixed
 - Fixed download links for prime95
+- Fixed a SideBySide version mismatch with gdiplus and common controls when building from a 20H2 source (WinRE).
+- Fixed a broken download link in BeyondCompare script.
+- Fixed broken profile and language download links for simplewall. (#44)
+- Fixed unquoted paths in FastStone script that could cause the build to fail if the path contains spaces. (#50)
+- Fixed unquoted paths in simplewall script that could cause the build to fail if the path contains spaces. (#50)
+- Fixed GWT would fail to download DISM is the path contained a space. (#50)
+- Fixed FIDO failure to launch if the path contained a space. (#50)
+- Fixed a situation where resetting defaults in Core-Registry would not reset Global variables %RegistrySoftwareSource% and %RegistryDriverSource%
+- Fixed 32bit dependencies for wlanapi.dll when running under Win11 in LizNetworkScanner script.
 
 ### Removed
 
