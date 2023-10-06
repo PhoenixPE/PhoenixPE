@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.5.0
-Date=2023-06-20
+Version=1.1.6.0
+Date=2023-09-29
 
 [Variables]
 %ProgramFolder%="Beyond Compare 4"
@@ -78,22 +78,23 @@ If,%cb_ShellExt%,Equal,True,Run,%ScriptFile%,RegisterShellExtension
 // BCClipboard
 If,%cb_ClipboardCompare%,Equal,True,AddAutoRun,PostShell,NoWait,"Starting BCClipboard","%PEPrograms%\%ProgramFolder%\BCClipboard.exe"
 
-// Copy settings from Host
 If,%rb_IncludeSettingsFromHost%,Equal,True,Begin
+  // Copy settings from Host
   System,GetEnv,"APPDATA",%BCompare-AppData%
   Set,%BCompare-AppData%,"%BCompare-AppData%\Scooter Software\Beyond Compare 4"
   If,ExistDir,%BCompare-AppData%,Begin
     Echo,"Copying settings from host [%BCompare-AppData%]..."
     FileCopy,"%BCompare-AppData%\*.*","%TargetAppData%\Scooter Software\Beyond Compare 4"
   End
+  Else,Echo,"WARNING: No BeyondCompare AppData was found on the host system.",WARN
 End
-
-// Copy settings from folder
-If,%rb_IncludeSettingsFromFolder%,Equal,True,Begin
+Else,If,%rb_IncludeSettingsFromFolder%,Equal,True,Begin
+  // Copy settings from folder
   If,Not,%fb_IncludeSettingsDir%,Equal,"",If,ExistDir,%fb_IncludeSettingsDir%,Begin
     Echo,"Copying settings from folder [%fb_IncludeSettingsDir%]..."
     FileCopy,"%fb_IncludeSettingsDir%\*.*","%TargetAppData%\Scooter Software\Beyond Compare 4"
   End
+  Else,Echo,"WARNING: The specified BeyondCompare settings folder does not exist.",WARN
 End
 
 RegUnloadHives
