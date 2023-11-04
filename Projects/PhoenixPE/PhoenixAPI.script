@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.7.0.0
-Date=2023-01-15
+Version=1.8.0.0
+Date=2023-09-21
 Level=0
 Selected=None
 
@@ -60,6 +60,7 @@ PinShortcut=Run,%API%,_PhoenixAPI_PinShortcut
 DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
 FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
+FileSearch=Run,%API%,_PhoenixAPI_FileSearch
 InnoCleanup=Run,%API%,_PhoenixAPI_InnoCleanup
 InnoRename=Run,%API%,_PhoenixAPI_InnoRename
 
@@ -743,6 +744,8 @@ System,EndLocal
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Wildcards are not supported. If you need wildcards use FileCopy instead.
+//                  Note: It's NOT safe to blindly copy .mun files here as we have no idea if any Windows directories exist
+//                        on the drive we are copying from or if they match our source/arch.
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_FileCopyEx]
@@ -754,24 +757,23 @@ If,#2,Equal,"",Halt,"FileCopyEx Syntax Error: Destination was not specified."
 GetParam,1,%SrcFile%
 GetParam,2,%DestPath%
 
-StrFormat,Pos,%SrcFile%,*,%WildCard%
-If,Not,%WildCard%,Equal,0,Halt,"FileCopyEx Syntax Error: Wildcards are not supported."
-StrFormat,Pos,%SrcFile%,?,%WildCard%
-If,Not,%WildCard%,Equal,0,Halt,"FileCopyEx Syntax Error: Wildcards are not supported."
+ForEach,%WildCard%,"*|?",Begin
+  StrFormat,Pos,%SrcFile%,%WildCard%,%WildCardPos%
+  If,Not,%WildCardPos%,Equal,0,Halt,"FileCopyEx Syntax Error: Wildcards are not supported."
+End
 
+StrFormat,CTrim,%DestPath%,"\",%DestPath%
+
+If,Not,ExistDir,%DestPath%,DirMake,%DestPath%
 FileCopy,%SrcFile%,%DestPath%
-
-StrFormat,FileName,%SrcFile%,%Filename%
-StrFormat,Split,%DestPath%,"\",1,%DriveLtr%
-If,ExistFile,"%DriveLtr%\Windows\SystemResources\%Filename%.mun",FileCopy,"%DriveLtr%\Windows\SystemResources\%Filename%.mun",APPEND
 
 StrFormat,FileName,%SrcFile%,%FileName%
 StrFormat,Ext,%SrcFile%,%FileExt%
 StrFormat,DirPath,%SrcFile%,%SrcDirPath%
-StrFormat,DirPath,%DestPath%,%DestDirPath%
+StrFormat,DirPath,"%DestPath%\",%DestDirPath%
 
 ForEach,%Language%,%SourceFallbackLang%,Begin
-  If,%FileExt%,Equal,.msc,FileCopy,"%SrcDirPath%%Language%\%FileName%","%DestPath%\%Language%\%FileName%"
+  If,%FileExt%,Equal,".msc",FileCopy,"%SrcDirPath%%Language%\%FileName%","%DestPath%\%Language%\%FileName%"
   Else,If,ExistFile,"%SrcDirPath%%Language%\%FileName%.mui",FileCopy,"%SrcDirPath%%Language%\%FileName%.mui","%DestDirPath%%Language%\%FileName%.mui"
 End
 
@@ -839,7 +841,7 @@ If,%Action%,Equal,"AppendList",Begin
   If,Not,ExistFile,%BulkFileList%,FileCreateBlank,%BulkFileList%
   TXTAddLine,%BulkFileList%,%GLOB%,APPEND
   TXTAddLine,%BulkFileList%,\Windows\SystemResources\%FileName%.mun,APPEND
-  If,%ExtractMui%,Equal,True,ForEach,%Language%,%SourceFallbackLang%,Run,%API%,__PhoenixAPI_RequireFileEx_ProcessMUI,%GLOB%,%Language%,%BulkFileList%
+  If,%ExtractMui%,Equal,True,ForEach,%Language%,%SourceFallbackLang%,Run,%API%,__PhoenixAPI_RequireFileEx_Process_MUI,%GLOB%,%Language%,%BulkFileList%
 End
 Else,If,%Action%,Equal,"ExtractFile",Begin
   Echo,"Extracting required file(s) [%GLOB%]..."
@@ -847,7 +849,7 @@ Else,If,%Action%,Equal,"ExtractFile",Begin
   If,Not,ExistFile,%SingleFileList%,FileCreateBlank,%SingleFileList%
   TXTAddLine,%SingleFileList%,%GLOB%,APPEND
   TXTAddLine,%SingleFileList%,\Windows\SystemResources\%FileName%.mun,APPEND
-  If,%ExtractMui%,Equal,True,ForEach,%Language%,%SourceFallbackLang%,Run,%API%,__PhoenixAPI_RequireFileEx_ProcessMUI,%GLOB%,%Language%,%SingleFileList%
+  If,%ExtractMui%,Equal,True,ForEach,%Language%,%SourceFallbackLang%,Run,%API%,__PhoenixAPI_RequireFileEx_Process_MUI,%GLOB%,%Language%,%SingleFileList%
   WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%SingleFileList%,%TargetDir%,NOACL,NOATTRIB,NOERR,NOWARN
   FileDeleteEx,%SingleFileList%
 End
@@ -861,11 +863,11 @@ Else,Halt,"RequireFileEx Syntax Error: Invalid Action [#1]."
 
 System,EndLocal
 
-[#__PhoenixAPI_RequireFileEx_ProcessMUI#]
+[#__PhoenixAPI_RequireFileEx_Process_MUI#]
 // ===============================================================================================================================
-// Name...........: RequireFileEx_ProcessMUI
+// Name...........: RequireFileEx_Process_MUI
 // Description....: Extract a file's .mui from Install.wim
-// Syntax.........: RequireFileEx_ProcessMUI,<FilePath>,<Language>,<ListFile>
+// Syntax.........: RequireFileEx_Process_MUI,<FilePath>,<Language>,<ListFile>
 // Parameters.....: #1 FilePath - Path to the file relative to the root of Install.wim
 //                  #2 Language - Language to extract
 //                  #3 ListFile - ListFile to write the MUI path
@@ -877,7 +879,7 @@ System,EndLocal
 //                  we should check if the files exist first using WimExistFile, but it slows things down too much with large lists.
 // Related........: RequireFileEx
 // ===============================================================================================================================
-[__PhoenixAPI_RequireFileEx_ProcessMUI]
+[__PhoenixAPI_RequireFileEx_Process_MUI]
 System,SetLocal
 GetParam,1,%GLOB%
 GetParam,2,%Language%
@@ -1307,6 +1309,41 @@ While,ExistFile,#1,Begin
   End
   
 End
+
+[#_PhoenixAPI_FileSearch#]
+// ===============================================================================================================================
+// Name...........: FileSearch
+// Description....: Search for a file and return it's full path if it exists. If the file cannot be found an empty string is returned.
+// Syntax.........: FileSearch,<Directory>,<File>
+// Parameters.....: #1 Directory - The directory to search recursively for the specified file.
+//                  #2 Filter - The name of the file including it's extension to search for. (Ex. MyProgram.exe). Wildcards are supported.
+// Return values..: Success - A pipe separated list containing the full path(s) to the file.
+//                  Fail (File not found) - An Empty String
+// Author.........: Homes32
+// Remarks........: This command is a work in progress and may change without notice.
+//                  Usage: PhoenixAPI-FileSearch.a3x <PathToSearch> <SearchFilter> <OutputFile>
+//                  PathToSearch - Full path to search (iterative)
+//                  SearchFilter - Filename or filter to search for. Wildcards are supported.
+//                  OutputFile - A standard .ini formatted File
+//                    [Results] contains key=value pairs of paths found in the format of 0-n=Path where 0 is the number of results and n is the index
+//                    [String] contains one key=value pair List= where the value is a | separated list of paths
+//                  Exit codes: 0 - Success
+//                              1 - Syntax Error
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_FileSearch]
+System,SetLocal
+GetParam,1,%Path%
+GetParam,2,%SearchFilter%
+
+// Recurse the path looking for the specified file
+ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","%Tools%\a3x\PhoenixAPI-FileSearch.a3x #$q%Path%#$q #$q%SearchFilter%#$q #$q%ProjectTemp%\PhoenixAPI-FileSearch.ini#$q"
+
+// Return the result as #r
+IniRead,"%ProjectTemp%\PhoenixAPI-FileSearch.ini","String","List",%SearchResult%,"Default="
+Return,%SearchResult%
+
+System,EndLocal
 
 [#_PhoenixAPI_InnoCleanup#]
 // ===============================================================================================================================

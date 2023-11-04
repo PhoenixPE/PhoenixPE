@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2022-12-24
+Version=1.1.0.0
+Date=2023-1-04
 
 [Variables]
 %ProgramFolder%="Acronis CyberProtect"
@@ -329,35 +329,37 @@ FileCopy,"%TargetPrograms%\%ProgramFolder%\bootmenu.bin","%TargetPrograms%\%Prog
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: Acronis Cyber Protect is downloaded as a compressed.exe that contains a .msi installer, that contains a WinPE.zip file that contains the exe.
+// Remarks........: Acronis Cyber Protect is downloaded as a compressed.exe that contains a .msi installer,
+//                  that contains a zip file pretending to be a .dll, which contains a WinPE.zip file that contains the exe files.
 // Related........: 
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+WebGet,"%DownloadURL%","%ProjectTemp%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
-
-// The name of the CAB file inside the .msi to extract. This occasionally changes with new releases and needs to be updated.
-Set,%CAB%,"_*_52D78812FFC93DDE133DECBB0875BCA0"
 
 // Extract the .msi installer
 Echo,"Extracting installer..."
-7z,"e -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q AcronisCyberProtectHomeOffice.msi -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\%SetupFile%#$q AcronisCyberProtectHomeOffice.msi -o#$q%ProjectTemp%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"Failed to extract .msi from [%SetupFile%]: The code returned was [#r]."
 
 // Extract compressed WinPE.zip from .msi installer
 Echo,"Extracting WinPE.zip from installer..."
-7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\AcronisCyberProtectHomeOffice.msi#$q %CAB% -o#$q%ProjectTemp%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Failed to extract from [AcronisCyberProtectHomeOffice.msi]: The code returned was [#r]."
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\AcronisCyberProtectHomeOffice.msi","%ProjectTemp%\%ProgramFolder%"
 
-// Unpack compressed WinPE.zip
-Echo,"Decompressing WinPE.zip..."
-7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\%CAB%#$q WinPE.zip -o#$q%ProgramsCache%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Failed to extract from [%CAB%]: The code returned was [#r]."
+// Find the full path to WinPE_resources.dll
+Echo,"Decompressing WinPE Resources..."
+FileSearch,"%ProjectTemp%\%ProgramFolder%","WinPE_resources.dll"
+If,#r,Equal,"",Halt,"Failed to find [WinPE_resources.dll]: The code returned was [#r]."
+Else,List,Get,#r,1,%WinPEResPath%
+
+// Unpack compressed WinPE.zip from WinPE_resources.dll
+7z,"e -y #$q%WinPEResPath%#$q WinPE.zip -o#$q%ProgramsCache%\%ProgramFolder%#$q"
+If,Not,#r,Equal,0,Halt,"Failed to extract WinPE.zip from [%WinPEResPath%]: The code returned was [#r]."
 
 // Cleanup
+Set,%WinPEResPath%,Nil
 DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
-FileDeleteEx,"%ProgramsCache%\%ProgramFolder%\%SetupFile%"
 
 [#ToggleLicenseReg#]
 // ===============================================================================================================================
