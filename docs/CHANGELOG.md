@@ -2,6 +2,37 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release UNRELEASED
+
+### Added
+- Added FileSearch command to the PhoenixAPI to allow searching for a specific file(s) in a path.
+
+### Changed
+- AudioSrvPolicyManager patching process was modified to work with Win11 10.0.22621.1702 (Issue #58)
+- Allow copy of license file and config in OCCT script (Issue #60)
+- Rewrote AcronisCyberProtect and ATI2021 download/unpack to eliminate the need to update the name of the inner CAB container.
+- AnyDesk script will now attempt to copy the identity cert from the local users profile (Issue #59)
+- Attribute Changer updated to v11.20b
+- BeyondCompare updated to v4.4.7.28397
+- Driver Store Explorer updated to v0.11.92
+- FastStone Image Viewer updated to v7.8
+- Open-Shell updated to v4.4.191
+- Powershell Core updated to v7.3.7
+- Rufus updated to v4.2, added x64 support. (Note: Rufus dropped support for Win7 as of v4.0)
+- TotalCommander updated to v11.02 + added Ukrainian translation.
+- VeraCypt updated to v1.26.7, added Corsican language, added amd64 support.
+  * **Compatibility warning:** VeraCypt 1.26.7 drops support for TrueCrypt mode. If you need to mount or convert legacy TrueCypt volumes use v1.25.9.
+- WinNTSetup updated to v5.3.2
+- Windows Login Unlocker updated to v2.1.0.6357 and added Chinese, Dutch, French, Ukrainian translations.
+- WinSCP updated to v6.1.2
+- Ventoy updated to v1.0.96
+
+### Fixed
+- Fixed an issue with FileCopyEx that would case the file to be copied incorrectly if the destination directory did not exist.
+- Remove Copilot icon from taskbar (Win11)
+
+### Removed
+
 ## Release 2023-08-03
 
 ### Added
@@ -43,11 +74,11 @@ Notable changes to the PhoenixPE project.
 - Fixed download links for prime95
 - Fixed a SideBySide version mismatch with gdiplus and common controls when building from a 20H2 source (WinRE).
 - Fixed a broken download link in BeyondCompare script.
-- Fixed broken profile and language download links for simplewall. (#44)
-- Fixed unquoted paths in FastStone script that could cause the build to fail if the path contains spaces. (#50)
-- Fixed unquoted paths in simplewall script that could cause the build to fail if the path contains spaces. (#50)
-- Fixed GWT would fail to download DISM is the path contained a space. (#50)
-- Fixed FIDO failure to launch if the path contained a space. (#50)
+- Fixed broken profile and language download links for simplewall. (Issue #44)
+- Fixed unquoted paths in FastStone script that could cause the build to fail if the path contains spaces. (Issue #50)
+- Fixed unquoted paths in simplewall script that could cause the build to fail if the path contains spaces. (Issue #50)
+- Fixed GWT would fail to download DISM is the path contained a space. (Issue #50)
+- Fixed FIDO failure to launch if the path contained a space. (Issue #50)
 - Fixed a situation where resetting defaults in Core-Registry would not reset Global variables %RegistrySoftwareSource% and %RegistryDriverSource%
 - Fixed 32bit dependencies for wlanapi.dll when running under Win11 in LizNetworkScanner script.
 

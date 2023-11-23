@@ -69,7 +69,10 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",RequireFile,"\Windows\SysWOW64\colorad
 
 System,GetEnv,"APPDATA",%HostAppData%
 
-If,%rb_IncludeNothing%,Equal,True,Echo,"No identify certificates will be copied. This may cause issues connecting to AnyDesk servers."
+// AnyConnect generates a client certificate for communication if none exists, however because WinPE does not recognize Daylight-Savings time
+// the certificates are generated with an effective date in Standard time. This means that during DST WinPE will not recognize the certificate as valid
+// until an the difference in time has elapsed. 
+If,%rb_IncludeNothing%,Equal,True,Echo,"No identify certificates will be copied. This may cause issues connecting to AnyDesk servers during Daylight-Savings time."
 Else,If,%rb_IncludeCertFromHost%,Equal,True,Begin
   // Copy only the certificate/service information from the Host
   If,ExistFile,"%HostAppData%\AnyDesk\service.conf",FileCopy,"%HostAppData%\AnyDesk\service.conf","%TargetAppData%\AnyDesk\service.conf"
@@ -249,10 +252,10 @@ cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,Networking
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,AnyDesk
 bvl_Options=Options,1,12,150,90,381,184,8,Bold
-rb_IncludeNothing="Do not include certificates or settings (this may impact connectivity)",1,11,165,115,345,20,False,"__AnyDesk uses identity certificates for authentication. This option allows you to skip including#$xan existing AnyDesk certificate, but may result in issues connecting to AnyDesk servers."
-rb_IncludeCertFromHost="Include identity certificate from host",1,11,165,135,245,20,True,"__Copy AnyDesk identity certificate from the local user's profile."
-rb_IncludeSettingsFromHost="Include identity certificate and settings from host",1,11,165,155,270,20,False,"__Copy AnyDesk identity certificate and preferences from the local user's profile."
-rb_IncludeSettingsFromFolder="Include identity certificate and settings from this folder",1,11,165,175,298,20,False,"__Copy AnyDesk identity certificate and preferences from the specified folder."
+rb_IncludeNothing="Do not include certificates or settings (this may impact connectivity)",1,11,165,115,345,20,True,"__AnyDesk uses client certificates for authentication. This option allows you to skip including#$xan existing AnyDesk certificate, but may result in issues connecting to AnyDesk servers during DST."
+rb_IncludeCertFromHost="Include client certificates from host",1,11,165,135,245,20,False,"__Copy AnyDesk client certificates from the local user's profile."
+rb_IncludeSettingsFromHost="Include client certificates and settings from host",1,11,165,155,270,20,False,"__Copy AnyDesk client certificates and preferences from the local user's profile."
+rb_IncludeSettingsFromFolder="Include client certificates and settings from this folder",1,11,165,175,298,20,False,"__Copy AnyDesk client certificates and preferences from the specified folder."
 fb_IncludeSettingsDir=,1,13,185,198,296,20,dir,"Title=Select a folder containing AnyDesk settings","__Files and folders in this directory will be copied to AnyDesk's AppData folder."
 btn_BrowseIncludeDir=,1,8,487,198,20,20,BrowseIncludeDir,OpenFolder_16.png,True,__Browse
 

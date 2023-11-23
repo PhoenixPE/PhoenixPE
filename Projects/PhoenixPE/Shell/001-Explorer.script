@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.5.3.0
-Date=2023-01-27
+Version=1.5.4.0
+Date=2023-11-27
 
 [Variables]
 
@@ -272,7 +272,7 @@ If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d1d3a04-debb-4115-95cf-2f29da2920da}\PropertyBag","ThisPCPolicy","Hide"
 If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d1d3a04-debb-4115-95cf-2f29da2920da}\PropertyBag","ThisPCPolicy","Hide"
 
-// Show_Videos_folder
+// Show Videos folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag","ThisPCPolicy"
 RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
@@ -282,6 +282,9 @@ End
 
 // Remove "Include in Library" Context Menu
 If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\Library Location",RegDelete,HKLM,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\Library Location"
+
+//Remove Copilot from taskbar (Win11 22621.2361+)
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowCopilotButton",0
 
 // Device Setup Mgr (Eject Device & Printer Support)
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\DsmSvc",HKLM,"Tmp_System\ControlSet001\Services\DsmSvc"
