@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2024 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.1.0.0
-Date=2023-05-17
+Version=1.2.0.0
+Date=2023-12-26
 
 [TODO]
 // Finish RunOnceEx
@@ -153,10 +153,12 @@ RegWrite,HKLM,0x4,"Tmp_software\Microsoft\Windows NT\CurrentVersion\WinPE","SetC
 
 // OEM Info
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Manufacturer","PhoenixPE"
-StrFormat,Date,%Date%,"yyyy-mm-dd"
-StrFormat,Date,%Time%,"hh:nn"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Model","PhoenixPE (Build %Date% %Time%)"
+StrFormat,Date,%Date%,"yyyy.mm.dd"
+StrFormat,Date,%Time%,"hhnn"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Model","PhoenixPE (Build %Date%.%Time%)"
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportURL","https://github.com/PhoenixPE/PhoenixPE"
+ExtractFile,"%ProjectDir%\script.project","AuthorEncoded","PhoenixPE.png",%ProjectTemp%
+ConvertImage,"%ProjectTemp%\PhoenixPE.png","%TargetSystem32%\oobe\Logo\Logo.bmp",120x120
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","X:\Windows\System32\oobe\Logo\Logo.bmp"
 
 // Open with Notepad context Menu option for all files
@@ -258,7 +260,7 @@ End
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: x86 only supports up to 1024 MB.
-//                  As of Win10 1803 additional tested working sizes on x64 are: 3072, 3584, and 4094 (4096 gets auto reset to 512)
+//                  As of Win10 2004 additional tested working sizes on x64 are: 3072, 3584, and 4094 (4096 gets auto reset to 512)
 // Related........:
 // ===============================================================================================================================
 [Config-FBWF]
@@ -268,8 +270,23 @@ If,%SourceArch%,Equal,x86,Begin
 	WriteInterface,Value,%ScriptFile%,Interface,cmb_FBWFSize,1024
   End
 End
-Echo,"Configuring FBWF for [%cmb_FBWFSize% MB]..."
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",%cmb_FBWFSize%
+
+If,%SourceVer%,<=,10.0.22000.0,Begin
+  // Source is Win10
+  If,%cmb_FBWFSize%,Equal,4096,Begin
+    Echo,"Configuring FBWF for [4094 MB]..."
+    RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",4094
+  End
+  Else,If,%cmb_FBWFSize%,>,4096,Begin
+	Echo,"Win10 based WinPE does not support a FBWF cache larger then 4094 MB",WARN
+	WriteInterface,Value,%ScriptFile%,Interface,cmb_FBWFSize,4096
+  End
+End
+Else,Begin
+  // Source is Win11+
+  Echo,"Configuring FBWF for [%cmb_FBWFSize% MB]..."
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",%cmb_FBWFSize%
+End
 
 [#Config-NumlockStatus#]
 // ===============================================================================================================================
@@ -434,7 +451,7 @@ btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_Disabled_16.
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_Fbwf=Options,1,12,5,48,210,79,8,Bold
 lbl_FbwfSize="WinPE Cache Size:",1,1,15,98,101,18,8,Normal
-cmb_FbwfSize=1024,1,4,112,92,67,21,512,768,1024,2048,3072,4094,"__WinPE Cache Threshold or FBWF Cache Size.#$xLimited to 1024 MB on x86 OS.#$x#$xIncreasing the cache size will give you more writable space on the boot drive, but less RAM will be available for system use."
+cmb_FbwfSize=1024,1,4,112,92,67,21,512,768,1024,2048,3072,4096,5120,6144,7168,8192,"__WinPE Cache Threshold or FBWF Cache Size.#$xLimited to 1024 MB on x86 based builds and 4094 MB when building from a x64 Win10 source.#$x#$xIncreasing the cache size will give you more writable space on the boot drive, but less RAM will be available for system use."
 lbl_FbwfMB=MB,1,1,183,99,26,18,8,Bold
 cmb_NumlockStatus=ON,1,4,112,65,67,21,ON,OFF,BIOS
 lbl_NumlockStatus="Numlock Status:",1,1,15,72,84,16,8,Normal
