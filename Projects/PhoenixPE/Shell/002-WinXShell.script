@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2024 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2022-10-25
+Version=1.0.2.0
+Date=2023-12-03
 
 [Variables]
 %ProgramFolder%="WinXShell"
@@ -82,8 +82,14 @@ If,%cb_UseCustomFileMgr%,Equal,True,Begin
 End
 Else,JSONWrite,%ConfigFile%,"JS_FILEEXPLORER.3rd_filename",""
 
+// Add the program dir to the System PATH so we can launch from anywhere
+RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
+StrFormat,Replace,%PathVar%,"%PEPrograms%\%ProgramFolder%;","",%PathVar%
+Set,%PathVar%,"%PEPrograms%\%ProgramFolder%;%PathVar%"
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
+
 // Load Shell, should be re-written
-If,ExistFile,"%TargetSystem32%\Pecmd.ini",TXTReplace,"%TargetSystem32%\Pecmd.ini","TEXT Starting Explorer Shell...#0xFFFFFF L59 T39 $20#$xSHEL #$pWinDir#$p\explorer.exe","TEXT Starting WinXShell...#0xFFFFFF L59 T39 $20#$xSHEL #$pProgramFiles#$p\%ProgramFolder%\WinXShell.exe -winpe"
+If,ExistFile,"%TargetSystem32%\PhoenixPE.au3",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Global $g_sShell = #$qExplorer#$q","Global $g_sShell = #$qWinXShell#$q"
 
 Run,%ScriptFile%,Reg-WinXShell
 

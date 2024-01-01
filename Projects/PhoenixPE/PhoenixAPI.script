@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2024 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -38,10 +38,6 @@ Level=0
 Selected=None
 
 [Variables]
-// Defines the configuration (pre-shell) processor used for things like creating shortcuts and auto-run entries.
-// In the future this can be used to add support for replacement pre-shell processors.
-// PECMD - Use PECMD (Default)
-%_PhoenixAPI_ConfigMode%=PECMD
 
 [Macros]
 // Registry
@@ -55,6 +51,7 @@ RunFromRam=Run,%API%,_PhoenixAPI_RunFromRam
 AddAutoRun=Run,%API%,_PhoenixAPI_AddAutoRun
 AddShortcut=Run,%API%,_PhoenixAPI_AddShortcut
 PinShortcut=Run,%API%,_PhoenixAPI_PinShortcut
+AddStartupConfig=Run,%API%,_PhoenixAPI_AddStartupConfig
 
 // File/Dir Handling
 DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
@@ -922,7 +919,7 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_AddAutoRun]
 System,SetLocal
-If,#1,Equal,"",Halt,"AddAutoRun Syntax Error: Run position was not specified."
+If,#1,Equal,"",Halt,"AddAutoRun Syntax Error: Run group was not specified."
 If,#2,Equal,"",Halt,"AddAutoRun Syntax Error: Run mode was not specified."
 // #3 Title is required but may be empty.
 If,#4,Equal,"",Halt,"AddAutoRun Syntax Error: Program Executable was not specified."
@@ -933,27 +930,30 @@ GetParam,3,%Title%
 GetParam,4,%ProgramExe%
 GetParam,5,%Parameters%
 
-If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
-  If,%Mode%,Equal,NoWait,Set,%ExecMode%,""
-  Else,If,%Mode%,Equal,Wait,Set,%ExecMode%,"-wait "
-  Else,If,%Mode%,Equal,HideNoWait,Set,%ExecMode%,"-hide "
-  Else,If,%Mode%,Equal,HideWait,Set,%ExecMode%,"-hide -wait "
-  Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
-  
-  If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\pecmd.ini","_END Preshell","TEXT %Title%##0xFFFFFF L59 T39 $20#$xEXEC %ExecMode%%ProgramExe% %Parameters%#$x#$x_END Preshell"
-  Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\pecmd.ini","_END PostShell","TEXT %Title%##0xFFFFFF L59 T39 $20#$xEXEC %ExecMode%%ProgramExe% %Parameters%#$x#$x_END PostShell"
-  Else,If,%RunGroup%,Equal,"NetInit",TXTReplace,"%TargetSystem32%\pecmd.ini","_END NetInit","TEXT %Title%##0xFFFFFF L59 T39 $20#$xEXEC %ExecMode%%ProgramExe% %Parameters%#$x#$x_END NetInit"
-  Else,If,%RunGroup%,Equal,"RunOnce",Run,%API%,__PhoenixAPI_AddAutoRun_RunOnce
-  Else,If,%RunGroup%,Equal,"AfterNetwork",Run,%API%,__PhoenixAPI_AddAutoRun_AfterNetwork
-  Else,Halt,"AddAutoRun Syntax Error: [%RunGroup%] is not a supported Run method."
+If,%Mode%,Equal,NoWait,Begin
+  Set,%ExecMode%,"RunProgram"
+  Set,%ShowFlag%,"@SW_SHOWNORMAL"
 End
-Else,Begin
-  // Shortcuts.exe - Not fully implemented yet...
-  If,%RunGroup%,Equal,"Preshell",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,PreConfig,"%Mode%|%Title%|%ProgramExe% %Parameters%"
-  Else,If,%RunGroup%,Equal,"Postshell",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,PostConfig,"%Mode%|%Title%|%ProgramExe% %Parameters%"
-  //Else,If,%RunGroup%,Equal,"?",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,Autorun,"%Mode%|%Title%|%ProgramExe% %Parameters%"
-  Else,Halt,"AddAutoRun Syntax Error: [%RunGroup%] is not a supported Run method."
+Else,If,%Mode%,Equal,Wait,Begin
+  Set,%ExecMode%,"RunProgramWait"
+  Set,%ShowFlag%,"@SW_SHOWNORMAL"
 End
+Else,If,%Mode%,Equal,HideNoWait,Begin
+  Set,%ExecMode%,"RunProgram"
+  Set,%ShowFlag%,"@SW_HIDE"
+End
+Else,If,%Mode%,Equal,HideWait,Begin
+  Set,%ExecMode%,"RunProgramWait"
+  Set,%ShowFlag%,"@SW_HIDE"
+End
+Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
+
+If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","SetSplashText(#$q%Title%#$q)#$x%ExecMode%(#$q%ProgramExe%#$q, #$q%Parameters%#$q, #$q#$q, %ShowFlag%)#$x#$xEndFunc   ;==>PreShellConfig"
+Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PostShellConfig","SetSplashText(#$q%Title%#$q)#$x%ExecMode%(#$q%ProgramExe%#$q, #$q%Parameters%#$q, #$q#$q, %ShowFlag%)#$x#$xEndFunc   ;==>PostShellConfig"
+Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>InitNetwork","SetSplashText(#$q%Title%#$q)#$x%ExecMode%(#$q%ProgramExe%#$q, #$q%Parameters%#$q, #$q#$q, %ShowFlag%)#$x#$xEndFunc   ;==>InitNetwork"
+Else,If,%RunGroup%,Equal,"RunOnce",Run,%API%,__PhoenixAPI_AddAutoRun_RunOnce
+Else,If,%RunGroup%,Equal,"AfterNetwork",Run,%API%,__PhoenixAPI_AddAutoRun_AfterNetwork
+Else,Halt,"AddAutoRun Syntax Error: [%RunGroup%] is not a supported Run group."
 
 System,EndLocal
 
@@ -1015,6 +1015,51 @@ Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
 
 TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","START #$q%Title%#$q %ExecMode%#$q%ProgramExe%#$q %Parameters%",Append
 
+[#_PhoenixAPI_AddStartupConfig#]
+// ===============================================================================================================================
+// Name...........: AddStartupConfig
+// Description....: Add a free-form line of code to the startup config (PhoenixPE.au3).
+// Syntax.........: AddStartupConfig,<RunGroup>,<Code>,<Position>
+// Parameters.....: #1 RunGroup
+//                     PreShell - Run before the shell (ie. Explorer) is loaded.
+//                     PostShell - Run after the shell is loaded.
+//                     RunOnce - Run during startup via HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+//                     AfterNetwork - Run after network connectivity has been established by PENetwork.
+//                  #2 Mode - Free-from line of code to be inserted. Be sure to escape quotes, etc. Use #$x to insert multiple lines in one statement.
+//                  #3 Position - (Optional) Define where in the RunGroup the code will be inserted. Valid options are:
+//                     Append  - (Default) Place the code at the end of the run group.
+//                     Prepend - Place the code at the start of the run group.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: 
+// ===============================================================================================================================
+[_PhoenixAPI_AddStartupConfig]
+System,SetLocal
+GetParam,1,%RunGroup%
+GetParam,2,%Code%
+GetParam,3,%Position%
+
+If,#1,Equal,"",Halt,"AddStartupConfig Syntax Error: Run group was not specified."
+If,#2,Equal,"",Halt,"AddStartupConfig Syntax Error: Code was not specified."
+If,#3,Equal,"",Set,%Position%,"Append"
+
+If,%Position%,Equal,"Append",Begin
+  If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","%Code%#$x#$xEndFunc   ;==>PreShellConfig"
+  Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PostShellConfig","%Code%#$x#$xEndFunc   ;==>PostShellConfig"
+  Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>InitNetwork","%Code%#$x#$xEndFunc   ;==>InitNetwork"
+  Else,Halt,"AddStartupConfig Syntax Error: [%RunGroup%] is not a supported Run group."
+End
+Else,If,%Position%,Equal,"Prepend",Begin
+  If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func PreShellConfig()","%Code%#$x#$xFunc PreShellConfig()"
+  Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func PostShellConfig()","%Code%#$x#$xFunc PostShellConfig()"
+  Else,If,%RunGroup%,Equal,"NetInit",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func InitNetwork()","%Code%#$x#$xFunc InitNetwork()"
+  Else,Halt,"AddStartupConfig Syntax Error: [%RunGroup%] is not a supported Run group."
+End
+Else,Halt,"AddStartupConfig Syntax Error: [%Position%] must be either [Append] or [Prepend]."
+
+System,EndLocal
+
 [#_PhoenixAPI_AddShortcut#]
 // ===============================================================================================================================
 // Name...........: AddShortcut
@@ -1064,79 +1109,35 @@ GetParam,9,%WindowState%
 GetParam,10,%Hotkey%
 GetParam,11,%Tooltip%
 
-// Space delimited list of illegal file name characters
-Set,%IllegalFileNameChars%,"\ / : * ? #$q < > |"
-// Strip illegal chars from Title
-ForEach,%Char%,%IllegalFileNameChars%,Delim=#$s,StrFormat,Replace,%Title%,%Char%,"",%Title%
+// Strip illegal file name characters from Title
+ForEach,%Char%,"\ / : * ? #$q < > |",Delim=#$s,StrFormat,Replace,%Title%,%Char%,"",%Title%
 
-// Space delimited list of illegal directory name characters (\ is allowed here as we use it to signify a subdir)
-Set,%IllegalDirNameChars%,"/ : * ? #$q < > |"
-// Strip illegal chars from Folder
-ForEach,%Char%,%IllegalDirNameChars%,Delim=#$s,StrFormat,Replace,%Folder%,%Char%,"",%Folder%
+// Strip illegal directory name characters from Folder (\ is allowed here as we use it to signify a subdir)
+ForEach,%Char%,"/ : * ? #$q < > |",Delim=#$s,StrFormat,Replace,%Folder%,%Char%,"",%Folder%
 
-If,%_PhoenixAPI_ConfigMode%,Equal,PECMD,Begin
+If,%Folder%,Equal,".",Set,%Folder%,""
+Else,If,Not,%Folder%,Equal,"",Set,%Folder%,"\%Folder%"
+  
+// Type
+If,%Type%,Equal,"Desktop",Set,%Cmd-Type%,"@DesktopCommonDir"
+Else,If,%Type%,Equal,"StartMenu",Set,%Cmd-Type%,"@StartMenuCommonDir"
+Else,If,%Type%,Equal,"QuickLaunch",Set,%Cmd-Type%,"#$q#$pUSERPROFILE#$p\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch#$q"
+Else,Halt,"AddShortcut Syntax Error: Shortcut type [%Type%] is not supported."
 
-  If,%Folder%,Equal,".",Set,%Folder%,""
-  Else,Set,%Folder%,"\%Folder%"
-  
-  // Type
-  If,%Type%,Equal,"Desktop",Set,%Cmd%,"LINK #$pDesktop#$p\%Title%#$c%ProgramExe%#$c%Parameters%"
-  Else,If,%Type%,Equal,"StartMenu",Set,%Cmd%,"LINK #$pPrograms#$p%Folder%\%Title%#$c%ProgramExe%#$c%Parameters%"
-  Else,If,%Type%,Equal,"QuickLaunch",Set,%Cmd%,"LINK #$pQuickLaunch#$p\%Title%#$c%ProgramExe%#$c%Parameters%"
-  Else,Halt,"AddShortcut Syntax Error: Shortcut type [%Type%] is not supported."
+// Icon index
+If,%IconIndex%,Equal,"",Set,%IconIndex%,0
 
-  // Window State
-  If,%WindowState%,Equal,"Minimized",StrFormat,Replace,%Cmd%,"LINK ","LINK _ ",%Cmd%
-  Else,If,%WindowState%,Equal,"Maximized",StrFormat,Replace,%Cmd%,"LINK ","LINK ^ ",%Cmd%
-  Else,Set,%WindowState%,""
+// Window State
+If,%WindowState%,Equal,"Minimized",Set,%Cmd-WindowState%,"@SW_SHOWMINNOACTIVE "
+Else,If,%WindowState%,Equal,"Maximized",Set,%Cmd-WindowState%,"@SW_SHOWMAXIMIZED"
+Else,Set,%Cmd-WindowState%,"@SW_SHOWNORMAL"
   
-  // Icon
-  If,Not,%IconPath%,Equal,"",Begin
-    Set,%Cmd%,"%Cmd%#$c%IconPath%"
-    If,Not,%IconIndex%,Equal,"",Set,%Cmd%,"%Cmd%##%IconIndex%"
-  End
-  Else,Set,%Cmd%,"%Cmd%#$c"
-  
-  // Tooltip
-  If,Not,%Tooltip%,Equal,"",Set,%Cmd%,"%Cmd%#$c%Tooltip%"
-  Else,Set,%Cmd%,"%Cmd%#$c"
-  
-  // WorkDir
-  If,Not,%WorkDir%,Equal,"",Set,%Cmd%,"%Cmd%#$c%WorkDir%"
-  
-  // Hotkey
-  If,Not,%Hotkey%,Equal,"",Set,%Cmd%,"%Cmd%#$c%HotKey%"
-  
-  // Final LINK command
-  TXTReplace,"%TargetSystem32%\pecmd.ini","_END Shortcuts","%Cmd%#$x#$x_END Shortcuts"
-End
-Else,Begin
-  // Shortcuts.exe
-  
-  // Window State
-  If,Not,%WindowState%,Equal,"",Echo,"Warning: Shortcuts.exe does not support the <WindowState> argument for AddShortcut.",Warn
-  
-  // Icon
-  If,Not,%IconIndex%,Equal,"",Set,%Icon%,"%IconPath%#$c%IconIndex%"
-  Else,Set,%Icon%,%IconPath%
-  
-  // Tooltip
-  If,Not,%Tooltip%,Equal,"",Echo,"Warning: Shortcuts.exe does not support the <Tooltip> argument for AddShortcut.",Warn
-  
-  // WorkDir
-  If,Not,%WorkDir%,Equal,"",Echo,"Warning: Shortcuts.exe does not support the <WorkDir> argument for AddShortcut.",Warn
-  
-  // Hotkey
-  If,Not,%Hotkey%,Equal,"",Echo,"Warning: Shortcuts.exe does not support the <Hotkey> argument for AddShortcut.",Warn
-  
-  // Final Cfg Entry
-  If,%Type%,Equal,"Desktop",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,Shortcut,"%Folder%|%Title%|%ProgramExe%|%Icon%|%Parameters%"
-  If,%Type%,Equal,"StartMenu",IniWriteTextLine,%TargetSystem32%\PhoenixPE.cfg,Shortcut,"%Folder%|%Title%|%ProgramExe%|%Icon%|%Parameters%"
-  Else,Halt,"AddShortcut Syntax Error: Shortcut type [%Type%] is not supported."
-End
+// Final command - MakeShortcut($sFile, $sLnk, $sWorkdir = @ScriptDir, $sArgs = "", $sDesc = "", $sIcon = "", $sHotkey = "", $iIconNumber = 0, $iState = @SW_SHOWNORMAL)
+TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>CreateShortcuts","MakeShortcut(#$q%ProgramExe%#$q, %Cmd-Type% & #$q%Folder%\%Title%.lnk#$q, #$q%WorkDir%#$q, #$q%Parameters%#$q, #$q%Tooltip%#$q, #$q%IconPath%#$q, #$q%HotKey%#$q, %IconIndex%, %Cmd-WindowState%)#$x#$xEndFunc   ;==>CreateShortcuts"
+
 System,EndLocal
 
-[_PhoenixAPI_PinShortcut]
+[#_PhoenixAPI_PinShortcut#]
 // ===============================================================================================================================
 // Name...........: PinShortcut
 // Description....: Pin a shortcut to the taskbar or start menu.
@@ -1155,7 +1156,7 @@ System,EndLocal
 //                  Explorer Shell:
 //                  Normally Pins cannot target an executable located on removable media. To get around this restriction
 //                  we trick Windows by creating a symlink on the ramdrive (B:\) to the Y:\Programs folder. 
-//                  PECMD takes care of the symlink creation on boot, so here we only need to point Pintool to B:\ instead of Y:\
+//                  The shell loader takes care of the symlink creation on boot, so here we only need to point Pintool to B:\ instead of Y:\
 //
 //                  I don't like referencing individual scripts inside PhoenixAPI but this is a fairly important feature, and the alternatives are:
 //                    - Do nothing: listen to users complain that Pin's don't work after they have changed the ramdrive letter.
@@ -1164,7 +1165,7 @@ System,EndLocal
 //                 WinXShell:
 //                 WinXShell's taskbar does not have "Pin" verbs in it's context menu, instead it behaves like WinXP and uses QuickLaunch shortcuts.
 //
-// Related........: Depends on %ProjectDir%\Components\330-ImDisk.script for Ramdisk drive letter
+// Related........: Depends on %ProjectDir%\Components\330-ImDisk.script or 330-AimRamdisk to set the Ramdisk drive letter as %RamDriv% in the PE Env.
 // ===============================================================================================================================
 [_PhoenixAPI_PinShortcut]
 System,SetLocal
@@ -1185,10 +1186,11 @@ If,"%Shell%-%PinLocation%",Equal,"WinXShell-Taskbar",Begin
 End
 Else,Begin
   // Explorer Taskbar
+  If,Not,ExistFile,"%TargetSystem32%\PinUtil.ini",FileCreateBlank,"%TargetSystem32%\PinUtil.ini"
   If,%PinPos%,Equal,"Auto",Begin
     // Find an unused pin position
 	ForRange,%i%,0,100,1,Begin
-	  IniRead,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%i%,%CurrentPos%
+	  IniRead,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%i%,%CurrentPos%
 	  If,%CurrentPos%,Equal,"",Begin
 	    Set,%PinPos%,%i%
 	    Break
@@ -1205,18 +1207,22 @@ Else,Begin
   End
   Else,Begin
     // Check if user specified position will be overwritten
-    IniReadSection,"%TargetSystem32%\pecmd.ini","PinUtil",%IniSection%
+    IniReadSection,"%TargetSystem32%\PinUtil.ini","PinUtil",%IniSection%
     List,Pos,%IniSection%,%PinLocation%%PinPos%,%Index%
     If,Not,%Index%,Equal,0,Begin
-      IniRead,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ExistingExe%
+      IniRead,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%PinPos%,%ExistingExe%
       Echo,"PinShortcut Warning: Existing pin for [%ExistingExe%] in [%PinLocation%] position [%PinPos%] will be overwritten by [%ProgramExe%].",Warn
     End
 
     // Work around pin restrictions on removable media.
-    ReadInterface,Value,"%ProjectDir%\Components\330-ImDisk.script",Interface,cmb_DriveLetter,%RamDisk%
+	IniRead,"%ProjectDir%\Components\330-AimRamdisk.script","Main","Selected",%IsSelectedAim%
+	IniRead,"%ProjectDir%\Components\330-ImDisk.script","Main","Selected",%IsSelectedImDisk%
+	If,%IsSelectedAim%,Equal,True,ReadInterface,Value,"%ProjectDir%\Components\330-AimRamdisk.script",Interface,cmb_DriveLetter,%RamDisk%
+	Else,If,%IsSelectedImDisk%,Equal,True,ReadInterface,Value,"%ProjectDir%\Components\330-ImDisk.script",Interface,cmb_DriveLetter,%RamDisk%
+	Else,Set,%RamDisk%,"B:"
     StrFormat,Replace,%ProgramExe%,"Y:\","%RamDisk%\",%ProgramExe%
   
-    IniWrite,"%TargetSystem32%\pecmd.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
+    IniWrite,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
   End
 End
 System,EndLocal
@@ -1317,8 +1323,8 @@ End
 // Syntax.........: FileSearch,<Directory>,<File>
 // Parameters.....: #1 Directory - The directory to search recursively for the specified file.
 //                  #2 Filter - The name of the file including it's extension to search for. (Ex. MyProgram.exe). Wildcards are supported.
-// Return values..: Success - A pipe separated list containing the full path(s) to the file.
-//                  Fail (File not found) - An Empty String
+// Return values..: #r - Success - A pipe separated list containing the full path(s) to the file.
+//                     - Fail (File not found) - An Empty String
 // Author.........: Homes32
 // Remarks........: This command is a work in progress and may change without notice.
 //                  Usage: PhoenixAPI-FileSearch.a3x <PathToSearch> <SearchFilter> <OutputFile>

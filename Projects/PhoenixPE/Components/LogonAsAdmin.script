@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2024 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -117,9 +117,9 @@ If,%cb_AutoAdminLogin%,Equal,True,Begin
   RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","AutoAdminLogon",1
   RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","DefaultUserName","Administrator"
   RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","DefaultPassword",""
-  // Process pecmd.ini on user login. We need to do this here otherwise autorun entries will be processed under the system account
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","Userinit","userinit.exe,Pecmd.exe MAIN -user %Windir%\System32\pecmd.ini"
-  // Set a flag for our PECMD script to see if we want to auto switch to admin (can't use AutoAdminLogon because Winlogon.exe deletes it on boot)
+  // Process PhoenixPE.au3 on user login. We need to do this here otherwise autorun entries will be processed under the system account
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","Userinit","userinit.exe,AutoIt3.exe PhoenixPE.au3"
+  // Set a flag for our PhoenixPE config script to see if we want to auto switch to admin (can't use AutoAdminLogon because Winlogon.exe deletes it on boot)
   RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","AutoSwitchToAdmin",1
 End
 

@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2024 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.4.1.0
-Date=2023-03-25
+Version=1.4.2.0
+Date=2023-12-03
 
 [Variables]
 
@@ -59,20 +59,14 @@ Else,Set,%RamDiskSize%,%num_RamDiskSize%
 
 If,%cb_CreateRamdisk%,Equal,True,Begin
   // Redirect %Temp%
-  If,%cb_ChgTemp%,Equal,True,Begin
-    // PECMD (v2012.1.88) does not listen for WM_SETTINGCHANGE messages.
-    // This is a problem, as any programs PECMD will EXEC get passed the Environment block established when PECMD was started and be oblivious our changes.
-    // To avoid using the old TEMP, we need to force PECMD to update it's Environment block with our new TEMP dir and pass it on to any EXEC programs.
-    // We accomplish this by calling "ENVI TEMP=%TmpDirPath%" -- The #$x will force the cmd to be written to its own line by AddAutoRun
-    Set,%TmpDirPath%," %cmb_DriveLetter%\Temp#$xENVI TEMP=%cmb_DriveLetter%\Temp"
-  End
+  If,%cb_ChgTemp%,Equal,True,Set,%TmpDirPath%," %cmb_DriveLetter%\Temp"
   Else,Set,%TmpDirPath%,""
 
   // Create Ramdrive at startup
   AddAutoRun,PreShell,HideNoWait,"Initializing ImDisk Ramdrive...","#$pWinDir#$p\System32\ImDiskStart.exe","%RamDiskSize% %cmb_DriveLetter% %txt_VolLabel% %cmb_DiskFormat%%TmpDirPath%"
 End
 
-// Add the RamDrive to ENV so PECMD knows where to create a symlink for pinning from removable media
+// Add the RamDrive to ENV so our shell loader knows where to create a symlink for pinning from removable media
 RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\Session Manager\Environment","RamDrive",%cmb_DriveLetter%
 
 // Shortcuts
