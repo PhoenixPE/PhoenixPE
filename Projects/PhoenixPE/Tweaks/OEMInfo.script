@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2024 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -74,8 +74,12 @@ If,Not,%fb_Logo%,Equal,"",Begin
     ConvertImage,%fb_Logo%,"%TargetSystem32%\OEMLogo.bmp",120x120
     RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","%SystemRoot%\System32\OEMLogo.bmp"
   End
-  Else,Halt,"ERROR: The specified image [%fb_Logo%] does not exist."
+  Else,Begin
+    Echo,"ERROR: The specified image [%fb_Logo%] does not exist.",WARN
+    RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo",""
+  End
 End
+Else,RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo",""
 
 RegUnloadHives
 
