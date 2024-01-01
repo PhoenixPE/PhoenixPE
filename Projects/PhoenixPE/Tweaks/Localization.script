@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2023 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2024 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.3.2.0
-Date=2023-04-27
+Version=1.4.0.0
+Date=2023-10-17
 
 [Variables]
 %DismLog%="%TargetWindows%\Logs\DISM\dism.log"
@@ -92,6 +92,16 @@ Else,If,%cmb_TimeZone%,Equal,HostOS,Run,%ScriptFile%,GetHostInternationalSetting
 
 // Configure Settings
 Run,%ScriptFile%,SetInternationalSettings
+
+// Sync time on network startup
+If,%cb_SyncTimeOnNetStartup%,Equal,True,Begin
+  // tzutil.exe is useful for checking or manually adjusting the time zone but is not required
+  RequireFile,\Windows\System32\tzutil.exe
+  RequireFile,\Windows\System32\w32tm.exe
+
+  AddAutoRun,AfterNetwork,HideWait,"Starting the time service...","sc.exe","start w32time"
+  AddAutoRun,AfterNetwork,HideNoWait,"Syncing with time server...","w32tm.exe","/resync"
+End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -242,6 +252,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cmb_InputLocale1,HostOS
 WriteInterface,Value,%ScriptFile%,Interface,cmb_InputLocale2,"(en-US) English US"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_UserLocale,HostOS
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TimeZone,HostOS
+WriteInterface,Value,%ScriptFile%,Interface,cb_SyncTimeOnNetStartup,False
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -313,7 +324,7 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,102,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,121,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,161,119,21,Accessibility
 txt_ShortcutName="Shortcut Name:",1,0,12,203,119,21,"Change Keyboard Layout"
-bvl_RegionalSettings="Regional Settings",1,12,145,50,271,132,8,Bold
+bvl_RegionalSettings="Regional Settings",1,12,145,50,271,184,8,Bold
 lbl_InputLocale1="Keyboard 1",1,1,156,70,56,18,8,Normal
 cmb_InputLocale1=HostOS,1,4,221,66,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your primary keyboard layout.#$x#$xThe en-US keyboard will added as a secondary layout if it is not already the default."
 lbl_InputLocale2="Keyboard 2",1,1,156,98,56,18,8,Normal
@@ -322,6 +333,7 @@ lbl_UserLocale=Format,1,1,156,127,58,18,8,Normal
 cmb_UserLocale=HostOS,1,4,221,121,180,21,HostOS,Default,"(fr-BE) Belgian French","(zh-CN) Chinese PRC","(zh-TW) Chinese Taiwan","(nl-NL) Dutch","(en-GB) English UK","(en-US) English US","(fr-FR) French","(de-DE) German","(el-GR) Greek","(he-IL) Hebrew","(hu-HU) Hungarian","(it-IT) Italian","(ko-KR) Korean","(pt-PT) Portuguese","(pt-BR) Portuguese Brazil","(ru-RU) Russian","(es-ES) Spanish","(sv-SE) Swedish","(tr-TR) Turkish","__Choose your date and time format."
 lbl_TimeZone=TimeZone,1,1,156,154,58,18,8,Normal
 cmb_TimeZone=HostOS,1,4,221,149,180,21,HostOS,Default,"(UTC-12:00) Dateline Standard Time","(UTC-11:00) UTC-11","(UTC-10:00) Hawaiian Standard Time","(UTC-10:00) Aleutian Standard Time","(UTC-09:30) Marquesas Standard Time","(UTC-09:00) Alaskan Standard Time","(UTC-09:00) UTC-09","(UTC-08:00) Pacific Standard Time (Mexico)","(UTC-08:00) Pacific Standard Time","(UTC-08:00) UTC-08","(UTC-07:00) US Mountain Standard Time","(UTC-07:00) Mountain Standard Time (Mexico)","(UTC-07:00) Mountain Standard Time","(UTC-06:00) Central America Standard Time","(UTC-06:00) Central Standard Time","(UTC-06:00) Central Standard Time (Mexico)","(UTC-06:00) Easter Island Standard Time","(UTC-06:00) Canada Central Standard Time","(UTC-05:00) SA Pacific Standard Time","(UTC-05:00) Eastern Standard Time (Mexico)","(UTC-05:00) Eastern Standard Time","(UTC-05:00) Haiti Standard Time","(UTC-05:00) Cuba Standard Time","(UTC-05:00) Turks And Caicos Standard Time","(UTC-05:00) US Eastern Standard Time","(UTC-04:00) Paraguay Standard Time","(UTC-04:00) Venezuela Standard Time","(UTC-04:00) Central Brazilian Standard Time","(UTC-04:00) SA Western Standard Time","(UTC-04:00) Atlantic Standard Time","(UTC-04:00) Pacific SA Standard Time","(UTC-03:30) Newfoundland Standard Time","(UTC-03:00) Tocantins Standard Time","(UTC-03:00) E. South America Standard Time","(UTC-03:00) Argentina Standard Time","(UTC-03:00) SA Eastern Standard Time","(UTC-03:00) Greenland Standard Time","(UTC-03:00) Montevideo Standard Time","(UTC-03:00) Magallanes Standard Time","(UTC-03:00) Saint Pierre Standard Time","(UTC-03:00) Bahia Standard Time","(UTC-02:00) UTC-02","(UTC-01:00) Cape Verde Standard Time","(UTC-01:00) Azores Standard Time","(UTC) UTC","(UTC+00:00) Morocco Standard Time","(UTC+00:00) GMT Standard Time","(UTC+00:00) Greenwich Standard Time","(UTC+01:00) W. Central Africa Standard Time","(UTC+01:00) W. Europe Standard Time","(UTC+01:00) Central Europe Standard Time","(UTC+01:00) Romance Standard Time","(UTC+01:00) Sao Tome Standard Time","(UTC+01:00) Central European Standard Time","(UTC+02:00) Jordan Standard Time","(UTC+02:00) GTB Standard Time","(UTC+02:00) Middle East Standard Time","(UTC+02:00) E. Europe Standard Time","(UTC+02:00) Syria Standard Time","(UTC+02:00) West Bank Standard Time","(UTC+02:00) South Africa Standard Time","(UTC+02:00) FLE Standard Time","(UTC+02:00) Israel Standard Time","(UTC+02:00) Kaliningrad Standard Time","(UTC+02:00) Sudan Standard Time","(UTC+02:00) Egypt Standard Time","(UTC+02:00) Libya Standard Time","(UTC+02:00) Namibia Standard Time","(UTC+03:00) Arabic Standard Time","(UTC+03:00) Turkey Standard Time","(UTC+03:00) Arab Standard Time","(UTC+03:00) Belarus Standard Time","(UTC+03:00) Russian Standard Time","(UTC+03:00) E. Africa Standard Time","(UTC+03:30) Iran Standard Time","(UTC+04:00) Arabian Standard Time","(UTC+04:00) Astrakhan Standard Time","(UTC+04:00) Azerbaijan Standard Time","(UTC+04:00) Caucasus Standard Time","(UTC+04:00) Russia Time Zone 3","(UTC+04:00) Mauritius Standard Time","(UTC+04:00) Saratov Standard Time","(UTC+04:00) Georgian Standard Time","(UTC+04:30) Afghanistan Standard Time","(UTC+05:00) West Asia Standard Time","(UTC+05:00) Ekaterinburg Standard Time","(UTC+05:00) Pakistan Standard Time","(UTC+05:30) India Standard Time","(UTC+05:30) Sri Lanka Standard Time","(UTC+05:45) Nepal Standard Time","(UTC+06:00) Central Asia Standard Time","(UTC+06:00) Bangladesh Standard Time","(UTC+06:00) Omsk Standard Time","(UTC+06:30) Myanmar Standard Time","(UTC+07:00) SE Asia Standard Time","(UTC+07:00) Altai Standard Time","(UTC+07:00) W. Mongolia Standard Time","(UTC+07:00) North Asia Standard Time","(UTC+07:00) N. Central Asia Standard Time","(UTC+07:00) Tomsk Standard Time","(UTC+08:00) China Standard Time","(UTC+08:00) North Asia East Standard Time","(UTC+08:00) Singapore Standard Time","(UTC+08:00) Ulaanbaatar Standard Time","(UTC+08:00) W. Australia Standard Time","(UTC+08:00) Taipei Standard Time","(UTC+08:30) North Korea Standard Time","(UTC+08:45) Aus Central W. Standard Time","(UTC+09:00) Transbaikal Standard Time","(UTC+09:00) Yakutsk Standard Time","(UTC+09:00) Tokyo Standard Time","(UTC+09:00) Korea Standard Time","(UTC+09:30) Cen. Australia Standard Time","(UTC+09:30) AUS Central Standard Time","(UTC+10:00) E. Australia Standard Time","(UTC+10:00) AUS Eastern Standard Time","(UTC+10:00) West Pacific Standard Time","(UTC+10:00) Tasmania Standard Time","(UTC+10:00) Vladivostok Standard Time","(UTC+10:30) Lord Howe Standard Time","(UTC+11:00) Russia Time Zone 10","(UTC+11:00) Bougainville Standard Time","(UTC+11:00) Norfolk Standard Time","(UTC+11:00) Central Pacific Standard Time","(UTC+11:00) Magadan Standard Time","(UTC+11:00) Sakhalin Standard Time","(UTC+12:00) Russia Time Zone 11","(UTC+12:00) New Zealand Standard Time","(UTC+12:00) Fiji Standard Time","(UTC+12:00) UTC+12","(UTC+12:45) Chatham Islands Standard Time","(UTC+13:00) Tonga Standard Time","(UTC+13:00) Samoa Standard Time","(UTC+13:00) UTC+13","(UTC+14:00) Line Islands Standard Time","__Choose your Time Zone."
+cb_SyncTimeOnNetStartup="Sync time on network startup",1,3,220,200,187,18,False
 
 [InterfaceEncoded]
 Health.ico=1150,896
