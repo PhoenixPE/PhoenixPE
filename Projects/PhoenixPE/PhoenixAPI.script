@@ -1693,36 +1693,39 @@ System,EndLocal
 // Syntax.........: JSONRead,<JSONFile>,<Path>
 // Parameters.....: #1 JSONFile - Full path to the JSON filed to read.
 //                  #2 Path - GJSON Path notation used to locate the value to read.
+//                  #3 NOERR - Don't Halt on errors. (Use if you intend to handle errors yourself).
 // Return values..: #r - Success - Returns the value of <Path>
 //                       Failure - Returns ""
 // Author.........: Homes32
 // Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj
 //                  Path Syntax Help: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
+//
+//                  Notes: We need to add escaped double-quotes surrounding the command with ^" or the FOR loop gets confused
+//                         and matches the quotes around "%Tools%\%HostArch%\jj.exe" incorrectly with the double-quotes in "%Path%".
 // Related........: Depends on %Tools%\%HostArch%\jj.exe
 // ===============================================================================================================================
 [_PhoenixAPI_JSONRead]
 System,SetLocal
 GetParam,1,%JSONFile%
 GetParam,2,%Path%
+GetParam,3,%Arg3%
 
 If,Not,ExistFile,%JSONFile%,Halt,"JSONRead Syntax Error: The file [%JSONFile%] does not exist."
 If,%Path%,Equal,"",Halt,"JSONRead Syntax Error: You must specify an JSON Path."
 
-FileDeleteEx,"%ProjectTemp%\PhoenixAPI-JSONRead.txt"
+If,%Arg3%,Equal,"NOERR",Set,%NOERR%,"True"
+
 FileDeleteEx,"%ProjectTemp%\PhoenixAPI-JSONRead.ini"
 
-ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-i #$q%JSONFile%#$q -o #$q%ProjectTemp%\PhoenixAPI-JSONRead.txt#$q #$q%Path%#$q"
-If,Not,#r,Equal,0,Halt,"JSONRead ERROR: Failed to read [%JSONFile%]."
-
-ShellExecute,Hide,"cmd.exe","/c for /f #$qtokens=*#$q %a in (PhoenixAPI-JSONRead.txt) do (echo Value=%a) > #$q%ProjectTemp%\PhoenixAPI-JSONRead.ini#$q",%ProjectTemp%
-If,ExistFile,"%ProjectTemp%\PhoenixAPI-JSONRead.ini",Begin
-  // Value was found in JSON file
-  TXTAddLine,"%ProjectTemp%\PhoenixAPI-JSONRead.ini","[Read]",PREPEND
-  IniRead,"%ProjectTemp%\PhoenixAPI-JSONRead.ini","Read","Value",#r
+ShellExecute,Hide,"cmd.exe","/c for /f #$qusebackq delims=#$q #$p? In (`^#$q#$q%Tools%\%HostArch%\jj.exe#$q -i #$q%JSONFile%#$q #$q%Path%#$q^#$q`) do (>#$q%ProjectTemp%\PhoenixAPI-JSONRead.ini#$q echo Value^=#$p?)"
+If,#r,Equal,0,Begin
+  TXTAddLine,"%ProjectTemp%\PhoenixAPI-JSONRead.ini","[JSONRead]",PREPEND
+  IniRead,"%ProjectTemp%\PhoenixAPI-JSONRead.ini","JSONRead","Value",%Value%
+  Return,%Value%
 End
 Else,Begin
-  // Value was not found in JSON file
-  Return,""
+  If,%NOERR%,Equal,"True",Return,""
+  Else,Halt,"JSONRead ERROR: Failed to read [%JSONFile%]."
 End
 
 System,EndLocal
@@ -1843,7 +1846,10 @@ System,EndLocal
 //                       Failure - Returns ""
 // Author.........: Homes32
 // Remarks........: The current implementation of this function only returns a single value.
-//                  http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf             
+//                  http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf          
+//
+//                  Notes: We need to add escaped double-quotes surrounding the command with ^" or the FOR loop gets confused
+//                         and matches the quotes around "%Tools%\x86\xml.exe" incorrectly with the double-quotes in "%XMLFile%".
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_XMLRead]
@@ -1857,24 +1863,17 @@ If,%Path%,Equal,"",Halt,"XMLRead Syntax Error: You must specify an XPath."
 
 If,%Arg3%,Equal,"NOERR",Set,%NOERR%,"True"
 
-FileDeleteEx,"%ProjectTemp%\PhoenixAPI-XMLRead.txt"
 FileDeleteEx,"%ProjectTemp%\PhoenixAPI-XMLRead.ini"
 
-ShellExecute,Hide,"cmd.exe","/c #$q#$q%Tools%\x86\xml.exe#$q select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q > #$q%ProjectTemp%\PhoenixAPI-XMLRead.txt#$q#$q"
-If,Not,#r,Equal,0,Begin
-  If,%NOERR%,Equal,"True",Return,""
-  Else,Halt,"XMLRead ERROR: Failed to read [%XMLFile%]."
-End
-
-ShellExecute,Hide,"cmd.exe","/c for /f #$qtokens=*#$q %a in (PhoenixAPI-XMLRead.txt) do (echo Value=%a) > #$q%ProjectTemp%\PhoenixAPI-XMLRead.ini#$q",%ProjectTemp%
-If,ExistFile,"%ProjectTemp%\PhoenixAPI-XMLRead.ini",Begin
-  // Value was found in XML file
-  TXTAddLine,"%ProjectTemp%\PhoenixAPI-XMLRead.ini","[Read]",PREPEND
-  IniRead,"%ProjectTemp%\PhoenixAPI-XMLRead.ini","Read","Value",#r
+ShellExecute,Hide,"cmd.exe","/c For /f #$qusebackq delims=#$q #$p? In (`^#$q#$q%Tools%\x86\xml.exe#$q select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q^#$q`) Do (>#$q%ProjectTemp%\PhoenixAPI-XMLRead.ini#$q echo Value^=#$p?)"
+If,#r,Equal,0,Begin
+  TXTAddLine,"%ProjectTemp%\PhoenixAPI-XMLRead.ini","[XMLRead]",PREPEND
+  IniRead,"%ProjectTemp%\PhoenixAPI-XMLRead.ini","XMLRead","Value",%Value%
+  Return,%Value%
 End
 Else,Begin
-  // Value was not found (we should never get here)
-  Return,""
+  If,%NOERR%,Equal,"True",Return,""
+  Else,Halt,"XMLRead ERROR: Failed to read [%XMLFile%]. XmlStarlet returned: [#r]"
 End
 
 System,EndLocal
