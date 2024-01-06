@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.7.0.0
-Date=2024-01-02
+Version=1.7.1.0
+Date=2024-01-05
 
 [Variables]
 %ProgramFolder%="PENetwork"
@@ -52,46 +52,53 @@ RunFromRam
 Echo,"Loading registry hives..."
 RegLoadHives
 
-///////////////////////////////////////////////////////////////////////////////////
-// PENetwork
-
 If,%cb_DownloadLatestPENetwork%,Equal,True,Run,%ScriptFile%,DownloadPENetwork
 
 Echo,"Extracting PENetwork..."
 ExtractFile,%ScriptFile%,%SourceArch%,PENetwork.7z,%ProjectTemp%
 Decompress,%ProjectTemp%\PENetwork.7z,"%TargetPrograms%\%ProgramFolder%"
 
-// We don't want to overwrite a users custom config, so only cache the default config if it doesn't exist.
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini",Begin
-  // Copy PENetwork default settings to cache
-  FileCopy,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","%ProgramsCache%\%ProgramFolder%\PENetwork.ini"
-  // Config PhoenixPE settings
-  Run,%ScriptFile%,PENetwork-CreateDefaultConfig
+///////////////////////////////////////////////////////////////////////////////////
+// PENetwork Config
+
+If,%cb_CustomPENetworkConfig%,Equal,True,Begin
+  // User supplied a custom PENetwork config file
+    If,ExistFile,%fb_CustomPENetworkConfig%,FileCopy,%fb_CustomPENetworkConfig%,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini"
+    Else,Halt,"The specified PENetwork config file [%fb_CustomPENetworkConfig%] does not exist!"  
 End
+Else,Begin
+  // We don't want to nuke a customized config, so only cache the default config if it doesn't exist. (User hasn't launched the Config Editor)
+  If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini",Begin
+    // Copy PENetwork default settings to cache
+    FileCopy,"%TargetPrograms%\%ProgramFolder%\PENetwork.ini","%ProgramsCache%\%ProgramFolder%\PENetwork.ini"
+    // Config PhoenixPE settings
+    Run,%ScriptFile%,PENetwork-CreateDefaultConfig
+  End
 
-// Copy cached config to target
-FileCopy,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","%TargetPrograms%\%ProgramFolder%"
+  // Copy cached config to target
+  FileCopy,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","%TargetPrograms%\%ProgramFolder%",NOWARN
 
-// Workaround a couple of bugs in PENetwork where .ini settings are not properly handled
-// for certain Global Settings, such as UseProfiles, StartMode, CloseToTray, and StartToTray.
-IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","UseProfiles",%PENMini_UseProfiles%
-If,%PENMini_UseProfiles%,Equal,"Yes",RegWrite,HKLM,0x1,"Tmp_Software\PENetwork","UseProfiles",1
-Else,RegWrite,HKLM,0x1,"Tmp_Software\PENetwork","UseProfiles",0
+  // Workaround a couple of bugs in PENetwork where .ini settings are not properly handled
+  // for certain Global Settings, such as UseProfiles, StartMode, CloseToTray, and StartToTray.
+  IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","UseProfiles",%PENMini_UseProfiles%
+  If,%PENMini_UseProfiles%,Equal,"Yes",RegWrite,HKLM,0x1,"Tmp_Software\PENetwork","UseProfiles",1
+  Else,RegWrite,HKLM,0x1,"Tmp_Software\PENetwork","UseProfiles",0
 
-IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","StartMode",%PENMini_StartMode%,Default=1
-RegWrite,HKLM,0x1,"Tmp_Default\Software\PENetwork","StartMode",%PENMini_StartMode%
+  IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","StartMode",%PENMini_StartMode%,Default=1
+  RegWrite,HKLM,0x1,"Tmp_Default\Software\PENetwork","StartMode",%PENMini_StartMode%
 
-IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","StartToTray",%PENMini_StartToTray%,Default=1
-If,%PENMini_StartToTray%,Equal,"Yes",RegWrite,HKLM,0x4,"Tmp_Default\Software\PENetwork","StartToTray",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\PENetwork","StartToTray",0
+  IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","StartToTray",%PENMini_StartToTray%,Default=1
+  If,%PENMini_StartToTray%,Equal,"Yes",RegWrite,HKLM,0x4,"Tmp_Default\Software\PENetwork","StartToTray",1
+  Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\PENetwork","StartToTray",0
 
-// CloseToTray is a reg only setting, so we will assume the user wants to mirror MinimizeToTray
-IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","MinimizeToTray",%PENMini_MinimizeToTray%,Default=1
-If,%PENMini_MinimizeToTray%,Equal,"Yes",RegWrite,HKLM,0x4,"Tmp_Software\PENetwork","CloseToTray",1
-Else,RegWrite,HKLM,0x4,"Tmp_Software\PENetwork","CloseToTray",0
+  // CloseToTray is a reg only setting, so we will assume the user wants to mirror MinimizeToTray
+  IniRead,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","PENetwork","MinimizeToTray",%PENMini_MinimizeToTray%,Default=1
+  If,%PENMini_MinimizeToTray%,Equal,"Yes",RegWrite,HKLM,0x4,"Tmp_Software\PENetwork","CloseToTray",1
+  Else,RegWrite,HKLM,0x4,"Tmp_Software\PENetwork","CloseToTray",0
 
-// Force install network services even if no NICs are detected (missing GUI option)
-RegWrite,HKLM,0x1,"Tmp_Software\PENetwork","ForceServices",1
+  // Force install network services even if no NICs are detected (missing GUI option)
+  RegWrite,HKLM,0x1,"Tmp_Software\PENetwork","ForceServices",1
+End
 
 // Custom Wireless Config
 If,%cb_AutoConnectWifi%,Equal,True,Run,%ScriptFile%,PENetwork-AutoConnectWifi
@@ -355,14 +362,28 @@ IniWrite,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini","Auto Connect Wifi","CM
 If,%SourceArch%,Equal,"",Halt,"Please select a valid source!"
 System,Cursor,Wait
 Echo,"Extracting PENetwork..."
+
 Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
-// We don't want to overwrite a users custom config, so only cache the default config if it doesn't exist.
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini",Begin
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\PENetwork.ini","%ProgramsCache%\%ProgramFolder%\PENetwork.ini"
-  Run,%ScriptFile%,PENetwork-CreateDefaultConfig
+
+If,%cb_CustomPENetworkConfig%,Equal,True,Begin
+  Set,%Cfg%,%fb_CustomPENetworkConfig%
+  If,Not,ExistFile,%Cfg%,Begin
+    Message,"Could not edit the specified PENetwork config.#$x#$x%Cfg%#$x#$xThe file does not exist!",Error
+    Halt,"The specified PENetwork config file [%Cfg%] does not exist!"
+  End
 End
+Else,Begin
+  Set,%Cfg%,"%ProgramsCache%\%ProgramFolder%\PENetwork.ini"
+  // We don't want to nuke a customized config, so only cache the default config if it doesn't exist. (User hasn't launched the Config Editor)
+  If,Not,ExistFile,%Cfg%,Begin
+    FileCopy,"%ProjectTemp%\%ProgramFolder%\PENetwork.ini",%Cfg%
+    Run,%ScriptFile%,PENetwork-CreateDefaultConfig
+  End
+End
+
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%","/profileeditor /ini=#$q%Cfg%#$q"
+Set,%Cfg%,Nil
 System,Cursor,Normal
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%","/profileeditor /ini=#$q%ProgramsCache%\%ProgramFolder%\PENetwork.ini#$q"
 
 [#PENetwork-ExportWifi#]
 // ===============================================================================================================================
@@ -467,6 +488,8 @@ System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cb_DownloadLatestPENetwork,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_AutoConnectWifi,False
 WriteInterface,Value,%ScriptFile%,Interface,fb_WifiConfig,""
+WriteInterface,Value,%ScriptFile%,Interface,cb_CustomPENetworkConfig,False
+WriteInterface,Value,%ScriptFile%,Interface,fb_CustomPENetworkConfig,""
 
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
@@ -506,9 +529,11 @@ Else,Begin
 End
 
 WriteInterface,Visible,%ScriptFile%,Interface,btn_PENMExportWifi,%Toggle%
-WriteInterface,Visible,%ScriptFile%,Interface,bvl_WifiConfig,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cb_AutoConnectWifi,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,fb_WifiConfig,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_CustomPENetworkConfig,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,fb_CustomPENetworkConfig,%Toggle%
 
 System,EndLocal
 
@@ -524,7 +549,7 @@ System,EndLocal
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"Utilize Holger's PE Network Manager to manage network settings.#$x#$xYou can use the built-in profile editor to pre-configure your network settings. Once they are configured your settings will be cached and used each time you build.#$x#$xOn first run this script will download the latest version of PENetwork (~1 MB) and cache it for future builds."
+Message,"Utilize Holger's PE Network Manager to configure network profiles and manage network settings in PhoenixPE.#$x#$xYou can use the built-in profile editor to pre-configure your network settings. Once they are configured your settings will be cached and used each time you build.#$x#$xOn first run this script will download the latest version of PENetwork (~1 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -540,19 +565,19 @@ Message,"Utilize Holger's PE Network Manager to manage network settings.#$x#$xYo
 // ===============================================================================================================================
 [Interface]
 btn_PENMEditor=" PENetwork Config Editor",1,8,5,5,160,25,PENetwork-ConfigEditor,"Icon Entry_239.ico",True,"__Configure PENetwork's settings."
-btn_PENMExportWifi=" Export Wireless Config",1,8,172,5,160,25,PENetwork-ExportWifi,PENetwork.png,True,"__Use PENetwork's WiFi Export tool to save a WiFi profile from your PC as an .xml file that can be included in your build."
+btn_PENMExportWifi=" Export Wireless Config",0,8,172,5,160,25,PENetwork-ExportWifi,PENetwork.png,True,"__Use PENetwork's WiFi Export tool to save a WiFi profile from your PC as an .xml file that can be included in your build."
 btn_DownloadPENetwork=,1,8,436,5,25,25,DownloadPENetwork,VistalcoDownload_16.png,False,"__Download PENetwork."
 btn_PurgeCache=,1,8,467,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_BrowseCache=,1,8,498,5,25,25,BrowseCache,OpenFolder.ico,True,"__Browse the PENetwork Cache.#$xUseful if you need to make manual changes to your config."
 btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
-btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_Exit_16.png,True,"__Hide Advanced Options"
+btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
-
 cb_DownloadLatestPENetwork="Always download PENetwork",1,3,150,50,200,18,False,"__Always download the latest version of PENetwork."
-bvl_WifiConfig="Wifi Config",1,12,150,174,423,60,8,Bold
-cb_AutoConnectWifi="Auto Connect to this Wifi Profile on Startup",1,3,160,186,235,18,False,"__Auto connect to a pre-configured SSID.#$x#$xUse the 'Export Wireless Config' button above to export#$xa wireless profile from your host OS for use with this option.#$x#$xAlternatly, leave this option unchecked and configure wireless profiles and automatic startup#$xdirectly from the 'PENetwork Config Editor'."
-fb_WifiConfig=,1,13,160,208,404,20,file,"Title=Select your Wifi Profile","Filter=Wifi Profile|*.xml"
-
+bvl_AdvancedOptions="Advanced Options",0,12,150,111,423,123,8,Bold
+cb_CustomPENetworkConfig="Use Custom PENetwork Config",0,3,160,181,235,18,False,"__Select a custom PENetwork config file to use in place of the default config."
+fb_CustomPENetworkConfig=,0,13,160,203,404,20,file,"Title=Select your custom PENetwork configuration file","Filter=PENetwork Config|*.ini"
+cb_AutoConnectWifi="Auto Connect to this Wifi Profile on Startup",0,3,160,126,235,18,False,"__Auto connect to a pre-configured SSID.#$x#$xUse the 'Export Wireless Config' button above to export#$xa wireless profile from your host OS for use with this option.#$x#$xAlternatly, leave this option unchecked and configure wireless profiles and automatic startup#$xdirectly from the 'PENetwork Config Editor'."
+fb_WifiConfig=,0,13,160,148,404,20,file,"Title=Select your Wifi Profile","Filter=Wifi Profile|*.xml"
 bvl_Shortcuts=PENetwork,1,12,5,50,133,184,8,Bold
 cb_DesktopShc=Desktop,1,3,12,64,122,18,True
 cb_StartMenuShc="Start Menu",1,3,12,83,122,18,True
@@ -1116,6 +1141,7 @@ lines=259
 257=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
 258=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
 259=hEU4SSHWWdbAodjKXBh8bHuLXrpfdIlC54sUcvhmydI9qHgdkYNWkU4lZ4JfnQUK7Hv4BBk+MzbtYwrxk9YXZXJvSqY7ew40cwQLeEe6q79RL/Rs7iiy4EILqYCDY32iG+1wlJ/1NiqnpGWqVoVURnl6an5GB/fOTxegYAJnCvG0KnomVn3MWCJcthL0ZNR3kBePY3iIwATo1VSfcZ/3kF2F72jEgngF9y4rKCQbJmi5NHJK/I8/D4EZEvATesH+3FTM19Mdc8YBAHpI08xJBy8al3dMHWIzSe3joW3CFa+PUWCOWF/ZcIR92Lg/FQImzf7llmpbzKO1SZhNO/YGfrsiL1egnOF0wDxc5hfQ7hQvIVIeUcXKpLk9AM2dJFYGchMR725JzgqvZO/ixwhoiVP461DdABn3q1ZLoj3vY1VOS7HWSB58+NusGPLKLthNjO4wZHDZSaYDQ3ln15F7VbMNQPkyuocZE1dU4G0CjQu54joUJfugHMtmTAK1pyJQaKLGe8l5oF10rd0MkBW8VSxWAb8pPRfvbfrZhgZq7AAgwoUwvcZXDs6WU7Y44yXpedhEbVmlymjsfF2YNnG83NJCN8IWX8aL7Z5nRSyxtygvGFbVxkcdUQfVb7YIjHpBpaBSTQ/XkAt/HGa8+tAhQ8BjhfhplXODK9SJiD7mGpMcpTf3b7yEwAAACBMweuMaFeWa/q4rvmUJyBAYPh1KDKtR2Q+3MOs2VbzYcyCgZEjD0Wsx9kfzvjWHGh2u+5M4vhquBoGGWGgtMJMbT24TOB42uS9bMj72CYJyGYOLygxzAqQzYxfYE2PaOy8RL++tdH162qgrWpNQhBBePEev/sWEAiUgAw3FRUDeJJW9nlnHqQ8TNW2ypIeVE2l1zBSGjouDtN7JS18kXTvDLoNG34GKQGaIRgYGKuJj2/NHm5d0+bv76N4qiJDvQDK+tGeB6yd2JtVXAD1gwakDeUx9RyzJlehYQb4YrlPiFhRuVULmp/0kGP8wKnFKVW4RCjjW1NWRYi7ll3nMJEZ8eDb4dpbHinqAjEEAIt599/FnG4O9rE71dfEQwU0yM1lpJ6Ul+jNZMq0kqrOxlhA6MXJS7z8GRRADe9H57rOOvEZEy7/jxGWx5Y2mvoGGEkeTY1m1XiCfsAt8k3QHwE4yxOHZSJeEvdPcb+2O7hO54VGefcrAiVMbu947xlSnffdtByMM3u+Er1CnnzuK23KpCW1JIwfeeYsYW4pD+WDZI8xvDU7B0MCvvlYqOhMbRuzpepJdEY6bDdJq+MwsamVfo45tc5V8rPitwHA+rfeES7is6sjFocx3gTL1KktwqthsvdhQExDbb5TNkg5YyjYNPrXgaS+rYIu/EcAEaapmzfbxO0hVFkWDIACBRTcChG8GFQclhtd5z27rg7k3IZiMYVrd63+CZZEQV+ZM8ZENl2w86Zy489n1fyleE3NDJGY3H0xnbGlb4I8v+JB6La9uIhUuWvpl62LZZT+3MJYi228a1L4VkxLWGeEK2/o1sNzC89DS7h8C92CZMfqHlnd8Y7NpeA3HgRexcGzFshAQmCjAAHCwEAASMDAQEFXQAQAAAMhiYKAc2XJ5UAAHic4wlw9UstKc8vytYzr2IYBSMNaKvw4JU/0TmlgpEBAHojByRUrOkgAQAAAAIAAAAlAAAAKyQMAAAAAAABAAAAAAAAAAAAAAA
+
 [AuthorEncoded]
 PENetwork.ico=5166,1220
 Logo=PENetwork.ico
@@ -1157,7 +1183,5 @@ lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
 
 [EncodedFolders]
-AuthorEncoded
 x64
 x86
-InterfaceEncoded
