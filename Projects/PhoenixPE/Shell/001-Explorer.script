@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.5.4.0
-Date=2023-11-27
+Version=1.6.0.0
+Date=2024-01-07
 
 [Variables]
 
@@ -66,10 +66,6 @@ Run,%ScriptFile%,Reg-Themes
 Run,%ScriptFile%,Reg-BitLocker
 Run,%ScriptFile%,Reg-Search
 Run,%ScriptFile%,Reg-Options
-
-// Win11 explorer.exe workaround check.
-FileVersion,"%TargetWindows%\Explorer.exe",%TargetExplorerVer%
-If,%TargetExplorerVer%,>=,"10.0.22000.0",Run,%ScriptFile%,Process-Win11-Explorer-Workaround
 
 Echo,"Unloading Registry Hives..."
 RegHiveUnload,Tmp_Software
@@ -424,13 +420,6 @@ Else,Begin
   RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",1
 End
 
-// Explorer Dark or Light Theme
-If,%SourceVer%,Bigger,10.0.17700.0,Begin
-  If,%cb_ExplorerDarkTheme%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize","AppsUseLightTheme",0
-  Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize","AppsUseLightTheme",1
-End
-Else,Echo,"Explorer's Dark theme is only available in Windows 10.0.17763.0 and newer.",Warn
-
 // DPI Scaling
 If,%cb_DisableDPIScaling%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","Win8DpiScaling",0
 
@@ -519,6 +508,18 @@ Else,If,%cmb_DefaultFolderLayout%,Equal,"Content",Begin
   RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,08,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,20,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,05,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,Halt,"INTERNAL LOGIC ERROR: Invalid selection [%cmb_DefaultFolderLayout%]."
+
+// Use Checkboxs to Select Items
+If,%cb_UseCheckboxsToSelectItems%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","AutoCheckSelect",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","AutoCheckSelect",0
+
+// Show Status Bar
+If,%cb_ShowStatusBar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",0
+
+// Launch Folders Windows in a Separate Process
+If,%cb_LaunchFoldersInSeparateProcess%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SeparateProcess",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SeparateProcess",0
 
 [#ExtractFiles#]
 // ===============================================================================================================================
@@ -911,101 +912,6 @@ ExtractAllFiles,%ScriptFile%,Files-System32,%TargetSystem32%
 // We need Windows.CloudStore.dll.mui for pintool, but the actual .dll crashes explorer and StartIsBack so delete it.
 FileDelete,"%TargetSystem32%\Windows.CloudStore.dll"
 
-[#Process-Win11-Explorer-Workaround#]
-// ===============================================================================================================================
-// Name...........: Process-Win11-Explorer-Workaround
-// Description....: Temporary workaround for Win11 explorer.exe crashing in WinPE. The workaround substitutes explorer.exe from Win10
-//                  As of Win11 22H2 (10.0.22621.0) this workaround is no longer required. It is included for limited backward compatibility.
-// Syntax.........: 
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: 
-// Related........: 
-// ===============================================================================================================================
-[Process-Win11-Explorer-Workaround]
-If,%cmb_Win10ExplorerSource%,Equal,"Use explorer.exe from the Win11 source image",Begin
-  // Check if we have a problematic source and warn the user.
-  If,%SourceVer%,Smaller,10.0.22621.0,Begin
-    If,QUESTION,"WARNING:#$x#$xThis version of Windows is known to cause blacksceen on boot using explorer.exe from the source.#$xIt is recommended to configure the Explorer Shell script to use explorer.exe from an alternate source.#$x#$xAre you sure you want to continue building?",10,False,Return
-    Else,Halt,"Explorer Shell: Build halted by user."
-  End
-End
-Else,If,%cmb_Win10ExplorerSource%,Equal,"Use explorer.exe from my Win10 host",Begin
-  // Copy Win10 Explorer from host. (Must build from a computer running Win10)
-  Echo,"Copying explorer.exe from Host..."
-  FileVersion,"C:\Windows\explorer.exe",%HostExplorerVer%
-  If,%HostExplorerVer%,Smaller,"10.0.22000.0",FileCopy,"C:\Windows\explorer.exe",%TargetWindows%
-  Else,Halt,"ERROR: You must build from a Win10 host in order to copy explorer.exe from your host."
-End
-Else,If,%cmb_Win10ExplorerSource%,Equal,"Extract explorer.exe from a Win10 ISO/Source",Begin
-    // Extract Explorer from the provided .wim file + index
-    Echo,"Extracting explorer.exe from .wim image..."
-	If,ExistFile,"%pb_Win10ExplorerWIM%Sources\Install.wim",Begin
-	  WimExtract,"%pb_Win10ExplorerWIM%Sources\Install.wim",%num_WimImage%,"\Windows\explorer.exe",%TargetWindows%
-	End
-	Else,If,ExistFile,"%SourceDir%\Sources\Install.esd",Begin
-	  Echo,"Warning:#$xYou have selected a source with [Install.esd] present.#$x.esd files MAY be encrypted. If you encounter problems building please select a different source which contains an unencrypted Install.esd or Install.wim",WARN
-	  WimExtract,"%pb_Win10ExplorerWIM%Sources\Install.esd",%num_WimImage%,"\Windows\explorer.exe",%TargetWindows%
-	End
-	Else,Halt,"ERROR: Invalid Source!#$x#$x  Could not extract explorer.exe because %pb_Win10ExplorerWIM%Sources\Install.wim#$x#$xcould not be found."
-End
-Else,If,%cmb_Win10ExplorerSource%,Equal,"Use the explorer.exe application provided below",Begin
-  // Copy from Path Box
-  If,ExistFile,%pb_Win10ExplorerEXE%,Begin
-    Echo,"Copying user provided explorer.exe..."
-	// Log file version
-	FileVersion,%pb_Win10ExplorerEXE%,%HostExplorerVer%
-    FileCopy,%pb_Win10ExplorerEXE%,%TargetWindows%
-  End
-  Else,Halt,"ERROR: You must provide the full path to the explorer.exe application."
-End
-Else,Halt,"INTERNAL LOGIC ERROR: Invalid selection [%cmb_Win10ExplorerSource%]."
-
-[#CheckWin10ExplorerSource#]
-// ===============================================================================================================================
-// Name...........: CheckWin10ExplorerSource
-// Description....: Check for a valid install.wim or install.esd file.
-// Syntax.........: 
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: 
-// Related........: pb_Win10ExplorerWIM
-// ===============================================================================================================================
-[CheckWin10ExplorerSource]
-If,ExistFile,"%pb_Win10ExplorerWIM%Sources\Install.wim",Return
-Else,If,ExistFile,"%SourceDir%Sources\Install.esd",Message,"Warning:#$xYou have selected a source with [Install.esd] present.#$x.esd files MAY be encrypted. If you encounter problems building please select a different source which contains an unencrypted Install.esd or Install.wim",Warning
-Else,Message,"Invalid Source!#$x#$x  %pb_Win10ExplorerWIM%Sources\Install.wim#$x#$xcould not be found.",ERROR
-
-[#ToggleWin10ExplorerSource#]
-// ===============================================================================================================================
-// Name...........: ToggleWin10ExplorerSource
-// Description....: Toggle the visibility of the pb_Win10ExplorerEXE and pb_Win10ExplorerWIM depending on the selection.
-// Syntax.........: 
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: 
-// Related........: cmb_Win10ExplorerSource
-// ===============================================================================================================================
-[ToggleWin10ExplorerSource]
-If,%cmb_Win10ExplorerSource%,Equal,"Extract explorer.exe from a Win10 ISO/Source",Begin
-  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerEXE,False
-  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerWIM,True
-  WriteInterface,Visible,%ScriptFile%,Interface,num_WimImage,True
-End
-Else,If,%cmb_Win10ExplorerSource%,Equal,"Use the explorer.exe application provided below",Begin
-  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerEXE,True
-  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerWIM,False
-  WriteInterface,Visible,%ScriptFile%,Interface,num_WimImage,False
-End
-Else,Begin
-  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerEXE,False
-  WriteInterface,Visible,%ScriptFile%,Interface,pb_Win10ExplorerWIM,False
-  WriteInterface,Visible,%ScriptFile%,Interface,num_WimImage,False
-End
-
 [#SetDefaultOptions#]
 // ===============================================================================================================================
 // Name...........: SetDefaultOptions
@@ -1026,7 +932,6 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,True
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"."
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"File Explorer"
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowComputerOnDesktop,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_ExplorerDarkTheme,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_ExpandCurDir,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysShowMenus,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_ExpandRibbon,True
@@ -1039,11 +944,10 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_SmallIconsOnDesktop,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_DisableDPIScaling,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ExpandOpStatusDlg,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHiddenFiles,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowStatusBar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_UseCheckboxsToSelectItems,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_LaunchFoldersInSeparateProcess,True
 WriteInterface,Value,%ScriptFile%,Interface,cmb_DefaultFolderLayout,"Details"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Win10ExplorerSource,"Use explorer.exe from the Win11 source image"
-WriteInterface,Value,%ScriptFile%,Interface,pb_Win10ExplorerEXE,""
-WriteInterface,Value,%ScriptFile%,Interface,pb_Win10ExplorerWIM,""
-WriteInterface,Value,%ScriptFile%,Interface,num_WimImage,1
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -1096,30 +1000,25 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,103,122,18,True
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,122,122,18,True
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,162,119,21,.
 txt_ShortcutName="Shortcut Name:",1,0,12,204,119,21,"File Explorer"
-bvl_Options=Options,1,12,151,50,403,203,8,Bold
-cb_ShowComputerOnDesktop="Show Computer on Desktop",1,3,160,64,172,18,True,"__Displays the Computer icon on the desktop"
-cb_ExplorerDarkTheme="Use Dark Theme",1,3,370,65,125,18,False,"__Explorer's Dark Theme introduced in Windows 10 1809"
+bvl_Options=Options,1,12,151,50,403,237,8,Bold
+cb_ShowComputerOnDesktop="Show Computer on Desktop",1,3,370,65,172,18,True,"__Displays the Computer icon on the desktop"
 cb_ExpandCurDir="Auto Expand to Current Folder",1,3,160,113,194,18,True,"__Expand Explorer's Navigation Pane to the current directory"
-cb_AlwaysShowMenus="Always Show Menus",1,3,160,81,200,18,False,"__Always show menu bar in Explorer"
+cb_AlwaysShowMenus="Always Show Menus",1,3,160,65,200,18,False,"__Always show menu bar in Explorer"
 cb_ExpandRibbon="Expand Ribbon",1,3,160,129,112,18,True,"__Expand Explorer's Ribbon by default"
-cb_AutoHideTaskbar="Auto Hide Taskbar",1,3,370,145,112,18,False,"__Automatically hide the Taskbar for full screen use"
-cb_LockTaskbar="Lock the Taskbar",1,3,370,161,112,18,True
-rGrp_TaskbarIcons="Taskbar Icons",1,14,160,171,179,73,"Always Combine, Hide Labels","Combine When Taskbar Is Full","Never Combine",2
-cb_SmallIconsInMenu="Small Icons In Menu",1,3,370,113,145,18,True
-cb_SmallIconsOnTaskbar="Small Icons On Taskbar",1,3,370,129,137,18,True
-cb_SmallIconsOnDesktop="Small Icons On Desktop",1,3,370,97,146,18,True
-cb_DisableDPIScaling="Disable DPI Scaling",1,3,370,81,171,18,True,"__Select this option to show larger Icons on high resolution displays."
+cb_AutoHideTaskbar="Auto Hide Taskbar",1,3,370,129,112,18,False,"__Automatically hide the Taskbar for full screen use"
+cb_LockTaskbar="Lock the Taskbar",1,3,370,145,112,18,True
+rGrp_TaskbarIcons="Taskbar Icons",1,14,160,201,179,73,"Always Combine, Hide Labels","Combine When Taskbar Is Full","Never Combine",2
+cb_SmallIconsInMenu="Small Icons In Menu",1,3,370,97,145,18,True
+cb_SmallIconsOnTaskbar="Small Icons On Taskbar",1,3,370,113,137,18,True
+cb_SmallIconsOnDesktop="Small Icons On Desktop",1,3,370,81,146,18,True
+cb_DisableDPIScaling="Disable DPI Scaling",1,3,370,161,171,18,True,"__Select this option to show larger Icons on high resolution displays."
 cb_ExpandOpStatusDlg="Expand Operation Status",1,3,160,145,200,18,True,"__Expand the modern FileCopy/Delete/Etc. dialog by default."
+cb_ShowStatusBar="Show Status Bar",1,3,160,81,200,18,True
+cb_LaunchFoldersInSeparateProcess="Launch File Explorer in Separate Process",1,3,160,177,251,18,True
 cb_ShowHiddenFiles="Show Hidden & System Files",1,3,160,97,200,18,True
-bvl_Win11Support="Win11 Support",1,12,151,275,403,94,8,Bold
-lbl_Win11Explorer="This option will only be processed if building from a Win11 source.",1,1,160,290,380,16,8,Normal
-cmb_Win10ExplorerSource="Use explorer.exe from the Win11 source image",1,4,160,310,311,21,"Use explorer.exe from the Win11 source image","Use explorer.exe from my Win10 host","Extract explorer.exe from a Win10 ISO/Source","Use the explorer.exe application provided below",_ToggleWin10ExplorerSource_,True
-web_WhatIsThis="What is this?",1,10,480,312,67,18,https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ#building-from-a-win11-source-with-explorer-shell-causes-blackscreen-on-boot
-pb_Win10ExplorerEXE=,1,20,160,340,380,20,file,"Title=Select the explorer.exe to include in your build",Filter=explorer.exe|explorer.exe,"__Select the explorer.exe to include in your build"
-pb_Win10ExplorerWIM=,0,20,160,340,329,20,dir,"Title=Select the directory containing your extracted Win10 ISO image.",_CheckWin10ExplorerSource_,True,"__Select the directory containing your extracted Win10 ISO image."
-num_WimImage=num_WimImage,0,2,500,340,40,20,1,1,99,1,"__Select the index of the image to extract"
-lbl_DefaultFolderLayout="Default Folder Layout:",1,1,370,205,149,16,8,Normal
-cmb_DefaultFolderLayout=Details,1,4,370,221,150,21,"Extra Large Icons","Large Icons","Medium Icons","Small Icons",List,Details,Tiles,Content
+cb_UseCheckboxsToSelectItems="Use Checkboxs to Select Items",1,3,160,161,173,18,False
+lbl_DefaultFolderLayout="Default Folder Layout:",1,1,370,235,149,16,8,Normal
+cmb_DefaultFolderLayout=Details,1,4,370,251,150,21,"Extra Large Icons","Large Icons","Medium Icons","Small Icons",List,Details,Tiles,Content
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
