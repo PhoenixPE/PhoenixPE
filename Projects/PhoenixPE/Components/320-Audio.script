@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.2.2.0
-Date=2023-09-10
+Version=1.2.1.0
+Date=2024-01-12
 
 [Variables]
 
@@ -305,14 +305,14 @@ If,ExistFile,"%TargetSystem32%\AudioSrvPolicyManager.dll",Begin
     If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\AudioSrvPolicyManager.dll] failed. Audio may not be available under the SYSTEM session. The error returned was [#r].",WARN
   End
   Else,Begin
-    // 10.0.22621.1485 - We will try this patch even if a more recent version is present
+    // 10.0.22621.1485+
     ShellExecute,Hide,"%Tools%\%HostArch%\binmay.exe","-v -u #$q%TargetSystem32%\AudioSrvPolicyManager.dll#$q -s 83FF017426 -r 83FF01EB26"
     If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\AudioSrvPolicyManager.dll] failed. Audio may not be available under the SYSTEM session. The error returned was [#r].",WARN
   End
 End
 
 // Warn if AudioSrvPolicyManager.dll version is unverified, as the patch will most likely fail to find a match
-If,%AudioSrvPolicyManagerVersion%,Bigger,10.0.22621.1485,Echo,"WARNING: [%TargetSystem32%\AudioSrvPolicyManager.dll] version [%AudioSrvPolicyManagerVersion%] has not been verified to work with this patch. Audio may not be available under the SYSTEM session. Please check the log for details.",WARN
+If,%AudioSrvPolicyManagerVersion%,Bigger,10.0.22621.2506,Echo,"WARNING: [%TargetSystem32%\AudioSrvPolicyManager.dll] version [%AudioSrvPolicyManagerVersion%] has not been verified to work with this patch. Audio may not be available under the SYSTEM session. Please check the log for details.",WARN
  
 [#ToggleStartupSound#]
 // ===============================================================================================================================
