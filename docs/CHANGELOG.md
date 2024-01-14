@@ -2,36 +2,83 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release UNRELEASED
+## Release 2024-01-14
 
 ### Added
+- **Compatibility warning:** The PECMD interpreter has been replaced by AutoIt3 and uses the PhoenixPE.au3 script for config, Shortcut creation, AutoRun, Shell loading, etc. Running custom PECMD scripts is still supported.
+- Added additional ISO download link to Config Source advanced options.
+- Added AddStartupConfig command to the PhoenixAPI to allow directly inserting free-form code to the startup config (PhoenixPE.au3).
 - Added FileSearch command to the PhoenixAPI to allow searching for a specific file(s) in a path.
+- Added GetStringResource command to the PhoenixAPI to allow extracting strings from the resource table of a binary.
+- Added the ability to specify a custom PENetwork config file in 310-PENetwork.script (Issue #64). Previously this feature required the user to place a custom PENetwork.ini file in the project cache, however this could result in the config being destroyed if the cache was cleared.
+- Added XMLRead command to PhoenixAPI (Issue #64). Allows reading a single value from an XML file.
+- Additional cleanup options in SlimFast. (Issue #35)
+- Added additional options in Explorer script: Use Checkboxs to Select Items, Show Status Bar, Launch Folder Windows in a Separate Process
+- Added ClasicCalc script.
+- Added DriveSnapshot script. (Issue #53)
+- Added FastStone Capture script.
 
 ### Changed
+- .Net 6 runtime updated to v6.0.26
+- AIDA64 updated to v7.00.6700
+- Added a warning if you try to include MSPaint in a Win11 build. M$ removed "Classic Paint" in Win11 and moved to the UWP Paint app.
+- Added a warning if you try to include Snipping Tool in a Win11 build. M$ replaced in Win11 and moved to the Snip and Sketch UWP app.
+- Added Localization option to sync time on network startup. (Issue #59)
+- AddShortcut, PinShortcut, and AddAutoRun commands were rewritten to work with the new AutoIt3 config/loader.
+- AgentRansack updated to v2022 build 3418
+- Allow copy of license file and config in OCCT script. (Issue #60)
+- AnyDesk script will now attempt to copy the identity cert from the local users profile. (Issue #59)
+- Arsenal Image Mounter updated to Driver v1.2.11.69 / GUI v3.10.262.0
+- Attribute Changer updated to v11.30
+- Attribute Changer updated language selections. (Issue #67)
 - AudioSrvPolicyManager patching process was modified to work with Win11 10.0.22621.1702 (Issue #58)
-- Allow copy of license file and config in OCCT script (Issue #60)
-- Rewrote AcronisCyberProtect and ATI2021 download/unpack to eliminate the need to update the name of the inner CAB container.
-- AnyDesk script will now attempt to copy the identity cert from the local users profile (Issue #59)
-- Attribute Changer updated to v11.20b
 - BeyondCompare updated to v4.4.7.28397
+- BleachBit updated v4.6.0 (now requires writable dir and VC++ 10)
+- Bumped StartAllBack supported version to v3.7.3
+- CPU-Z updated to v.2.08.0
+- DesktopInfo updated to v3.11.0
+- DiskCyptor updated to v1.3 beta
+- DiskGenius updated to v5.5.1.1508
 - Driver Store Explorer updated to v0.11.92
 - FastStone Image Viewer updated to v7.8
+- FurMark updated to v1.37.2.0
+- Google Chrome updated to v120.0.6099.217
+- GPU-Z updated to v2.56.0
+- HWInfo updated to v7.68
+- IrfanView updated to v4.66
+- LibreOffice updated to v7.6.4
+- MPC-BE updated to v1.6.11.0
+- MS Visual C++ Runtime updated to v14.38.33130.0
+- Notepad++ updated to v8.6.1.0
+- Notepad3 updated to v6.24.109.1 RC2
 - Open-Shell updated to v4.4.191
-- Powershell Core updated to v7.3.7
-- Rufus updated to v4.2, added x64 support. (Note: Rufus dropped support for Win7 as of v4.0)
+- PowerShell Core updated to v7.4.1
+- Re-worked FBWF logic to allow Win11 based builds to use more then 4094 MB WinPE Cache.
+- Remove OEM logo if left blank in OEMInfo.script.
+- Rewrote AcronisCyberProtect and ATI2021 download/unpack to eliminate the need to update the name of the inner CAB container.
+- Rufus updated to v4.3, added x64 support. (Note: Rufus dropped support for Win7 as of v4.0)
+- Simplewall updated to v3.7.7
 - TotalCommander updated to v11.02 + added Ukrainian translation.
-- VeraCypt updated to v1.26.7, added Corsican language, added amd64 support.
-  * **Compatibility warning:** VeraCypt 1.26.7 drops support for TrueCrypt mode. If you need to mount or convert legacy TrueCypt volumes use v1.25.9.
-- WinNTSetup updated to v5.3.2
-- Windows Login Unlocker updated to v2.1.0.6357 and added Chinese, Dutch, French, Ukrainian translations.
-- WinSCP updated to v6.1.2
 - Ventoy updated to v1.0.96
+- VeraCypt updated to v1.26.7, added Corsican language, added amd64 support. **Compatibility warning:** VeraCypt 1.26.7 drops support for TrueCrypt mode. If you need to mount or convert legacy TrueCypt volumes use v1.25.9
+- Windows Login Unlocker updated to v2.1.0.6357 and added Chinese, Dutch, French, Ukrainian translations.
+- WinMerge updated to v2.16.36
+- WinNTSetup updated to v5.3.3
+- WinSCP updated to v6.1.2
+- WizTree updated to v4.16
+- Zulu JRE11 updated to v11.68.17
+- Zulu JRE17 updated to v17.46.19
 
 ### Fixed
+- Fixed explorer crashing on boot with 23H2v2 source.
 - Fixed an issue with FileCopyEx that would case the file to be copied incorrectly if the destination directory did not exist.
+- KVRT now requires writable dir.
+- PCI-Z requires a writable directory in order to read downloaded PCI ID database.
 - Remove Copilot icon from taskbar (Win11)
 
 ### Removed
+- Fixscreen.exe is no longer required. Show desktop and screen res fixes are now handled directly by the PhoenixPE loader.
+- Old Win11 22000 explorer workaround was removed. We no longer support building from this version.
 
 ## Release 2023-08-03
 
@@ -52,7 +99,7 @@ Notable changes to the PhoenixPE project.
 - DMDE updated to v4.0.6.806
 - FurMark updated to v1.35.0.0 (Now embedded in script due to download protections)
 - Google Chrome updated to v115.0.5790.99
-- GPU updated to v2.54.0
+- GPU-Z updated to v2.54.0
 - grepWin updated to v2.0.15
 - HDClone updated to X.4
 - HWInfo updated to v7.60
