@@ -33,8 +33,8 @@ Title=Drive Snapshot
 Description=Drive Snapshot is disk imaging software that enables the user to back up and restore hard disk data easily and safely.
 Author=Homes32
 Level=5
-Version=1.0.0.0
-Date=2023-07-24
+Version=1.1.0.0
+Date=2024-01-13
 Selected=False
 Mandatory=False
 
@@ -61,7 +61,26 @@ FileCopy,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%","%TargetPrograms%\%Progr
 FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
 Echo,"Program version: v%ProgramExeVer%"
 
-// TODO: Generate registered .exe using provided license file
+///////////////////////////////////////////////////////////////////////////////////
+// License Registration
+
+If,%cmb_Registration%,Equal,"Enter license info",Begin
+  FileCreateBlank,"%ProjectTemp%\License.txt",NOWARN
+  TXTaddLine,"%ProjectTemp%\License.txt",%txt_LicenseInfo1%,Append
+  TXTaddLine,"%ProjectTemp%\License.txt",%txt_LicenseInfo2%,Append
+  TXTaddLine,"%ProjectTemp%\License.txt",%txt_LicenseInfo3%,Append
+  TXTaddLine,"%ProjectTemp%\License.txt",%txt_LicenseInfo4%,Append
+  ShellExecute,Hide,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%","--register:#$q%ProjectTemp%\License.txt#$q -W","%TargetPrograms%\%ProgramFolder%"
+  If,Not,%ExitCode%,Equal,0,Halt,"Drive Snapshot license registration failed. Please check the log for details."
+End
+Else,If,%cmb_Registration%,Equal,"Provide license file",Begin
+  If,ExistFile,%fb_LicenseFile%,Begin
+  ShellExecute,Hide,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%","--register:#$q%fb_LicenseFile%#$q -W","%TargetPrograms%\%ProgramFolder%"
+  If,Not,%ExitCode%,Equal,0,Halt,"Drive Snapshot license registration failed. Please check the log for details."
+  End
+  Else,Halt,"The license file [%fb_LicenseFile%] does not exist!"
+End
+Else,Halt,"INTERNAL LOGIC ERROR: [%cmb_Registration%] is not a valid selection."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
@@ -148,11 +167,51 @@ End
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
-// Related........: cmb_RegEdition
+// Related........: cmb_Registration
 // ===============================================================================================================================
 [ToggleRegKey]
-If,%cmb_RegEdition%,Equal,"Registered Version",WriteInterface,Visible,%ScriptFile%,Interface,fb_RegKey,True
-Else,WriteInterface,Visible,%ScriptFile%,Interface,fb_RegKey,False
+System,Cursor,Wait
+If,%cmb_Registration%,Equal,"30 day evaluation",Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,fb_LicenseFile,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_EnterLicenseInfo,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo1,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo1,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo2,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo2,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo3,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo3,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo4,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo4,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_30DayTrial,True
+End
+Else,If,%cmb_Registration%,Equal,"Enter license info",Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,fb_LicenseFile,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_EnterLicenseInfo,True
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo1,True
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo1,True
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo2,True
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo2,True
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo3,True
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo3,True
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo4,True
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo4,True
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_30DayTrial,False
+End
+Else,If,%cmb_Registration%,Equal,"Provide license file",Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,fb_LicenseFile,True
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_EnterLicenseInfo,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo1,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo1,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo2,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo2,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo3,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo3,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicenseInfo4,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_LicenseInfo4,False
+  WriteInterface,Visible,%ScriptFile%,Interface,lbl_30DayTrial,False
+End
+Else,Halt,"INTERNAL LOGIC ERROR: [%cmb_Registration%] is not a valid selection."
+System,Cursor,Normal
 
  [#LaunchProgram#]
 // ===============================================================================================================================
@@ -206,8 +265,12 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Backup & Imaging"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Drive Snapshot"
 WriteInterface,Value,%ScriptFile%,Interface,cb_RegisterFileExt,True
-WriteInterface,Value,%ScriptFile%,Interface,fb_RegKey,""
-WriteInterface,Value,%ScriptFile%,Interface,cmb_RegEdition,"30 Day Evaluation"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Registration,"30 day evaluation"
+WriteInterface,Value,%ScriptFile%,Interface,fb_LicenseFile,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_LicenseInfo1,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_LicenseInfo2,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_LicenseInfo3,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_LicenseInfo4,""
 Run,%ScriptFile%,ToggleRegKey
 System,Cursor,Normal
 
@@ -271,10 +334,20 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Backup & Imaging"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Drive Snapshot"
 bvl_Options=Options,1,12,150,90,195,184,8,Bold
 cb_RegisterFileExt="Register .sna file extension",1,3,160,105,173,18,True
-lbl_RegEdition="Software Edition",0,1,160,200,153,16,8,Normal
-cmb_RegEdition="30 Day Evaluation",0,4,160,215,174,21,"30 Day Evaluation","Registered Version",_ToggleRegKey_,True
-fb_RegKey=,0,13,160,243,174,20,file,"Title=Select your license file","Filter=Text Files|*.txt|All Files|*.*","__Please select the license file (YOURNAME.TXT) you received when you registered the software."
-lbl_30DayTrial="Note: The 30 day evaluation program contains a built-in time limit of approx. 30 days from the time it was compiled, after which it won't backup any longer. There are no other restrictions in the trial version. You must download a new .exe once it has expired.",1,1,5,285,340,60,8,Normal
+lbl_RegEdition="Software Registration",1,1,367,105,153,16,8,Normal
+bvl_License=License,1,12,357,90,271,184,8,Bold
+cmb_Registration="30 day evaluation",1,4,367,120,174,21,"30 day evaluation","Enter license info","Provide license file",_ToggleRegKey_,True
+fb_LicenseFile=,0,13,367,148,246,20,file,"Title=Select your license file","Filter=Text Files|*.txt|All Files|*.*","__Please select the license file (YOURNAME.TXT) you received when you registered the software."
+lbl_30DayTrial="Note: The 30 day evaluation program contains a built-in time limit of approx. 30 days from the time it was compiled, after which it won't backup any longer. There are no other restrictions in the trial version. You must download a new .exe once it has expired.",1,1,367,148,250,72,8,Normal
+lbl_EnterLicenseInfo="Enter your license data below:",0,1,367,153,200,16,8,Bold
+lbl_LicenseInfo1="Line 1:",0,1,367,180,40,16,8,Normal
+txt_LicenseInfo1=,0,0,414,173,200,21,
+lbl_LicenseInfo2="Line 2:",0,1,367,201,40,16,8,Normal
+txt_LicenseInfo2=,0,0,414,195,200,21,,"__Hint: This line is usually left blank."
+lbl_LicenseInfo3="Line 3:",0,1,367,223,40,16,8,Normal
+txt_LicenseInfo3=,0,0,414,217,200,21,
+lbl_LicenseInfo4="Line 4:",0,1,367,245,40,16,8,Normal
+txt_LicenseInfo4=,0,0,414,239,200,21,
 
 [InterfaceEncoded]
 Trash.ico=1150,1212
