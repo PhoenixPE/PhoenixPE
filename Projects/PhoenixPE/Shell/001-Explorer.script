@@ -147,12 +147,15 @@ RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explore
 If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\Explorer",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon",shell,explorer.exe
+  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","shell","explorer.exe"
   // Registry cached version of the Start menu + Windows.CloudStore.dll are required for Pintool
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\CloudStore",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\CloudStore"
   RegImport,%ProjectTemp%\Explorer-RegSoftware.reg
   Run,%ScriptFile%,Reg-AdditionalFonts
 End
+
+// Prevent explorer from initializing start menu defaults/pins/recent apps/etc. (Prevents explorer crash in 23H2v2)
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","StartMenuInit",13
 
 // Set the My Computer > Properties context menu to open the classic System Properties dialog
 RegWrite,HKLM,0x2,"Tmp_Software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Properties\command","","%WinDir%\System32\SystemPropertiesComputerName.exe"
@@ -520,6 +523,10 @@ Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Ex
 // Launch Folder Windows in a Separate Process
 If,%cb_LaunchFoldersInSeparateProcess%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SeparateProcess",1
 Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SeparateProcess",0
+
+// Use Compact View
+If,%cb_UseCompactMode%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","UseCompactMode",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","UseCompactMode",0
 
 [#ExtractFiles#]
 // ===============================================================================================================================
@@ -945,6 +952,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_DisableDPIScaling,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ExpandOpStatusDlg,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHiddenFiles,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowStatusBar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_UseCompactMode,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_UseCheckboxsToSelectItems,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_LaunchFoldersInSeparateProcess,True
 WriteInterface,Value,%ScriptFile%,Interface,cmb_DefaultFolderLayout,"Details"
@@ -1000,23 +1008,24 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,103,122,18,True
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,122,122,18,True
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,162,119,21,.
 txt_ShortcutName="Shortcut Name:",1,0,12,204,119,21,"File Explorer"
-bvl_Options=Options,1,12,151,50,403,237,8,Bold
-cb_ShowComputerOnDesktop="Show Computer on Desktop",1,3,370,65,172,18,True,"__Displays the Computer icon on the desktop"
-cb_ExpandCurDir="Auto Expand to Current Folder",1,3,160,113,194,18,True,"__Expand Explorer's Navigation Pane to the current directory"
-cb_AlwaysShowMenus="Always Show Menus",1,3,160,65,200,18,False,"__Always show menu bar in Explorer"
-cb_ExpandRibbon="Expand Ribbon",1,3,160,129,112,18,True,"__Expand Explorer's Ribbon by default"
-cb_AutoHideTaskbar="Auto Hide Taskbar",1,3,370,129,112,18,False,"__Automatically hide the Taskbar for full screen use"
-cb_LockTaskbar="Lock the Taskbar",1,3,370,145,112,18,True
+bvl_Options=Options,1,12,151,50,480,237,8,Bold
+cb_ShowComputerOnDesktop="Show computer on desktop",1,3,370,65,172,18,True,"__Displays the Computer icon on the desktop"
+cb_ExpandCurDir="Auto expand to current folder",1,3,160,113,194,18,True,"__Expand Explorer's Navigation Pane to the current directory"
+cb_AlwaysShowMenus="Always show menus",1,3,160,65,200,18,False,"__Always show menu bar in Explorer"
+cb_ExpandRibbon="Expand ribbon",1,3,160,129,112,18,True,"__Expand Explorer's Ribbon by default"
+cb_AutoHideTaskbar="Auto hide taskbar",1,3,370,129,112,18,False,"__Automatically hide the Taskbar for full screen use"
+cb_LockTaskbar="Lock the taskbar",1,3,370,145,112,18,True
 rGrp_TaskbarIcons="Taskbar Icons",1,14,160,201,179,73,"Always Combine, Hide Labels","Combine When Taskbar Is Full","Never Combine",2
-cb_SmallIconsInMenu="Small Icons In Menu",1,3,370,97,145,18,True
-cb_SmallIconsOnTaskbar="Small Icons On Taskbar",1,3,370,113,137,18,True
-cb_SmallIconsOnDesktop="Small Icons On Desktop",1,3,370,81,146,18,True
-cb_DisableDPIScaling="Disable DPI Scaling",1,3,370,161,171,18,True,"__Select this option to show larger Icons on high resolution displays."
-cb_ExpandOpStatusDlg="Expand Operation Status",1,3,160,145,200,18,True,"__Expand the modern FileCopy/Delete/Etc. dialog by default."
-cb_ShowStatusBar="Show Status Bar",1,3,160,81,200,18,True
-cb_LaunchFoldersInSeparateProcess="Launch File Explorer in Separate Process",1,3,160,177,251,18,True
-cb_ShowHiddenFiles="Show Hidden & System Files",1,3,160,97,200,18,True
-cb_UseCheckboxsToSelectItems="Use Checkboxs to Select Items",1,3,160,161,173,18,False
+cb_SmallIconsInMenu="Small icons in menu",1,3,370,97,145,18,True
+cb_SmallIconsOnTaskbar="Small icons on taskbar",1,3,370,113,137,18,True
+cb_SmallIconsOnDesktop="Small icons on desktop",1,3,370,81,146,18,True
+cb_DisableDPIScaling="Disable DPI scaling",1,3,370,161,171,18,True,"__Select this option to show larger Icons on high resolution displays."
+cb_ExpandOpStatusDlg="Expand operation status",1,3,160,145,200,18,True,"__Expand the modern FileCopy/Delete/Etc. dialog by default."
+cb_ShowStatusBar="Show status bar",1,3,160,81,200,18,True
+cb_LaunchFoldersInSeparateProcess="Launch folders in separate process",1,3,370,177,197,18,True,"__Launch folder windows in a separate process"
+cb_ShowHiddenFiles="Show hidden & system files",1,3,160,97,200,18,True
+cb_UseCheckboxsToSelectItems="Use checkboxs to select items",1,3,160,161,173,18,False
+cb_UseCompactMode="Decrease space between items",1,3,160,177,200,18,False,"__Decrease space between items (compact view)"
 lbl_DefaultFolderLayout="Default Folder Layout:",1,1,370,235,149,16,8,Normal
 cmb_DefaultFolderLayout=Details,1,4,370,251,150,21,"Extra Large Icons","Large Icons","Medium Icons","Small Icons",List,Details,Tiles,Content
 
