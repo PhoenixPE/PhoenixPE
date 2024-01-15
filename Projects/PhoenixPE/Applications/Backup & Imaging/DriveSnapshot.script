@@ -33,8 +33,8 @@ Title=Drive Snapshot
 Description=Drive Snapshot is disk imaging software that enables the user to back up and restore hard disk data easily and safely.
 Author=Homes32
 Level=5
-Version=1.1.0.0
-Date=2024-01-13
+Version=1.1.1.0
+Date=2024-01-14
 Selected=False
 Mandatory=False
 
@@ -64,7 +64,9 @@ Echo,"Program version: v%ProgramExeVer%"
 ///////////////////////////////////////////////////////////////////////////////////
 // License Registration
 
-If,%cmb_Registration%,Equal,"Enter license info",Begin
+If,%cmb_Registration%,Equal,"30 day evaluation",Echo,"Evaluation license: No backups possible after trial expires."
+Else,If,%cmb_Registration%,Equal,"Enter license info",Begin
+  Echo,"Registering %ScriptTitle%..."
   FileCreateBlank,"%ProjectTemp%\License.txt",NOWARN
   TXTaddLine,"%ProjectTemp%\License.txt",%txt_LicenseInfo1%,Append
   TXTaddLine,"%ProjectTemp%\License.txt",%txt_LicenseInfo2%,Append
@@ -74,6 +76,7 @@ If,%cmb_Registration%,Equal,"Enter license info",Begin
   If,Not,%ExitCode%,Equal,0,Halt,"Drive Snapshot license registration failed. Please check the log for details."
 End
 Else,If,%cmb_Registration%,Equal,"Provide license file",Begin
+  Echo,"Registering %ScriptTitle%..."
   If,ExistFile,%fb_LicenseFile%,Begin
   ShellExecute,Hide,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%","--register:#$q%fb_LicenseFile%#$q -W","%TargetPrograms%\%ProgramFolder%"
   If,Not,%ExitCode%,Equal,0,Halt,"Drive Snapshot license registration failed. Please check the log for details."
@@ -98,6 +101,7 @@ If,%cb_RegisterFileExt%,Equal,True,Begin
 End
 
 // Backup Settings
+Echo,"Configuring %ScriptTitle%..."
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","MinClusterSizeToUseByteMode",65537
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","MaxImageSizeMB",121575219
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","GenerateHashFile",0
@@ -105,8 +109,8 @@ RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","VssOptions",3
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","BackupDifferential",0
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","EmptyRecycleBinAlways",0
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","TestImageAfterBackup",0
-RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","EnableLogFile",1
-RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Snapshot","LogFileName","%TEMP%\Snapshot.log"
+//RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Snapshot","EnableLogFile",1
+//RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Default\Software\Snapshot","LogFileName","%TEMP%\Snapshot.log"
 
 RegUnloadHives
 
