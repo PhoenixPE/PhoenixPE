@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.2.0.0
-Date=2023-12-26
+Version=1.2.1.0
+Date=2024-01-18
 
 [TODO]
 // Finish RunOnceEx
@@ -261,6 +261,7 @@ End
 // Author.........: Homes32
 // Remarks........: x86 only supports up to 1024 MB.
 //                  As of Win10 2004 additional tested working sizes on x64 are: 3072, 3584, and 4094 (4096 gets auto reset to 512)
+//                  As of Win11 23H2 tested working up to 32 GB. (RAM sizes greater then 32 GB not tested for practical reasons) 
 // Related........:
 // ===============================================================================================================================
 [Config-FBWF]
@@ -272,21 +273,21 @@ If,%SourceArch%,Equal,x86,Begin
 End
 
 If,%SourceVer%,<=,10.0.22000.0,Begin
-  // Source is Win10
+  // Win10 Restrictions
+  If,%cmb_FBWFSize%,>,4096,Begin
+    Echo,"Win10 based WinPE does not support a FBWF cache larger then 4094 MB",WARN
+    WriteInterface,Value,%ScriptFile%,Interface,cmb_FBWFSize,4096
+  End
+  
   If,%cmb_FBWFSize%,Equal,4096,Begin
     Echo,"Configuring FBWF for [4094 MB]..."
     RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",4094
-  End
-  Else,If,%cmb_FBWFSize%,>,4096,Begin
-	Echo,"Win10 based WinPE does not support a FBWF cache larger then 4094 MB",WARN
-	WriteInterface,Value,%ScriptFile%,Interface,cmb_FBWFSize,4096
+    Return
   End
 End
-Else,Begin
-  // Source is Win11+
-  Echo,"Configuring FBWF for [%cmb_FBWFSize% MB]..."
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",%cmb_FBWFSize%
-End
+
+Echo,"Configuring FBWF for [%cmb_FBWFSize% MB]..."
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",%cmb_FBWFSize%
 
 [#Config-NumlockStatus#]
 // ===============================================================================================================================
