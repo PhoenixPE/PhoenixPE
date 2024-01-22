@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.2.0.0
-Date=2022-02-02
+Version=1.2.1.0
+Date=2024-01-21
 
 [Variables]
 
@@ -126,7 +126,7 @@ If,Not,ExistFile,%SourceBaseWim%,Run,%ScriptFile%,ExtractWinRE
 
 StrFormat,FileName,%SourceBaseWim%,%tmp_BaseFileName%
 Echo,"Extracting [%tmp_BaseFileName%:%SourceBaseWimImage%] to [%TargetDir%]..."
-WimApply,%SourceBaseWim%,%SourceBaseWimImage%,%TargetDir%,NOACL,NOATTRIB
+WimApply,%SourceBaseWim%,%SourceBaseWimImage%,%TargetDir%,NOACL
 
 // If building with boot.wim we need to extract additional files to get up to the level of WinRE
 If,%tmp_BaseFileName%,Equal,"Boot.wim",Run,%ScriptFile%,SuperchargeBootWim
@@ -149,7 +149,7 @@ System,EndLocal
 // ===============================================================================================================================
 [ExtractWinRE]
 Echo,"Extracting [WinRE.wim] from [%SourceInstallWim%:%SourceInstallWimImage%]..."
-WimExtract,%SourceInstallWim%,%SourceInstallWimImage%,Windows\System32\Recovery\WinRE.wim,%ProjectCache%,NOACL,NOATTRIB
+WimExtract,%SourceInstallWim%,%SourceInstallWimImage%,Windows\System32\Recovery\WinRE.wim,%ProjectCache%,NOACL
 
 // Sanity Check
 Run,"%ProjectDir%\Core\200-PreFlight.script",CheckWinREVersion
@@ -206,7 +206,7 @@ TxtAddline,%WinSxS-Listfile%,"\Windows\WinSxS\manifests\%SxSArch%_microsoft.wind
 TxtAddline,%WinSxS-Listfile%,"\Windows\WinSxS\manifests\%SxSArch%_microsoft-windows-servicingstack_*.manifest",Append
 
 Echo,"Extracting Essential Windows SidebySide Components..."
-WimExtractBulk,%SourceBaseWim%,%SourceBaseWimImage%,%WinSxS-Listfile%,%TargetDir%,NOACL,NOATTRIB,NOERR
+WimExtractBulk,%SourceBaseWim%,%SourceBaseWimImage%,%WinSxS-Listfile%,%TargetDir%,NOACL,NOERR
 If,Not,ExistDir,%TargetWindows%\WinSxS\Catalogs,DirMake,%TargetWindows%\WinSxS\Catalogs
 
 System,EndLocal
