@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.6.0.0
-Date=2024-01-07
+Version=1.7.0.0
+Date=2024-01-22
 
 [Variables]
 
@@ -469,13 +469,17 @@ Else,If,%rGrp_TaskbarIcons%,Equal,1,RegWrite,HKLM,0x4,"Tmp_Default\Software\Micr
 Else,If,%rGrp_TaskbarIcons%,Equal,2,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",2
 Else,Halt,"INTERNAL LOGIC ERROR: No action configured for option [%rGrp_TaskbarIcons%]"
 
-// Hidden files
-If,%cb_ShowHiddenFiles%,Equal,True,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","HideFileExt",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Hidden",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SuperHidden",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowSuperHidden",1
-End
+// Hide known file extensions
+If,%cb_HideKnownFileExtensions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","HideFileExt",1
+Else,If,%cb_HideKnownFileExtensions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","HideFileExt",0
+
+// Hidden Files
+If,%cb_ShowHiddenFiles%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Hidden",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Hidden",0
+
+// Super Hidden Files (Hidden+System)
+If,%cb_HideSystemFiles%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowSuperHidden",0
+Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowSuperHidden",1
 
 // Default Folder Layout (Currently we are only setting the "Generic" folder view CLSID.)
 If,%cmb_DefaultFolderLayout%,Equal,"Extra Large Icons",Begin
@@ -950,7 +954,9 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_SmallIconsOnTaskbar,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_SmallIconsOnDesktop,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_DisableDPIScaling,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ExpandOpStatusDlg,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_HideKnownFileExtensions,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHiddenFiles,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_HideSystemFiles,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowStatusBar,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_UseCompactMode,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_UseCheckboxsToSelectItems,False
@@ -1009,25 +1015,27 @@ cb_PinToStartMenu="Pin to Start Menu",1,3,12,122,122,18,True
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,162,119,21,.
 txt_ShortcutName="Shortcut Name:",1,0,12,204,119,21,"File Explorer"
 bvl_Options=Options,1,12,151,50,480,237,8,Bold
-cb_ShowComputerOnDesktop="Show computer on desktop",1,3,370,65,172,18,True,"__Displays the Computer icon on the desktop"
-cb_ExpandCurDir="Auto expand to current folder",1,3,160,113,194,18,True,"__Expand Explorer's Navigation Pane to the current directory"
+cb_ShowComputerOnDesktop="Show computer on desktop",1,3,375,97,172,18,True,"__Displays the Computer icon on the desktop"
+cb_ExpandCurDir="Auto expand to current folder",1,3,160,145,194,18,True,"__Expand Explorer's Navigation Pane to the current directory"
 cb_AlwaysShowMenus="Always show menus",1,3,160,65,200,18,False,"__Always show menu bar in Explorer"
-cb_ExpandRibbon="Expand ribbon",1,3,160,129,112,18,True,"__Expand Explorer's Ribbon by default"
-cb_AutoHideTaskbar="Auto hide taskbar",1,3,370,129,112,18,False,"__Automatically hide the Taskbar for full screen use"
-cb_LockTaskbar="Lock the taskbar",1,3,370,145,112,18,True
+cb_ExpandRibbon="Expand ribbon",1,3,160,161,112,18,True,"__Expand Explorer's Ribbon by default"
+cb_AutoHideTaskbar="Auto hide taskbar",1,3,375,161,112,18,False,"__Automatically hide the Taskbar for full screen use"
+cb_LockTaskbar="Lock the taskbar",1,3,375,177,112,18,True
 rGrp_TaskbarIcons="Taskbar Icons",1,14,160,201,179,73,"Always Combine, Hide Labels","Combine When Taskbar Is Full","Never Combine",2
-cb_SmallIconsInMenu="Small icons in menu",1,3,370,97,145,18,True
-cb_SmallIconsOnTaskbar="Small icons on taskbar",1,3,370,113,137,18,True
-cb_SmallIconsOnDesktop="Small icons on desktop",1,3,370,81,146,18,True
-cb_DisableDPIScaling="Disable DPI scaling",1,3,370,161,171,18,True,"__Select this option to show larger Icons on high resolution displays."
-cb_ExpandOpStatusDlg="Expand operation status",1,3,160,145,200,18,True,"__Expand the modern FileCopy/Delete/Etc. dialog by default."
+cb_SmallIconsInMenu="Small icons in menu",1,3,375,129,145,18,True
+cb_SmallIconsOnTaskbar="Small icons on taskbar",1,3,375,145,137,18,True
+cb_SmallIconsOnDesktop="Small icons on desktop",1,3,375,113,146,18,True
+cb_DisableDPIScaling="Disable DPI scaling",1,3,375,193,171,18,True,"__Select this option to show larger Icons on high resolution displays."
+cb_ExpandOpStatusDlg="Expand operation status",1,3,160,177,200,18,True,"__Expand the modern FileCopy/Delete/Etc. dialog by default."
 cb_ShowStatusBar="Show status bar",1,3,160,81,200,18,True
-cb_LaunchFoldersInSeparateProcess="Launch folders in separate process",1,3,370,177,197,18,False,"__Launch folder windows in a separate process"
-cb_ShowHiddenFiles="Show hidden & system files",1,3,160,97,200,18,True
-cb_UseCheckboxsToSelectItems="Use checkboxs to select items",1,3,160,161,173,18,False
-cb_UseCompactMode="Decrease space between items",1,3,160,177,200,18,False,"__Decrease space between items (compact view)"
-lbl_DefaultFolderLayout="Default Folder Layout:",1,1,370,235,149,16,8,Normal
-cmb_DefaultFolderLayout=Details,1,4,370,251,150,21,"Extra Large Icons","Large Icons","Medium Icons","Small Icons",List,Details,Tiles,Content
+cb_LaunchFoldersInSeparateProcess="Launch folders in separate process",1,3,375,209,197,18,False,"__Launch folder windows in a separate process"
+cb_HideKnownFileExtensions="Hide extensions for known file types",1,3,160,97,200,18,False
+cb_ShowHiddenFiles="Show hidden files and folders",1,3,160,113,200,18,True
+cb_HideSystemFiles="Hide protected operating system files",1,3,160,129,200,18,True,"__Deselect this option to show files with the Hidden+System attributes."
+cb_UseCheckboxsToSelectItems="Use checkboxs to select items",1,3,375,65,173,18,False
+cb_UseCompactMode="Decrease space between items",1,3,375,81,200,18,False,"__Decrease space between items (compact view)"
+lbl_DefaultFolderLayout="Default Folder Layout:",1,1,375,235,149,16,8,Normal
+cmb_DefaultFolderLayout=Details,1,4,375,251,150,21,"Extra Large Icons","Large Icons","Medium Icons","Small Icons",List,Details,Tiles,Content
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
