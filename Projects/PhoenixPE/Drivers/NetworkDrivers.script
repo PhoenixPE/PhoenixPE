@@ -31,13 +31,13 @@
 
 [Main]
 Title=Network Drivers
-Description=Load network drivers included with Windows 10.
+Description=Load additional Features on Demand network drivers included with Windows.
 Author=Homes32
 Level=6
 Selected=False
 Mandatory=False
-Version=1.3.0.0
-Date=2021-11-28
+Version=1.4.0.0
+Date=2024-02-06
 
 [Variables]
 %NetworkDriverRegCache%="%ProjectCache%\NetworkDrivers"
@@ -107,62 +107,121 @@ RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DriverPackages"
 // Build Driver Database
 
 If,%SourceArch%,Equal,x64,Begin
-  RegCopyDriver,athw8x.inf
-  RegCopyDriver,mrvlpcie8897.inf
-  RegCopyDriver,net8185.inf
-  RegCopyDriver,net8187bv64.inf
-  RegCopyDriver,net8187se64.inf
-  RegCopyDriver,net8192se64.inf
-  RegCopyDriver,net8192su64.inf
-  RegCopyDriver,netathr10x.inf
-  RegCopyDriver,netathrx.inf
-  RegCopyDriver,netbc63a.inf
-  RegCopyDriver,netbc64.inf
-  RegCopyDriver,netr28x.inf
-  RegCopyDriver,netr28ux.inf
-  RegCopyDriver,netr7364.inf
-  RegCopyDriver,netrtwlane.inf
-  RegCopyDriver,netrtwlane_13.inf
-  RegCopyDriver,netrtwlane01.inf
-  RegCopyDriver,netrtwlanu.inf
-  RegCopyDriver,netwbw02.inf
-  RegCopyDriver,netwew00.inf
-  RegCopyDriver,netwew01.inf
-  RegCopyDriver,netwlv64.inf
-  RegCopyDriver,netwns64.inf
-  RegCopyDriver,netwsw00.inf
-  RegCopyDriver,netwtw02.inf
-  RegCopyDriver,netwtw04.inf
-  RegCopyDriver,netwtw06.inf
-  RegCopyDriver,netwtw08.inf
+  
+  If,%cb_Broadcom%,Equal,True,Begin
+    // WiFi
+    RegCopyDriver,bcmwdidhdpcie.inf
+    RegCopyDriver,netbc63a.inf
+    RegCopyDriver,netbc64.inf 
+  End
+  
+  If,%cb_Intel%,Equal,True,Begin
+    // Ethernet
+    RegCopyDriver,net1ic64.inf
+    RegCopyDriver,net2ic68.inf
+    // WiFi
+    RegCopyDriver,netwbw02.inf
+    RegCopyDriver,netwew00.inf
+    RegCopyDriver,netwew01.inf
+    RegCopyDriver,netwlv64.inf
+    RegCopyDriver,netwns64.inf
+    RegCopyDriver,netwsw00.inf
+    RegCopyDriver,netwtw02.inf
+    RegCopyDriver,netwtw04.inf
+    RegCopyDriver,netwtw06.inf
+    RegCopyDriver,netwtw08.inf
+  End
+  
+  If,%cb_Marvel%,Equal,True,Begin
+    // WiFi
+    RegCopyDriver,mrvlpcie8897.inf
+  End
+  
+  If,%cb_Qualcomm%,Equal,True,Begin
+    // WiFi
+    RegCopyDriver,athw8x.inf
+    RegCopyDriver,netathrx.inf
+    RegCopyDriver,netathr10x.inf
+  End
+  
+  If,%cb_Ralink%,Equal,True,Begin
+    // WiFi
+    RegCopyDriver,netr28ux.inf
+    RegCopyDriver,netr28x.inf
+    RegCopyDriver,netr7364.inf
+  End
+  
+  If,%cb_Realtek%,Equal,True,Begin
+    // Ethernet
+    RegCopyDriver,rtcx21x64.inf
+     // Wifi
+    RegCopyDriver,net8185.inf
+    RegCopyDriver,net8187bv64.inf
+    RegCopyDriver,net8187se64.inf
+    RegCopyDriver,net8192se64.inf
+    RegCopyDriver,net8192su64.inf
+    RegCopyDriver,net819xp.inf
+    RegCopyDriver,netrtwlane01.inf
+    RegCopyDriver,netrtwlane_13.inf
+    RegCopyDriver,netrtwlane.inf
+    RegCopyDriver,netrtwlanu.inf
+  End
 End
 Else,Begin
   // x86
-  RegCopyDriver,athw8.inf
-  RegCopyDriver,net8185.inf
-  RegCopyDriver,net8187bv32.inf
-  RegCopyDriver,net8187se86.inf
-  RegCopyDriver,net8192se32.inf
-  RegCopyDriver,net8192su32.inf
-  RegCopyDriver,netathr.inf
-  RegCopyDriver,netathr10.inf
-  RegCopyDriver,netbc63.inf
-  RegCopyDriver,netbc64.inf
-  RegCopyDriver,netr28.inf
-  RegCopyDriver,netr28u.inf
-  RegCopyDriver,netr73.inf
-  RegCopyDriver,netrtwlane.inf
-  RegCopyDriver,netrtwlane_13.inf
-  RegCopyDriver,netrtwlane01.inf
-  RegCopyDriver,netrtwlanu.inf
-  RegCopyDriver,netwbn02.inf
-  RegCopyDriver,netwen00.inf
-  RegCopyDriver,netwen01.inf
-  RegCopyDriver,netwlv32.inf
-  RegCopyDriver,netwns32.inf
-  RegCopyDriver,netwsn00.inf
-  RegCopyDriver,netwtn02.inf
-  RegCopyDriver,netwtn04.inf
+  
+  If,%cb_Broadcom%,Equal,True,Begin
+    // WiFi
+    RegCopyDriver,bcmwdidhdpcie.inf
+    RegCopyDriver,netbc63.inf
+    RegCopyDriver,netbc64.inf
+  End
+  
+  If,%cb_Intel%,Equal,True,Begin
+    // Wifi
+    RegCopyDriver,netwbn02.inf
+    RegCopyDriver,netwen00.inf
+    RegCopyDriver,netwen01.inf
+    RegCopyDriver,netwlv32.inf
+    RegCopyDriver,netwns32.inf
+    RegCopyDriver,netwsn00.inf
+    RegCopyDriver,netwtn02.inf
+    RegCopyDriver,netwtn04.inf
+  End
+  
+  If,%cb_Marvel%,Equal,True,Begin
+    // Marvel
+  End
+  
+  If,%cb_Qualcomm%,Equal,True,Begin
+    // WiFi
+    RegCopyDriver,athw8.inf
+    RegCopyDriver,netathr.inf
+    RegCopyDriver,netathr10.inf
+  End 
+  
+  If,%cb_Ralink%,Equal,True,Begin
+    // WiFi
+    RegCopyDriver,netr28.inf
+    RegCopyDriver,netr28u.inf
+    RegCopyDriver,netr73.inf
+  End
+  
+  If,%cb_Realtek%,Equal,True,Begin
+    // Ethernet
+    RegCopyDriver,rtcx21x86.inf
+    // WiFi
+    RegCopyDriver,net8187bv32.inf
+    RegCopyDriver,net8187se86.inf
+    RegCopyDriver,net8192se32.inf
+    RegCopyDriver,net8192su32.inf
+    RegCopyDriver,net819xp.inf
+    RegCopyDriver,net8185.inf
+    RegCopyDriver,netrtwlane01.inf
+    RegCopyDriver,netrtwlane_13.inf
+    RegCopyDriver,netrtwlane.inf
+    RegCopyDriver,netrtwlanu.inf
+  End
 End
 
 // Export the hive to a .reg file
@@ -180,8 +239,12 @@ RegHiveUnload,Tmp_Install_Drivers
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: We extract drivers manually instead of using RequireDriver, so we can save time by using a separate registry cache.
-//                  RequireDriver copies registry entries on the fly and is much slower with large operations then using a cache.
+// Remarks........: We extract drivers using RequireDriver with the NOREG flag to skip copying the registry driver database so we can
+//                  save time by during subsequent builds by using a separate registry cache.
+//                  RequireDriver without the NOREG flag copies registry entries on the fly and is much slower with large operations then using a cache.
+//
+//                  Don't forget when adding new drivers to check the .inf and make sure the .sys matches the .inf name, otherwise you need to manually
+//                  include the correct .sys file with RequireFileEx
 // Related........: 
 // ===============================================================================================================================
 [ExtractDrivers]
@@ -189,64 +252,153 @@ Echo,"Building a list of required files...#$x#$xThis can take awhile, please be 
 
 // Driver Files to Extract
 If,%SourceArch%,Equal,"x64",Begin
-  // x64
-  RequireDriver,athw8x.inf,NOREG
-  RequireDriver,mrvlpcie8897.inf,NOREG
-  RequireDriver,net8185.inf,NOREG
-  RequireDriver,net8187bv64.inf,NOREG
-  RequireDriver,net8187se64.inf,NOREG
-  RequireDriver,net8192se64.inf,NOREG
-  RequireDriver,net8192su64.inf,NOREG
-  RequireDriver,netathr10x.inf,NOREG
-  RequireDriver,netathrx.inf,NOREG
-  RequireDriver,netbc63a.inf,NOREG
-  RequireDriver,netbc64.inf,NOREG
-  RequireDriver,netr28x.inf,NOREG
-  RequireDriver,netr28ux.inf,NOREG
-  RequireDriver,netr7364.inf,NOREG
-  RequireDriver,netrtwlane.inf,NOREG
-  RequireDriver,netrtwlane_13.inf,NOREG
-  RequireDriver,netrtwlane01.inf,NOREG
-  RequireDriver,netrtwlanu.inf,NOREG
-  RequireDriver,netwbw02.inf,NOREG
-  RequireDriver,netwew00.inf,NOREG
-  RequireDriver,netwew01.inf,NOREG
-  RequireDriver,netwlv64.inf,NOREG
-  RequireDriver,netwns64.inf,NOREG
-  RequireDriver,netwsw00.inf,NOREG
-  RequireDriver,netwtw02.inf,NOREG
-  RequireDriver,netwtw04.inf,NOREG
-  RequireDriver,netwtw06.inf,NOREG
-  RequireDriver,netwtw08.inf,NOREG
+ 
+  If,%cb_Broadcom%,Equal,True,Begin
+    // WiFi
+    RequireDriver,bcmwdidhdpcie.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Bcmpciedhd63.sys
+    RequireDriver,netbc63a.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Bcmwl63al.sys
+    RequireDriver,netbc64.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Bcmwl63a.sys
+  End
+  
+  If,%cb_Intel%,Equal,True,Begin
+    // Ethernet
+    RequireDriver,net1ic64.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\E1i68x64.sys
+    RequireDriver,net2ic68.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\E2f68.sys
+    // WiFi
+    RequireDriver,netwbw02.inf,NOREG
+    RequireDriver,netwew00.inf,NOREG
+    RequireDriver,netwew01.inf,NOREG
+    RequireDriver,netwlv64.inf,NOREG
+    RequireDriver,netwns64.inf,NOREG
+    RequireDriver,netwsw00.inf,NOREG
+    RequireDriver,netwtw02.inf,NOREG
+    RequireDriver,netwtw04.inf,NOREG
+    RequireDriver,netwtw06.inf,NOREG
+    RequireDriver,netwtw08.inf,NOREG
+  End
+  
+  If,%cb_Marvel%,Equal,True,Begin
+    // WiFi
+    RequireDriver,mrvlpcie8897.inf,NOREG
+  End
+  
+  If,%cb_Qualcomm%,Equal,True,Begin
+    // WiFi
+    RequireDriver,athw8x.inf,NOREG
+    RequireDriver,netathrx.inf,NOREG
+    RequireDriver,netathr10x.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Qcamain10x64.sys   
+  End
+  
+  If,%cb_Ralink%,Equal,True,Begin
+    // WiFi
+    RequireDriver,netr28ux.inf,NOREG
+    RequireDriver,netr28x.inf,NOREG
+    RequireDriver,netr7364.inf,NOREG
+  End
+  
+  If,%cb_Realtek%,Equal,True,Begin
+    // Ethernet
+    RequireDriver,rtcx21x64.inf,NOREG
+     // Wifi
+    RequireDriver,net8185.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Rtl85n64.sys
+    RequireDriver,net8187bv64.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\rtl8187B.sys
+    RequireDriver,net8187se64.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Rtl8187se.sys
+    RequireDriver,net8192se64.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Rtl8192se.sys
+    RequireDriver,net8192su64.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\RTL8192su.sys
+    RequireDriver,net819xp.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\rtl819xp.sys
+    RequireDriver,netrtwlane01.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Rtwlane01.sys
+    RequireDriver,netrtwlane_13.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Rtwlane_13.sys
+    RequireDriver,netrtwlane.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\Rtwlane.sys
+    RequireDriver,netrtwlanu.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\rtwlanu.sys
+  End 
 End
 Else,Begin
   // x86
-  RequireDriver,athw8.inf,NOREG
-  RequireDriver,net8185.inf,NOREG
-  RequireDriver,net8187bv32.inf,NOREG
-  RequireDriver,net8187se86.inf,NOREG
-  RequireDriver,net8192se32.inf,NOREG
-  RequireDriver,net8192su32.inf,NOREG
-  RequireDriver,netathr.inf,NOREG
-  RequireDriver,netathr10.inf,NOREG
-  RequireDriver,netbc63.inf,NOREG
-  RequireDriver,netbc64.inf,NOREG
-  RequireDriver,netr28.inf,NOREG
-  RequireDriver,netr28u.inf,NOREG
-  RequireDriver,netr73.inf,NOREG
-  RequireDriver,netrtwlane.inf,NOREG
-  RequireDriver,netrtwlane_13.inf,NOREG
-  RequireDriver,netrtwlane01.inf,NOREG
-  RequireDriver,netrtwlanu.inf,NOREG
-  RequireDriver,netwbn02.inf,NOREG
-  RequireDriver,netwen00.inf,NOREG
-  RequireDriver,netwen01.inf,NOREG
-  RequireDriver,netwlv32.inf,NOREG
-  RequireDriver,netwns32.inf,NOREG
-  RequireDriver,netwsn00.inf,NOREG
-  RequireDriver,netwtn02.inf,NOREG
-  RequireDriver,netwtn04.inf,NOREG
+  
+  If,%cb_Broadcom%,Equal,True,Begin
+    // WiFi
+    RequireDriver,bcmwdidhdpcie.inf,NOREG
+	RequireFileEx,AppendList,Bcmpciedhd63.sys
+    RequireDriver,netbc63.inf,NOREG
+	RequireFileEx,AppendList,Bcmwl63l.sys
+    RequireDriver,netbc64.inf,NOREG
+	RequireFileEx,AppendList,Bcmwl63a.sys
+  End
+  
+  If,%cb_Intel%,Equal,True,Begin
+    // Wifi
+    RequireDriver,netwbn02.inf,NOREG
+    RequireDriver,netwen00.inf,NOREG
+    RequireDriver,netwen01.inf,NOREG
+    RequireDriver,netwlv32.inf,NOREG
+    RequireDriver,netwns32.inf,NOREG
+    RequireDriver,netwsn00.inf,NOREG
+    RequireDriver,netwtn02.inf,NOREG
+    RequireDriver,netwtn04.inf,NOREG
+  End
+  
+  If,%cb_Marvel%,Equal,True,Begin
+    // Marvel
+  End
+  
+  If,%cb_Qualcomm%,Equal,True,Begin
+    // WiFi
+    RequireDriver,athw8.inf,NOREG
+    RequireDriver,netathr.inf,NOREG
+    RequireDriver,netathr10.inf,NOREG
+	RequireFileEx,AppendList,Qcamain10x86.sys
+  End
+  
+  If,%cb_Ralink%,Equal,True,Begin
+    // WiFi
+    RequireDriver,netr28.inf,NOREG
+    RequireDriver,netr28u.inf,NOREG
+    RequireDriver,netr73.inf,NOREG
+  End
+  
+  If,%cb_Realtek%,Equal,True,Begin
+    // Ethernet
+    RequireDriver,rtcx21x86.inf,NOREG
+    // WiFi
+	RequireDriver,net8185.inf,NOREG
+	RequireFileEx,AppendList,Rtl85n86.sys
+    RequireDriver,net8187bv32.inf,NOREG
+    RequireDriver,net8187se86.inf,NOREG
+	RequireFileEx,AppendList,Rtl8187se.sys
+    RequireDriver,net8192se32.inf,NOREG
+	RequireFileEx,AppendList,Rtl8192se.sys
+    RequireDriver,net8192su32.inf,NOREG
+    RequireDriver,net819xp.inf,NOREG
+	RequireFileEx,AppendList,Rtl819xp.sys
+    RequireDriver,netrtwlane01.inf,NOREG
+	RequireFileEx,AppendList,Rtwlane01.sys
+    RequireDriver,netrtwlane_13.inf,NOREG
+	RequireFileEx,AppendList,Rtwlane_13.sys
+    RequireDriver,netrtwlane.inf,NOREG
+	RequireFileEx,AppendList,Rtwlane.sys
+    RequireDriver,netrtwlanu.inf,NOREG
+	RequireFileEx,AppendList,\Windows\System32\Drivers\rtwlanu.sys
+  End
 End
+
+// Extract
+RequireFileEx,ExtractList
 
 [#PurgeRegCache#]
 // ===============================================================================================================================
@@ -257,7 +409,7 @@ End
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
-// Related........: btn_PurgeRegCache
+// Related........: btn_PurgeRegCache, cb_Broadcom, cb_Intel, cb_Marvel, cb_Qualcomm, cb_Ralink, cb_Realtek
 // ===============================================================================================================================
 [PurgeRegCache]
 Echo,"Purging the registry cache..."
@@ -276,6 +428,13 @@ DirDeleteEx,%NetworkDriverRegCache%
 // ===============================================================================================================================
 [SetDefaultOptions]
 WriteInterface,Value,%ScriptFile%,Interface,cb_EnableHiveCache,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_Broadcom,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_Intel,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_Marvel,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_Qualcomm,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_Ralink,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_Realtek,True
+Run,%ScriptFile%,PurgeRegCache
 
 [#ToggleAdvancedOptions#]
 // ===============================================================================================================================
@@ -303,7 +462,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"This script is responsible for adding network drivers included with Windows 10 and configuring the drivers registry for the included network drivers. The resulting 'Hive' may be cached to speed up future builds."
+Message,"This script is responsible for adding network drivers included as Features on Demand (FOD) with Windows. The driver database 'Hive' may be cached to speed up future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -322,6 +481,13 @@ btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True
 btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_Disabled_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 cb_EnableHiveCache="Cache Driver Database",1,3,5,50,140,15,True,"__Cache the processed driver database registry hives instead of recreating them at every build.#$x#$xDisabling this option will significantly increase build time."
+bvl_FOD-Drivers="Include Drivers",1,12,5,90,160,180,8,Bold
+cb_Broadcom=Broadcom,1,3,15,110,140,18,True,_PurgeRegCache_,True
+cb_Intel=Intel,1,3,15,130,140,18,True,_PurgeRegCache_,True
+cb_Marvel=Marvel,1,3,15,150,140,18,True,_PurgeRegCache_,True
+cb_Qualcomm=Qualcomm,1,3,15,170,140,18,True,_PurgeRegCache_,True
+cb_Ralink=Ralink,1,3,15,190,140,18,True,_PurgeRegCache_,True
+cb_Realtek=Realtek,1,3,15,210,140,18,True,_PurgeRegCache_,True
 
 [InterfaceEncoded]
 Trash.ico=1150,1212
