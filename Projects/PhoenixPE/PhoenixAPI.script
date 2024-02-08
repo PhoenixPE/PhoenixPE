@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.9.2.0
-Date=2024-01-07
+Version=1.9.3.0
+Date=2024-02-07
 Level=0
 Selected=None
 
@@ -166,9 +166,9 @@ Else,If,%Mode%,Equal,HideWait,Begin
 End
 Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
 
-If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","SetSplashText(#$q%Title%#$q)#$x%ExecMode%(#$q%ProgramExe%#$q, #$q%Parameters%#$q, #$q#$q, %ShowFlag%)#$x#$xEndFunc   ;==>PreShellConfig"
-Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PostShellConfig","SetSplashText(#$q%Title%#$q)#$x%ExecMode%(#$q%ProgramExe%#$q, #$q%Parameters%#$q, #$q#$q, %ShowFlag%)#$x#$xEndFunc   ;==>PostShellConfig"
-Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>InitNetwork","SetSplashText(#$q%Title%#$q)#$x%ExecMode%(#$q%ProgramExe%#$q, #$q%Parameters%#$q, #$q#$q, %ShowFlag%)#$x#$xEndFunc   ;==>InitNetwork"
+If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","SetSplashText(#$q%Title%#$q)#$x%ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>PreShellConfig"
+Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PostShellConfig","SetSplashText(#$q%Title%#$q)#$x%ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>PostShellConfig"
+Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>InitNetwork","SetSplashText(#$q%Title%#$q)#$x%ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>InitNetwork"
 Else,If,%RunGroup%,Equal,"RunOnce",Run,%API%,__PhoenixAPI_AddAutoRun_RunOnce
 Else,If,%RunGroup%,Equal,"AfterNetwork",Run,%API%,__PhoenixAPI_AddAutoRun_AfterNetwork
 Else,Halt,"AddAutoRun Syntax Error: [%RunGroup%] is not a supported Run group."
@@ -329,7 +329,7 @@ Else,If,%WindowState%,Equal,"Maximized",Set,%Cmd-WindowState%,"@SW_SHOWMAXIMIZED
 Else,Set,%Cmd-WindowState%,"@SW_SHOWNORMAL"
   
 // Final command
-TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>CreateShortcuts","MakeShortcut(#$q%ProgramExe%#$q, %Cmd-Type% & #$q%Folder%\%Title%.lnk#$q, #$q%WorkDir%#$q, #$q%Parameters%#$q, #$q%Tooltip%#$q, #$q%IconPath%#$q, #$q%HotKey%#$q, %IconIndex%, %Cmd-WindowState%)#$x#$xEndFunc   ;==>CreateShortcuts"
+TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>CreateShortcuts","MakeShortcut('%ProgramExe%', %Cmd-Type% & '%Folder%\%Title%.lnk', '%WorkDir%', '%Parameters%', '%Tooltip%', '%IconPath%', '%HotKey%', %IconIndex%, %Cmd-WindowState%)#$x#$xEndFunc   ;==>CreateShortcuts"
 
 System,EndLocal
 
@@ -1523,8 +1523,11 @@ End
 // Description....: Copy the driver support files and driver entries from the INSTALL.WIM driver database to the target registry driver database.
 //                  Both the DRIVERS hive and SYSTEM\Drivers store are processed.
 //
-//                  You must still copy additional/supporting driver files yourself if they have a different name then the .inf file itself.
+//                  This function will try and include the driver (.sys) file if it has the same name as the .ini file, however
+//                  You must still copy additional/supporting driver files yourself if they have a different name then the .inf file.
 //                  Ex. RequireDriver,netrndis.inf - you still need to copy \Windows\System32\drivers\usb8023.sys yourself.
+//                      RequireDriver,bcmwdidhdpcie.inf - RequireFile,AppendList,\Windows\System32\Drivers\Bcmpciedhd63.sys
+//                      RequireDriver,net8192se64.inf - RequireFile,AppendList,\Windows\System32\Drivers\Rtl8192se.sys
 //
 // Syntax.........: RequireDriver,<filename.inf>
 // Parameters.....: InfFile - The name of the driver's .inf file
