@@ -190,7 +190,7 @@ Else,If,%OnBuildExitReason%,EQUAL,COMMAND,Begin
   Message,%BuildExitMsg%,ERROR
 End
 
-[GenerateSupportLog]
+[#GenerateSupportLog#]
 // ===============================================================================================================================
 // Name...........: GenerateSupportLog
 // Description....: Export the build log and 7z it and any .log files found in %ProjectTemp%
@@ -215,15 +215,14 @@ Set,%LogFile%,"%Timestamp%-%ProjectTitle%-Logs.7z"
 
 // Collect various information useful for troubleshooting
 If,ExistFile,"%TargetWindows%\Logs\DISM\dism.log",Filecopy,"%TargetWindows%\Logs\DISM\dism.log","%ProjectTemp%"
-System,ErrorOff,1
-Filecopy,"%TargetSystem32%\pecmd*.ini","%ProjectTemp%"
 
 // Compress our build log and our other logs into a zip archive
 Echo,"Archiving Support Log...."
-// Disable fail on error in case there are no .log or .ini files
-System,ErrorOff,2
+// Disable fail on error in case there are no .au3, .log or .ini files
+System,ErrorOff,3
 Compress,7z,%ProjectTemp%\*.log,%BaseDir%\Logs\%LogFile%
 Compress,7z,%ProjectTemp%\*.ini,%BaseDir%\Logs\%LogFile%
+Compress,7z,%TargetSystem32%\PhoenixPE*.au3,%BaseDir%\Logs\%LogFile%
 Compress,7z,%ProjectTemp%\BuildLog.html,%BaseDir%\Logs\%LogFile%
 
 // Cleanup old logs (%num_LogsToKeep% var is read by PostBuildCleanup section)
