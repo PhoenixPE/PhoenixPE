@@ -2,6 +2,35 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release 2024-02-09
+
+### Added
+- Added additional FOD Network drivers. (Issue #23)
+- Camara/Webcam support. (Issue #81)
+- Pressing F11 during startup toggles the splash screen on/off. This can be useful when testing to show autorun application windows or error messages.
+
+### Changed
+- AgentRansack updated to v2022 build 3420
+- Attribute Changer updated to v11.30a
+- CPU-Z updated to v.2.09.0
+- HWInfo updated to v7.72
+- Improved PhoenixPE.au3 handling of Win32 messages.
+- Notepad++ updated to v8.6.2.0
+- Simplewall updated to v3.7.8
+- WinMerge updated to v2.16.38
+- WizTree updated to v4.18
+- Zulu JRE11 updated to v11.70.15
+- Zulu JRE17 updated to v17.48.15
+
+### Fixed
+- Fixed an issue where ProtectPE could block broadcast messages.
+- Fixed blocking startup on SetResolution if the specified resolution was not supported by the current graphic mode.
+- Fixed Command Prompt to specify full path to cmd.exe in order to allow pinning to taskbar/start menu.
+- Fixed handling of double-quotes in AddShortcut and AddAutoRun.
+- Fixed WinPE Cache size not getting applied correctly with Win10 sources. (Issue #74)
+
+### Removed
+
 ## Release 2024-01-14
 
 ### Added
@@ -17,6 +46,7 @@ Notable changes to the PhoenixPE project.
 - Added ClasicCalc script.
 - Added DriveSnapshot script. (Issue #53)
 - Added FastStone Capture script.
+- Added Intel Management Engine Driver script.
 
 ### Changed
 - .Net 6 runtime updated to v6.0.26
