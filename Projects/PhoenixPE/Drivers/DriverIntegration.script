@@ -35,8 +35,8 @@ Author=Homes32
 Level=6
 Selected=False
 Mandatory=False
-Version=1.1.2.0
-Date=2024-01-14
+Version=1.1.3.0
+Date=2024-03-09
 
 [Variables]
 %DismLog%=%TargetWindows%\Logs\DISM\dism.log
@@ -83,6 +83,9 @@ If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
 If,%cb_ForceUnsignedDrivers%,Equal,True,Set,%DismForceUnsigned%," /ForceUnsigned"
 Else,Set,%DismForceUnsigned%,""
+
+// DISM doesn't like trailing \ in path
+StrFormat,CTrim,%DriversSrc%,"\",%DriversSrc%
 
 DISM,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%DriversSrc%#$q /recurse /LogPath:#$q%DismLog%#$q%DismForceUnsigned%"
 If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
