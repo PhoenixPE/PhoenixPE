@@ -30,19 +30,19 @@
 
 [Main]
 Title=Google Chrome
-Description=(v120.0.6099.217) Google Chrome is a cross-platform web browser developed by Google.
+Description=(v123.0.6312.59) Google Chrome is a cross-platform web browser developed by Google.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.7.0
-Date=2024-01-13
+Version=1.1.8.0
+Date=2024-03-23
 
 [Variables]
 %ProgramFolder%="Chrome"
 %ProgramExe%="chrome.exe"
-%DownloadURLx86%=https://dl.google.com/release2/chrome/kcjdv7hmimly2olpybynchk4jy_120.0.6099.217/120.0.6099.217_chrome_installer.exe
-%DownloadURLx64%=https://dl.google.com/release2/chrome/kiwlingl36y4sj7nxjd2a564xa_120.0.6099.217/120.0.6099.217_chrome_installer.exe
+%DownloadURLx86%=https://dl.google.com/release2/chrome/itpbcwawcezkjfkz4kkxw6dyki_123.0.6312.59/123.0.6312.59_chrome_installer.exe
+%DownloadURLx64%=https://dl.google.com/release2/chrome/bo5bx4ow6y5satz5ndsascxvo4_123.0.6312.59/123.0.6312.59_chrome_installer.exe
 %SetupFile%="Chrome_x86.exe"
 
 [Process]
@@ -306,9 +306,14 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociatio
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\http\UserChoice","ProgId","ChromeURL"
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\https\UserChoice","ProgId","ChromeURL"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice","ProgId","ChromeURL"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice","ProgId","ChromeURL"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice","ProgId","ChromeURL"
+//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice","ProgId","ChromeURL"
+//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice","ProgId","ChromeURL"
+//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice","ProgId","ChromeURL"
+
+// Newer Windows aggressively blocks writing to the offline registry keys (Prohibited Operation), so we have to write them during PE startup.
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"
 
 [#DownloadProgram#]
 // ===============================================================================================================================

@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=True
 Mandatory=False
-Version=1.1.1.0
-Date=2023-01-10
+Version=1.1.2.0
+Date=2024-03-24
 
 [Variables]
 %ProgramFolder%="Firefox"
@@ -358,9 +358,14 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociatio
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\http\UserChoice","ProgId","FirefoxURL"
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\https\UserChoice","ProgId","FirefoxURL"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice","ProgId","FirefoxURL"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice","ProgId","FirefoxURL"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice","ProgId","FirefoxURL"
+//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice","ProgId","FirefoxURL"
+//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice","ProgId","FirefoxURL"
+//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice","ProgId","FirefoxURL"
+
+// Newer Windows aggressively blocks writing to the offline registry keys (Prohibited Operation), so we have to write them during PE startup.
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
 
 [#DownloadProgram#]
 // ===============================================================================================================================
