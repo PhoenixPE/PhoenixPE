@@ -35,8 +35,8 @@ Description=The Media Transfer Protocol allows media files to be transferred to 
 Selected=False
 Level=4
 Author=Homes32
-Version=1.1.1.0
-Date=2023-01-08
+Version=1.1.2.0
+Date=2024-03-12
 Mandatory=False
 
 [Variables]
@@ -108,10 +108,10 @@ RegUnloadHives
 // ===============================================================================================================================
 [Process_mtpHelper]
 Echo,"Registering mtpHelper..."
-If,%SourceVer%,BiggerEqual,10.0.22000.0,ExtractFile,%ScriptFile%,mtpHelper_Win11,"mtpHelper_%SourceArch%.sys","%TargetSystem32%\Drivers\mtphelper.sys"
-Else,ExtractFile,%ScriptFile%,mtpHelper_Win10,"mtpHelper_%SourceArch%.sys","%TargetSystem32%\Drivers\mtphelper.sys"
+If,%SourceVer%,BiggerEqual,10.0.22000.0,ExtractFile,%ScriptFile%,mtpHelper_Win11,"mtpHelper_%SourceArch%.sys","%TargetSystem32%\Drivers"
+Else,ExtractFile,%ScriptFile%,mtpHelper_Win10,"mtpHelper_%SourceArch%.sys","%TargetSystem32%\Drivers"
 
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\mtpHelper","ImagePath","System32\Drivers\mtpHelper.sys"
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\mtpHelper","ImagePath","System32\Drivers\mtpHelper_%SourceArch%.sys"
 RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\mtpHelper","Start",1
 RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\mtpHelper","ErrorControl",0
 RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\mtpHelper","Type",1
