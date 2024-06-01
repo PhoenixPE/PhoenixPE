@@ -32,10 +32,10 @@
 Title=Script Factory
 Author=Homes32
 Description=Create a new script for PhoenixPE
-Version=1.0.0.0
+Version=1.1.0.0
 Level=10
 Selected=None
-Date=2020-07-27
+Date=2024-06-01
 Mandatory=False
 
 [Variables]
@@ -74,6 +74,7 @@ Set,%NewScript%,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%\%txt_ScriptTitl
 
 // Process the selected Template
 If,%cmb_ScriptTemplate%,Equal,"Simple Embedded App",Run,%ScriptFile%,CreateSimpleEmbeddedScript
+If,%cmb_ScriptTemplate%,Equal,"Simple Embedded Setup App",Run,%ScriptFile%,CreateSimpleEmbeddedSetupScript
 Else,If,%cmb_ScriptTemplate%,Equal,"Simple Download App",Run,%ScriptFile%,CreateSimpleDownloadScript
 Else,If,%cmb_ScriptTemplate%,Equal,"Blank Script",Run,%ScriptFile%,CreateBlankScript
 Else,Exit,"INTERNAL LOGIC ERROR: An invalid template was selected.",WARN
@@ -101,6 +102,32 @@ System,RefreshAllScripts
 // ===============================================================================================================================
 [CreateSimpleEmbeddedScript]
 Set,%TemplateScript%,"Template-SimpleEmbeddedApp.script"
+// Just in case we have a template leftover from a failed attempt
+FileDeleteEx,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%\%TemplateScript%"
+ExtractFile,%ScriptFile%,"Templates",%TemplateScript%,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%"
+// If the script already exists prompt the user for permission to overwrite
+If,ExistFile,%NewScript%,Begin
+  If,QUESTION,"WARNING:#$x#$xThe file already exists#$x#$x  %NewScript%#$x#$xWould you like to replace it?",FileDeleteEx,%NewScript%
+  Else,Begin
+    Message,"The script creation was canceled.",ERROR
+	Exit,"User aborted the operation."
+  End
+End
+FileRename,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%\%TemplateScript%",%NewScript%
+
+[#CreateSimpleEmbeddedSetupScript#]
+// ===============================================================================================================================
+// Name...........: CreateSimpleEmbeddedSetupScript
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[CreateSimpleEmbeddedSetupScript]
+Set,%TemplateScript%,"Template-SimpleEmbeddedSetupApp.script"
 // Just in case we have a template leftover from a failed attempt
 FileDeleteEx,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%\%TemplateScript%"
 ExtractFile,%ScriptFile%,"Templates",%TemplateScript%,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%"
@@ -180,6 +207,7 @@ FileRename,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%\%TemplateScript%",%N
 [UpdateTemplateDescription]
 // Process the selected Template
 If,%cmb_ScriptTemplate%,Equal,"Simple Embedded App",WriteInterface,Text,%ScriptFile%,Interface,lbl_TemplateDescr,"A simple script that contains embedded programs and extracts them at build time."
+If,%cmb_ScriptTemplate%,Equal,"Simple Embedded Setup App",WriteInterface,Text,%ScriptFile%,Interface,lbl_TemplateDescr,"A simple script that contains an embedded steup file or archive and extracts it at build time."
 Else,If,%cmb_ScriptTemplate%,Equal,"Simple Download App",WriteInterface,Text,%ScriptFile%,Interface,lbl_TemplateDescr,"A simple script that downloads programs at build time."
 Else,If,%cmb_ScriptTemplate%,Equal,"Blank Script",WriteInterface,Text,%ScriptFile%,Interface,lbl_TemplateDescr,"A skeleton framework for advanced users."
 Else,Exit,"INTERNAL LOGIC ERROR: An invalid template was selected.",WARN
@@ -203,6 +231,8 @@ WriteInterface,Value,%ScriptFile%,Interface,txt_ScriptAuthor,""
 WriteInterface,Value,%ScriptFile%,Interface,txt_ScriptDescr,""
 WriteInterface,Value,%ScriptFile%,Interface,cmb_ScriptLevel,"05 - Applications"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ScriptFolder,""
+
+Run,%ScriptFile%,UpdateTemplateDescription
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -280,7 +310,7 @@ btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True
 btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_ScriptTemplate=Template,1,12,5,50,472,71,8,Bold
-cmb_ScriptTemplate="Simple Download App",1,4,20,69,200,21,"Blank Script","Simple Download App","Simple Embedded App",_UpdateTemplateDescription_,True
+cmb_ScriptTemplate="Simple Download App",1,4,20,69,200,21,"Blank Script","Simple Download App","Simple Embedded App","Simple Embedded Setup App",_UpdateTemplateDescription_,True
 lbl_TemplateDescr="A simple script that downloads programs at build time.",1,1,20,100,447,16,8,Normal
 bvl_ScriptProperties="General Script Information",1,12,5,140,472,157,8,Bold
 txt_ScriptTitle="Script Title",1,0,20,170,200,21,
@@ -299,6 +329,7 @@ Templates
 Template-SimpleEmbeddedApp.script=11546,7028
 Template-Blank.script=2292,1544
 Template-SimpleDownloadApp.script=16892,9264
+Template-SimpleEmbeddedSetupApp.script=13195,7632
 
 [EncodedFile-Templates-Template-SimpleEmbeddedApp.script]
 lines=1
@@ -350,3 +381,8 @@ lines=4
 [EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-Templates-Template-SimpleEmbeddedSetupApp.script]
+lines=1
+0=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
+1=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
