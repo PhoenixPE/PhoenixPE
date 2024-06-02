@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.7.0.0
-Date=2024-01-22
+Version=1.7.1.0
+Date=2024-04-22
 
 [Variables]
 
@@ -71,9 +71,9 @@ Echo,"Unloading Registry Hives..."
 RegHiveUnload,Tmp_Software
 RegHiveUnload,Tmp_Default
 RegHiveUnload,Tmp_Drivers
+RegHiveUnload,Tmp_System
 RegHiveUnload,Tmp_Install_Software
 RegHiveUnload,Tmp_Install_System
-RegHiveUnload,Tmp_System
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -312,8 +312,8 @@ RegWrite,HKLM,0x1,"Tmp_Drivers\DriverDatabase\DriverFiles\winusb.sys","","winusb
 // ===============================================================================================================================
 [Reg-BitLocker]
 Echo,"Registering Bitlocker Shell Extensions..."
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\BDESVC",HKLM,"Tmp_System\ControlSet001\Services\BDESVC"
 If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\BDESVC",HKLM,"Tmp_System\ControlSet001\Services\BDESVC"
   RegWrite,HKLM,0x2,"Tmp_Software\Classes\Drive\shell\unlock-bde","","@#$pSystemRoot#$p\System32\bdeunlock.exe,-100"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\unlock-bde","AppliesTo","System.Volume.BitLockerProtection:=6"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\unlock-bde","DefaultAppliesTo",""
@@ -815,9 +815,13 @@ RequireFileEx,AppendList,\Windows\System32\shsvcs.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Explorer BitLocker integration
+RequireFileEx,AppendList,\Windows\System32\BDEHDCFGLIB.dll
+RequireFileEx,AppendList,\Windows\System32\BitlockerWizard.exe
+RequireFileEx,AppendList,\Windows\System32\FVESKYBACKUP.dll
 RequireFileEx,AppendList,\Windows\System32\bdesvc.dll
 RequireFileEx,AppendList,\Windows\System32\bdeunlock.exe
 RequireFileEx,AppendList,\Windows\System32\fvenotify.exe
+RequireFileEx,AppendList,\Windows\System32\fvewiz.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Taking Ownership (Appinfo and ProfSvc services)
