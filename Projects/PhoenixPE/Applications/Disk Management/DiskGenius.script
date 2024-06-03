@@ -35,16 +35,16 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.3.0
-Date=2024-01-12
+Version=1.1.4.0
+Date=2024-06-02
 
 [Variables]
 %ProgramFolder%="DiskGenius"
 %ProgramExe%="DiskGenius.exe"
 %ProgramVersion%=5511508
 %SetupFile%="DiskGenius_%SourceArch%.zip"
-%DownloadURLx86%=http://engdownload.eassos.cn/winpe/DGEng%ProgramVersion%_x86.zip
-%DownloadURLx64%=http://engdownload.eassos.cn/winpe/DGEng%ProgramVersion%_x64.zip
+%DownloadURLx86%=https://download.eassos.com/DGEng%ProgramVersion%_x86.zip
+%DownloadURLx64%=https://download.eassos.com/DGEng%ProgramVersion%_x64.zip
 %aLangMap%=Arabic|العربية|Dutch|Nederlands|English||French|Français|German|Deutsch|Italian|Italian|Japanese|日本語|Korean|한국어|Polish|Polski|Portuguese|Português|Russian|Русский|Spanish|Español
 
 [Process]
@@ -140,7 +140,7 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
-WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.diskgenius.com/download.php,NOERR
 If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
 
 [#SetProgramArch#]
