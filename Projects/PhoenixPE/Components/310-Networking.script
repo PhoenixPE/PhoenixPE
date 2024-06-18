@@ -36,8 +36,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.7.1.0
-Date=2024-01-26
+Version=1.7.2.0
+Date=2024-04-03
 
 [Variables]
 
@@ -518,6 +518,7 @@ If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\wcmsvc",HKLM,"Tmp_Software\Microsoft\wcmsvc"
   RegCopy,HKLM,"Tmp_Install_Software\Policies\Microsoft\Windows\WcmSvc",HKLM,"Tmp_Software\Policies\Microsoft\Windows\WcmSvc"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SettingSync\WindowsSettingHandlers\Tethering",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SettingSync\WindowsSettingHandlers\Tethering"
+  System,ErrorOff,7
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{01578f96-c270-4602-ade0-578d9c29fc0c}",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{01578f96-c270-4602-ade0-578d9c29fc0c}"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{017ba13c-9a55-4f1f-8200-323055aac810}",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{017ba13c-9a55-4f1f-8200-323055aac810}"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{67d07935-283a-4791-8f8d-fa9117f3e6f2}",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{67d07935-283a-4791-8f8d-fa9117f3e6f2}"
@@ -530,7 +531,11 @@ End
 
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\LanmanWorkstation",HKLM,"Tmp_System\ControlSet001\Services\LanmanWorkstation"
 RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\LanmanWorkstation\Parameters","AllowInsecureGuestAuth",1
+
+// Removed in 10.0.26040.1000
+System,ErrorOff,1
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\NetTrace\Scenarios\WLAN",HKLM,"Tmp_System\ControlSet001\Control\NetTrace\Scenarios\WLAN"
+
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WlanSvc",HKLM,"Tmp_System\ControlSet001\Services\WlanSvc"
 RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\WlanSvc","DependOnService","nativewifip","RpcSs","Ndisuio","wcmsvc",NOWARN
 
