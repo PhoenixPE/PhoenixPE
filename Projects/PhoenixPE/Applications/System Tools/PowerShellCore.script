@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.12.0
-Date=2024-06-03
+Version=1.0.13.0
+Date=2024-06-15
 
 [Variables]
 %ProgramFolder%="PowerShell"
@@ -62,6 +62,17 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%TargetPrograms%\%Prog
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
+RegLoadHives
+
+// Register AppPath
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+// Add to system PATH
+RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%SysPath%
+StrFormat,CTrim,%SysPath%,";",%SysPath%
+RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;%PEPrograms%\%ProgramFolder%\;"
+
+RegUnloadHives
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
