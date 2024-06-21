@@ -35,46 +35,55 @@ Author=Homes32
 Level=8
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2019-10-20
+Version=1.0.1.0
+Date=2024-06-20
 
 [Variables]
 RaiseErr=Run,%ScriptFile%,RaiseErr
 
 [Process]
-Echo,"Starting file copy to [%fb_Dest%]..."
+Echo,"Copy to [%fb_Dest%]..."
 
 If,Not,ExistDir,%fb_Dest%,RaiseErr,"You must specify a valid destination directory."
 
 If,%rbtn_CopyISO%,Equal,True,Begin
+  Echo,"Copying [%ISOFile%] to [%fb_Dest%]..."
   If,ExistFile,%ISOFile%,FileCopy,%ISOFile%,%fb_Dest%
   Else,RaiseErr,"ISO Image [%ISOFile%] does not exist. Please rebuild your project."    
 End
 Else,If,%rbtn_CopyBootWim%,Equal,True,Begin
+  Echo,"Copying [%OutputDir%\sources\Boot.wim] to [%fb_Dest%]..."
   If,ExistFile,"%OutputDir%\sources\Boot.wim",FileCopy,"%OutputDir%\sources\Boot.wim",%fb_Dest%
   Else,RaiseErr,"[%OutputDir%\sources\Boot.wim] does not exist. Please rebuild your project."
 End
 Else,If,%rbtn_CopyPrograms%,Equal,True,Begin
+  Echo,"Copying [%OutputDir%\Programs] to [%fb_Dest%]..."
   If,ExistDir,"%OutputDir%\Programs",DirCopy,"%OutputDir%\Programs",%fb_Dest%
   Else,RaiseErr,"[%OutputDir%\Programs] does not exist. Please rebuild your project."
 End
 Else,If,%rbtn_CopyBootWimSources%,Equal,True,Begin
+  Echo,"Copying [%OutputDir%\sources] to [%fb_Dest%]..."
   If,ExistDir,"%OutputDir%\sources",DirCopy,"%OutputDir%\sources",%fb_Dest%
   Else,RaiseErr,"[%OutputDir%\sources] does not exist. Please rebuild your project."
 End
 Else,If,%rbtn_CopyBootWimPrograms%,Equal,True,Begin
+  Echo,"Copying [%OutputDir%\sources\Boot.wim] to [%fb_Dest%]..."
   If,ExistFile,"%OutputDir%\sources\Boot.wim",FileCopy,"%OutputDir%\sources\Boot.wim",%fb_Dest%
   Else,RaiseErr,"[%OutputDir%\sources\Boot.wim] does not exist. Please rebuild your project."    
+  Echo,"Copying [%OutputDir%\Programs] to [%fb_Dest%]..."
   If,ExistDir,"%OutputDir%\Programs",DirCopy,"%OutputDir%\Programs",%fb_Dest%
   Else,RaiseErr,"[%OutputDir%\Programs] does not exist. Please rebuild your project."	
 End
 Else,If,%rbtn_CopyBootWimSourcesPrograms%,Equal,True,Begin
+  Echo,"Copying [%OutputDir%\sources] to [%fb_Dest%]..."
   If,ExistDir,"%OutputDir%\sources",DirCopy,"%OutputDir%\sources",%fb_Dest%
   Else,RaiseErr,"[%OutputDir%\sources] does not exist. Please rebuild your project."
+  Echo,"Copying [%OutputDir%\Programs] to [%fb_Dest%]..."
   If,ExistDir,"%OutputDir%\Programs",DirCopy,"%OutputDir%\Programs",%fb_Dest%
   Else,RaiseErr,"[%OutputDir%\Programs] does not exist. Please rebuild your project."
 End
 Else,If,%rbtn_CopyOutputDir%,Equal,True,Begin
+  Echo,"Copying [%OutputDir%] to [%fb_Dest%]..."
   If,ExistDir,%OutputDir%,FileCopy,"%OutputDir%\*.*",%fb_Dest%
   Else,RaiseErr,"[%OutputDir%] does not exist. Please rebuild your project."
 End
