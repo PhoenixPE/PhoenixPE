@@ -2,6 +2,71 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release 2024-06-20
+
+### Added
+- .Net 8 runtime
+- Added a script factory template for simple embedded setup app (7z/zip/rar/exe).
+- Added additional Bitlocker support files.
+- Added Ventoy Compatibility checks to work around Ventoy's flawed OS hooking resulting in the source ISO not being mounted. (Issue #86)
+- Added WindowsPowerShell component script. (Issue #90)
+
+### Changed
+- Improved progress text to Copy2Folder.script
+- .Net 6 runtime updated to v6.0.31
+- 7zip script and tools updated to v24.06
+- AgentRansack updated to v2022 build 3434
+- AIDA64 updated to v7.30.6900
+- Arsenal Image Mounter updated to Driver v1.2.16.75 / GUI v3.11.290.0
+- Attribute Changer updated to v11.30b
+- DesktopInfo updated to v3.13.2
+- FastStone Capture updated to v10.5
+- FurMark updated to v1.38.1.0
+- Google Chrome updated to v126.0.6478.115
+- GPU-Z updated to v2.59.0
+- grepWin updated to v2.1.1
+- HDTune Pro updated to v.6.00
+- HWInfo updated to v8.04
+- Intel MEI driver is now cached on first download. (Issue #92)
+- Intel MEI driver updated to v2413.5.67.0
+- IrfanView updated to v4.67
+- LetterSwap.exe updated to include new command line help, better error handling, code refactoring, and a fix for /MountAll (Issue #71) 
+- LibreOffice updated to v24.2.3
+- Macrium Reflect updated to v8.0.7783
+- MPC-BE updated to v1.7.2.0
+- Notepad++ updated to v8.6.8.0
+- Notepad3 updated to v6.24.309.1
+- PowerShell Core updated to v7.4.3
+- PowerShell Core added pwsh.exe to the system path.
+- Prime95 updated to v30.19b20
+- Rufus updated to v4.5
+- Simplewall updated to v3.8.2
+- TestDisk & PhotoRec updated to v7.2 stable
+- TotalCommander updated to v11.03
+- Ventoy updated to v1.0.99
+- WinMerge updated to v2.16.40
+- WinSCP updated to v6.3.4
+- WinNTSetup updated to v5.3.5.1
+- Zulu JRE11 updated to v11.72.19
+- Zulu JRE17 updated to v17.50.19
+- MS Visual C++ Runtime updated to v14.40.33810.0
+
+### Fixed
+- DiskGenius download links fixed.
+- DriverIntergration script now removes trailing \ from the the driver source path to keep DISM happy.
+- Fixed a bug in ScriptFactory where resetting script defaults didn't reset the template description.
+- Fixed a build failure with Win v10.0.26040.1000 due to the removal of some networking related registry keys.
+- Fixed an issue with PhoenixPE-UserConfig au3/a3x files not running during startup. (Issue #85)
+- Fixed an issue where ventoy would extract from setup every run instead of using the cached version.
+- Fixed an issue with WMI when using the Slimfast script.
+- Fixed an issue with mtphelper.sys driver.
+- Fixed missing bootx64.efi.mui.
+- Fixed shortcut creation in DirectX script.
+- Fixed WizTree download.
+- Modified Chrome and Firefox scripts to set default http and https ProgID during startup to work around Windows blocking registry edits to these keys.
+
+### Removed
+
 ## Release 2024-02-09
 
 ### Added
@@ -49,7 +114,7 @@ Notable changes to the PhoenixPE project.
 - Added Intel Management Engine Driver script.
 
 ### Changed
-- .Net 6 runtime updated to v6.0.26
+- .Net 6 runtime updated to v6.0.25
 - AIDA64 updated to v7.00.6700
 - Added a warning if you try to include MSPaint in a Win11 build. M$ removed "Classic Paint" in Win11 and moved to the UWP Paint app.
 - Added a warning if you try to include Snipping Tool in a Win11 build. M$ replaced in Win11 and moved to the Snip and Sketch UWP app.
