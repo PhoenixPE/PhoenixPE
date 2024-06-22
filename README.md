@@ -1,7 +1,7 @@
 # PhoenixPE
 
 [![Latest Release](https://img.shields.io/github/release-pre/phoenixpe/phoenixpe.svg?style=flat-square&label=Latest%20Release)](https://github.com/phoenixpe/phoenixpe/releases)
-[![Licence](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&label=License)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&label=License)](https://opensource.org/licenses/MIT)
 [![Download Stats](https://img.shields.io/github/downloads/phoenixpe/phoenixpe/total.svg?label=Downloads&style=flat-square)](https://github.com/phoenixpe/phoenixpe/releases)
 [![Contributors](https://img.shields.io/github/contributors/phoenixpe/phoenixpe.svg?style=flat-square&label=Contributors)](https://github.com/phoenixpe/phoenixpe/graphs/contributors)
 

@@ -32,20 +32,20 @@ Notable changes to the PhoenixPE project.
 - IrfanView updated to v4.67
 - LetterSwap.exe updated to include new command line help, better error handling, code refactoring, and a fix for /MountAll (Issue #71) 
 - LibreOffice updated to v24.2.3
-- Macrium Reflect updated to v8.0.7783
+- Macrium Reflect updated to v8.0.7783
 - MPC-BE updated to v1.7.2.0
 - Notepad++ updated to v8.6.8.0
 - Notepad3 updated to v6.24.309.1
 - PowerShell Core updated to v7.4.3
 - PowerShell Core added pwsh.exe to the system path.
-- Prime95 updated to v30.19b20
+- Prime95 updated to v30.19b20
 - Rufus updated to v4.5
 - Simplewall updated to v3.8.2
 - TestDisk & PhotoRec updated to v7.2 stable
 - TotalCommander updated to v11.03
 - Ventoy updated to v1.0.99
 - WinMerge updated to v2.16.40
-- WinSCP updated to v6.3.4
+- WinSCP updated to v6.3.4
 - WinNTSetup updated to v5.3.5.1
 - Zulu JRE11 updated to v11.72.19
 - Zulu JRE17 updated to v17.50.19
