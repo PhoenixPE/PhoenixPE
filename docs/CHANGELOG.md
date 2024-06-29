@@ -2,6 +2,19 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release UNRELEASED
+
+### Added
+- Added the option to configure the default Execution Policy on the Windows Powershell and Powershell Core scripts.
+
+### Changed
+- PhoenixPE now requires PEBakery v1.2.0-develop or greater due to new StrFormat,StartTrim` and `StrFormat,EndTrim` commands implemented.
+- Changed usage of `StrFormat,Ctrim` to use `StrFormat,StartTrim` and `StrFormat,EndTrim` where appropriate. (Issue #96)
+
+### Fixed
+
+### Removed
+
 ## Release 2024-06-20
 
 ### Added

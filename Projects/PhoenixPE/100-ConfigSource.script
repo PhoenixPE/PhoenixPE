@@ -35,8 +35,8 @@ Author=Homes32
 Level=1
 Selected=True
 Mandatory=True
-Version=1.1.3.0
-Date=2023-06-21
+Version=1.1.4.0
+Date=2024-06-26
 
 [Variables]
 
@@ -51,12 +51,12 @@ End
 
 // Set Output Directories
 If,%fb_OutputDir%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_OutputDir,"#$pBaseDir#$p\Output\#$pProjectTitle#$p\"
-StrFormat,CTrim,%fb_OutputDir%,\,%tmp_OutputDir%
+StrFormat,EndTrim,%fb_OutputDir%,\,%tmp_OutputDir%
 Set,%OutputDir%,%tmp_OutputDir%,PERMANENT
 Set,%tmp_OutputDir%,Nil
 
 If,%fb_IsoOutputDir%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,fb_IsoOutputDir,"#$pBaseDir#$p\Output\"
-StrFormat,CTrim,%fb_IsoOutputDir%,\,%tmp_ISODir%
+StrFormat,EndTrim,%fb_IsoOutputDir%,\,%tmp_ISODir%
 Set,%ISODir%,%tmp_ISODir%,PERMANENT
 Set,%tmp_ISODir%,Nil
 
@@ -122,7 +122,7 @@ Echo,"Verifying Source..."
 Run,%ScriptFile%,ResetVars
 
 // SourceDir
-StrFormat,CTrim,%fb_SrcPath%,"\",%fb_SrcPath%
+StrFormat,EndTrim,%fb_SrcPath%,"\",%fb_SrcPath%
 Set,%SourceDir%,%fb_SrcPath%,PERMANENT
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -505,7 +505,7 @@ lbl_ImageInfo="Image Info:",1,1,64,274,60,16,8,Normal
 lbl_ImgInfo=,1,1,131,274,474,16,8,Bold
 bvl_DestCfg_Basic="Configure Destination",1,12,5,313,625,65,8,Bold
 bvl_DestCfg_Advanced="Configure Destination",0,12,5,313,625,140,8,Bold
-cb_RunFromWim="Run all programs from RAM (Boot.wim)",1,3,15,342,215,18,False,"__Select this option to pack all programs into Boot.wim regardless of individual script settings.#$x#$xRequired for PXE/Network boot."
+cb_RunFromWim="Run all programs from RAM (Boot.wim)",1,3,15,342,215,18,False,"__Select this option to pack all programs into Boot.wim regardless of individual script settings.#$x#$xRequired for PXE/Network boot, wimboot, etc."
 txt_YProgramsDirName="Programs folder:",0,0,394,342,200,21,Programs,"__The name of the 'Programs' folder on the final media Y: drive (CD/DVD/USB).#$x#$xChanging the name of the Programs folder can be useful if you run more then one WinPE#$xfrom a single USB drive and need to keep your programs separated.#$x#$xChanges will take effect on the next build."
 lbl_OutputDir="Output Dir:",0,1,17,389,70,16,8,Bold
 fb_OutputDir=%BaseDir%\Output\%ProjectTitle%\,0,13,94,383,525,20,dir,"Title=Select the directory where the final build will be saved","__The directory where the final build will be saved. (eg. BOOT.WIM, Programs, etc.)"

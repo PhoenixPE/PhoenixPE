@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.9.3.0
-Date=2024-02-07
+Version=1.9.4.0
+Date=2024-06-28
 Level=0
 Selected=None
 
@@ -414,7 +414,7 @@ Math,BitOr,%Bits%,0x%Bits%,%BitMask%
 
 // Back to Hex for our return value
 Math,Hex,%Hex%,%Bits%,%BitSize%
-StrFormat,LTRIM,%Hex%,2,%Hex%
+StrFormat,LTrim,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
 Return,%BitArray%
@@ -450,10 +450,10 @@ If,ExistRegSubKey,HKLM,"Tmp_Software",Set,%RegHivesLoaded%,True
 Else,Set,%RegHivesLoaded%,False
 
 // Remove . from the file extension if present.
-StrFormat,CTRIM,%FileExt%,".",%FileExt%
+StrFormat,StartTrim,%FileExt%,".",%FileExt%
 
-StrFormat,FILENAME,%Program%,%ProgramFileName%
-StrFormat,EXT,%ProgramFileName%,%ProgramExt%
+StrFormat,Filename,%Program%,%ProgramFileName%
+StrFormat,Ext,%ProgramFileName%,%ProgramExt%
 List,Pos,%ExeExtList%,%ProgramExt%,%IsExecutable%
 If,%IsExecutable%,Equal,0,Halt,"Associate Error: [%Program%] is not an executable file (%ExeExtList%)." 
 Else,Begin
@@ -532,7 +532,7 @@ Math,BitAnd,%Bits%,0x%Bits%,%BitMask%
 
 // Back to Hex for our return value
 Math,Hex,%Hex%,%Bits%,%BitSize%
-StrFormat,LTRIM,%Hex%,2,%Hex%
+StrFormat,LTrim,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
 Return,%BitArray%
@@ -577,7 +577,7 @@ Math,BitOr,%Bits%,0x%Bits%,%BitMask%
 
 // Back to Hex for our return value
 Math,Hex,%Hex%,%Bits%,%BitSize%
-StrFormat,LTRIM,%Hex%,2,%Hex%
+StrFormat,LTrim,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
 Return,%BitArray%
@@ -622,7 +622,7 @@ Math,BitXOr,%Bits%,0x%Bits%,%BitMask%
 
 // Back to Hex for our return value
 Math,Hex,%Hex%,%Bits%,%BitSize%
-StrFormat,LTRIM,%Hex%,2,%Hex%
+StrFormat,LTrim,%Hex%,2,%Hex%
 
 List,Set,%BitArray%,%BitGroup%,%Hex%,Delim=#$c
 Return,%BitArray%
@@ -652,7 +652,7 @@ GetParam,1,%SourceImage%
 Getparam,2,%TargetImage%
 Getparam,3,%ResizeTo%
 
-StrFormat,EXT,%TargetImage%,%NewImageExt%
+StrFormat,Ext,%TargetImage%,%NewImageExt%
 Echo,"Converting [%SourceImage%] to a [%NewImageExt%] image..."
 If,Not,%ResizeTo%,Equal,"",Set,%ResizeParam%," --resize:%ResizeTo%"
 ShellExecute,Hide,"%Tools%\%HostArch%\ImageConvert.exe","#$q%SourceImage%#$q #$q%TargetImage%#$q --silent%ResizeParam%"
@@ -763,7 +763,7 @@ ForEach,%WildCard%,"*|?",Begin
   If,Not,%WildCardPos%,Equal,0,Halt,"FileCopyEx Syntax Error: Wildcards are not supported."
 End
 
-StrFormat,CTrim,%DestPath%,"\",%DestPath%
+StrFormat,EndTrim,%DestPath%,"\",%DestPath%
 
 If,Not,ExistDir,%DestPath%,DirMake,%DestPath%
 FileCopy,%SrcFile%,%DestPath%
@@ -1293,7 +1293,7 @@ If,#2,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the destination d
 GetParam,1,%SetupFile%
 GetParam,2,%DestDir%
 
-StrFormat,CTrim,%DestDir%,"\","%DestDir%"
+StrFormat,EndTrim,%DestDir%,"\","%DestDir%"
 
 ShellExecute,Hide,"%Tools%\anycpu\lessmsi\lessmsi.exe","x #$q%SetupFile%#$q #$q%DestDir%\#$q"
 If,Not,%ExitCode%,Equal,0,Begin
@@ -1549,7 +1549,7 @@ GetParam,2,%Arg2%
 If,%Arg2%,Equal,NOREG,Set,%NOREG%,True
 Else,Set,%NOREG%,False
 
-StrFormat,RTRIM,%InfFile%,3,%InfFileNoExt%
+StrFormat,RTrim,%InfFile%,3,%InfFileNoExt%
 
 Set,%RequireDriver-Listfile%,%ProjectTemp%\RequireDriver-ListFile.txt
 FileDeleteEx,%RequireDriver-Listfile%
@@ -1772,7 +1772,7 @@ If,#2,Equal,"",Halt,"WixExtract Syntax Error: You must specify the destination d
 GetParam,1,%SetupFile%
 Getparam,2,%DestDir%
 
-StrFormat,CTrim,%DestDir%,"\","%DestDir%"
+StrFormat,EndTrim,%DestDir%,"\","%DestDir%"
 
 ShellExecute,Hide,"%Tools%\anycpu\wix\dark.exe","-x #$q%DestDir%#$q #$q%SetupFile%#$q"
 If,Not,%ExitCode%,Equal,0,Begin

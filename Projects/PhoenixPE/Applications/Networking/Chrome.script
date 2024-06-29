@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.10.0
-Date=2024-06-20
+Version=1.1.11.0
+Date=2024-06-26
 
 [Variables]
 %ProgramFolder%="Chrome"
@@ -102,7 +102,7 @@ Echo,"Configuring %ScriptTitle%..."
 // Setup the master_preferences file for settings where policy is blocked unless you are joined to a domain
 FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\master_preferences"
 FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\master_preferences"
-StrFormat,CTrim,"%PEPrograms%\%ProgramFolder%","\",%ProgramDirEsc%
+StrFormat,EndTrim,"%PEPrograms%\%ProgramFolder%","\",%ProgramDirEsc%
 StrFormat,Replace,"%PEPrograms%\%ProgramFolder%","\","\\",%ProgramDirEsc%
 TxtAddLine,"%TargetPrograms%\%ProgramFolder%\master_preferences","{#$qdistribution#$q:{#$qimport_bookmarks_from_file#$q:#$q%ProgramDirEsc%\\bookmarks.html#$q,#$qsuppress_first_run_bubble#$q:true,#$qdo_not_create_desktop_shortcut#$q:true,#$qdo_not_create_quick_launch_shortcut#$q:true,#$qdo_not_launch_chrome#$q:true,#$qdo_not_register_for_update_launch#$q:true,#$qmake_chrome_default#$q:true,#$qmake_chrome_default_for_user#$q:true,#$qsuppress_first_run_default_browser_prompt#$q:true,#$qsystem_level#$q:true},#$qhomepage#$q:#$q${txt_Homepage}#$q,#$qhomepage_is_newtabpage#$q:true,#$qfirst_run_tabs#$q:[#$q${txt_Homepage}#$q]}",APPEND
 
@@ -126,8 +126,8 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A6
 // User Config - Script Interface
 	
 // Language (Policy)
-StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
-StrFormat,RTRIM,%Lang%,1,%Lang%
+StrFormat,Split,%cmb_Language%,"[",2,%Lang%
+StrFormat,RTrim,%Lang%,1,%Lang%
 RegWrite,HKLM,0x1,"Tmp_Software\Policies\Google\Chrome\Recommended","ApplicationLocaleValue","%Lang%"
 
 // Show Home Button (Policy)
@@ -152,7 +152,7 @@ Else,TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Hom
 
 // Import Bookmarks
 If,ExistFile,%fb_ImportBookmarks%,Begin
-  StrFormat,EXT,%fb_ImportBookmarks%,%FileExt%
+  StrFormat,Ext,%fb_ImportBookmarks%,%FileExt%
   If,Not,%FileExt%,Equal,".html",Halt,"ERROR: Bookmarks to import must be in .HTML format."
   Else,Begin
     Echo,"Importing user provided bookmarks..."
