@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2020-06-02
+Version=1.0.2.0
+Date=2024-07-01
 
 [Variables]
 %ProgramFolder%="TestDisk"
@@ -91,12 +91,16 @@ If,%cb_PinToStartMenu2%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Pro
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"e -r -y #$q%ProgramsCache%\%ProgramFolder%\TestDisk-%SourceArch%.zip#$q testdisk-7.2-WIP\* -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [TestDisk-%SourceArch%.zip]. The error code returned was [#r]."
-7z,"e -r -y #$q%ProgramsCache%\%ProgramFolder%\TestDisk-%SourceArch%.zip#$q testdisk-7.2-WIP\63\* -o#$q#1\63#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [TestDisk-%SourceArch%.zip]. The error code returned was [#r]."
-7z,"e -r -y #$q%ProgramsCache%\%ProgramFolder%\TestDisk-%SourceArch%.zip#$q testdisk-7.2-WIP\platforms\* -o#$q#1\platforms#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [TestDisk-%SourceArch%.zip]. The error code returned was [#r]."
+
+Decompress,"%ProgramsCache%\%ProgramFolder%\TestDisk-%SourceArch%.zip","%ProjectTemp%\%ProgramFolder%"
+
+// TestDisk uses an annoying folder structure that changes with each version.
+FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
+If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%] in the setup file: The code returned was [#r]."
+Else,List,Get,#r,1,%ProgramExePath%
+
+StrFormat,DirPath,%ProgramExePath%,%ProgramExeDir%
+FileCopy,"%ProgramExeDir%\*.*",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
