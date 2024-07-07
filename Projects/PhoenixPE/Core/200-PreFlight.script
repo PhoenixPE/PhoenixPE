@@ -35,7 +35,7 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.1.5.0
+Version=1.2.0.0
 Date=2024-06-29
 
 [Variables]
@@ -46,32 +46,65 @@ Date=2024-06-29
 Echo,"Starting Pre-Flight Check..."
 
 Run,%ScriptFile%,CheckEngine
-Run,%ScriptFile%,CheckPaths
-If,%cb_CheckFreeSpace%,Equal,True,Run,%ScriptFile%,CheckDiskSpace
 Run,%ScriptFile%,CheckTools
+If,%cb_VerifyOutputPath%,Equal,True,Run,%ScriptFile%,CheckOutputPath
+If,%cb_CheckFreeSpace%,Equal,True,Run,%ScriptFile%,CheckDiskSpace
 If,%cb_CheckForSupportedBuildVer%,Equal,True,Run,%ScriptFile%,CheckVerifiedBuilds
 Run,%ScriptFile%,CheckWinREVersion
 
-[#CheckPaths#]
+[#CheckOutputPath#]
 // ===============================================================================================================================
-// Name...........: CheckPaths
-// Description....: Verify that %OutputDir% is not a root drive (ie. d:\). This will cause issues with creating/cleaning up
-//                  the build environment.
+// Name...........: CheckOutputPath
+// Description....: Verify that %OutputDir% is not a root drive (ie. d:\), network drive (mapped or UNC path), ramdrive, etc.    
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: 
+// Remarks........: DISM and System,GetFreeSpace can't handle network paths (https://github.com/PhoenixPE/PhoenixPE/issues/96) 
+//                  DISM doesn't like RamDisks either (0x80071126 - ERROR_NOT_A_REPARSE_POINT https://theoven.org/viewtopic.php?p=1680#p1680)
+//                  Root drives cause issues with creating/cleaning up the build environment.
 // Related........: Called by [Process]
 // ===============================================================================================================================
-[CheckPaths]
+[CheckOutputPath]
 System,SetLocal
+
 // Check if output is the root of a drive
-StrFormat,SPLIT,%OutputDir%,"\",0,%NumSplits%
+StrFormat,Split,%OutputDir%,"\",0,%NumSplits%
 If,%NumSplits%,Equal,1,Begin
-  Message,"Setting the OutputDir to the root of a drive is not supported.",Error
-  Halt,"Error: Setting the OutputDir to the root of a drive is not supported."
+  Message,"Setting the Output directory to the root of a drive is not supported.#$x#$xPlace the PhoenixPE files in a sub-directory (eg. C:\PhoenixPE) or adjust the Output directory path in the 'Config Source' script and try again.",Error
+  Halt,"Error: Setting the OutputDir to the root of a drive is not supported.#$x#$xPlace the PhoenixPE files in a sub-directory (eg. C:\PhoenixPE) or adjust the Output directory path in the 'Config Source' script and try again."
 End
+
+// Check for network path
+StrFormat,Left,%OutputDir%,2,%PathPrefix%
+If,%PathPrefix%,Equal,"\\",Begin
+  Message,"Setting the Output directory to a network location is not supported. This includes UNC paths and mapped drives.#$x#$xPlace the PhoenixPE files on a physical disk (eg. C:\PhoenixPE) or adjust the Output directory path in the 'Config Source' script and try again.",Error
+  Halt,"Error: Setting the OutputDir to a network location is not supported."
+End
+
+// Check for relative paths
+StrFormat,Left,%OutputDir%,1,%PathPrefix%
+If,%PathPrefix%,Equal,".",Begin
+  Message,"Setting the Output directory to a relative path is not supported.#$x#$xAdjust the Output directory path in the 'Config Source' script and try again.",Error
+  Halt,"Error: Setting the OutputDir to a relative path is not supported."
+End
+
+// Check Output drive type
+StrFormat,Left,%OutputDir%,3,%DriveLetter%
+DriveGetType,%DriveLetter%
+Set,%DriveType%,#r
+If,%DriveType%,Equal,"",Begin
+  // Try to catch any invalid paths/drive letters
+  Message,"Error: Could not determine the drive type for [%DriveLetter%]. Make sure your path exists.",Error
+  Halt,"Error: Could not determine the drive type for [%DriveLetter%]."
+End
+Else,Begin
+  If,Not,%DriveType%,Equal,"Removable",If,Not,%DriveType%,Equal,"Fixed",Begin
+    Message,"Setting the Output directory to a %DriveType% drive is not supported.#$x#$xPlace the PhoenixPE files on a physical disk (eg. C:\PhoenixPE) or adjust the Output directory path in the 'Config Source' script and try again.",Error
+    Halt,"Error: Setting the OutputDir to a %DriveType% drive is not supported."
+  End
+End
+
 System,EndLocal
 
 [#CheckEngine#]
@@ -216,7 +249,7 @@ Halt,"The build cannot continue because [ #1 ] is missing."
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Note: GetWaikTools has been discontinued as of v21.04. Will need to rewrite this function to use adksetup.exe
-// Related........: Called by [CheckTools]
+// Related........: Called by [CheckTools], btn_DownloadProgram
 // ===============================================================================================================================
 [GetWaikTools]
 Echo,"Downloading required tools from Windows 10 ADK...#$x#$xThis will only need to be done once."
@@ -230,7 +263,6 @@ If,Not,ExistFile,"%Tools%\x64\Oscdimg\oscdimg.exe",Halt,"Error downloading requi
 DirDeleteEx,"%Tools%\x86\BCDBOOT"
 //DirDeleteEx,"%Tools%\x64\DISM"
 DirDeleteEx,"%Tools%\x64\BCDBOOT"
-
 
 [#CheckVerifiedBuilds#]
 // ===============================================================================================================================
@@ -359,8 +391,8 @@ System,GetFreeSpace,%TargetDir%,%FreeMegabytes%
 Math,Mul,%FreeBytes%,%FreeMegabytes%,1048576
 StrFormat,IntToBytes,%FreeBytes%,%HumanReadableFreeSpace%
 If,%FreeMegabytes%,Smaller,%MinimumFreeMegabytes%,Begin
-    Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your target drive [%TargetDir%]. This may result in build failures.",Warn
-    Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your target drive, which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
+  Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your target drive [%TargetDir%]. This may result in build failures.",Warn
+  Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your target drive, which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
 End
 
 // Check %OutputDir%
@@ -368,11 +400,43 @@ System,GetFreeSpace,%OutputDir%,%FreeMegabytes%
 Math,Mul,%FreeBytes%,%FreeMegabytes%,1048576
 StrFormat,IntToBytes,%FreeBytes%,%HumanReadableFreeSpace%
 If,%FreeMegabytes%,Smaller,%MinimumFreeMegabytes%,Begin
-    Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your output drive [%OutputDir%]. This may result in build failures.",Warn
-    Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your output drive [%OutputDir%], which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
+  Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your output drive [%OutputDir%]. This may result in build failures.",Warn
+  Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your output drive [%OutputDir%], which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
 End
 
 System,EndLocal
+
+[#DownloadTools#]
+// ===============================================================================================================================
+// Name...........: DownloadTools
+// Description....: Download Waik Tools
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_DownloadTools
+// ===============================================================================================================================
+[DownloadTools]
+Run,%ScriptFile%,GetWaikTools
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+Echo,"Removing downloaded tools..."
+DirDeleteEx,%Tools%\x86\DISM
+DirDeleteEx,%Tools%\x64\DISM
+DirDeleteEx,%Tools%\x86\Oscdimg
+DirDeleteEx,%Tools%\x64\Oscdimg
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
@@ -386,8 +450,9 @@ System,EndLocal
 // Related........: btn_SetDefaultOptions
 // ===============================================================================================================================
 [SetDefaultOptions]
-WriteInterface,Value,%ScriptFile%,Interface,cb_CheckForSupportedBuildVer,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_VerifyOutputPath,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_CheckFreeSpace,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_CheckForSupportedBuildVer,True
 
 [#ToggleAdvancedOptions#]
 // ===============================================================================================================================
@@ -416,8 +481,9 @@ Else,Begin
   WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
 End
 
-WriteInterface,Visible,%ScriptFile%,Interface,cb_CheckForSupportedBuildVer,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_VerifyOutputPath,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,cb_CheckFreeSpace,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cb_CheckForSupportedBuildVer,%Toggle%
 WriteInterface,Visible,%ScriptFile%,Interface,bvl_AdvancedOptions,%Toggle%
 System,EndLocal
 
@@ -447,18 +513,23 @@ Message,"This script verifies that essential tools are available, PEBakery is co
 // Related........:
 // ===============================================================================================================================
 [Interface]
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadTools,VistalcoDownload_16.png,False,"__Download WAIK tools."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded tools."
 btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_AdvancedOptions="Advanced Options",0,12,5,50,200,115,8,Bold
-cb_CheckForSupportedBuildVer="Verify Source Build Number",0,3,12,64,150,18,True,"__Check and see if the Win10 build version has been tested with this project."
+cb_VerifyOutputPath="Verify Output Path",0,3,12,64,150,18,True
 cb_CheckFreeSpace="Verify Free Disk Space",0,3,12,84,150,18,True,"__Verify we have the free disk space required to build this project."
+cb_CheckForSupportedBuildVer="Verify Source Build Number",0,3,12,104,150,18,True,"__Check and see if the Win10 build version has been tested with this project."
 
 [InterfaceEncoded]
 Advanced_16.png=1722,2396
 SetDefaults_16.png=2475,3404
 Help_16.png=2830,3868
 Advanced_Exit_16.png=705,1048
+VistalcoDownload_16.png=927,1348
+Trash.ico=1150,1228
 
 [AuthorEncoded]
 lists.png=10008,13436
@@ -486,3 +557,11 @@ lines=0
 [EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx11PtLU2EYB/B3KmV0M6IbSdkITlDQFQq6YBEWERV07w8IS43ykoMczs2juc2tXdxsudratDZ0qbPNqdlmUpabZUtnZRdL0yTrWJueY+QT72qhqx74/vJyPue853necxBiIRaKiUGIheJQYhRC8xFCKxBCMQihOPRrHVd8FPqr9uzeFb1je/zME8ePbSIIQkwQhIogCPV/omKz2YLY2MULN6xfN+PA/n1T8D2K5dKII4cP5bjdreD1eqHL5wOapqGvrw9sthooKdFAVVUlPH3aDkqlEthxcQvSziSxJu6D5HFTtVrtuF6vB4PBAFarFcxmM8jlMiDJXLh0SQo6nQ74OTx//JbNc8LfQ1fAPfre104NfXhHMaMjFMMw1JehT1S398lwh7uFarvXGIxJUfCYvXTJ3HBvUYlOh3xHQ3WgQZHDtNksgdviC7RVyKFb7zqC3q5XvYqKiMAtnlQ3xNws7Pu7u4YdkizGXpA+5q42BWolXLqKTGUa9MV+7O/cvNY7a/q0ZeHeLBNIse9otH1r0ghpanBwGO//1bN2qqlUE6jKO09j77SU9c+bPXN1uC9XXtRj73VU+h15yd/7u7u+Yv/G94yq5p0es0uzR7Fvrqn4yF40b9tlcd6k/tcbVDXYD7x+Qb184PJ7TCWjg329VKvFGHAZigMt9sph7FvqrJ9WLYvdqxLmTvLWq/L7of69fujyO0XnvnsqS0fqyOQxh5Qb3DuO21n3edPK5SeKhGREyDbXVrOabxm6Qp4e8VMvnLaAx2Icua+Xj7bfaww+G8fTdIdK2LjmVFpSYmTIG4sk0a328t5/zb+n+zk1cf44B3duzdq7O2FqyOfxeUkikXBcLpOBpLAQNBpN8Ayq1Wrg8/mQkZEOHA4H8vPzQSaTwanExKE9uxKmh7wwn+Q+evQQfJ2d8LjNAwMD/cAwDPT09EBtrR202itgNBrA1eSCzs4OUCoVP1LPJP/5GrUa9aqUlJR6hUIxjs95udkEprJSuFFqDJ59taoIpBIJWCoqQCwSQUZ6mjJ8/rgkhYVrOZmZgus63Ycyo9ErEhakZWdnXzt39mwmmZtbIeDnnCQFgl8/gwnFYyHkjPxH8Prv4GsmJRKht1MR+gkUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUDoQGbs8iFCkXoMbAB+CQU+pPfbDwEAAAACAAAAJAAAAFEDAAAAAAAAAQAAAAAAAAAAAAAA

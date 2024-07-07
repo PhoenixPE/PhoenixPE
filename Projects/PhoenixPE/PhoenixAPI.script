@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.9.4.0
-Date=2024-06-28
+Version=1.10.0.0
+Date=2024-07-06
 Level=0
 Selected=None
 
@@ -55,6 +55,7 @@ BitToggle=Run,%API%,_PhoenixAPI_BitToggle
 ConvertImage=Run,%API%,_PhoenixAPI_ConvertImage
 DirDeleteEx=Run,%API%,_PhoenixAPI_DirDeleteEx
 DISM=Run,%API%,_PhoenixAPI_DISM
+DriveGetType=Run,%API%,_PhoenixAPI_DriveGetType
 FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 FileSearch=Run,%API%,_PhoenixAPI_FileSearch
@@ -735,6 +736,49 @@ Return,%ExitCode%
 
 System,EndLocal
 
+[#_PhoenixAPI_DriveGetType#]
+// ===============================================================================================================================
+// Name...........: DriveGetType
+// Description....: Get the drive type.
+// Syntax.........: DriveGetType,<DriveLetter>
+// Parameters.....: #1 Drive Letter - The drive letter to query.
+// Return values..: #r - Success - One of the following values:
+//                         - Unknown
+//                         - Removable
+//                         - Fixed
+//                         - Network
+//                         - CDROM
+//                         - RAMDisk
+// Author.........: Homes32
+// Remarks........: This command is a work in progress and may change without notice.
+//                  Usage: PhoenixAPI-DriveGetType.a3x <DriveLetter> <OutputFile>
+//                  DriveLetter - Drive Letter. Ex. B:
+//                  OutputFile - A standard .ini formatted File
+//                    [DriveType] contains key=value pairs in the format of <DriveLetter>=<DriveType> ex. C:=Fixed
+//                  Exit codes: 0 - Success
+//                              1 - Syntax Error
+//                              2 - Invalid Path
+//                              3 - Failed to get drive type
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_DriveGetType]
+System,SetLocal
+GetParam,1,%DriveLetter%
+
+If,%DriveLetter%,Equal,"",Halt,"Syntax Error: Drive letter was not specified."
+
+StrFormat,EndTrim,%DriveLetter%,"\",%DriveLetter%
+
+ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","%Tools%\a3x\PhoenixAPI-DriveGetType.a3x #$q%DriveLetter%#$q #$q%ProjectTemp%\PhoenixAPI-DriveGetType.ini#$q"
+
+If,Not,%ExitCode%,Equal,0,Halt,"DriveGetType Error: Unable get drive type for [%DriveLetter%]. The command returned [%ExitCode%]."
+
+// Return the result as #r
+IniRead,"%ProjectTemp%\PhoenixAPI-DriveGetType.ini","DriveType",%DriveLetter%,%DriveType%,"Default="
+Return,%DriveType%
+
+System,EndLocal
+
 [#_PhoenixAPI_FileCopyEx#]
 // ===============================================================================================================================
 // Name...........: FileCopyEx
@@ -839,6 +883,9 @@ End
 System,SetLocal
 GetParam,1,%Path%
 GetParam,2,%SearchFilter%
+
+If,%Path%,Equal,"",Halt,"Syntax Error: Path was not specified."
+If,%SearchFilter%,Equal,"",Halt,"Syntax Error: Search filter was not specified."
 
 // Recurse the path looking for the specified file
 ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","%Tools%\a3x\PhoenixAPI-FileSearch.a3x #$q%Path%#$q #$q%SearchFilter%#$q #$q%ProjectTemp%\PhoenixAPI-FileSearch.ini#$q"
