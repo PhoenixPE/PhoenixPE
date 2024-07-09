@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.2.0.0
-Date=2024-06-29
+Version=1.2.1.0
+Date=2024-07-08
 
 [Variables]
 // Minimum PEBakery version that has the command/feature set that is compatible with PhoenixPE.
@@ -67,6 +67,7 @@ Run,%ScriptFile%,CheckWinREVersion
 // ===============================================================================================================================
 [CheckOutputPath]
 System,SetLocal
+Echo,"Verifying Output directory path..."
 
 // Check if output is the root of a drive
 StrFormat,Split,%OutputDir%,"\",0,%NumSplits%
@@ -297,6 +298,7 @@ DirDeleteEx,"%Tools%\x64\BCDBOOT"
 // ===============================================================================================================================
 [CheckVerifiedBuilds]
 System,SetLocal
+Echo,"Checking source version against known working builds..."
 
 // Minimum supported version
 Set,%MinimumSourceVer%,"10.0.16299.0"
@@ -307,7 +309,6 @@ Set,%aSupportedVersions%,10.0.17634|10.0.17763|10.0.18362|10.0.18363|10.0.19041|
 // Latest Verified Source - This string is used in the warning message if the user is attempting to use an unverified source.
 Set,%MostRecentVerifiedSource%,"* Win10: 10.0.19041 - May 2020 Update (20H1) 2004#$x* Win11: 10.0.22621 - 22H2"
 
-Echo,"Checking source version against known working builds..."
 If,%SourceVer%,Smaller,%MinimumSourceVer%,Begin
   Message,"Unsupported Source!#$x#$xBuilding with Windows version [%SourceVer%] sources are not supported.#$x#$xPlease select a valid Windows 10 Source.",Error,10
   Halt,"Unsupported Windows source version [%SourceVer%]"
@@ -338,6 +339,8 @@ System,EndLocal
 //                  has not yet been cached).
 // ===============================================================================================================================
 [CheckWinREVersion]
+Echo,"Checking WinRE version..."
+
 // If we are using boot.wim or WinRE.wim hasn't been extracted yet skip the version check.
 If,ExistFile,"%ProjectCache%\WinRE.wim",Begin
   Echo,"Verifying WinRE version..."
@@ -380,25 +383,38 @@ End
 // ===============================================================================================================================
 [CheckDiskSpace]
 System,SetLocal
+Echo,"Checking disk space..."
 
-// Set minimum space required to 5 GB
+// Set minimum space required = 5 GB
 Set,%MinimumFreeMegabytes%,5120
 Math,Mul,%MinimumFreeBytes%,%MinimumFreeMegabytes%,1048576
 StrFormat,IntToBytes,%MinimumFreeBytes%,%HumanReadableMinimumFreeSpace%
 
-// Check %TargetDir% & %Workbench%
+// Check %TargetDir%
 System,GetFreeSpace,%TargetDir%,%FreeMegabytes%
 Math,Mul,%FreeBytes%,%FreeMegabytes%,1048576
 StrFormat,IntToBytes,%FreeBytes%,%HumanReadableFreeSpace%
+Echo,"TargetDir free space is %HumanReadableFreeSpace%"
 If,%FreeMegabytes%,Smaller,%MinimumFreeMegabytes%,Begin
   Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your target drive [%TargetDir%]. This may result in build failures.",Warn
   Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your target drive, which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
+End
+
+// Check %Workbench%
+System,GetFreeSpace,%Workbench%,%FreeMegabytes%
+Math,Mul,%FreeBytes%,%FreeMegabytes%,1048576
+StrFormat,IntToBytes,%FreeBytes%,%HumanReadableFreeSpace%
+Echo,"Workbench free space is %HumanReadableFreeSpace%"
+If,%FreeMegabytes%,Smaller,%MinimumFreeMegabytes%,Begin
+  Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your workbench drive [%Workbench%]. This may result in build failures.",Warn
+  Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your workbench drive, which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
 End
 
 // Check %OutputDir%
 System,GetFreeSpace,%OutputDir%,%FreeMegabytes%
 Math,Mul,%FreeBytes%,%FreeMegabytes%,1048576
 StrFormat,IntToBytes,%FreeBytes%,%HumanReadableFreeSpace%
+Echo,"OutputDir free space is %HumanReadableFreeSpace%"
 If,%FreeMegabytes%,Smaller,%MinimumFreeMegabytes%,Begin
   Echo,"Warning: You have less then %HumanReadableMinimumFreeSpace% of free disk space on your output drive [%OutputDir%]. This may result in build failures.",Warn
   Message,"Warning: You only have [%HumanReadableFreeSpace%] free disk space on your output drive [%OutputDir%], which is less then the recommended %HumanReadableMinimumFreeSpace%. This may result in build failures.",Warning,10
