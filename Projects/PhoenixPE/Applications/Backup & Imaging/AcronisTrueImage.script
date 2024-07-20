@@ -28,24 +28,21 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Note: Acronis True Image and been re-branded as Acronis Cyber Protect Home Office.
-// This script has been placed in Archive status and will no longer be maintained.
-
 [Main]
-Title=Acronis True Image 2021
+Title=Acronis True Image
 Description=Acronis True Image is a popular and easy to use backup software for personal use.
 Author=Homes32
 Level=5
-Selected=False
+Selected=True
 Mandatory=False
-Version=1.1.0.0
-Date=2023-11-04
+Version=1.2.0.0
+Date=2024-07-19
 
 [Variables]
-%ProgramFolder%="TrueImage2021"
+%ProgramFolder%="TrueImage"
 %ProgramExe%="TrueImage_starter.exe"
-%SetupFile%="AcronisTrueImage2021.exe"
-%DownloadURL%=https://download.acronis.com/AcronisTrueImage2021.exe
+%SetupFile%="AcronisTrueImage.exe"
+%DownloadURL%=https://download.acronis.com/AcronisTrueImage.exe
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -140,16 +137,16 @@ If,%cb_Include_iSCSI_Drivers%,Equal,True,Run,%ScriptFile%,iSCSIsupport
 
 // License
 If,%cmb_SoftwareLicense%,Equal,"Use Host License",Begin
-  If,ExistRegSubKey,HKLM,"Software\Acronis\TrueImage",RegCopy,HKLM,"Software\Acronis\TrueImage",HKLM,"Tmp_Software\Acronis\TrueImage"
+  If,ExistRegSubKey,HKLM,"Software\Acronis\TrueImageHome",RegCopy,HKLM,"Software\Acronis\TrueImageHome",HKLM,"Tmp_Software\Acronis\TrueImageHome"
   Else,Echo,"Warning: The software license was not found in the Host registry. Acronis True Image will run in Evaluation Mode.",Warn
 End
 Else,If,%cmb_SoftwareLicense%,Equal,"License from .reg file",Begin
   If,Not,%fb_SoftwareLicense%,Equal,"",If,ExistFile,%fb_SoftwareLicense%,Begin
     // Find/Replace Software hive with our mounted PE Software hive
-	FileCopy,%fb_SoftwareLicense%,"%ProjectTemp%\ATI2021Reg.reg"
-    TXTReplace,"%ProjectTemp%\ATI2021Reg.reg","HKEY_LOCAL_MACHINE\SOFTWARE\","HKEY_LOCAL_MACHINE\Tmp_Software\"
+	FileCopy,%fb_SoftwareLicense%,"%ProjectTemp%\ATIReg.reg"
+    TXTReplace,"%ProjectTemp%\ATIReg.reg","HKEY_LOCAL_MACHINE\SOFTWARE\","HKEY_LOCAL_MACHINE\Tmp_Software\"
     // Not checking for a valid .reg file at the moment. Just being lazy and letting RegImport fail if there is an error.
-    RegImport,"%ProjectTemp%\ATI2021Reg.reg"
+    RegImport,"%ProjectTemp%\ATIReg.reg"
   End
   Else,Echo,"Warning: The .reg file specified for the software license does not exist. Acronis True Image will run in Evaluation Mode.",Warn
 End
@@ -332,7 +329,8 @@ FileCopy,"%TargetPrograms%\%ProgramFolder%\bootmenu.bin","%TargetPrograms%\%Prog
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: ATI is downloaded as a compressed.exe that contains a .msi installer, that contains a WinPE.zip file that contains the exe.
+// Remarks........: Acronis True Image is downloaded as a compressed.exe that contains a .msi installer,
+//                  that contains a zip file pretending to be a .dll, which contains a WinPE.zip file that contains the exe files.
 // Related........: 
 // ===============================================================================================================================
 [DownloadProgram]
@@ -340,14 +338,16 @@ Echo,"Downloading %ScriptTitle%..."
 WebGet,"%DownloadURL%","%ProjectTemp%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
 
+Set,%MsiFile%,"AcronisCyberProtectHomeOffice.msi"
+
 // Extract the .msi installer
 Echo,"Extracting installer..."
-7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\%SetupFile%#$q AcronisTrueImage.msi -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\%SetupFile%#$q %MsiFile% -o#$q%ProjectTemp%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"Failed to extract .msi from [%SetupFile%]: The code returned was [#r]."
 
 // Extract compressed WinPE.zip from .msi installer
 Echo,"Extracting WinPE.zip from installer..."
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AcronisTrueImage.msi","%ProjectTemp%\%ProgramFolder%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%MsiFile%","%ProjectTemp%\%ProgramFolder%"
 
 // Find the full path to WinPE_resources.dll
 Echo,"Decompressing WinPE Resources..."
@@ -410,7 +410,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Backup & Imaging"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Acronis True Image 2021"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Acronis True Image"
 WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [en]"
 WriteInterface,Value,%ScriptFile%,Interface,cb_Include_iSCSI_Drivers,False
@@ -473,7 +473,7 @@ cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Backup & Imaging"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Acronis True Image 2021"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Acronis True Image"
 cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of Acronis True Image in your build.#$x#$xWARNING: 1 GB Download"
 bvl_Options=Options,1,12,150,90,220,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
