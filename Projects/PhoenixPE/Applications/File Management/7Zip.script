@@ -32,9 +32,9 @@
 Title=7-Zip
 Author=Homes32
 Level=5
-Version=1.2.3.0
+Version=1.2.4.0
 Description=(v24.07) 7-Zip is a free and open-source file archiver capable of reading and writing many archive formats.
-Date=2024-07-07
+Date=2024-07-27
 Selected=False
 Mandatory=False
 
@@ -61,7 +61,7 @@ Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
-Echo,"Configuring 7-Zip..."
+Echo,"Configuring %ScriptTitle%..."
 RegHiveLoad,Tmp_Software,%RegSoftware%
 RegHiveLoad,Tmp_Default,%RegDefault%
 
@@ -74,9 +74,10 @@ Run,%ScriptFile%,RegisterFileAssociations
 If,%cb_AddShellContextMenu%,Equal,True,Begin
   
   // Register Shell Extension
-  RegWrite,HKLM,0x2,"Tmp_Software\7-Zip,Path","%PEPrograms%\%ProgramFolder%"
-  RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\7zFM.exe","","%PEPrograms%\%ProgramFolder%\7zFM.exe"
+  RegWrite,HKLM,0x2,"Tmp_Software\7-Zip","Path","%PEPrograms%\%ProgramFolder%"
+  RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\7zFM.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
   RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\7zFM.exe","Path","%PEPrograms%\%ProgramFolder%"
+  
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}","","7-Zip Shell Extension"
   RegWrite,HKLM,0x2,"Tmp_Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32","","%PEPrograms%\%ProgramFolder%\7-zip.dll"
@@ -497,7 +498,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Managers"
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Management"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"7-Zip File Manager"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English (US) [en]"
 WriteInterface,Value,%ScriptFile%,Interface,cb_AddShellContextMenu,True
@@ -604,11 +605,11 @@ cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
-txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"File Managers"
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"File Management"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"7-Zip File Manager"
 bvl_Options=Options,1,12,150,90,477,322,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language="English (US) [en]",1,4,160,126,150,21,"Afrikaans [af]","Albanian [sq]","Arabic [ar]","Aragonese [an]","Armenian [hy]","Asturianu [ast]","Azerbaijani [az]","Bashkir [ba]","Basque [eu]","Belarusian [be]","Bengali [bn]","Breton [br]","Bulgarian [bg]","Catalan [ca]","Chinese (Traditional) [zh-CN]","Chinese (Simplified) [zh-TW]","Corsican [co]","Croatian [hr]","Czech [cs]","Danish [da]","Dutch [nl]","English (US) [en]","Esperanto [eo]","Extremaduran [ext]","Frisian [fy]","Estonian [et]","Finnish [fi]","Friulian [fur]","French [fr]","Galician [gl]","Georgian [ka]","German [de]","Greek [el]","Gujarati (India) [gu]","Hebrew [he]","Hindi (India) [hi]","Hungarian [hu]","Icelandic [is]","Ido [io]","Indonesian [id]","Irish [ga]","Italian [it]","Japanese [ja]","Kabyle [kab]","Karakalpak (Latin) [kaa]","Kazakh [kk]","Korean [ko]","Kurdish [ku]","Kurdish (Sorani) [ku-ckb]","Kyrgyz [ky]","Latvian [lv]","Ligurian [lij]","Lithuanian [lt]","Macedonian [mk]","Malay [ms]","Marathi [mr]","Nepali [ne]","Mongolian [mn]","Mongolian (Unicode) [mng]","Mongolian (MenkCode) [mng2]","Nepali [ne]","Norwegian (Bokmal) [nb]","Norwegian (Nynorsk) [nn]","Pashto [ps]","Persian [fa]","Polish [pl]","Portuguese (Brazilian) [pt-BR]","Portuguese (Portugal) [pt]","Punjabi (India) [pa-IN]","Romanian [ro]","Russian [ru]","Sanskrit (Indian) [sa]","Serbian (Cyrilli) [sr-spc]","Serbian (Latin) [sr-spl]","Sinhala [si]","Slovak [sk]","Slovenian [sl]","Spanish [es]","Swedish [sv-SE]","Tamil [ta]","Tatar [tt]","Thai [th]","Turkish [tr]","Ukrainian [uk]","Uyghur [ug]","Uzbek [uz]","Valencian [va]","Vietnamese [vi]","Welsh [cy]","Yoruba [yo]"
+cmb_Language="English (US) [en]",1,4,160,126,150,21,"Afrikaans [af]","Albanian [sq]","Arabic [ar]","Aragonese [an]","Armenian [hy]","Asturianu [ast]","Azerbaijani [az]","Bashkir [ba]","Basque [eu]","Belarusian [be]","Bengali [bn]","Breton [br]","Bulgarian [bg]","Catalan [ca]","Chinese (Traditional) [zh-TW]","Chinese (Simplified) [zh-CN]","Corsican [co]","Croatian [hr]","Czech [cs]","Danish [da]","Dutch [nl]","English (US) [en]","Esperanto [eo]","Extremaduran [ext]","Frisian [fy]","Estonian [et]","Finnish [fi]","Friulian [fur]","French [fr]","Galician [gl]","Georgian [ka]","German [de]","Greek [el]","Gujarati (India) [gu]","Hebrew [he]","Hindi (India) [hi]","Hungarian [hu]","Icelandic [is]","Ido [io]","Indonesian [id]","Irish [ga]","Italian [it]","Japanese [ja]","Kabyle [kab]","Karakalpak (Latin) [kaa]","Kazakh [kk]","Korean [ko]","Kurdish [ku]","Kurdish (Sorani) [ku-ckb]","Kyrgyz [ky]","Latvian [lv]","Ligurian [lij]","Lithuanian [lt]","Macedonian [mk]","Malay [ms]","Marathi [mr]","Nepali [ne]","Mongolian [mn]","Mongolian (Unicode) [mng]","Mongolian (MenkCode) [mng2]","Nepali [ne]","Norwegian (Bokmal) [nb]","Norwegian (Nynorsk) [nn]","Pashto [ps]","Persian [fa]","Polish [pl]","Portuguese (Brazilian) [pt-BR]","Portuguese (Portugal) [pt]","Punjabi (India) [pa-IN]","Romanian [ro]","Russian [ru]","Sanskrit (Indian) [sa]","Serbian (Cyrilli) [sr-spc]","Serbian (Latin) [sr-spl]","Sinhala [si]","Slovak [sk]","Slovenian [sl]","Spanish [es]","Swedish [sv-SE]","Tamil [ta]","Tatar [tt]","Thai [th]","Turkish [tr]","Ukrainian [uk]","Uyghur [ug]","Uzbek [uz]","Valencian [va]","Vietnamese [vi]","Welsh [cy]","Yoruba [yo]"
 cb_AddShellContextMenu="Add Shell Context Menu",1,3,160,155,140,18,True
 cb_CascadedContextMenu="Cascaded Context Menu",1,3,160,176,145,18,True
 bvl_ContextMenuItems="Context Menu Items",1,12,162,218,160,179,8,Bold
