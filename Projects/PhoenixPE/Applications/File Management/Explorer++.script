@@ -29,24 +29,25 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=Q-Dir
-Description=The Quad-Directory-Explorer is an alternative file manager for Windows.
+Title=Explorer++
+Description=(1.4.0 beta2) Explorer++ is a lightweight and fast file manager for Windows.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
 Version=1.1.1.0
-Date=2023-01-10
+Date=2022-02-24
 
 [Variables]
-%ProgramFolder%="Q-Dir"
-%ProgramExex86%="Q-Dir.exe"
-%ProgramExex64%="Q-Dir_x64.exe"
-%DownloadURLx86%=http://www.softwareok.com/Download/Q-Dir_Portable.zip
-%DownloadURLx64%=http://www.softwareok.com/Download/Q-Dir_Portable_x64.zip
-%SetupFile%="Q-Dir.zip"
-%ConfigFile1%="Q-Dir.ini"
-%ConfigFile2%="start.qdr"
+%ProgramFolder%="Explorer++"
+%ProgramExe%="Explorer++.exe"
+%ProgramVersion%=1.4.0-beta-2
+%DownloadURLx86%=https://github.com/derceg/explorerplusplus/releases/download/version-%ProgramVersion%/explorerpp_x86.zip
+%DownloadURLx64%=https://github.com/derceg/explorerplusplus/releases/download/version-%ProgramVersion%/explorerpp_x64.zip
+%TranslationsURL%=https://github.com/derceg/explorerplusplus/releases/download/version-%ProgramVersion%/explorerpp_translations.zip
+%SetupFile%="Explorer++.zip"
+%TranslationsFile%="Translations.zip"
+%aLangMap%=CA|3|ZH_CN|2052|ZH_TW|1028|CS|5|DA|6|NA|19|EN|9|FA|41|FI|1035|FR|12|DE|7|HE|1037|HU|14|IT|16|JA|17|KO|18|NO|20|PL|21|PT|22|RO|24|RU|25|SI|91|ES|10|SV|29|TR|31|UK|34|VI|1066
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -58,44 +59,58 @@ Run,%ScriptFile%,SetProgramArch
 // Extract
 
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\Q-Dir\*.*","%TargetPrograms%\%ProgramFolder%"
-FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
-Echo,"Program version: v%ProgramExeVer%"
+Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
 
-Echo,"Configuring %ScriptTitle%..."
-
 RegLoadHives
+
 // Add the program dir to the System PATH so we can launch from anywhere
 RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
 StrFormat,Replace,%PathVar%,"%PEPrograms%\%ProgramFolder%;","",%PathVar%
 Set,%PathVar%,"%PEPrograms%\%ProgramFolder%;%PathVar%"
 RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
-RegUnloadHives
-
-FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\%ConfigFile1%"
-FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\%ConfigFile2%"
-
-// Accept License
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile1%","Q-Dir","Lizenz",1
 
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTRIM,%Lang%,1,%Lang%
-IniWrite,%TargetPrograms%\%ProgramFolder%\%ConfigFile1%,"Start","m_lang_id",%Lang%
 
-// ViewMode
-StrFormat,SPLIT,%cmb_ViewMode%,"[",2,%ViewMode%
-StrFormat,RTRIM,%ViewMode%,1,%ViewMode%
-TXTAddLine,%TargetPrograms%\%ProgramFolder%\%ConfigFile2%,"ViewMode=%ViewMode%",Append
+If,Not,%cmb_Language%,Equal,"Auto",Begin  
+  If,Not,%cmb_Language%,Equal,"English [EN]",Begin,If,Not,ExistFile,"%TargetPrograms%\%ProgramFolder%\Explorer++%Lang%.dll",Begin
+    // Halt if the language dll doesn't exist.
+    Halt,"Error: Language resources [%TargetPrograms%\%ProgramFolder%\Explorer++%Lang%.dll] do not exist."
+  End
+  
+  List,Pos,%aLangMap%,%Lang%,%LangPos%
+  Math,Add,%idPos%,%LangPos%,1
+  List,Get,%aLangMap%,%idPos%,%LangID%
+  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","Language",%LangID%
+End
 
-// TreeMode
-StrFormat,SPLIT,%cmb_TreeMode%,"[",2,%TreeMode%
-StrFormat,RTRIM,%TreeMode%,1,%TreeMode%
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile1%","Start","tree_mode",%TreeMode%
+// Default View
+StrFormat,LEFT,%cmb_DefaultView%,1,%DefaultView%
+RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","ViewModeGlobal",%DefaultView%
+
+If,%cb_LargeToolbarIcons%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","LargeToolbarIcons",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","LargeToolbarIcons",0
+
+If,%cb_ShowGridlines%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","ShowGridlinesGlobal",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","ShowGridlinesGlobal",0
+
+If,%cb_ShowHiddenFiles%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","ShowHiddenGlobal",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","ShowHiddenGlobal",0
+
+If,%cb_ShowInGroups%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","ShowInGroupsGlobal",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","ShowInGroupsGlobal",0
+
+If,%cb_AutoArrange%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","AutoArrangeGlobal",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","AutoArrangeGlobal",0
+
+If,%cb_SortAscending%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","SortAscendingGlobal",1
+Else,RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\Explorer++\Settings","SortAscendingGlobal",0
+
+RegUnloadHives
 
 // Additional Files - Keep this after any config changes so if the users wants to provide their own .ini config we don't overwrite it.
 If,Not,%fb_IncludeDir%,Equal,"",If,ExistDir,%fb_IncludeDir%,Begin
@@ -128,6 +143,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting files..."
 Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+Decompress,"%ProgramsCache%\%ProgramFolder%\%TranslationsFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -143,8 +159,10 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","Referer=http://www.softwareok.com/",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR,"UserAgent=Webget/cURL"
+If,Not,#r,Equal,200,Halt,"Download [%SetupFile%] failed: The code returned was [#r]."
+WebGet,%TranslationsURL%,"%ProgramsCache%\%ProgramFolder%\%TranslationsFile%",NOERR,"UserAgent=Webget/cURL"
+If,Not,#r,Equal,200,Halt,"Download [%TranslationsFile%] failed: The code returned was [#r]."
 
 [#SetProgramArch#]
 // ===============================================================================================================================
@@ -154,7 +172,6 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Parameters.....: 
 // Return values..: Sets the following local variables:
 //                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
-//                  %ProgramExe%     - The x86 or x64 program exe.
 // Author.........: Homes32
 // Remarks........:
 // Related........: 
@@ -162,11 +179,9 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 [SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
   Set,%DownloadURL%,%DownloadURLx64%
-  Set,%ProgramExe%,%ProgramExex64%
 End  
 Else,Begin
   Set,%DownloadURL%,%DownloadURLx86%
-  Set,%ProgramExe%,%ProgramExex86%
 End
 
 [#LaunchProgram#]
@@ -184,7 +199,7 @@ End
 Run,%ScriptFile%,SetProgramArch
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\Q-Dir\%ProgramExe%"
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
 [#BrowseIncludeDir#]
 // ===============================================================================================================================
@@ -233,12 +248,17 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,True
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Managers"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Q-Dir"
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Management"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Explorer++"
 WriteInterface,Value,%ScriptFile%,Interface,cb_AutoRun,False
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [1]"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_ViewMode,"4-Dir (Quad)              [0]"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_TreeMode,"Do Not Use   [0]"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"Auto"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_DefaultView,"1 - Medium Icons"
+WriteInterface,Value,%ScriptFile%,Interface,cb_LargeToolbarIcons,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowGridlines,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowHiddenFiles,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowInGroups,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_AutoArrange,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_SortAscending,True
 WriteInterface,Value,%ScriptFile%,Interface,fb_IncludeDir,""
 System,Cursor,Normal
 
@@ -288,7 +308,7 @@ System,EndLocal
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"The Quad-Directory-Explorer is an alternative file manager for Windows.#$x#$xOn first run this script will download the setup file (~1 MB) and cache it for future builds.#$x#$xQ-Dir is free for company, business, and private use."
+Message,"Explorer++ is a lightweight and fast file manager for Windows.#$x#$xOn first run this script will download the setup file (~2.5 MB) and cache it for future builds.#$x#$xExplorer++ is free and open source software."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -302,9 +322,9 @@ Message,"The Quad-Directory-Explorer is an alternative file manager for Windows.
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch Q-Dir",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+btn_LaunchProgram="Launch Explorer++",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,http://www.softwareok.com/?seite=Freeware/Q-Dir
+web_Homepage=Homepage,1,10,377,9,60,18,https://explorerplusplus.com/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
@@ -317,20 +337,24 @@ cb_DesktopShc=Desktop,1,3,12,104,122,18,True
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,True
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,True
-txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"File Managers"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,Q-Dir
-bvl_Options=Options,1,12,150,90,263,184,8,Bold
-cb_AutoRun="Run on startup",1,3,159,104,200,18,False
+txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"File Management"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,Explorer++
+bvl_Options=Options,1,12,150,90,381,184,8,Bold
+cb_AutoRun="Run on startup",1,3,158,104,105,18,False
 lbl_Language=Language,1,1,159,135,153,16,8,Normal
-cmb_Language="English [1]",1,4,160,151,180,21,"Arabic [25]","Bulgarian [32]","Chinese (Simplified) [9]","Chinese (Traditional) [5]","Croatian [23]","Czech [16]","Danish [17]","Dutch [11]","English [1]","English (UK) [28]","Estonian [27]","Finnish [21]","French [2]","German [0]","Greek [13]","Hungarian [22]","Italian [3]","Japanese [6]","Korean [7]","Norsk [29]","Polish [8]","Portuguese (Brazil) [18]","Romanian [19]","Russian [10]","Serbian [30]","Slovak [15]","Slovenian [24]","Spanish (Argentina) [14]","Spanish (Latin) [31]","Spanish (Spain) [4]","Swedish [20]","Turkish [12]","Ukrainian [26]"
-lbl_ViewMode="View Mode",1,1,159,180,153,16,8,Normal
-cmb_ViewMode="4-Dir (Quad)              [0]",1,4,160,193,180,21,"4-Dir (Quad)              [0]","4-Dir (Tile Vertically)   [1]","4-Dir (Tile Horizontally) [2]","3-Dir (1 on Top)          [3]","3-Dir (1 on Bottom)       [4]","3-Dir (1 on Left)         [5]","3-Dir (1 on Right)        [6]","3-Dir (Tile Vertically)   [7]","3-Dir (Tile Horizontally) [8]","2-Dir (Tile Vertically)   [9]","2-Dir (Tile Horizontally) [10]","1-Dir                     [11]"
-lbl_TreeMode="Tree Mode",1,1,159,222,153,16,8,Normal
-cmb_TreeMode="Do Not Use   [0]",1,4,160,235,180,21,"Do Not Use   [0]","One 4 All    [1]","Each Has One [2]"
-bvl_AdvancedOptions="Advanced Options",0,12,5,290,408,60,8,Bold
-lbl_IncludeDir="Include these files",0,1,15,308,200,16,8,Normal
-fb_IncludeDir=,0,13,15,321,362,20,dir,"__Files and folders in this directory will be copied to the program folder.#$x#$xYou can use this option to include custom config, favorites, quick-links, etc.#$xIf you include a customized Q-Dir.ini it will override all setting configured by the script interface."
-btn_BrowseIncludeDir=,0,8,382,321,20,20,BrowseIncludeDir,OpenFolder_16.png,True,__Browse
+cmb_Language=Auto,1,4,160,151,150,21,Auto,"Catalan [CA]","Chinese (Simplified) [ZH_CN]","Chinese (Traditional) [ZH_TW]","Czech [CS]","Danish [DA]","Dutch [NA]","English [EN]","Farsi [FA]","Finnish [FI]","French [FR]","German [DE]","Hebrew [HE]","Hungarian [HU]","Italian [IT]","Japanese [JA]","Korean [KO]","Norwegian [NO]","Polish [PL]","Portuguese [PT]","Romanian [RO]","Russian [RU]","Sinhala [SI]","Spanish [ES]","Swedish [SV]","Turkish [TR]","Ukrainian [UK]","Vietnamese [VI]"
+lbl_DefaultView="Default View:",1,1,159,180,153,16,8,Normal
+cmb_DefaultView="1 - Medium Icons",1,4,160,196,150,21,"1 - Medium Icons","2 - Small Icons","3 - List","4 - Details","5 - Tiles","6 - Thumbnails","7 - Extra Large Icons","8 - Large Icons"
+cb_LargeToolbarIcons="Large Toolbar Icons",1,3,355,104,127,18,False
+cb_ShowHiddenFiles="Show Hidden Files",1,3,355,125,116,18,True
+cb_ShowInGroups="Show In Groups",1,3,355,146,112,18,False
+cb_ShowGridlines="Show Gridlines",1,3,355,167,107,18,False,"__Show gridlines in Details view"
+cb_SortAscending="Sort Ascending",1,3,355,188,106,18,True
+cb_AutoArrange="Auto Arrange",1,3,355,209,90,18,True
+bvl_AdvancedOptions="Advanced Options",0,12,150,290,381,60,8,Bold
+lbl_IncludeDir="Include these files",0,1,160,308,200,16,8,Normal
+fb_IncludeDir=,0,13,160,321,337,20,dir,"__Files and folders in this directory will be copied to the program folder.#$x#$xYou can use this option to include custom config, etc.#$xIf you include a customized config.xml Explorer++ will switch to portable mode and override all settings configured by the script interface."
+btn_BrowseIncludeDir=,0,8,502,321,20,20,BrowseIncludeDir,OpenFolder_16.png,True,__Browse
 
 [InterfaceEncoded]
 play-hot.png=841,1220
@@ -343,8 +367,8 @@ OpenFolder_16.png=2299,3168
 Advanced_Exit_16.png=705,1048
 
 [AuthorEncoded]
-Q-Dir_80.png=4081,5540
-Logo=Q-Dir_80.png
+Explorer++_80.png=4887,6620
+Logo=Explorer++_80.png
 
 [EncodedFile-InterfaceEncoded-OpenFolder_16.png]
 lines=0
@@ -374,10 +398,10 @@ lines=0
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
 
-[EncodedFile-AuthorEncoded-Q-Dir_80.png]
+[EncodedFile-AuthorEncoded-Explorer++_80.png]
 lines=1
-0=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
-1=ESxoH/bnHMB2aGbAPuAv+J1BKW22mzHu1Hkj9foR+gOcJaDuMpUhWmHUbbs05hOEpEOcDFdjOLDzgO/OADqSDTnjifT4Ir2ewmHOjzyRrU1qYrka1boaaGgtk8ohYpFzcqoGhm6AL6SaVFowpKBhez4GJGUZQMftGCazTtlEz/cQvOa8ZfcNRVY6Oe900mxR+WDcSlMS4PdB3oOtB1YDlhHRsTRaDRmNFRWFigzuyc57EXmbcbnvgm8B72464dZlHvBs6i5zD2GkrkMf9/16IwOg018pmY3ynTdrm1IOdHakFI/siITvTTaXjyRHZjS0hLP/IfDtsPXJuk0imjOGwHrnebAb5tbnajA9dewwXrYcMD1845kRr0qivnwPV6JXLCQuC7KcuJjI3pSsR5L0Rz8yYcuLQkmjQY1OerOfLfUFXFodpaDvn9rz3y/1ZtLW/5/Rsf+c/l2Ftby951gdOKwKY5ot/t99Pt92985D+bpau6mi6//7VH/nPz82Tn59WJ4BwZ88MmHdjaKsVAR4/aXzoxOippPgdne+mEk41zcLaXTty7J0VBvb2Cs710YnRUrn37JM+iHdGPxdZw3d2C04qanJdOjI4SSia5ZxSOJiGPmmtza6CTVPrySz0n8s03smYUi/JSr1/8Qj8x9Je/rBZjcuyYtKeVrd2+LTczObmWE9EO0Dx8KLP//n0pb/v0U2lXi9o4OYw9e+QUuvZOrEhkVWEEk0muAX+0BCe+NMtRzaYc6PdL2GnPHl2JtLfLjKuultna3a1HKR4/lhyD1ysOfuMNfSaEQmvFnI2N0NWl1/3F46KCPB7Bd3bquEJB+quqkqLOnTt1XCAgk8XnYxl5PcCkZU1dMBGnzTnQNZcHug50HfiP7MBUSnbEgQGdPzmFPZmMEMxbt3R6MjYmlCKXE6oyNCQbhhagjUTWXgN6965QJK3fuTnZYefnhYJoB4GCQQnBFwqSnnj0SE+Yv3wpaYtslmYTF9SUUp0h5IFNO9CpzopG7S+hDYeFegwO2g+ghEIywExGeF4qZX8J7fqDNrncxi+hdd6ddfmyXq/ivIQ2m5WJ8O230r8m0cbHIZViF3DBKJxyqzaSr8mikNY7sAis5BOJHMPDXoaHqwwRt5tDWF9nY2O6TCo35y29G1lVlXyJU1Ovby8U0md9mW33etm+iUd1saqKoqK6HAc+AS6NHD8eNLL0oEWH/8PaYksLMYXzrndgdOTECecVV/tdB5bJ++pqlpX11GcmZQyIXZR3Pe820aNq1226L5F3qS1rNGYBqZuMYQo4XauM+ZgndkFzYMw4cMD10+bsvwFFBOGOp/GkwAAAAABJRU5ErkJggnic4wnUdcksircw0CvIS2cYBSMNfOTHL/9PPeI/IwMAczQHYfSZKDABAAAAAgAAACQAAADxDwAAAAAAAAEAAAAAAAAAAAAAAA
+0=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
+1=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
 
 [EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
 lines=0
