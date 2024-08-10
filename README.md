@@ -36,7 +36,7 @@ PhoenixPE includes a variety of carefully selected applications to get you start
 
 ## Installation
 
-Download the [latest release]() and unpack it in the desired location. To uninstall, simply delete the PhoenixPE folder.
+Download the [latest release](https://github.com/PhoenixPE/PhoenixPE/releases) and unpack it in the desired location. To uninstall, simply delete the PhoenixPE folder.
 
 ## Documentation
 
