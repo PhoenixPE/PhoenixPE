@@ -1,0 +1,529 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2024 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[Main]
+Title=WinRAR
+Author=Homes32
+Level=5
+Version=1.0.0.0
+Description=(v7.01) WinRAR is a powerful archive extractor, and can open many popular file formats.
+Date=2024-07-21
+Selected=False
+Mandatory=False
+
+[Variables]
+%ProgramFolder%="WinRAR"
+%ProgramExe%="WinRAR.exe"
+%ProgramVersion%=701
+// %LangCode% is set by [DownloadProgram]
+%DownloadURLx86%=https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-%ProgramVersion%%LangCode%.exe
+%DownloadURLx64%=https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x64-%ProgramVersion%%LangCode%.exe
+%SetupFilex86%="WinRAR-x86.exe"
+%SetupFilex64%="WinRAR-x64.exe"
+%aLangMap%=Arabic|ar|Armenian|am|Azerbaijani|az|Bulgarian|bg|Catalan|ca|Chinese (Traditional)|tc|Chinese (Simplified)sc|Croatian|cro|Czech|cz|Danish|dk|Dutch|nl|English||Euskera|eu|Finnish|fi|French|fr|Galician|gl|German|d|Greek|el|Hebrew|he|Hungarian|hu|Indonesian|id|Italian|it|Japanese|jp|Korean|kr|Lithuanian|lt|Mongolian|mn|Norwegian|no|Polish|pl|Portuguese (Brazilian)|br|Portuguese (Portugal)|pt|Romanian|ro|Russian|ru|Serbian (Cyrilli)|srbcyr|Slovak|sk|Slovenian|slv|Spanish|es|Swedish|sw|Thai|th|Turkish|tr|Ukrainian|uk|Vietnamese|vn
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+Run,%ScriptFile%,SetProgramArch
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
+
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+Echo,"Configuring %ScriptTitle%..."
+RegHiveLoad,Tmp_Software,%RegSoftware%
+RegHiveLoad,Tmp_Default,%RegDefault%
+
+// Show Text on toolbar buttons
+If,%cb_ShowToolbarButtonText%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\General\Toolbar","ButtonsText",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\General\Toolbar","ButtonsText",0
+
+// Button Size: 0 - Small, 1 - Medium, 2 - Large, 3 - Extra Large
+StrFormat,Left,%cmb_ToolbarSize%,1,%ToolbarSize%
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\General\Toolbar","Size",%ToolbarSize%
+
+// Lock toolbar positions
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\General\Toolbar","Lock",0
+
+Run,%ScriptFile%,RegisterFileAssociations
+
+If,%cb_AddShellContextMenu%,Equal,True,Begin
+  
+  // Register Shell Extension
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\WinRAR.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\WinRAR.exe","Path","%PEPrograms%\%ProgramFolder%"
+  
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\WinRAR","","{B41DB860-64E4-11D2-9906-E49FADC173CA}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B41DB860-64E4-11D2-9906-E49FADC173CA}","","WinRAR"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B41DB860-64E4-11D2-9906-E49FADC173CA}\InprocServer32","","%PEPrograms%\%ProgramFolder%\rarext.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B41DB860-64E4-11D2-9906-E49FADC173CA}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\WinRAR","","{B41DB860-64E4-11D2-9906-E49FADC173CA}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\DragDropHandlers\WinRAR","","{B41DB860-64E4-11D2-9906-E49FADC173CA}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\DragDropHandlers\WinRAR","","{B41DB860-64E4-11D2-9906-E49FADC173CA}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{B41DB860-64E4-11D2-9906-E49FADC173CA}","WinRAR Shell Extension"
+
+  //x86
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\WinRAR32","","{B41DB860-8EE4-11D2-9906-E49FADC173CA}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B41DB860-8EE4-11D2-9906-E49FADC173CA}","","WinRAR"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B41DB860-8EE4-11D2-9906-E49FADC173CA}\InprocServer32","","%PEPrograms%\%ProgramFolder%\rarext32.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B41DB860-8EE4-11D2-9906-E49FADC173CA}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\WinRAR32","","{B41DB860-8EE4-11D2-9906-E49FADC173CA}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\DragDropHandlers\WinRAR32","","{B41DB860-8EE4-11D2-9906-E49FADC173CA}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\DragDropHandlers\WinRAR32","","{B41DB860-8EE4-11D2-9906-E49FADC173CA}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{B41DB860-8EE4-11D2-9906-E49FADC173CA}","WinRAR 32bit Shell Extension"
+
+  // Enable Shell Extension
+  If,%cb_CascadedContextMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup","ShellExt",1
+
+  // Need the Win32 shell menu for WinPE as it doesn't support the stupid Win11 context menu
+  If,%cb_CascadedContextMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup","LegacyMenu",1
+  
+  // Make it pretty
+  If,%cb_CascadedContextMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup","MenuIcons",1
+
+  // Cascade Menu
+  If,%cb_CascadedContextMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup","CascadedMenu",1
+  Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup","CascadedMenu",0
+
+  // Context Menu Items
+  If,%cb_ContextMenuOpenArchive%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","OpenArc",1
+  Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","OpenArc",0
+  
+  If,%cb_ContextMenuAddToArchive%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","AddArc",1
+  Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","AddArc",0
+  
+  If,%cb_ContextMenuAddToRar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","AddTo",1
+  Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","AddTo",0
+  
+  If,%cb_ContextMenuExtractFiles%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","Extr",1
+  Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","Extr",0
+  
+  If,%cb_ContextMenuExtractHere%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","ExtrHere",1
+  Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","ExtrHere",0
+  
+  If,%cb_ContextMenuExtractToFolder%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","ExtrTo",1
+  Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","ExtrTo",0
+  
+  // Disable Email Options that seem to always default to enabled
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","EmailArc",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\WinRAR\Setup\MenuItems","EmailOpt",0
+    
+End
+
+RegHiveUnLoad,Tmp_Software
+RegHiveUnLoad,Tmp_Default
+
+// License Registration
+If,%rb_RegFromHost%,Equal,True,Begin
+  // Copy reg key from Host
+  System,GetEnv,"APPDATA",%WinRAR-AppData%
+  Set,%WinRAR-AppData%,"%WinRAR-AppData%\%ProgramFolder%"
+  If,ExistFile,"%WinRAR-AppData%\rarreg.key",Begin
+    Echo,"Copying license from host..."
+    FileCopy,"%WinRAR-AppData%\rarreg.key","%TargetAppData%\%ProgramFolder%\rarreg.key"
+  End
+  Else,Echo,"WARNING: No WinRAR license was found on the host system. WinRAR will run in trial mode.",WARN
+End
+Else,If,%rb_RegFromFile%,Equal,True,Begin
+  // Copy reg key from folder
+  If,Not,%fb_RegFile%,Equal,"",If,ExistFile,%fb_RegFile%,Begin
+    Echo,"Copying license file [%fb_RegFile%]..."
+	StrFormat,FileName,%fb_RegFile%,%RegFileName%
+    FileCopy,%fb_RegFile%,"%TargetAppData%\%ProgramFolder%\%RegFileName%"
+  End
+  Else,Echo,"WARNING: The specified license file does not exist. WinRAR will run in trial mode.",WARN
+End
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#RegisterFileAssociations#]
+// ===============================================================================================================================
+// Name...........: RegisterFileAssociations
+// Description....: Register File Associations.
+// Syntax.........: Run,%ScriptFile%,RegisterFileAssociations
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Hives must be mounted before this section is called.
+// Related........: 
+// ===============================================================================================================================
+[RegisterFileAssociations]
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR","","WinRAR archive"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR\DefaultIcon","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR\shellex\ContextMenuHandlers\{B41DB860-64E4-11D2-9906-E49FADC173CA}","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR\shellex\ContextMenuHandlers\{B41DB860-8EE4-11D2-9906-E49FADC173CA}","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR\shellex\DropHandler","","{B41DB860-64E4-11D2-9906-E49FADC173CA}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR\shellex\PropertySheetHandlers\{B41DB860-64E4-11D2-9906-E49FADC173CA}","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR\shellex\PropertySheetHandlers\{B41DB860-8EE4-11D2-9906-E49FADC173CA}","",""
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.REV","","RAR recovery volume"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.REV\DefaultIcon","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.REV\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.ZIP","","WinRAR ZIP archive"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.ZIP\DefaultIcon","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.ZIP\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.ZIP\shellex\ContextMenuHandlers\{B41DB860-64E4-11D2-9906-E49FADC173CA}","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.ZIP\shellex\ContextMenuHandlers\{B41DB860-8EE4-11D2-9906-E49FADC173CA}","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.ZIP\shellex\DropHandler","","{B41DB860-64E4-11D2-9906-E49FADC173CA}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.ZIP\shellex\PropertySheetHandlers\{B41DB860-64E4-11D2-9906-E49FADC173CA}","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WinRAR.ZIP\shellex\PropertySheetHandlers\{B41DB860-8EE4-11D2-9906-E49FADC173CA}","",""
+
+If,%cb_Ext001%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.001","","WinRAR"
+If,%cb_Ext7z%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.7z","","WinRAR"
+If,%cb_ExtArj%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.arj","","WinRAR"
+If,%cb_ExtBz2%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bz2","","WinRAR"
+If,%cb_ExtBzip2%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bzip2","","WinRAR"
+If,%cb_ExtCab%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.cab","","WinRAR"
+If,%cb_ExtGz%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.gz","","WinRAR"
+If,%cb_ExtGzip%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.gzip","","WinRAR"
+If,%cb_ExtIso%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.iso","","WinRAR"
+If,%cb_ExtJar%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.jar","","WinRAR"
+If,%cb_ExtLz%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.lz","","WinRAR"
+If,%cb_ExtLzh%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.lzh","","WinRAR"
+If,%cb_ExtRar%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rar","","WinRAR"
+If,%cb_ExtTar%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tar","","WinRAR"
+If,%cb_ExtUue%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.uue","","WinRAR"
+If,%cb_ExtXz%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xz","","WinRAR"
+If,%cb_ExtZ%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.z","","WinRAR"
+If,%cb_ExtZip%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.zip","","WinRAR.ZIP"
+If,%cb_ExtZipx%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.zipx","","WinRAR"
+If,%cb_ExtZst%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.zst","","WinRAR"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestPath>
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting files..."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.* -o#$q#1#$q"
+If,Not,#r,Equal,0,Halt,"Error: Failed to extract program files."
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+
+//Language must be set before ProgramArch/DownloadUrl
+List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+Math,Add,%LangCodePos%,%LangPos%,1
+List,Get,%aLangMap%,%LangCodePos%,%LangCode%
+
+Run,%ScriptFile%,SetProgramArch
+
+WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%","Referer=https://www.win-rar.com/download.html",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetProgramArch#]
+// ===============================================================================================================================
+// Name...........: SetProgramArch
+// Description....: Configure the script for the correct source architecture.
+// Syntax.........: Run,%ScriptFile%,SetProgramArch
+// Parameters.....: 
+// Return values..: Sets the following local variables:
+//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
+//                  %SetupFile%      - The x86 or x64 downloaded setup file name.
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[SetProgramArch]
+If,%SourceArch%,Equal,x64,Begin
+  Set,%SetupFile%,%SetupFilex64%
+  Set,%DownloadURL%,%DownloadURLx64%
+End
+Else,Begin
+  Set,%SetupFile%,%SetupFilex86%
+  Set,%DownloadURL%,%DownloadURLx86%
+End
+
+[#LaunchProgram#]
+// ===============================================================================================================================
+// Name...........: LaunchProgram
+// Description....: Unpack and launch the program.
+// Syntax.........: Run,%ScriptFile%,LaunchProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_LaunchProgram
+// ===============================================================================================================================
+[LaunchProgram]
+System,SetLocal
+Run,%ScriptFile%,SetProgramArch
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+System,EndLocal
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Management"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"WinRAR"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
+WriteInterface,Value,%ScriptFile%,Interface,cb_AddShellContextMenu,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_CascadedContextMenu,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenuOpenArchive,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenuAddToArchive,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenuAddToRar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenuExtractFiles,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenuExtractHere,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenuExtractToFolder,True
+WriteInterface,Value,%ScriptFile%,Interface,cmb_ToolbarSize,"2 - Large"
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowToolbarButtonText,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_Ext001,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_Ext7z,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtArj,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtBz2,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtBzip2,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtCab,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtGz,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtGzip,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtIso,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtJar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtLz,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtLzh,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtRar,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtTar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtUue,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtXz,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtZ,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtZip,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtZipx,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ExtZst,False
+WriteInterface,Value,%ScriptFile%,Interface,fb_RegFile,""
+WriteInterface,Value,%ScriptFile%,Interface,rb_NoReg,True
+WriteInterface,Value,%ScriptFile%,Interface,rb_RegFromHost,False
+WriteInterface,Value,%ScriptFile%,Interface,rb_RegFromFile,False
+// Clear the cache in case the language was reset to English
+Run,%ScriptFile%,ClearDownloadCache
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"WinRAR is a powerful archive extractor, and can open many popular file formats.#$x#$xOn first run this script will download the setup file (~4 MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_LaunchProgram="Launch Program",1,8,5,5,130,25,LaunchProgram,play-hot.png,True
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.win-rar.com
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_Disabled_16.png,True,"__Show Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"File Management"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,WinRAR
+bvl_Options=Options,1,12,150,90,477,270,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language=English,1,4,160,126,150,21,Arabic,Armenian,Azerbaijani,Bulgarian,Catalan,"Chinese (Traditional)","Chinese (Simplified)",Croatian,Czech,Danish,Dutch,English,Euskera,Finnish,French,Galician,German,Greek,Hebrew,Hungarian,Indonesian,Italian,Japanese,Korean,Lithuanian,Mongolian,Norwegian,Polish,"Portuguese (Brazilian)","Portuguese (Portugal)",Romanian,Russian,"Serbian (Cyrilli)",Slovak,Slovenian,Spanish,Swedish,Thai,Turkish,Ukrainian,Vietnamese,_ClearDownloadCache_,True
+cb_AddShellContextMenu="Add shell context menu",1,3,160,155,140,18,True
+cb_CascadedContextMenu="Cascaded context menu",1,3,160,176,145,18,True
+bvl_ContextMenuItems="Context Menu Items",1,12,162,208,160,138,8,Bold
+cb_ContextMenuOpenArchive="Open Archive",1,3,170,221,92,18,True
+cb_ContextMenuAddToArchive="Add To Archive...",1,3,170,241,109,18,True
+cb_ContextMenuAddToRar="Add To <Archive>.rar",1,3,170,261,127,18,True
+cb_ContextMenuExtractHere="Extract Here",1,3,170,281,84,18,True
+cb_ContextMenuExtractFiles="Extract Files...",1,3,170,301,84,18,True
+cb_ContextMenuExtractToFolder="Extract To <Folder>",1,3,170,321,122,18,True
+lbl_ToolbarSize="Toolbar Size",1,1,335,110,149,16,8,Normal
+cmb_ToolbarSize="2 - Large",1,4,335,125,150,21,"0 - Small","1 - Medium","2 - Large","3 - Extra Large"
+cb_ShowToolbarButtonText="Show toolbar button text",1,3,335,155,149,18,True
+bvl_FileAssociations="File Associations",1,12,335,208,277,138,8,Bold
+cb_Ext001=.001,1,3,344,223,50,14,False
+cb_Ext7z=.7z,1,3,344,238,50,14,False
+cb_ExtArj=.arj,1,3,344,253,50,14,False
+cb_ExtBz2=.bz2,1,3,344,268,50,14,False
+cb_ExtBzip2=.bzip2,1,3,344,283,50,14,False
+cb_ExtCab=.cab,1,3,344,298,50,14,True
+cb_ExtGz=.gz,1,3,344,313,50,14,False
+cb_ExtGzip=.gzip,1,3,409,223,50,14,False
+cb_ExtIso=.iso,1,3,409,238,50,14,False
+cb_ExtJar=.jar,1,3,409,253,50,14,False
+cb_ExtLz=.lz,1,3,409,268,50,14,False
+cb_ExtLzh=.lzh,1,3,409,283,50,14,False
+cb_ExtRar=.rar,1,3,409,298,50,14,True
+cb_ExtTar=.tar,1,3,409,313,50,14,False
+cb_ExtUue=.uue,1,3,474,223,50,14,False
+cb_ExtXz=.xz,1,3,474,238,50,14,False
+cb_ExtZ=.z,1,3,474,253,50,14,False
+cb_ExtZip=.zip,1,3,474,268,50,14,True
+cb_ExtZipx=.zipx,1,3,474,283,50,14,False
+cb_ExtZst=.zst,1,3,474,298,50,14,False
+bvl_Registration="License Registration",1,12,150,379,475,138,8,Bold
+lbl_RegInfo="WinRAR is not freeware. In order to use the program after the 40 day trial period please support the author and purchases a license.",1,1,162,395,441,24,8,Normal
+rb_NoReg="40 day Trial",1,11,162,423,245,20,True
+rb_RegFromHost="Use registration key from host",1,11,162,443,245,20,False,"__Copy WinRAR's license from the local user's profile."
+rb_RegFromFile="Use this registration key:",1,11,162,463,245,20,False,"__Install WinRAR's license from the specified license file."
+fb_RegFile=,1,13,182,486,405,20,file,"Title=Select your WinRAR license file","Filter=WinRAR Key|rarreg.key|All Files|*.*","__Select your WinRAR license file."
+
+[AuthorEncoded]
+WinRAR_80.png=9596,12892
+Logo=WinRAR_80.png
+
+[InterfaceEncoded]
+play-hot.png=841,1220
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+Advanced_Disabled_16.png=474,744
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_Disabled_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVQ4y43Tz4tNcRgG8M+dOTGuRLhF9hi/h81IKRuR1IhSxIIssPAn3J1mb2oSNso0O2oWiIwNu2FWw21YkEm6ykwmv5XNc+rQnfLW6Zy+z/d9zvO+z/vWms2mBeIcjuMrhnC/06Wi8r0Ku/EIX9DACixHbwgW4wieo1UlWIsLOIWbmEA/fuI3NmMv9uEknmAQrZKgL8mvcAjH8A2LgveHYB5vQvSgSvAUI9iPOdQwhcngO7Ap2MqoHKuWMIu7+XMX7uAGZoKvw1kMoAfP8LkkOJAaN+I7XmAY7UqDZ3K2IUrOpLEfC1zEGvyI9Ml/kstoB9seh47iU4F6Erv8X9TiTjdqBUaxOjPQk4Y1OqhoBPuFt5mF+QLXcmEAl1Pb+QWa2BsFj3G96sIy7MzYzoVsfQcbZ7EUu3AP70qCwziN6fhcx7YkSs319KmNgyG/WhJMYBx7cCujeiIquvEeV+LApezLw2oJrcx2H25nHrZiC5akaeN5XuNl3n9tY6vcsMQUPqTm6cr5WNWaPzh+YcvU7DU1AAAAAElFTkSuQmCCeJyTcEwpS8xLTk2Jd8ksTkzKATIMzfQK8tIZRsFIALcY8ct/c/M8xcgAANAVDAqUbKQXAQAAAAIAAAAvAAAA2gEAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-WinRAR_80.png]
+lines=3
+0=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
+1=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
+2=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
+3=r42XbqRNQ+zsRP9HreoPujB67ZToUjIhSN6dzL313Nyu+vGtma4PzRX9ecEPFMlBWdfCitnEr8cofMNerzOkN9BjQ38/E/+muW0GdPfH5w4YuYaOSaF/LJViWVhZZaxpNDWT84lCGFH4gAdwVZQJIPvrX3yxDlUKDF3D3JXEBIHye8P8wdqoMG17iQoXM2s0RQd/2+PlTwouKblhwWMuhMMvGhU6n+6K/K8Rw9y5FalLuh5hKQ3NzQq8mxP3IRitcavsnU+GmuYqg48v2s2acBJzEsmJduxEoV6tX5rz8IHXR3YykmS4j+bkZeC34jc/vByK/2qAvEmgxLHyvY25QKosgntCUTSAGK4qFAm91TrHxrf0Km9Ye+6jxdPWPgclRcXw/oK4Ef9BWicHhbOcqwHJwuQVMgWhXgJ6AbVlsSyKEKcWhg3QlnEc7XRlr7D3w99p3yx3sQ9+V1cKToU+bfnwDzobhzceb88Prh9cPrh9dTXv8fQuu5TTGUhpwAAAAASUVORK5CYIJ4nOMNz8wLcgyKtzDQK8hLZxgFIwzUqOKXd3B3qmNkAABbPQZEGHisdQEAAAACAAAAJQAAAHwlAAAAAAAAAQAAAAAAAAAAAAAA
