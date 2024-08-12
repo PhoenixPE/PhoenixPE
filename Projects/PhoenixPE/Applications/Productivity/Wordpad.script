@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-01
+Version=1.0.1.0
+Date=2024-08-11
 
 [Variables]
 %ProgramFolder%="Windows NT\Accessories"
@@ -46,6 +46,9 @@ Date=2020-03-01
 Echo,"Processing %ScriptTitle%..."
 
 RunFromRam
+
+// Microsoft has discontinued WordPad as of Windows 11 build 26020
+If,%SourceVer%,>=,10.0.26020.0,Halt,"Microsoft has discontinued WordPad as of Win11 26020 and later."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
@@ -156,6 +159,7 @@ txt_StartMenuFolder="Start Menu Folder:",1,0,12,161,119,21,Productivity
 txt_ShortcutName="Shortcut Name:",1,0,12,203,119,21,Wordpad
 bvl_Options=Options,1,12,145,50,160,184,8,Bold
 cb_RegFileExt="Register file extensions",1,3,152,64,192,18,True
+lbl_SupportVer="WordPad is not available when building from a Win11 build 26020 or later source.",1,1,5,255,432,16,8,Bold
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
