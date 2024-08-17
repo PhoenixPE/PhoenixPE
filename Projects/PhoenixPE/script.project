@@ -29,9 +29,9 @@
 Title=PhoenixPE
 Description=PhoenixPE is a fully customizable rescue and recovery environment.
 Author=Homes32
-Version=1.0.5.0
+Version=1.0.6.0
 PathSetting=False
-Date=2023-06-17
+Date=2024-08-07
 Level=0
 Selected=None
 Mandatory=False
@@ -193,13 +193,13 @@ End
 [#GenerateSupportLog#]
 // ===============================================================================================================================
 // Name...........: GenerateSupportLog
-// Description....: Export the build log and 7z it and any .log files found in %ProjectTemp%
+// Description....: Export build logs and collect various information useful for troubleshooting.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
 // Modified.......:
-// Remarks........:
+// Remarks........: 
 // Related........: Called by System,OnBuildExit
 // ===============================================================================================================================
 [GenerateSupportLog]
@@ -212,18 +212,27 @@ If,Not,ExistDir,%ProjectTemp%,DirMake,%ProjectTemp%
 System,SaveLog,"%ProjectTemp%\BuildLog.html"
 System,SaveLog,"%ProjectTemp%\BuildLog.log",Text
 Set,%LogFile%,"%Timestamp%-%ProjectTitle%-Logs.7z"
+Set,%LogFileWrapper%,"%Timestamp%-%ProjectTitle%-Logs.zip"
 
-// Collect various information useful for troubleshooting
-If,ExistFile,"%TargetWindows%\Logs\DISM\dism.log",Filecopy,"%TargetWindows%\Logs\DISM\dism.log","%ProjectTemp%"
-
-// Compress our build log and our other logs into a zip archive
+// Compress our build log and our other logs into a 7-Zip archive.
 Echo,"Archiving Support Log...."
-// Disable fail on error in case there are no .au3, .log or .ini files
+If,ExistFile,"%TargetWindows%\Logs\DISM\dism.log",Compress,7z,%TargetWindows%\Logs\DISM\dism.log,%BaseDir%\Logs\%LogFile%,Best
+If,ExistFile,"%ProjectTemp%\Get-Intl.ini",Compress,7z,%ProjectTemp%\Get-Intl.ini,%BaseDir%\Logs\%LogFile%,Best
+
+// Disable fail on error in case there are no *.au3, *.log or *.ini files
 System,ErrorOff,3
-Compress,7z,%ProjectTemp%\*.log,%BaseDir%\Logs\%LogFile%
-Compress,7z,%ProjectTemp%\*.ini,%BaseDir%\Logs\%LogFile%
-Compress,7z,%TargetSystem32%\PhoenixPE*.au3,%BaseDir%\Logs\%LogFile%
-Compress,7z,%ProjectTemp%\BuildLog.html,%BaseDir%\Logs\%LogFile%
+Compress,7z,%ProjectTemp%\*.log,%BaseDir%\Logs\%LogFile%,Best
+Compress,7z,%ProjectTemp%\PhoenixAPI-*.ini,%BaseDir%\Logs\%LogFile%,Best
+Compress,7z,%TargetSystem32%\PhoenixPE*.au3,%BaseDir%\Logs\%LogFile%,Best
+Compress,7z,%ProjectTemp%\BuildLog.html,%BaseDir%\Logs\%LogFile%,Best
+
+Hash,SHA256,"%BaseDir%\Logs\%LogFile%",%LogFileHash%
+TXTAddLine,"%BaseDir%\Logs\CHECKSUM",%LogFileHash%,Append
+
+// We have to wrap the compressed log in a .zip because the GitHub bug tracker and some forum software stupidly does not allow users to attach .7z files.
+Compress,Zip,%BaseDir%\Logs\%LogFile%,%BaseDir%\Logs\%LogFileWrapper%,Store
+Compress,Zip,%BaseDir%\Logs\%ChecksumFile%,%BaseDir%\Logs\%LogFileWrapper%,Best
+FileDeleteEx,"%BaseDir%\Logs\%LogFile%"
 
 // Cleanup old logs (%num_LogsToKeep% var is read by PostBuildCleanup section)
 Echo,"Removing old support logs..."
@@ -235,7 +244,7 @@ System,EndLocal
 [#NukeProject#]
 // ===============================================================================================================================
 // Name...........: NukeProject
-// Description....: Blow away all Target, ISO, Temp, Downloaded, and Cached Files.
+// Description....: Destroy all Target, ISO, Temp, Downloaded, and Cached Files.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -499,7 +508,6 @@ lines=3
 1=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
 2=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
 3=p50lN0LTMK1U4Ruy83RMf4VMXxS3lNauCZr/Ep3/8+r9fUwH8/6en1Whp4hvRj5zG8vnz5f/cmYo14nOPzyC8PyXcqzcxJ0SsqSWMYBSML8E6H0Doq2OX/Pfp7moENAKuMCgyoqc1DAQAAAAIAAAAqAAAALCQAAAAAAAABAAAAAAAAAAAAAAA
-
 
 [EncodedFile-InterfaceEncoded-greetz.rtf]
 lines=3

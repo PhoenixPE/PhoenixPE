@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.10.0.0
-Date=2024-07-06
+Version=1.10.1.0
+Date=2024-08-11
 Level=0
 Selected=None
 
@@ -1063,7 +1063,7 @@ Run,%API%,__PhoenixAPI_InnoExtract_Process_Arg,%Arg5%
 ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Password%%CurrentDir%#$q%SetupFile%#$q%ListFile%"
 If,Not,%ExitCode%,Equal,0,Begin
   FileVersion,"%Tools%\x86\Innounp.exe",%InnounpVer%
-  Halt,"InnoExtract Error: Failed to unpack setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using Innounp.exe version [%InnounpVer%]."
+  Halt,"InnoExtract Error: Failed to unpack setup file [%SetupFile%]. The command returned: [%ExitCode%]. You are using Innounp.exe version [%InnounpVer%]."
 End
 
 System,EndLocal
@@ -1345,7 +1345,7 @@ StrFormat,EndTrim,%DestDir%,"\","%DestDir%"
 ShellExecute,Hide,"%Tools%\anycpu\lessmsi\lessmsi.exe","x #$q%SetupFile%#$q #$q%DestDir%\#$q"
 If,Not,%ExitCode%,Equal,0,Begin
   FileVersion,"%Tools%\anycpu\lessmsi\lessmsi.exe",%lessmsiVer%
-  Halt,"MSIExtract Error: Failed to unpack .msi file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using lessmsi.exe version [%lessmsiVer%]."
+  Halt,"MSIExtract Error: Failed to unpack .msi file [%SetupFile%]. The command returned: [%ExitCode%]. You are using lessmsi.exe version [%lessmsiVer%]."
 End
 
 System,EndLocal
@@ -1768,10 +1768,11 @@ Set,%PEPrograms%,"X:\Program Files"
 [_PhoenixAPI_SetFileACL]
 System,SetLocal
 If,#1,Equal,"",Halt,"SetFileACL Syntax Error: You must specify the file or directory to modify."
+GetParam,1,%Path%
 
-Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
-ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe," -ot #$qfile#$q -on #$q#1#$q -actn ace -actn setprot -op #$qdacl:p_nc#$q -ace #$qn:S-1-1-0;p:full;s:y#$q"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]."
+Echo,"Granting full access to [%Path%] ...#$X#$XThis can take awhile, please be patient."
+ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe," -ot #$qfile#$q -on #$q%Path%#$q -actn ace -actn setprot -op #$qdacl:p_nc#$q -ace #$qn:S-1-1-0;p:full;s:y#$q"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on [%Path%]. The command returned: [%ExitCode%]."
 
 System,EndLocal
 
@@ -1779,8 +1780,8 @@ System,EndLocal
 // ===============================================================================================================================
 // Name...........: SetRegACL
 // Description....: Take ownership and grant full control for "Everyone" on a registry key using Helge Klein's SetAcl.exe
-// Syntax.........: SetRegACL,<Path>
-// Parameters.....: #1 Path - Registry key to modify. The hive must already be mounted.
+// Syntax.........: SetRegACL,<%RegKey%>
+// Parameters.....: #1 %RegKey% - Registry key to modify. The hive must already be mounted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Depends on SetAcl.exe in %Tools% <https://helgeklein.com/setacl/>
@@ -1789,13 +1790,14 @@ System,EndLocal
 [_PhoenixAPI_SetRegACL]
 System,SetLocal
 If,#1,Equal,"",Halt,"SetRegACL Syntax Error: You must specify the Registry Key to modify."
+GetParam,1,%RegKey%
 
-Echo,"Taking ownership of [#1] ...#$X#$XThis can take awhile, please be patient."
-ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
-If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of#$x#$x#1#$x#$xThe command returned: [%ExitCode%]."
-Echo,"Granting full access to [#1] ...#$X#$XThis can take awhile, please be patient."
-ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q#1#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on#$x#$x#1#$x#$xThe command returned: [%ExitCode%]."
+Echo,"Taking ownership of [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
+ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
+If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of [%RegKey%]. The command returned: [%ExitCode%]."
+Echo,"Granting full access to [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
+ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on [%RegKey%]. The command returned: [%ExitCode%]."
 
 System,EndLocal
 
@@ -1824,7 +1826,7 @@ StrFormat,EndTrim,%DestDir%,"\","%DestDir%"
 ShellExecute,Hide,"%Tools%\anycpu\wix\dark.exe","-x #$q%DestDir%#$q #$q%SetupFile%#$q"
 If,Not,%ExitCode%,Equal,0,Begin
   FileVersion,"%Tools%\anycpu\wix\dark.exe",%DarkVer%
-  Halt,"WixExtract Error: Failed to unpack the setup file#$x#$x[%SetupFile%]#$x#$xThe command returned: [%ExitCode%].#$xYou are using dark.exe version [%DarkVer%]."
+  Halt,"WixExtract Error: Failed to unpack the setup file [%SetupFile%]. The command returned: [%ExitCode%]. You are using dark.exe version [%DarkVer%]."
 End
 
 System,EndLocal
