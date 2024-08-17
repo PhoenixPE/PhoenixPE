@@ -2,18 +2,60 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release UNRELEASED
+## Release 2024-08-17
 
 ### Added
+- .Net 5 runtime (Issue #82)
+- .Net 7 runtime (Issue #82)
+- AcronisTrueImage script. (AcronisCyberProtectHomeOffice re-branded again.)
+- Added DriveGetType command to the PhoenixAPI to assist in detecting network drives, ramdrives, etc.
+- Added new logic to Pre-Flight check to detect output directory conditions (Network drive, ramdisk, etc.) that could cause the build to fail. (Issue #96)
 - Added the option to configure the default Execution Policy on the Windows Powershell and Powershell Core scripts.
+- Added CrystalDiskInfo script.
+- Added CrystalDiskMark script.
+- Added DISM++ script. (Issue #54)
+- Added h2testw script.
+- Added RustDesk script (Open-Source AnyDesk/TeamViewer alternative).
+- Added WinRAR script.
 
 ### Changed
 - PhoenixPE now requires PEBakery v1.2.0-develop or greater due to new StrFormat,StartTrim` and `StrFormat,EndTrim` commands implemented.
 - Changed usage of `StrFormat,Ctrim` to use `StrFormat,StartTrim` and `StrFormat,EndTrim` where appropriate. (Issue #96)
+- Windows Event Log Service startup now logs to PhoenixPE.log instead of %temp%.
+- Added a informational message to PhoenixPE.log if booting in Forensic Mode (WinFE write-protect, etc.).
+- If running as Ventoy compatible choosing 'Remount Boot Media as Y:' from the PhoenixPE tray menu will also scan for and mount the ISO file if needed.
+- Optimized support log generation. In addition, the support log is now packed in a .zip file for easier uploading to github and forums that don't support .7z files.
+- WordPad script will display a more friendly error message if the source is Win 11 build 26020 or greater. (MS discontinued)
+- 7-Zip script and tools updated to v24.07
+- AIDA64 updated to v7.35.7000
+- CPU-Z updated to v.2.10.0
+- DesktopInfo updated to v3.14.0
+- DiskCyptor updated to v1.3 beta signed
+- DiskGenius updated to v5.6.0.1565
+- DMDE updated to v4.2.0.814
+- FastStone Capture updated to v10.6
+- Google Chrome updated to v127.0.6533.100
+- grepWin updated to v2.1.5
+- HDClone updated to X.5.FE
+- HWinfo updated to v8.06
+- Notepad++ updated to v8.6.9.0 + added additional language support (Abkhazian, HongKongCantonese, Irish, Nepali, TaiwaneseMandarin, Venetian).
+- PowerShell Core updated to v7.4.4
+- Simplewall updated to v3.8.3
+- WinMerge updated to v2.16.42.1
+- WinNTSetup updated to v5.3.5.2
+- WizTree updated to v4.20
+- Zulu JRE11 updated to v11.74.15
+- Zulu JRE17 updated to v17.52.17
 
 ### Fixed
+- Fixed setup file extraction for TestDisk/PhotoRec.
+- Fixed %Workbench% was not processed by FreeSpaceCheck
+- Fixed wrong AutoIt3 binaries copied on x86 build. (Issue #95 / https://theoven.org/viewtopic.php?p=1899#p1899)
+- Fixed incorrect language selection in 7-Zip, FireFox, and IfranView. (Issue #99)
+- Work around a bug in PCI-Z that causes the eternal ID database not be be used if the shortcut or ShellExecute doesn't specify the working directory.
 
 ### Removed
+- AcronisCyberProtectHomeOffice script. (Re-branded again as Acronis True Image)
 
 ## Release 2024-06-20
 
@@ -242,7 +284,7 @@ Notable changes to the PhoenixPE project.
 ## Release 2023-03-28
 
 ### Added
-- Total Commander script
+- Total Commander script.
 - Default Ramdrive now uses Arsenal Image Mounter. This modern driver developed by the author of ImDisk solves some compatibility issues with modern software. The old ImDisk ramdrive script continues to be available in PhoenixPE, though ImDisk development has ceased.
   * Modern applications that utilize the Windows volume manger API's will work correctly
   * Dynamically allocated Ramdisks can be used, in addition to traditional fixed-size ramdisks.
