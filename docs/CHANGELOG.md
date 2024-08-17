@@ -19,7 +19,7 @@ Notable changes to the PhoenixPE project.
 - Added WinRAR script.
 
 ### Changed
-- PhoenixPE now requires PEBakery v1.2.0-develop or greater due to new StrFormat,StartTrim` and `StrFormat,EndTrim` commands implemented.
+- **PhoenixPE now requires PEBakery v1.2.0-develop or greater due to new StrFormat,StartTrim` and `StrFormat,EndTrim` commands implemented.**
 - Changed usage of `StrFormat,Ctrim` to use `StrFormat,StartTrim` and `StrFormat,EndTrim` where appropriate. (Issue #96)
 - Windows Event Log Service startup now logs to PhoenixPE.log instead of %temp%.
 - Added a informational message to PhoenixPE.log if booting in Forensic Mode (WinFE write-protect, etc.).
