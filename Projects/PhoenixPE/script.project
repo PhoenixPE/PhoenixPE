@@ -29,9 +29,9 @@
 Title=PhoenixPE
 Description=PhoenixPE is a fully customizable rescue and recovery environment.
 Author=Homes32
-Version=1.0.6.0
+Version=1.0.7.0
 PathSetting=False
-Date=2024-08-07
+Date=2024-09-05
 Level=0
 Selected=None
 Mandatory=False
@@ -227,11 +227,11 @@ Compress,7z,%TargetSystem32%\PhoenixPE*.au3,%BaseDir%\Logs\%LogFile%,Best
 Compress,7z,%ProjectTemp%\BuildLog.html,%BaseDir%\Logs\%LogFile%,Best
 
 Hash,SHA256,"%BaseDir%\Logs\%LogFile%",%LogFileHash%
-TXTAddLine,"%BaseDir%\Logs\CHECKSUM",%LogFileHash%,Append
+TXTAddLine,"%ProjectTemp%\CHECKSUM",%LogFileHash%,Append
 
 // We have to wrap the compressed log in a .zip because the GitHub bug tracker and some forum software stupidly does not allow users to attach .7z files.
 Compress,Zip,%BaseDir%\Logs\%LogFile%,%BaseDir%\Logs\%LogFileWrapper%,Store
-Compress,Zip,%BaseDir%\Logs\%ChecksumFile%,%BaseDir%\Logs\%LogFileWrapper%,Best
+Compress,Zip,%ProjectTemp%\CHECKSUM,%BaseDir%\Logs\%LogFileWrapper%,Best
 FileDeleteEx,"%BaseDir%\Logs\%LogFile%"
 
 // Cleanup old logs (%num_LogsToKeep% var is read by PostBuildCleanup section)
