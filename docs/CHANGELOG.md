@@ -2,6 +2,21 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release UNRELEASED
+
+### Added
+
+### Changed
+- Update StartIsBack download URL and supported version. (Issue #104)
+- HWinfo updated to v8.06
+
+### Fixed
+- AttributeChanger added new language support breaking existing language codes. (Issue #104)
+- Fixed space in path causes PhoenixAPI-DriveGetType to fail (Issue #107)
+- Fixed an issue causing the support log compression to fail.
+
+### Removed
+
 ## Release 2024-08-17
 
 ### Added
@@ -23,7 +38,7 @@ Notable changes to the PhoenixPE project.
 - Changed usage of `StrFormat,Ctrim` to use `StrFormat,StartTrim` and `StrFormat,EndTrim` where appropriate. (Issue #96)
 - Windows Event Log Service startup now logs to PhoenixPE.log instead of %temp%.
 - Added a informational message to PhoenixPE.log if booting in Forensic Mode (WinFE write-protect, etc.).
-- If running as Ventoy compatible choosing 'Remount Boot Media as Y:' from the PhoenixPE tray menu will also scan for and mount the ISO file if needed.
+- If running as Ventoy compatible choosing 'Remount Boot Media as Y:' from the PhoenixPE tray menu will also scan for and mount the ISO file if needed.
 - Optimized support log generation. In addition, the support log is now packed in a .zip file for easier uploading to github and forums that don't support .7z files.
 - WordPad script will display a more friendly error message if the source is Win 11 build 26020 or greater. (MS discontinued)
 - 7-Zip script and tools updated to v24.07
@@ -31,7 +46,7 @@ Notable changes to the PhoenixPE project.
 - CPU-Z updated to v.2.10.0
 - DesktopInfo updated to v3.14.0
 - DiskCyptor updated to v1.3 beta signed
-- DiskGenius updated to v5.6.0.1565
+- DiskGenius updated to v5.6.0.1565
 - DMDE updated to v4.2.0.814
 - FastStone Capture updated to v10.6
 - Google Chrome updated to v127.0.6533.100
