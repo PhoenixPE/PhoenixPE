@@ -2,7 +2,7 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release UNRELEASED
+## Release 2024-09-13
 
 ### Added
 
