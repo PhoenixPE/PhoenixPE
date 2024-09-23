@@ -35,16 +35,13 @@ Author=Homes32
 Level=3
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2024-01-12
+Version=1.0.2.0
+Date=2024-09-22
 
 [Variables]
 %ProgramFolder%=StartAllBack
 %SetupExe%=StartIsBackPlusPlus_setup.exe
 %DownloadURL%=https://www.startallback.com/download.php
-// Latest version of StartAllBack that has been confirmed working with this project.
-// New versions have a history of breaking in PE so we warn the user of the possibility there will be issues.
-%SupportedVer%=3.7.3.4855
 
 [Process]
 Echo,"Configuring [ StartAllBack ] as the start menu..."
@@ -59,7 +56,7 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,D
 If,Not,#r,Equal,0,Halt,"ERROR: Failed to extract [%SetupExe%]. The error code returned was [#r]."
 
 FileVersion,"%TargetPrograms%\%ProgramFolder%\StartAllBackX64.dll",%ExeVer%
-If,%ExeVer%,Bigger,%SupportedVer%,Echo,"WARNING: You are using a version of StartAllBack that has not been tested for use with this project.",WARN
+Echo,"StartAllBack v%ExeVer%"
 
 If,%SourceArch%,Equal,x64,Begin
   Set,%COMDLL%,"StartAllBackX64.dll"
@@ -110,7 +107,8 @@ RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explore
 RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Search","SearchboxTaskbarMode",0
 // Remove Task View 
 RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowTaskViewButton",0
-// Remove Widgets from taskbar
+// Remove Widgets from taskbar - Ignore errors as UCPD blocks attempts to modify this key as of the ?Aug 2024 Cumulative update?. Pretty sloppy pattern matching on behalf of M$ to block this in an offline/user mounted hive.
+System,ErrorOff,1
 RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarDa",0
 
 ///////////////////////////////////////////////////////////////////////////////////
