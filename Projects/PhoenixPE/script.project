@@ -29,9 +29,9 @@
 Title=PhoenixPE
 Description=PhoenixPE is a fully customizable rescue and recovery environment.
 Author=Homes32
-Version=1.0.7.0
+Version=1.0.8.0
 PathSetting=False
-Date=2024-09-05
+Date=2024-10-19
 Level=0
 Selected=None
 Mandatory=False
@@ -164,7 +164,8 @@ Echo,""
 If,%OnBuildExitReason%,EQUAL,ERROR,Begin
   // Error
   Beep,ERROR
-  Set,%BuildExitMsg%,"An error occurred building %ProjectTitle%. Please check the build log for details.#$x#$xA support package was generated and saved to #$x    %BaseDir%\Logs"
+  If,%cb_GenerateSupportLog%,Equal,True,Set,%BuildExitMsg%,"An error occurred building %ProjectTitle%. Please check the build log for details.#$x#$xA support bundle was generated and saved to #$x    %BaseDir%\Logs#$xbe sure to include this package if you ask for help in the forums or bug tracker."
+  Else,Set,%BuildExitMsg%,"An error occurred building %ProjectTitle%. Please check the build log for details."
   Echo,%BuildExitMsg%,Warn
   Message,%BuildExitMsg%,ERROR
 End
@@ -185,7 +186,8 @@ End
 Else,If,%OnBuildExitReason%,EQUAL,COMMAND,Begin
   // HALT/EXIT command
   Beep,CONFIRMATION
-  Set,%BuildExitMsg%,"An error occurred building %ProjectTitle%. Please check the build log for details.#$x#$xA support package was generated and saved to #$x    %BaseDir%\Logs#$xbe sure to include this package if you ask for help."
+  If,%cb_GenerateSupportLog%,Equal,True,Set,%BuildExitMsg%,"An error occurred building %ProjectTitle%. Please check the build log for details.#$x#$xA support bundle was generated and saved to #$x    %BaseDir%\Logs#$xbe sure to include this package if you ask for help in the forums or bug tracker."
+  Else,Set,%BuildExitMsg%,"An error occurred building %ProjectTitle%. Please check the build log for details."
   Echo,%BuildExitMsg%,Warn
   Message,%BuildExitMsg%,ERROR
 End
@@ -359,7 +361,7 @@ lbl_Documentation=Documentation,1,1,465,321,78,16,8,Bold
 web_Wiki="PhoenixPE Wiki",1,10,467,336,73,18,https://github.com/PhoenixPE/PhoenixPE/wiki
 lbl_CommunitySupport="Community Support",1,1,453,365,103,16,8,Bold
 web_Discord="PhoenixPE Discord",1,10,461,380,88,18,https://discord.com/channels/642440817138597908/642751078399606815
-web_TheOven="The Oven",1,10,485,398,45,18,https://theoven.org/viewforum.php?f=17
+web_TheOven="The Oven",1,10,485,398,45,18,https://theoven.org/viewforum.php?f=26
 web_Reboot=reboot.pro,1,10,483,415,51,18,http://reboot.pro/index.php?showforum=147
 
 [EncodedFolders]
