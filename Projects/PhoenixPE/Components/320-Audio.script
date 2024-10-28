@@ -304,9 +304,13 @@ If,ExistFile,"%TargetSystem32%\AudioSrvPolicyManager.dll",Begin
     ShellExecute,Hide,"%Tools%\%HostArch%\binmay.exe","-v -u #$q%TargetSystem32%\AudioSrvPolicyManager.dll#$q -s FB010F849200000085DB -r FB01E9930000000085DB"
     If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\AudioSrvPolicyManager.dll] failed. Audio may not be available under the SYSTEM session. The error returned was [#r].",WARN
   End
-  Else,Begin
-    // 10.0.22621.1485+
+  Else,If,%AudioSrvPolicyManagerVersion%,Smaller,10.0.26100.1150,Begin
     ShellExecute,Hide,"%Tools%\%HostArch%\binmay.exe","-v -u #$q%TargetSystem32%\AudioSrvPolicyManager.dll#$q -s 83FF017426 -r 83FF01EB26"
+    If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\AudioSrvPolicyManager.dll] failed. Audio may not be available under the SYSTEM session. The error returned was [#r].",WARN
+  End
+  Else,Begin
+    // 24H2 - 10.0.26100.1150+
+    ShellExecute,Hide,"%Tools%\%HostArch%\binmay.exe","-v -u #$q%TargetSystem32%\AudioSrvPolicyManager.dll#$q -s 7427488B4DD8488365D8004885C9740C -r EB27488B4DD8488365D8004885C9740C"
     If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\AudioSrvPolicyManager.dll] failed. Audio may not be available under the SYSTEM session. The error returned was [#r].",WARN
   End
 End
