@@ -32,10 +32,10 @@
 Title=Script Factory
 Author=Homes32
 Description=Create a new script for PhoenixPE
-Version=1.1.0.0
+Version=1.1.1.0
 Level=10
 Selected=None
-Date=2024-06-01
+Date=2024-11-01
 Mandatory=False
 
 [Variables]
@@ -70,11 +70,12 @@ StrFormat,Date,%TodaysDateYear%,"yyyy"
 StrFormat,Left,%cmb_ScriptLevel%,2,%Level%
 StrFormat,LTrim,%cmb_ScriptLevel%,5,%LevelFolder%
 
-Set,%NewScript%,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%\%txt_ScriptTitle%.script"
+If,%txt_ScriptFolder%,Equal,"",Set,%NewScript%,"%myAppsFolder%\%LevelFolder%\%txt_ScriptTitle%.script"
+Else,Set,%NewScript%,"%myAppsFolder%\%LevelFolder%\%txt_ScriptFolder%\%txt_ScriptTitle%.script"
 
 // Process the selected Template
 If,%cmb_ScriptTemplate%,Equal,"Simple Embedded App",Run,%ScriptFile%,CreateSimpleEmbeddedScript
-If,%cmb_ScriptTemplate%,Equal,"Simple Embedded Setup App",Run,%ScriptFile%,CreateSimpleEmbeddedSetupScript
+Else,If,%cmb_ScriptTemplate%,Equal,"Simple Embedded Setup App",Run,%ScriptFile%,CreateSimpleEmbeddedSetupScript
 Else,If,%cmb_ScriptTemplate%,Equal,"Simple Download App",Run,%ScriptFile%,CreateSimpleDownloadScript
 Else,If,%cmb_ScriptTemplate%,Equal,"Blank Script",Run,%ScriptFile%,CreateBlankScript
 Else,Exit,"INTERNAL LOGIC ERROR: An invalid template was selected.",WARN
