@@ -32,7 +32,7 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.11.2.0
+Version=1.11.3.0
 Date=2024-11-02
 Level=0
 Selected=None
@@ -1806,7 +1806,7 @@ System,EndLocal
 //                  TimeOut= - (Optional) The time-span (in seconds) to wait for a response before the request times out. Default: 10
 //                  UserAgent= - (Optional) Set a custom User-Agent string used to identify PEBakery to the website.
 //                  NOERR - (Optional) Do not halt the build if the download fails. It will be the script developer's responsibility to handle the situation gracefully.
-// Return values..: #r
+// Return values..: #r - Success: 0, Fail: Non-Zero - See Aria2 exit code reference.
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
 //                  Aria2 exit code reference: https://aria2.github.io/manual/en/html/aria2c.html#exit-status
@@ -1900,16 +1900,18 @@ StrFormat,FileName,%DestPath%,%DestFileName%
 
 ShellExecute,Hide,"%Tools%\%HostArch%\aria2c.exe","%CheckIntegrity%--referer=#$q%Referer%#$q --user-agent=#$q%UserAgent%#$q --connect-timeout=%ConnTimeout% --log-level=info --log=- --allow-overwrite=true --auto-file-renaming=false --dir=#$q%DestPathDir%#$q --out=#$q%DestFileName%#$q #$q%URL%#$q"
 If,Not,%ExitCode%,Equal,0,Begin
-  Set,%Aria2Errors%,"0|All downloads were successful|1|An unknown error occurred|2|Download timed out|3|A resource was not found|4|Resource not found threshold reached|5|A download aborted because download speed was too slow|6|A network issue occurred|7|Download aborted by user|8|The remote server did not support resume when resume was required to complete the download|9|Not enough disk space available|10|The piece length is different from one in .aria2 control file|11|The same file is already being downloaded|12|The same info hash torrent is already being downloaded|13|The file already exists|14|Renaming the downloaded file failed|15|Could not open the existing file|16|Could not create a new file or truncate the existing file|17|File I/O error|18|Could not create the directory|19|DNS name resolution failed|20|Could not parse Metalink document|21|FTP command failed|22|The HTTP response header was bad or unexpected|23|Too many redirects occurred|24|HTTP authorization failed|25|Could not parse bencoded file|26|The .torrent file was corrupted or incomplete|27|Bad magnet URI|28|Syntax error. Unrecognized option or unexpected argument|29|The remote server was unable to handle the request due to overloading or maintenance|30|Could not parse JSON-RPC request|31|Reserved|32|Checksum validation failed."
-  List,Pos,%Aria2Errors%,%ExitCode%,%Aria2ErrorPos%
+  Set,%Aria2Errors%,"0|All downloads were successful|1|An unknown error occurred|2|Download timed out|3|A resource was not found|4|Resource not found threshold reached|5|A download aborted because download speed was too slow|6|A network issue occurred|7|Download aborted by user|8|The remote server did not support resume when resume was required to complete the download|9|Not enough disk space available|10|The piece length is different from one in .aria2 control file|11|The same file is already being downloaded|12|The same info hash torrent is already being downloaded|13|The file already exists|14|Renaming the downloaded file failed|15|Could not open the existing file|16|Could not create a new file or truncate the existing file|17|File I/O error|18|Could not create the directory|19|DNS name resolution failed|20|Could not parse Metalink document|21|FTP command failed|22|The HTTP response header was bad or unexpected|23|Too many redirects occurred|24|HTTP authorization failed|25|Could not parse bencoded file|26|The .torrent file was corrupted or incomplete|27|Bad magnet URI|28|Syntax error. Unrecognized option or unexpected argument|29|The remote server was unable to handle the request due to overloading or maintenance|30|Could not parse JSON-RPC request|31|Reserved|32|Checksum validation failed. The downloaded file's hash does not match [%HashDigest%]"
+
+  List,Pos,%Aria2Errors%,%ExitCode%,%Aria2ErrorPos%  
   If,%Aria2ErrorPos%,Equal,0,Set,%Aria2ErrorDescr%,""
   Else,Begin
     Math,Add,%Aria2ErrorDescrPos%,%Aria2ErrorPos%,1
     List,Get,%Aria2Errors%,%Aria2ErrorDescrPos%,%Aria2ErrorDescr%
 	Set,%Aria2ErrorDescr%," %Aria2ErrorDescr%"
   End
-  FileVersion,"%Tools%\%HostArch%\aria2c.exe",%Aria2Ver%
-  Halt,"WebGetEx Error: Failed to download [%URL%]. The command returned: [%ExitCode%]%Aria2ErrorDescr%. Please check the log for details. You are using aria2c.exe version [%Aria2Ver%]."
+  
+  If,%NoErr%,Equal,True,Return,%ExitCode%
+  Else,Halt,"WebGetEx Error: Failed to download [%URL%]. The command returned: [%ExitCode%]%Aria2ErrorDescr%. Please check the log for details."
 End
 
 System,EndLocal
