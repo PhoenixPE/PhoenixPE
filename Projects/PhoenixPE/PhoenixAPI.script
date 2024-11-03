@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.10.2.0
-Date=2024-09-09
+Version=1.11.0.0
+Date=2024-11-01
 Level=0
 Selected=None
 
@@ -81,6 +81,7 @@ RequireFileEx=Run,%API%,_PhoenixAPI_RequireFileEx
 RunFromRam=Run,%API%,_PhoenixAPI_RunFromRam
 SetFileACL=Run,%API%,_PhoenixAPI_SetFileACL
 SetRegACL=Run,%API%,_PhoenixAPI_SetRegACL
+WebGetEx=Run,%API%,_PhoenixAPI_WebGetEx
 WixExtract=Run,%API%,_PhoenixAPI_WixExtract
 XMLAdd=Run,%API%,_PhoenixAPI_XMLAdd
 XMLDelete=Run,%API%,_PhoenixAPI_XMLDelete
@@ -1798,6 +1799,127 @@ If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of [%R
 Echo,"Granting full access to [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
 If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on [%RegKey%]. The command returned: [%ExitCode%]."
+
+System,EndLocal
+
+[#_PhoenixAPI_WebGetEx#]
+// ===============================================================================================================================
+// Name...........: WebGetEx
+// Description....: An extended version of WebGet utilizing Aria2 as the download engine. Useful for URL's that include javascript based redirects or CDN protection such as CloudFlare.
+// Syntax.........: WebGetEx,<URL>,<DestDir>
+// Parameters.....: #1 URL - URL of the file to download.
+//                  #2 DestPath - The full path where the downloaded file will be saved. If the path does not exist it will be created. If the file exists it will be overwritten.
+//                  Hash Verification - (Optional) Downloads can be verified by validating the hash value of the downloaded file in the form of <HashType>=<HashDigest>.
+//                  HashType= - Hash type to calculate. Supported hash types: MD5, SHA1, SHA256, SHA384, SHA512.
+//                  Referer= - (Optional) Set an http referrer (Referer).
+//                  TimeOut= - (Optional) The time-span (in seconds) to wait for a response before the request times out. Default: 10
+//                  UserAgent= - (Optional) Set a custom User-Agent string used to identify PEBakery to the website.
+//                  NOERR - (Optional) Do not halt the build if the download fails. It will be the script developer's responsibility to handle the situation gracefully.
+// Return values..: #r
+// Author.........: Homes32
+// Remarks........:                      *** Experimental - May be changed or removed without notice ***
+//                  Aria2 exit code reference: https://aria2.github.io/manual/en/html/aria2c.html#exit-status
+// Related........: Depends on aria2c.exe. (https://aria2.github.io/)
+// ===============================================================================================================================
+[_PhoenixAPI_WebGetEx]
+System,SetLocal
+If,#1,Equal,"",Halt,"WebGetEx Syntax Error: You must specify the URL of the file to download."
+If,#2,Equal,"",Halt,"WebGetEx Syntax Error: You must specify the destination path."
+
+GetParam,1,%URL%
+Getparam,2,%DestPath%
+Set,%argc%,#a
+
+Set,%HashType%,""
+Set,%HashDigest%,""
+Set,%Referer%,"*"
+Set,%ConnTimeout%,600
+Set,%UserAgent%,"aria2/1.37.0"
+Set,%NoErr%,False
+
+If,%argc%,>,2,Begin
+ // Process additional arguments
+  Math,Add,%argTo%,%argc%,1
+  ForRange,%i%,3,%argTo%,1,Begin
+    GetParam,%i%,%Arg%
+    
+	If,%Arg%,Equal,"NOERR",Begin
+      Set,%NoErr%,True
+      Continue
+    End
+
+    // Process Key=Value args
+    StrFormat,Split,%Arg%,"=",1,%ArgKey%
+    
+    If,%ArgKey%,Equal,"Referer",Begin
+      StrFormat,Split,%Arg%,"=",2,%Referer%
+      Continue
+    End
+
+    If,%ArgKey%,Equal,"ConnTimeout",Begin
+      StrFormat,Split,%Arg%,"=",2,%TimeOut%
+      Continue
+    End
+    
+    If,%ArgKey%,Equal,"UserAgent",Begin
+      StrFormat,Split,%Arg%,"=",2,%UserAgent%
+      Continue
+    End
+	
+	If,%ArgKey%,Equal,"MD5",Begin
+      Set,%HashType%,"MD5"
+      StrFormat,Split,%Arg%,"=",2,%HashDigest%
+      Continue
+    End
+	
+	If,%ArgKey%,Equal,"SHA1",Begin
+      Set,%HashType%,"SHA-1"
+      StrFormat,Split,%Arg%,"=",2,%HashDigest%
+      Continue
+    End
+	
+	If,%ArgKey%,Equal,"SHA256",Begin
+      Set,%HashType%,"SHA-256"
+      StrFormat,Split,%Arg%,"=",2,%HashDigest%
+      Continue
+    End
+	
+	If,%ArgKey%,Equal,"SHA384",Begin
+      Set,%HashType%,"SHA-384"
+      StrFormat,Split,%Arg%,"=",2,%HashDigest%
+      Continue
+    End
+	
+	If,%ArgKey%,Equal,"SHA512",Begin
+      Set,%HashType%,"SHA-512"
+      StrFormat,Split,%Arg%,"=",2,%HashDigest%
+      Continue
+    End
+
+    Halt,"WebGetEx SYNTAX ERROR: Invalid Argument [%Arg%] at position [%i%]."
+  End
+End
+
+If,Not,%HashType%,Equal,"",Set,%CheckIntegrity%,"--check-integrity=true --checksum=%HashType%=%HashDigest% "
+Else,Set,%CheckIntegrity%,""
+
+StrFormat,DirPath,%DestPath%,%DestPathDir%
+StrFormat,EndTrim,%DestPathDir%,"\","%DestPathDir%"
+StrFormat,FileName,%DestPath%,%DestFileName%
+
+ShellExecute,Hide,"%Tools%\%HostArch%\aria2c.exe","%CheckIntegrity%--referer=#$q%Referer%#$q --user-agent=#$q%UserAgent%#$q --connect-timeout=%ConnTimeout% --log-level=info --log=- --allow-overwrite=true --auto-file-renaming=false --dir=#$q%DestPathDir%#$q --out=#$q%DestFileName%#$q #$q%URL%#$q"
+If,Not,%ExitCode%,Equal,0,Begin
+  Set,%Aria2Errors%,"0|All downloads were successful|1|An unknown error occurred|2|Download timed out|3|A resource was not found|4|Resource not found threshold reached|5|A download aborted because download speed was too slow|6|A network issue occurred|7|Download aborted by user|8|The remote server did not support resume when resume was required to complete the download|9|Not enough disk space available|10|The piece length is different from one in .aria2 control file|11|The same file is already being downloaded|12|The same info hash torrent is already being downloaded|13|The file already exists|14|Renaming the downloaded file failed|15|Could not open the existing file|16|Could not create a new file or truncate the existing file|17|File I/O error|18|Could not create the directory|19|DNS name resolution failed|20|Could not parse Metalink document|21|FTP command failed|22|The HTTP response header was bad or unexpected|23|Too many redirects occurred|24|HTTP authorization failed|25|Could not parse bencoded file|26|The .torrent file was corrupted or incomplete|27|Bad magnet URI|28|Syntax error. Unrecognized option or unexpected argument|29|The remote server was unable to handle the request due to overloading or maintenance|30|Could not parse JSON-RPC request|31|Reserved|32|Checksum validation failed."
+  List,Pos,%Aria2Errors%,%ExitCode%,%Aria2ErrorPos%
+  If,%Aria2ErrorPos%,Equal,0,Set,%Aria2ErrorDescr%,""
+  Else,Begin
+    Math,Add,%Aria2ErrorDescrPos%,%Aria2ErrorPos%,1
+    List,Get,%Aria2Errors%,%Aria2ErrorDescrPos%,%Aria2ErrorDescr%
+	Set,%Aria2ErrorDescr%," %Aria2ErrorDescr%"
+  End
+  FileVersion,"%Tools%\%HostArch%\aria2c.exe",%Aria2Ver%
+  Halt,"WebGetEx Error: Failed to download [%URL%]. The command returned: [%ExitCode%]%Aria2ErrorDescr%. Please check the log for details. You are using aria2c.exe version [%Aria2Ver%]."
+End
 
 System,EndLocal
 
