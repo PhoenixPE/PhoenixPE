@@ -32,9 +32,9 @@
 Title=Classic Calculator
 Author=Homes32
 Level=5
-Version=1.0.0.0
+Version=1.1.0.0
 Description=(v6.3.9600.17667) Classic Windows Calculator.
-Date=2023-10-08
+Date=2024-10-28
 Selected=False
 Mandatory=False
 
@@ -122,8 +122,8 @@ Else,FileCopyEx,"%ProjectTemp%\%ProgramFolder%\Calc 32-bit\Calc1.exe",#1
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",SHA256=%DownloadHash%,NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+WebGetEx,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",SHA256=%DownloadHash%,"UserAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299",NOERR
+If,Not,#r,Equal,0,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
 
 [#SetProgramArch#]
 // ===============================================================================================================================
@@ -167,7 +167,6 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 If,%SourceArch%,Equal,x64,ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\Calc 64-bit\Calc1.exe"
 Else,ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\Calc 32-bit\Calc1.exe"
-
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================
