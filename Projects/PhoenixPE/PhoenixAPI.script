@@ -32,7 +32,7 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.11.1.0
+Version=1.11.2.0
 Date=2024-11-02
 Level=0
 Selected=None
@@ -658,7 +658,7 @@ StrFormat,Ext,%TargetImage%,%NewImageExt%
 Echo,"Converting [%SourceImage%] to a [%NewImageExt%] image..."
 If,Not,%ResizeTo%,Equal,"",Set,%ResizeParam%," --resize:%ResizeTo%"
 ShellExecute,Hide,"%Tools%\%HostArch%\ImageConvert.exe","#$q%SourceImage%#$q #$q%TargetImage%#$q --silent%ResizeParam%"
-If,Not,%ExitCode%,Equal,0,Halt,"ERROR: Image conversion failed. [%ExitCode%]"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Image conversion failed. [%ExitCode%]"
 
 System,EndLocal
 
@@ -1056,7 +1056,7 @@ Set,%CurrentDir%,""
 Set,%ListFile%,""
 
 If,%argc%,>,2,Begin
- // Process additional arguments
+  // Process additional arguments
   Math,Add,%argMax%,%argc%,1
   ForRange,%i%,3,%argMax%,1,Begin
     GetParam,%i%,%Arg%
@@ -1081,7 +1081,7 @@ If,%argc%,>,2,Begin
 	  Continue
     End
   
-    Halt,"InnoExtract SYNTAX ERROR: Invalid Argument [%Arg%] at position [%i%]."
+    Halt,"InnoExtract Syntax Error: Invalid Argument [%Arg%] at position [%i%]."
   End
 End
 
@@ -1187,7 +1187,7 @@ GetParam,1,%JSONFile%
 If,Not,ExistFile,%JSONFile%,Halt,"JSONCompact Syntax Error: The file [%JSONFile%] does not exist."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-u -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q"
-If,Not,#r,Equal,0,Halt,"JSONCompact ERROR: Failed to compact [%JSONFile%]."
+If,Not,#r,Equal,0,Halt,"JSONCompact Error: Failed to compact [%JSONFile%]."
 
 System,EndLocal
 
@@ -1213,7 +1213,7 @@ If,Not,ExistFile,%JSONFile%,Halt,"JSONDelete Syntax Error: The file [%JSONFile%]
 If,%Path%,Equal,"",Halt,"JSONDelete Syntax Error: You must specify an JSON Path."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-D -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q #$q%Path%#$q"
-If,Not,#r,Equal,0,Halt,"JSONDelete ERROR: Failed to delete [%Path%] from [%JSONFile%]."
+If,Not,#r,Equal,0,Halt,"JSONDelete Error: Failed to delete [%Path%] from [%JSONFile%]."
 
 System,EndLocal
 
@@ -1235,7 +1235,7 @@ GetParam,1,%JSONFile%
 If,Not,ExistFile,%JSONFile%,Halt,"JSONPretty Syntax Error: The file [%JSONFile%] does not exist."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-p -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q"
-If,Not,#r,Equal,0,Halt,"JSONPretty ERROR: Failed to pretty [%JSONFile%]."
+If,Not,#r,Equal,0,Halt,"JSONPretty Error: Failed to pretty [%JSONFile%]."
 
 System,EndLocal
 
@@ -1278,7 +1278,7 @@ If,#r,Equal,0,Begin
 End
 Else,Begin
   If,%NOERR%,Equal,"True",Return,""
-  Else,Halt,"JSONRead ERROR: Failed to read [%JSONFile%]."
+  Else,Halt,"JSONRead Error: Failed to read [%JSONFile%]."
 End
 
 System,EndLocal
@@ -1307,7 +1307,7 @@ If,Not,ExistFile,%JSONFile%,Halt,"JSONWrite Syntax Error: The file [%JSONFile%] 
 If,%Path%,Equal,"",Halt,"JSONWrite Syntax Error: You must specify an JSON Path."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-v #$q%Value%#$q -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q #$q%Path%#$q"
-If,Not,#r,Equal,0,Halt,"JSONWrite ERROR: Failed to write the value of [%Value%] to [%Path%] in [%JSONFile%]."
+If,Not,#r,Equal,0,Halt,"JSONWrite Error: Failed to write the value of [%Value%] to [%Path%] in [%JSONFile%]."
 
 System,EndLocal
 
@@ -1503,23 +1503,45 @@ RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
 [_PhoenixAPI_RegUnloadHives]
 System,SetLocal
 
-GetParam,1,%Arg1%
-GetParam,2,%Arg2%
-GetParam,3,%Arg3%
+Set,%argc%,#a
   
 Set,%ForceUnmount%,False
 Set,%HKEY%,"HKLM"
 Set,%UnloadTarget%,"ALL"
 
-Run,%API%,__PhoenixAPI_RegUnloadHives_Process_Arg,%Arg1%
-Run,%API%,__PhoenixAPI_RegUnloadHives_Process_Arg,%Arg2%
-Run,%API%,__PhoenixAPI_RegUnloadHives_Process_Arg,%Arg3%
+If,%argc%,>,0,Begin
+  // Process additional arguments
+  Math,Add,%argMax%,%argc%,1
+  ForRange,%i%,1,%argMax%,1,Begin
+    GetParam,%i%,%Arg%
+    
+	If,%Arg%,Equal,"Force",Begin
+      Set,%ForceUnmount%,True
+      Continue
+    End
+
+    // Process Key=Value args
+    StrFormat,Split,%Arg%,"=",1,%ArgKey%
+    
+    If,%ArgKey%,Equal,"HKEY",Begin
+     StrFormat,Split,%Arg%,"=",2,%HKEY%
+     Continue
+    End
+	
+	If,%ArgKey%,Equal,"TARGET",Begin
+	  StrFormat,Split,%Arg%,"=",2,%UnloadTarget%
+	  Continue
+    End
+	
+    Halt,"RegUnloadHives Syntax Error: Invalid Argument [%Arg%] at position [%i%]."
+  End
+End
 
 If,%ForceUnmount%,Equal,True,Begin
   If,ExistFile,"%Tools%\x86\HiveUnload.exe",ShellExecute,Hide,"%Tools%\x86\HiveUnload.exe","/%HKEY% /Target:%UnloadTarget%"
   If,%ExitCode%,Equal,0,Echo,"HiveUnload: All registry hives unloaded successfully."
-  If,%ExitCode%,Equal,1,Echo,"HiveUnload: Warning: Not all registry hives could be unloaded! Please verify that regedit is not running and try again.",Warn
-  If,%ExitCode%,Equal,2,Echo,"HiveUnload: No loaded registry hives were found."
+  Else,If,%ExitCode%,Equal,1,Echo,"HiveUnload: Warning: Not all registry hives could be unloaded! Please verify that regedit is not running and try again.",Warn
+  Else,If,%ExitCode%,Equal,2,Echo,"HiveUnload: No loaded registry hives were found."
 End
 Else,Begin
   RegHiveUnload,Tmp_Default
@@ -1533,30 +1555,6 @@ Else,Begin
 End
 
 System,EndLocal
-
-[#__PhoenixAPI_RegUnloadHives_Process_Arg#]
-// ===============================================================================================================================
-// Name...........: __PhoenixAPI_RegUnloadHives_Process_Arg
-// Description....: Process RegUnloadHives optional arguments
-// Syntax.........: __PhoenixAPI_RegUnloadHives_Process_Arg,<Arg>
-// Parameters.....: #1 Arg - The argument to process
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: Internal Function
-//                  Do not call System,SetLocal here. We need this function to run in the same scope as the caller
-// Related........: _PhoenixAPI_RegUnloadHives
-// ===============================================================================================================================
-[__PhoenixAPI_RegUnloadHives_Process_Arg]
-
-If,#1,Equal,"Force",Set,%ForceUnmount%,True
-Else,Begin
-  StrFormat,Split,#1,"=",1,%ArgKey%
-  If,Not,%ArgKey%,Equal,"",Begin
-    If,%ArgKey%,Equal,"HKEY",StrFormat,Split,#1,"=",2,%HKEY%
-    Else,If,%ArgKey%,Equal,"TARGET",StrFormat,Split,#1,"=",2,%UnloadTarget%
-    Else,Halt,"SYNTAX ERROR: Invalid Argument [#1]"
-  End
-End
 
 [#_PhoenixAPI_RequireDriver#]
 // ===============================================================================================================================
@@ -1831,7 +1829,7 @@ Set,%UserAgent%,"aria2/1.37.0"
 Set,%NoErr%,False
 
 If,%argc%,>,2,Begin
- // Process additional arguments
+  // Process additional arguments
   Math,Add,%argMax%,%argc%,1
   ForRange,%i%,3,%argMax%,1,Begin
     GetParam,%i%,%Arg%
@@ -1889,7 +1887,7 @@ If,%argc%,>,2,Begin
       Continue
     End
 
-    Halt,"WebGetEx SYNTAX ERROR: Invalid Argument [%Arg%] at position [%i%]."
+    Halt,"WebGetEx Syntax Error: Invalid Argument [%Arg%] at position [%i%]."
   End
 End
 
@@ -1982,15 +1980,15 @@ If,%Name%,Equal,"",Halt,"XMLAdd Syntax Error: You must specify a name."
 
 If,%Operation%,Equal,"Insert",Begin
   ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --insert #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-  If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to insert value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+  If,Not,#r,Equal,0,Halt,"XMLAdd Error: Failed to insert value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,If,%Operation%,Equal,"Append",Begin
   ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --append #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-  If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to append value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+  If,Not,#r,Equal,0,Halt,"XMLAdd Error: Failed to append value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,If,%Operation%,Equal,"Subnode",Begin
   ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --subnode #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-  If,Not,#r,Equal,0,Halt,"XMLAdd ERROR: Failed to add subnode value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+  If,Not,#r,Equal,0,Halt,"XMLAdd Error: Failed to add subnode value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,Halt,"XMLAdd Syntax Error: You must specify an valid operation [insert|append|subnode]."
 
@@ -2017,7 +2015,7 @@ If,Not,ExistFile,%XMLFile%,Halt,"XMLDelete Syntax Error: The file [%XMLFile%] do
 If,%XPath%,Equal,"",Halt,"XMLDelete Syntax Error: You must specify an XPath."
 
 ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
-If,Not,#r,Equal,0,Halt,"XMLDelete ERROR: Failed to delete [%XPath%] from [%XMLFile%]."
+If,Not,#r,Equal,0,Halt,"XMLDelete Error: Failed to delete [%XPath%] from [%XMLFile%]."
 
 System,EndLocal
 
@@ -2061,7 +2059,7 @@ If,#r,Equal,0,Begin
 End
 Else,Begin
   If,%NOERR%,Equal,"True",Return,""
-  Else,Halt,"XMLRead ERROR: Failed to read [%XMLFile%]. XmlStarlet returned: [#r]"
+  Else,Halt,"XMLRead Error: Failed to read [%XMLFile%]. XmlStarlet returned: [#r]"
 End
 
 System,EndLocal
@@ -2091,7 +2089,7 @@ If,%XPath%,Equal,"",Halt,"XMLRename Syntax Error: You must specify an XPath."
 If,%Value%,Equal,"",Halt,"XMLRename Syntax Error: You must specify a value."
 
 ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --rename #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-If,Not,#r,Equal,0,Halt,"XMLRename ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
+If,Not,#r,Equal,0,Halt,"XMLRename Error: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
 
 System,EndLocal
 
@@ -2132,7 +2130,7 @@ If,%Arg3%,Equal,"NOERR",Set,%NOERR%,"True"
 
 ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
 If,Not,#r,Equal,0,Begin
-  If,%NOERR%,Equal,"False",Halt,"XMLUpdate ERROR: Failed to query [%XPath%] from [%XMLFile%]. The XPath must exist in order for the value to be updated."
+  If,%NOERR%,Equal,"False",Halt,"XMLUpdate Error: Failed to query [%XPath%] from [%XMLFile%]. The XPath must exist in order for the value to be updated."
   Return,-99999999
 End
 Else,Begin
@@ -2141,7 +2139,7 @@ Else,Begin
   Else,Begin
     // There was a problem writing the XML file
     If,%NOERR%,Equal,True,Return,5
-    Else,Halt,"XMLUpdate ERROR: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
+    Else,Halt,"XMLUpdate Error: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
   End
 End
 
