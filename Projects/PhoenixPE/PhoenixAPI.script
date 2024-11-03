@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.11.0.0
-Date=2024-11-01
+Version=1.11.1.0
+Date=2024-11-02
 Level=0
 Selected=None
 
@@ -1049,17 +1049,41 @@ If,#2,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the destination 
 
 GetParam,1,%SetupFile%
 Getparam,2,%DestDir%
-Getparam,3,%Arg3%
-Getparam,4,%Arg4%
-Getparam,5,%Arg5%
+Set,%argc%,#a
 
 Set,%Password%,""
 Set,%CurrentDir%,""
 Set,%ListFile%,""
 
-Run,%API%,__PhoenixAPI_InnoExtract_Process_Arg,%Arg3%
-Run,%API%,__PhoenixAPI_InnoExtract_Process_Arg,%Arg4%
-Run,%API%,__PhoenixAPI_InnoExtract_Process_Arg,%Arg5%
+If,%argc%,>,2,Begin
+ // Process additional arguments
+  Math,Add,%argMax%,%argc%,1
+  ForRange,%i%,3,%argMax%,1,Begin
+    GetParam,%i%,%Arg%
+    
+	StrFormat,Split,%Arg%,"=",1,%ArgKey%
+	
+    If,%ArgKey%,Equal,"PASSWORD",Begin
+      StrFormat,Split,%Arg%,"=",2,%Password%
+	  Set,%Password%," -p#$q%Password%#$q "
+      Continue
+    End
+	
+	If,%ArgKey%,Equal,"CDIR",Begin
+	  StrFormat,Split,%Arg%,"=",2,%CurrentDir%
+	  Set,%CurrentDir%," -c#$q%CurrentDir%#$q "
+	  Continue
+    End
+	
+	If,%ArgKey%,Equal,"LIST",Begin
+	  StrFormat,Split,%Arg%,"=",2,%ListFile%
+	  Set,%ListFile%," #$q@%ListFile%#$q"
+	  Continue
+    End
+  
+    Halt,"InnoExtract SYNTAX ERROR: Invalid Argument [%Arg%] at position [%i%]."
+  End
+End
 
 ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Password%%CurrentDir%#$q%SetupFile%#$q%ListFile%"
 If,Not,%ExitCode%,Equal,0,Begin
@@ -1116,37 +1140,6 @@ Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet
 If,Not,%ExitCode%,Equal,0,Halt,"InnoRename Error: Failed to cleanup files. [%ExitCode%]."
 
 System,EndLocal
-
-[#__PhoenixAPI_InnoExtract_Process_Arg#]
-// ===============================================================================================================================
-// Name...........: __PhoenixAPI_InnoExtract_Process_Arg
-// Description....: Process InnoExtract optional arguments
-// Syntax.........: __PhoenixAPI_InnoExtract_Process_Arg,<Arg>
-// Parameters.....: #1 Arg - The argument to process
-// Return values..: 
-// Author.........: Homes32
-// Remarks........: Internal Function
-//                  Do not call System,SetLocal here. We need this function to run in the same scope as PhoenixAPI_InnoExtract
-// Related........: _PhoenixAPI_InnoExtract
-// ===============================================================================================================================
-[__PhoenixAPI_InnoExtract_Process_Arg]
-
-StrFormat,Split,#1,"=",1,%ArgKey%
-If,Not,%ArgKey%,Equal,"",Begin
-  If,%ArgKey%,Equal,"PASSWORD",Begin
-    StrFormat,Split,#1,"=",2,%Password%
-	Set,%Password%," -p#$q%Password%#$q "
-  End	
-  Else,If,%ArgKey%,Equal,"CDIR",Begin
-	  StrFormat,Split,#1,"=",2,%CurrentDir%
-	  Set,%CurrentDir%," -c#$q%CurrentDir%#$q "
-  End
-  Else,If,%ArgKey%,Equal,"LIST",Begin
-	  StrFormat,Split,#1,"=",2,%ListFile%
-	  Set,%ListFile%," #$q@%ListFile%#$q"
-  End
-  Else,Halt,"InnoExtract SYNTAX ERROR: Invalid Argument [#1]."
-End
 
 [#_PhoenixAPI_Innounp#]
 // ===============================================================================================================================
@@ -1839,8 +1832,8 @@ Set,%NoErr%,False
 
 If,%argc%,>,2,Begin
  // Process additional arguments
-  Math,Add,%argTo%,%argc%,1
-  ForRange,%i%,3,%argTo%,1,Begin
+  Math,Add,%argMax%,%argc%,1
+  ForRange,%i%,3,%argMax%,1,Begin
     GetParam,%i%,%Arg%
     
 	If,%Arg%,Equal,"NOERR",Begin
