@@ -34,8 +34,8 @@ Description=Add the Windows Remote Desktop (RDP) Client/Server.
 Selected=False
 Level=4
 Author=Homes32
-Version=1.1.0.0
-Date=2023-02-06
+Version=1.1.1.0
+Date=2024-11-10
 Mandatory=False
 
 [Variables]
@@ -114,19 +114,16 @@ If,%cb_AutoConnectRDP%,Equal,True,Begin
   AddAutoRun,HideNoWait,"RDP: Auto-Connecting to %txt_AutoConnectRDP%...","%ProgramFolder%\%ProgramExe%","/v:%txt_AutoConnectRDP%"
 End
 
-// Enable RDP Connections
-If,%cb_Server_EnableTSConnections%,Equal,True,Begin
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\SessionEnv",HKLM,"Tmp_System\ControlSet001\Services\SessionEnv"
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TermService",HKLM,"Tmp_System\ControlSet001\Services\TermService"
-  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\UmRdpService",HKLM,"Tmp_System\ControlSet001\Services\UmRdpService"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server","fDenyTSConnections",0
-End
+// Enable RDP Connections (Server)
+If,%cb_Server_EnableTSConnections%,Equal,True,Run,%ScriptFile%,EnableTSConnections
 
 // Require NLA for incoming RDP Connections
-If,%cb_Server_ForceNLA%,Equal,True,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server\WinStations\RDP-Tcp","UserAuthentication",0
-
-// Server
-If,%cb_Server_EnableTSConnections%,Equal,True,Run,%ScriptFile%,EnableTSConnections
+If,%cb_Server_ForceNLA%,Equal,True,Begin
+  If,ExistRegMulti,HKLM,"Tmp_System\ControlSet001\Control\Lsa\OSConfig","Security Packages",RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Lsa\OSConfig","Security Packages",APPEND,"tspkg"
+  Else,RegWrite,HKLM,REG_MULTI_SZ,"Tmp_System\ControlSet001\Control\Lsa\OSConfig","Security Packages","tspkg"
+  
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server\WinStations\RDP-Tcp","UserAuthentication",0
+End
 
 RegUnloadHives
 
@@ -164,6 +161,7 @@ RequireFileEx,AppendList,\Windows\System32\dcomp.dll
 RequireFileEx,AppendList,\Windows\System32\DWrite.dll
 RequireFileEx,AppendList,\Windows\System32\dxgi.dll
 RequireFileEx,AppendList,\Windows\System32\FontGlyphAnimator.dll
+RequireFileEx,AppendList,\Windows\System32\mf.dll
 RequireFileEx,AppendList,\Windows\System32\MrmCoreR.dll
 RequireFileEx,AppendList,\Windows\System32\msacm32.dll
 RequireFileEx,AppendList,\Windows\System32\msacm32.drv
@@ -209,8 +207,13 @@ RequireFileEx,ExtractList
 [EnableTSConnections]
 Echo,"Configuring Terminal Server..."
 
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\SessionEnv",HKLM,"Tmp_System\ControlSet001\Services\SessionEnv"
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TermService",HKLM,"Tmp_System\ControlSet001\Services\TermService"
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\UmRdpService",HKLM,"Tmp_System\ControlSet001\Services\UmRdpService"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Terminal Server",HKLM,"Tmp_System\ControlSet001\Control\Terminal Server"
+
 RegWrite,HKLM,0x4,"Tmp_Software\Policies\Microsoft\Windows NT\Terminal Services","fEnableWddmDriver",0
+RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server","fDenyTSConnections",0
 
 Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
 RequireFileEx,AppendList,\Windows\System32\SessEnv.dll
@@ -389,7 +392,7 @@ fb_IncludeProfilesInThisDir=,1,13,160,162,358,20,dir,"Title=Select the directory
 cb_AutoConnectRDP="Auto Connect to this computer on Startup",1,3,160,185,235,18,False
 txt_AutoConnectRDP=,1,0,160,205,358,20,,"__Enter the hostname or IP address of the computer you wish to auto-connect on startup."
 bvl_ServerOptions="Server Options (Experimental)",0,12,150,250,377,60,8,Bold
-cb_Server_EnableTSConnections="Enable Remote Desktop Connections to this computer",0,3,160,265,287,18,True
+cb_Server_EnableTSConnections="Enable Remote Desktop Connections to this computer",0,3,160,265,287,18,False
 cb_Server_ForceNLA="Require Network Layer Authentication",0,3,160,285,250,18,False
 
 [AuthorEncoded]
