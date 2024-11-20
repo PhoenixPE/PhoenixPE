@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.7.1.0
-Date=2024-04-22
+Version=1.7.2.0
+Date=2024-11-19
 
 [Variables]
 
@@ -587,10 +587,12 @@ RequireFileEx,AppendList,\windows\system32\credssp.dll
 RequireFileEx,AppendList,\Windows\System32\cscapi.dll
 RequireFileEx,AppendList,\Windows\System32\ctfmon.exe
 RequireFileEx,AppendList,\Windows\System32\desk.cpl
-RequireFileEx,AppendList,\Windows\System32\edputil.dll
+If,%SourceVer%,BiggerEqual,10.0.26100.0,RequireFileEx,AppendList,\Windows\System32\DispBroker.dll
+If,%SourceVer%,BiggerEqual,10.0.26100.0,RequireFileEx,AppendList,\Windows\System32\DispBroker.Desktop.dll
 RequireFileEx,AppendList,\Windows\System32\dlnashext.dll
 If,%SourceVer%,BiggerEqual,10.0.20150.0,RequireFileEx,AppendList,\Windows\System32\dmenrollengine.dll
 If,%SourceVer%,BiggerEqual,10.0.17134.0,RequireFileEx,AppendList,\Windows\System32\dsreg.dll
+RequireFileEx,AppendList,\Windows\System32\edputil.dll
 RequireFileEx,AppendList,\Windows\System32\dtsh.dll
 RequireFileEx,AppendList,\Windows\System32\ELSCore.dll
 RequireFileEx,AppendList,\Windows\System32\ExplorerFrame.dll
@@ -604,6 +606,8 @@ RequireFileEx,AppendList,\Windows\System32\InfDefaultInstall.exe
 RequireFileEx,AppendList,\Windows\System32\InputSwitch.dll
 RequireFileEx,AppendList,\Windows\System32\kdcpw.dll
 If,%SourceVer%,BiggerEqual,10.0.19041.0,RequireFileEx,AppendList,\windows\System32\KernelBase.dll
+// Fix mouse cursor & taskbar/startmenu colors, etc. in 24H2
+If,%SourceVer%,BiggerEqual,10.0.26100.0,RequireFileEx,AppendList,\Windows\System32\Microsoft.Internal.WarpPal.dll
 RequireFileEx,AppendList,\windows\system32\mblctr.exe
 RequireFileEx,AppendList,\Windows\System32\mfperfhelper.dll
 RequireFileEx,AppendList,\Windows\System32\MrmCoreR.dll
@@ -675,6 +679,7 @@ RequireFileEx,AppendList,\Windows\System32\Windows.CloudStore.dll
 
 // Appears to cause issues with PinTool: \Windows\System32\windows.immersiveshell.serviceprovider.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.Globalization.dll
+If,%SourceVer%,BiggerEqual,10.0.26100.0,RequireFileEx,AppendList,\Windows\System32\Windows.Graphics.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.Internal.Shell.Broker.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.Networking.Connectivity.dll
 RequireFileEx,AppendList,\Windows\System32\Windows.UI.dll
