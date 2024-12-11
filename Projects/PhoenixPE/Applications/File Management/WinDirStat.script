@@ -35,14 +35,15 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2024-12-09
 
 [Variables]
 %ProgramFolder%="WinDirStat"
 %ProgramExe%="WinDirStat.exe"
-%DownloadURL%=https://windirstat.net/wds_current_setup.exe
-%SetupFile%="setup.exe"
+%DownloadURL%=https://github.com/windirstat/windirstat/releases/latest/download/WinDirStat.7z
+%SetupFile%="WinDirStat.7z"
+%aLangMap%=Chinese (Simplified)|4|Czech|5|Dutch|19|English|9|Estonian|37|Finnish|11|French|12|German|7|Hungarian|14|Italian|16|Norwegian|20|Polish|21|Portuguese|22|Russian|25|Spanish|10
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -65,9 +66,12 @@ Echo,"Configuring %ScriptTitle%..."
 RegHiveLoad,Tmp_Default,%RegDefault%
 
 // Language
-StrFormat,SPLIT,%cmb_Language%,"[",2,%LCID%
-StrFormat,RTRIM,%LCID%,1,%LCID%
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Seifert\WinDirStat\options","language",%LCID%
+List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
+Math,Add,%ValuePos%,%LangPos%,1
+List,Get,%aLangMap%,%ValuePos%,%Lang%
+
+RegWrite,HKLM,0x4,"Tmp_Default\Software\WinDirStat\WinDirStat\Options","LanguageId",%Lang%
 
 // Shell Ext.
 If,%cb_ContextMenu%,Equal,True,Begin
@@ -105,7 +109,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -xr!$* -xr!shfolder.dll -xr!Uninstall.exe -o#$q#1#$q"
+7z,"e -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q %SourceArch%\* -o#$q#1#$q"
 If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 [#DownloadProgram#]
@@ -176,7 +180,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Management"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"WinDirStat"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English [1033]"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
 WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenu,True
 System,Cursor,Normal
 
@@ -240,7 +244,7 @@ txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,WinDirStat
 cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of WinDirStat in your build."
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language="English [1033]",1,4,160,126,150,21,"Czech [1029]","Dutch [1043]","English [1033]","Estonian [1061]","Finnish [1035]","French [1036]","German [1031]","Hungarian [1038]","Italian [1040]","Polish [1045]","Russian [1049]","Spanish [1034]"
+cmb_Language="English",1,4,160,126,150,21,"Chinese (Simplified)","Czech","Dutch","English","Estonian","Finnish","French","German","Hungarian","Italian","Norwegian","Polish","Portuguese","Russian","Spanish"
 cb_ContextMenu="Enable Shell Context Menu",1,3,160,161,177,18,True,"__Add WinDirStat to Explorer's context menu."
 
 [InterfaceEncoded]
