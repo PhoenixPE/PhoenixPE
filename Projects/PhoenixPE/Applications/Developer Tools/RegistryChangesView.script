@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.1.0
-Date=2023-01-10
+Version=1.2.0.0
+Date=2024-12-10
 
 [Variables]
 %ProgramFolder%="RegistryChangesView"
@@ -44,7 +44,7 @@ Date=2023-01-10
 %DownloadURLx86%=https://www.nirsoft.net/utils/registrychangesview.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/registrychangesview-x64.zip
 %SetupFile%="RegistryChangesView-%SourceArch%.zip"
-%aLangMap%=Arabic|registrychangesview_arabic.zip|Czech|registrychangesview_czech.zip|Dutch|registrychangesview_dutch.zip|French|registrychangesview_french.zip|German|registrychangesview_german.zip|Greek|registrychangesview_greek.zip|Hungarian|registrychangesview_hungarian.zip|Italian|registrychangesview_italian.zip|Japanese|registrychangesview_japanese.zip|Polish|registrychangesview_polish.zip|Russian|registrychangesview_russian.zip|Chinese (Simplified)|registrychangesview_schinese1.zip|Slovak|registrychangesview_slovak.zip|Spanish|registrychangesview_spanish.zip|Ukrainian|registrychangesview_ukrainian.zip
+%aLangMap%=Arabic|arabic|Chinese (Simplified)|schinese1|Chinese (Traditional)|tchinese|Czech|czech|Dutch|dutch|French|french1|German|german|Greek|greek|Hungarian|hungarian|Italian|italian|Japanese|japanese1|Polish|polish|Portuguese (Brazil)|brazilian_portuguese|Russian|russian|Slovak|slovak|Spanish|spanish|Turkish|turkish|Ukrainian|ukrainian
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -73,10 +73,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\RegistryChangesView-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
-    List,Get,%aLangMap%,%ZipPos%,%LangZip%
+    List,Get,%aLangMap%,%ZipPos%,%Lang%
   
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\RegistryChangesView-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/registrychangesview_%Lang%.zip","%ProgramsCache%\%ProgramFolder%\RegistryChangesView-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
   
@@ -273,7 +274,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Developer Tools"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,RegistryChangesView
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)",Czech,Dutch,English,French,German,Greek,Hungarian,Italian,Japanese,Polish,Russian,Slovak,Spanish,Ukrainian,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Czech,Dutch,English,French,German,Greek,Hungarian,Italian,Japanese,Polish,"Portuguese (Brazil)",Russian,Slovak,Spanish,Turkish,Ukrainian,_DeleteCachedLangFile_,True
 
 [InterfaceEncoded]
 play-hot.png=841,1220

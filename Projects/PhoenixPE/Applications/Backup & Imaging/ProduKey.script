@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2024-12-10
 
 [Variables]
 %ProgramFolder%="ProduKey"
@@ -44,7 +44,7 @@ Date=2023-01-10
 %DownloadURLx86%=https://www.nirsoft.net/utils/produkey.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/produkey-x64.zip
 %SetupFile%="ProduKey-%SourceArch%.zip"
-%aLangMap%=Arabic|produkey_arabic.zip|Azerbaijani|produkey_azerbaijani.zip|Bahasa Indonesia|produkey_bahasa_indonesia.zip|Belarussian|produkey_belarussian.zip|Bulgarian|produkey_bulgarian.zip|Catalan|produkey_catalan.zip|Chinese (Simplified)|produkey_schinese2.zip|Chinese (Traditional)|produkey_tchinese.zip|Czech|produkey_czech.zip|Danish|produkey_danish.zip|Dutch|produkey_dutch.zip|Estonian|produkey_estonian.zip|Finnish|produkey_finnish.zip|French|produkey_french1.zip|Galician|produkey_galician.zip|German|produkey_german.zip|Greek|produkey_greek.zip|Hangul|produkey_hangul.zip|Hebrew|produkey_hebrew.zip|Hungarian|produkey_hungarian.zip|Italian|produkey_italian.zip|Japanese|produkey_japanese1.zip|Korean|produkey_korean.zip|Latvian|produkey_latvian.zip|Lithuanian|produkey_lithuanian.zip|Mongolian|produkey_mongolian.zip|Norwegian|produkey_norwegian.zip|Persian|produkey_persian.zip|Polish|produkey_polish.zip|Portuguese (Brazil)|produkey_brazilian_portuguese3.zip|Portuguese (Portugal)|produkey_portuguese.zip|Romanian|produkey_romanian.zip|Russian|produkey_russian1.zip|Slovak|produkey_slovak.zip|Slovenian|produkey_slovenian.zip|Spanish|produkey_spanish.zip|Swedish|produkey_swedish1.zip|Taiwanese|produkey_taiwanese.zip|Thai|produkey_thai.zip|Turkish|produkey_turkish1.zip|Ukrainian|produkey_ukrainian.zip|Valencian|produkey_valencian.zip
+%aLangMap%=Arabic|arabic|Azerbaijani|azerbaijani|Bahasa Indonesia|bahasa_indonesia|Belarussian|belarussian|Bulgarian|bulgarian|Catalan|catalan|Croatian|croatian|Chinese (Simplified)|schinese1|Chinese (Traditional)|tchinese|Czech|czech|Danish|danish|Dutch|dutch|Estonian|estonian|Finnish|finnish|French|french1|Galician|galician|German|german|Greek|greek|Hangul|hangul|Hebrew|hebrew|Hungarian|hungarian|Italian|italian|Japanese|japanese|Korean|korean|Latvian|latvian|Lithuanian|lithuanian|Mongolian|mongolian|Norwegian|norwegian|Persian|persian|Polish|polish|Portuguese (Brazil)|brazilian_portuguese3|Portuguese (Portugal)|portuguese|Romanian|romanian|Russian|russian1|Slovak|slovak|Slovenian|slovenian|Spanish|spanish|Swedish|swedish1|Taiwanese|taiwanese|Thai|thai|Turkish|turkish1|Ukrainian|ukrainian|Valencian|valencian
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -72,10 +72,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\ProduKey-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
-    List,Get,%aLangMap%,%ZipPos%,%LangZip%
+    List,Get,%aLangMap%,%ZipPos%,%Lang%
   
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\ProduKey-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/produkey_%Lang%.zip","%ProgramsCache%\%ProgramFolder%\ProduKey-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
   
@@ -210,7 +211,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
-WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Backup & Recovery"
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Backup & Imaging"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"ProduKey"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
 Run,%ScriptFile%,DeleteCachedLangFile
@@ -276,7 +277,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Backup & Imaging"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,ProduKey
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Arabic,Azerbaijani,"Bahasa Indonesia",Belarussian,Bulgarian,Catalan,"Chinese (Simplified)","Chinese (Traditional)",Czech,Danish,Dutch,English,Estonian,Finnish,French,Galician,German,Greek,Hangul,Hebrew,Hungarian,Italian,Japanese,Korean,Latvian,Lithuanian,Mongolian,Norwegian,Persian,Polish,"Portuguese (Brazil)","Portuguese (Portugal)",Romanian,Russian,Slovak,Slovenian,Spanish,Swedish,Taiwanese,Thai,Turkish,Ukrainian,Valencian,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,Arabic,Azerbaijani,"Bahasa Indonesia",Belarussian,Bulgarian,Catalan,Croatian,"Chinese (Simplified)","Chinese (Traditional)",Czech,Danish,Dutch,English,Estonian,Finnish,French,Galician,German,Greek,Hangul,Hebrew,Hungarian,Italian,Japanese,Korean,Latvian,Lithuanian,Mongolian,Norwegian,Persian,Polish,"Portuguese (Brazil)","Portuguese (Portugal)",Romanian,Russian,Slovak,Slovenian,Spanish,Swedish,Taiwanese,Thai,Turkish,Ukrainian,Valencian,_DeleteCachedLangFile_,True
 lbl_FalsePositiveNote="Note: Some Antivirus/Antimalware software may detect legitimate software as a virus/trojan/potentially unwanted program (PUP). Make sure you read this",1,1,5,375,624,31,9,Bold
 web_FalsePositiveWiki="important information regarding Antivirus False Positives.",1,10,296,385,277,18,https://github.com/PhoenixPE/PhoenixPE/wiki/Security#anti-virus-false-positives
 

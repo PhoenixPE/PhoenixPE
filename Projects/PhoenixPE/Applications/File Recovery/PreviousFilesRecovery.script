@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2024-12-10
 
 [Variables]
 %ProgramFolder%="PreviousFilesRecovery"
@@ -44,7 +44,7 @@ Date=2023-01-10
 %DownloadURLx86%=https://www.nirsoft.net/utils/previousfilesrecovery.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/previousfilesrecovery-x64.zip
 %SetupFile%="PreviousFilesRecovery-%SourceArch%.zip"
-%aLangMap%=Arabic|previousfilesrecovery_arabic.zip|Chinese (Simplified)|previousfilesrecovery_schinese.zip|Dutch|previousfilesrecovery_dutch.zip|French|previousfilesrecovery_french.zip|German|previousfilesrecovery_german.zip|Greek|previousfilesrecovery_greek.zip|Italian|previousfilesrecovery_italian.zip|Japanese|previousfilesrecovery_japanese.zip|Polish|previousfilesrecovery_polish1.zip|Portuguese (Brazil)|previousfilesrecovery_brazilian_portuguese.zip|Romanian|previousfilesrecovery_romanian.zip|Russian|previousfilesrecovery_russian.zip|Slovak|previousfilesrecovery_slovak.zip|Swedish|previousfilesrecovery_swedish.zip
+%aLangMap%=Arabic|arabic|Chinese (Simplified)|schinese|Dutch|dutch|French|french|German|german|Greek|greek|Hungarian|hungarian|Italian|italian|Japanese|japanese|Persian|persian|Polish|polish1|Portuguese (Brazil)|brazilian_portuguese|Romanian|romanian|Russian|russian|Slovak|slovak|Swedish|swedish
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -72,10 +72,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\PreviousFilesRecovery-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
-    List,Get,%aLangMap%,%ZipPos%,%LangZip%
+    List,Get,%aLangMap%,%ZipPos%,%Lang%
   
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\PreviousFilesRecovery-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/previousfilesrecovery_%Lang%.zip","%ProgramsCache%\%ProgramFolder%\PreviousFilesRecovery-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
   
@@ -272,7 +273,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"File Recovery"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,PreviousFilesRecovery
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)",Dutch,English,French,German,Greek,Italian,Japanese,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Swedish,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)",Dutch,English,French,German,Greek,Hungarian,Italian,Japanese,Persian,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Swedish,_DeleteCachedLangFile_,True
 
 [InterfaceEncoded]
 play-hot.png=841,1220

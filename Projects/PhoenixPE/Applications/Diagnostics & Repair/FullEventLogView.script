@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2024-12-10
 
 [Variables]
 %ProgramFolder%="FullEventLogView"
@@ -44,7 +44,7 @@ Date=2023-01-10
 %DownloadURLx86%=https://www.nirsoft.net/utils/fulleventlogview.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/fulleventlogview-x64.zip
 %SetupFile%="FullEventLogView-%SourceArch%.zip"
-%aLangMap%=Bulgarian|fulleventlogview_bulgarian.zip|Chinese (Simplified)|fulleventlogview_schinese.zip|Chinese (Traditional)|fulleventlogview_tchinese.zip|Dutch|fulleventlogview_dutch.zip|French|fulleventlogview_french.zip|German|fulleventlogview_german.zip|Greek|fulleventlogview_greek.zip|Hindi|fulleventlogview_hindi.zip|Polish|fulleventlogview_polish.zip|Portuguese (Brazil)|fulleventlogview_brazilian_portuguese1.zip|Russian|fulleventlogview_russian.zip|Slovak|fulleventlogview_slovak.zip|Spanish|fulleventlogview_spanish.zip|Swedish|fulleventlogview_swedish.zip|Turkish|fulleventlogview_turkish.zip
+%aLangMap%=Bulgarian|bulgarian|Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Dutch|dutch|French|french|German|german|Greek|greek|Hindi|hindi|Hungarian|hungarian|Italian|italian|Japanese|japanese|Persian|persian|Polish|polish|Portuguese (Brazil)|brazilian_portuguese1|Russian|russian|Slovak|slovak|Spanish|spanish|Swedish|swedish|Turkish|turkish
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -72,10 +72,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\FullEventLogView-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
-    List,Get,%aLangMap%,%ZipPos%,%LangZip%
+    List,Get,%aLangMap%,%ZipPos%,%Lang%
   
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\FullEventLogView-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/fulleventlogview_%Lang%.zip","%ProgramsCache%\%ProgramFolder%\FullEventLogView-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
   
@@ -277,7 +278,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Diagnostics & Repair
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,FullEventLogView
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Bulgarian,"Chinese (Simplified)","Chinese (Traditional)",Dutch,English,French,German,Greek,Hindi,Polish,"Portuguese (Brazil)",Russian,Slovak,Spanish,Swedish,Turkish,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,Bulgarian,"Chinese (Simplified)","Chinese (Traditional)",Dutch,English,French,German,Greek,Hindi,Hungarian,Italian,Japanese,Persian,Polish,"Portuguese (Brazil)",Russian,Slovak,Spanish,Swedish,Turkish,_DeleteCachedLangFile_,True
 
 [InterfaceEncoded]
 play-hot.png=841,1220
