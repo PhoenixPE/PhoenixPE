@@ -35,14 +35,14 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-01
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="ImageCacheViewer"
 %ProgramExe%="ImageCacheViewer.exe"
 %DownloadURL%=https://www.nirsoft.net/utils/imagecacheviewer.zip
-%aLangMap%=Arabic|imagecacheviewer_arabic.zip|Chinese (Simplified)|imagecacheviewer_schinese.zip|Chinese (Traditional)|imagecacheviewer_tchinese.zip|Czech|imagecacheviewer_czech.zip|Dutch|imagecacheviewer_dutch.zip|French|imagecacheviewer_french.zip|German|imagecacheviewer_german.zip|Greek|imagecacheviewer_greek.zip|Italian|imagecacheviewer_italian.zip|Japanese|imagecacheviewer_japanese.zip|Korean|imagecacheviewer_korean.zip|Portuguese (Brazil)|imagecacheviewer_portuguese_brazil.zip|Romanian|imagecacheviewer_romanian.zip|Russian|imagecacheviewer_russian.zip|Slovak|imagecacheviewer_slovak.zip|Spanish|imagecacheviewer_spanish.zip|Swedish|imagecacheviewer_swedish.zip|Valencian|imagecacheviewer_valencian.zip
+%aLangMap%=Arabic|arabic|Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Czech|czech|Dutch|dutch|French|french|German|german|Greek|greek|Hungarian|hungarian|Italian|italian|Japanese|japanese|Korean|korean|Persian|persian|Portuguese (Brazil)|portuguese_brazil|Romanian|romanian|Russian|russian|Slovak|slovak|Spanish|spanish|Swedish|swedish|Valencian|valencian|Turkish|turkish
 %SetupFile%="ImageCacheViewer.zip"
 
 [Process]
@@ -68,10 +68,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\ImageCacheViewer-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\ImageCacheViewer-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/imagecacheviewer_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\ImageCacheViewer-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 
@@ -246,7 +247,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Forensic Tools"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,ImageCacheViewer
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Czech,Dutch,English,French,German,Greek,Italian,Japanese,Korean,"Portuguese (Brazil)",Romanian,Russian,Slovak,Spanish,Swedish,Valencian,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Czech,Dutch,English,French,German,Greek,Hungarian,Italian,Japanese,Korean,Persian,"Portuguese (Brazil)",Romanian,Russian,Slovak,Spanish,Swedish,Turkish,Valencian,_DeleteCachedLangFile_,True
 
 [InterfaceEncoded]
 play-hot.png=841,1220

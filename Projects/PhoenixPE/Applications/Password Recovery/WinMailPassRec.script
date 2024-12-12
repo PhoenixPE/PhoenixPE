@@ -35,15 +35,15 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-03-26
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="WinMailPassRec"
 %ProgramExe%="WinMailPassRec.exe"
 %DownloadURLx86%=https://www.nirsoft.net/utils/winmailpassrec.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/winmailpassrec-x64.zip
-%aLangMap%=Chinese (Simplified)|winmailpassrec_schinese.zip|Dutch|winmailpassrec_dutch.zip|French|winmailpassrec_french.zip|German|winmailpassrec_german.zip|Greek|winmailpassrec_greek.zip|Hungarian|winmailpassrec_hungarian.zip|Italian|winmailpassrec_italian.zip|Persian|winmailpassrec_persian.zip|Polish|winmailpassrec_polish.zip|Russian|winmailpassrec_russian.zip|Slovak|winmailpassrec_slovak.zip
+%aLangMap%=Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Dutch|dutch|French|french|German|german|Greek|greek|Hungarian|hungarian|Italian|italian|Persian|persian|Polish|polish|Russian|russian|Slovak|slovak|Turkish|turkish
 %SetupFile%="WinMailPassRec.zip"
 
 [Process]
@@ -72,10 +72,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\WinMailPassRec-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\WinMailPassRec-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/winmailpassrec_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\WinMailPassRec-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 
@@ -252,7 +253,7 @@ Message,"WinMailPassRec is a password recovery tool that displays the details of
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch WinMailPassRec",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+btn_LaunchProgram="Launch Program",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
 web_Homepage=Homepage,1,10,377,9,60,18,https://www.nirsoft.net/utils/windows_mail_password_recovery.html
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
@@ -272,7 +273,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Password Recovery"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,WinMailPassRec
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,"Chinese (Simplified)",English,Dutch,French,German,Greek,Hungarian,Italian,Persian,Polish,Russian,Slovak,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,"Chinese (Simplified)","Chinese (Traditional)",English,Dutch,French,German,Greek,Hungarian,Italian,Persian,Polish,Russian,Slovak,Turkish,_DeleteCachedLangFile_,True
 lbl_FalsePositiveNote="Note: Some Antivirus/Antimalware software may detect legitimate software as a virus/trojan/potentially unwanted program (PUP). Make sure you read this",1,1,5,375,624,31,9,Bold
 web_FalsePositiveWiki="important information regarding Antivirus False Positives.",1,10,296,385,277,18,https://github.com/PhoenixPE/PhoenixPE/wiki/Security#anti-virus-false-positives
 

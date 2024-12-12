@@ -30,20 +30,20 @@
 
 [Main]
 Title=DataProtectionDecryptor
-Description=DataProtectionDecryptor is a powerful tool for that allows you to decrypt passwords and other information encrypted by the DPAPI (Data Protection API) system.
+Description=DataProtectionDecryptor decrypts passwords and other information encrypted by the DPAPI (Data Protection API) system.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="DataProtectionDecryptor"
 %ProgramExe%="DataProtectionDecryptor.exe"
 %DownloadURLx86%=https://www.nirsoft.net/toolsdownload/dataprotectiondecryptor.zip
 %DownloadURLx64%=https://www.nirsoft.net/toolsdownload/dataprotectiondecryptor-x64.zip
-%aLangMap%=Chinese (Simplified)|dataprotectiondecryptor_schinese1.zip|Chinese (Traditional)|dataprotectiondecryptor_tchinese.zip|Dutch|dataprotectiondecryptor_dutch.zip|French|dataprotectiondecryptor_french.zip|German|dataprotectiondecryptor_german.zip|Greek|dataprotectiondecryptor_greek.zip|Romanian|dataprotectiondecryptor_romanian.zip|Russian|dataprotectiondecryptor_russian.zip|Slovak|dataprotectiondecryptor_slovak.zip
+%aLangMap%=Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Dutch|dutch|French|french|German|german|Greek|greek|Hungarian|hungarian|Italian|italian|Persian|persian|Romanian|romanian|Russian|russian|Slovak|slovak|Turkish|turkish
 %SetupFile%="DataProtectionDecryptor-%SourceArch%.zip"
 
 [Process]
@@ -67,15 +67,16 @@ Echo,"Program version: v%ProgramExeVer%"
 Echo,"Configuring %ScriptTitle%..."
 
 // Language
-If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\BrowsingHistoryView_lng.ini"
+If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\DataProtectionDecryptor_lng.ini"
 Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\DataProtectionDecryptor-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\DataProtectionDecryptor-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/dataprotectiondecryptor_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\DataProtectionDecryptor-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 
@@ -272,7 +273,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Password Recovery"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,DataProtectionDecryptor
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,"Chinese (Simplified)","Chinese (Traditional)",Dutch,English,French,German,Greek,Romanian,Russian,Slovak,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,"Chinese (Simplified)","Chinese (Traditional)",Dutch,English,French,German,Greek,Hungarian,Italian,Persian,Romanian,Russian,Slovak,Turkish,_DeleteCachedLangFile_,True
 lbl_FalsePositiveNote="Note: Some Antivirus/Antimalware software may detect legitimate software as a virus/trojan/potentially unwanted program (PUP). Make sure you read this",1,1,5,375,624,31,9,Bold
 web_FalsePositiveWiki="important information regarding Antivirus False Positives.",1,10,296,385,277,18,https://github.com/PhoenixPE/PhoenixPE/wiki/Security#anti-virus-false-positives
 

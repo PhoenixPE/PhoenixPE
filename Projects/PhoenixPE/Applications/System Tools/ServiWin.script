@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-01
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="ServiWin"
@@ -44,7 +44,7 @@ Date=2020-03-01
 %DownloadURLx86%=https://www.nirsoft.net/utils/serviwin.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/serviwin-x64.zip
 %SetupFile%="ServiWin-%SourceArch%.zip"
-%aLangMap%=Arabic|serviwin_arabic1.zip|Chinese (Simplified)|serviwin_schinese.zip|Chinese (Traditional)|serviwin_tchinese.zip|Czech|serviwin_czech.zip|Dutch|serviwin_dutch.zip|French|serviwin_french.zip|Galician|serviwin_galician.zip|German|serviwin_german.zip|Greek|serviwin_greek.zip|Hebrew|serviwin_hebrew.zip|Italian|serviwin_italian.zip|Japanese|serviwin_japanese.zip|Polish|serviwin_polish.zip|Portuguese (Brazil)|serviwin_portuguese_brazil.zip|Romanian|serviwin_romanian.zip|Russian|serviwin_russian.zip|Slovak|serviwin_slovak.zip|Spanish|serviwin_spanish.zip|Swedish|serviwin_swedish.zip|Taiwanese|serviwin_taiwanese.zip|Turkish|serviwin_turkish.zip|Valencian|serviwin_valencian.zip
+%aLangMap%=Arabic|arabic1|Chinese (Simplified)|schinese1|Chinese (Traditional)|tchinese|Czech|czech|Dutch|dutch|French|french|Galician|galician|German|german|Greek|greek|Hebrew|hebrew|Hungarian|hungarian|Italian|italian|Japanese|japanese|Persian|persian|Polish|polish|Portuguese (Brazil)|portuguese_brazil|Romanian|romanian|Russian|russian|Slovak|slovak|Spanish|spanish1|Swedish|swedish|Taiwanese|taiwanese|Turkish|turkish|Valencian|valencian
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -69,10 +69,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\ServiWin-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
   
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\ServiWin-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/serviwin_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\ServiWin-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
   
@@ -261,7 +262,7 @@ Message,"ServiWin allows you to easily stop, start, restart, pause, and continue
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch ServiWin",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+btn_LaunchProgram="Launch Program",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
 web_Homepage=Homepage,1,10,377,9,60,18,https://www.nirsoft.net/utils/serviwin.html
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
@@ -288,7 +289,7 @@ txt_StartMenuFolder2="Start Menu Folder:",1,0,152,201,119,21,"System Tools"
 txt_ShortcutName2="Shortcut Name:",1,0,152,243,119,21,"ServiWin (Offline)"
 bvl_Options=Options,1,12,285,90,197,184,8,Bold
 lbl_Language=Language,1,1,294,110,153,16,8,Normal
-cmb_Language=English,1,4,295,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Czech,Dutch,English,French,Galician,German,Greek,Hebrew,Italian,Japanese,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Spanish,Swedish,Taiwanese,Turkish,Valencian,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,295,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Czech,Dutch,English,French,Galician,German,Greek,Hebrew,Hungarian,Italian,Japanese,Persian,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Spanish,Swedish,Taiwanese,Turkish,Valencian,_DeleteCachedLangFile_,True
 
 [InterfaceEncoded]
 play-hot.png=841,1220

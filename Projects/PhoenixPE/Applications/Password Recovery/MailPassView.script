@@ -35,14 +35,14 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="MailPassView"
 %ProgramExe%="mailpv.exe"
 %DownloadURL%=https://www.nirsoft.net/toolsdownload/mailpv.zip
-%aLangMap%=Arabic|mailpv_arabic.zip|Azerbaijani|mailpv_azerbaijani.zip|Belarussian|mailpv_belarussian.zip|Bulgarian|mailpv_bulgarian1.zip|Catalan|mailpv_catalan.zip|Croatian|mailpv_croatian.zip|Chinese (Simplified)|mailpv_schinese.zip|Chinese (Traditional)|mailpv_tchinese.zip|Czech|mailpv_czech.zip|Danish|mailpv_danish.zip|Dutch|mailpv_dutch.zip|French|mailpv_french1.zip|Galician|mailpv_galician.zip|German|mailpv_german.zip|Greek|mailpv_greek.zip|Hebrew|mailpv_hebrew.zip|Hungarian|mailpv_hungarian.zip|Italian|mailpv_italian.zip|Japanese|mailpv_japanese.zip|Korean|mailpv_korean.zip|Lithuanian|mailpv_lithuanian.zip|Norwegian|mailpv_norwegian.zip|Persian|mailpv_persian.zip|Polish|mailpv_polish.zip|Portuguese|mailpv_portuguese.zip|Portuguese (Brazil)|mailpv_portuguese_brazil.zip|Romanian|mailpv_romanian.zip|Russian|mailpv_russian.zip|Slovak|mailpv_slovak.zip|Slovenian|mailpv_slovenian.zip|Spanish|mailpv_spanish.zip|Swedish|mailpv_swedish.zip|Taiwanese|mailpv_taiwanese.zip|Thai|mailpv_thai.zip|Turkish|mailpv_turkish.zip|Ukrainian|mailpv_ukrainian.zip|Valencian|mailpv_valencian.zip
+%aLangMap%=Arabic|arabic|Azerbaijani|azerbaijani|Belarussian|belarussian|Bulgarian|bulgarian1|Catalan|catalan|Croatian|croatian|Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Czech|czech|Danish|danish|Dutch|dutch|French|french1|Galician|galician|German|german|Greek|greek|Hebrew|hebrew|Hungarian|hungarian|Italian|italian|Japanese|japanese|Korean|korean|Lithuanian|lithuanian|Norwegian|norwegian|Persian|persian|Polish|polish|Portuguese|portuguese|Portuguese (Brazil)|portuguese_brazil|Romanian|romanian|Russian|russian|Slovak|slovak|Slovenian|slovenian|Spanish|spanish|Swedish|swedish|Taiwanese|taiwanese|Thai|thai|Turkish|turkish|Ukrainian|ukrainian|Valencian|valencian
 %SetupFile%="MailPassView.zip"
 
 [Process]
@@ -70,10 +70,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\MailPassView-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\MailPassView-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/mailpv_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\MailPassView-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 

@@ -30,20 +30,20 @@
 
 [Main]
 Title=SecurityQuestionsView
-Description=SecurityQuestionsView allows you to view the security questions and their answers stored on a Windows 10 system.
+Description=SecurityQuestionsView allows you to view the security questions and their answers stored on a Windows system.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="SecurityQuestionsView"
 %ProgramExe%="SecurityQuestionsView.exe"
 %DownloadURLx86%=https://www.nirsoft.net/utils/securityquestionsview.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/securityquestionsview.zip
-%aLangMap%=Czech|securityquestionsview_czech.zip|Chinese (Simplified)|securityquestionsview_schinese.zip|Chinese (Traditional)|securityquestionsview_tchinese.zip|Dutch|securityquestionsview_dutch.zip|French|securityquestionsview_french.zip|German|securityquestionsview_german.zip|Greek|securityquestionsview_greek.zip|Italian|securityquestionsview_italian.zip|Polish|securityquestionsview_polish.zip|Russian|securityquestionsview_russian.zip|Slovak|securityquestionsview_slovak.zip|Spanish|securityquestionsview_spanish.zip|
+%aLangMap%=Czech|czech|Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Dutch|dutch|French|french|German|german|Greek|greek|Hungarian|hungarian|Italian|italian|Persian|persian|Polish|polish|Russian|russian|Slovak|slovak|Spanish|spanish
 %SetupFile%="SecurityQuestionsView-%SourceArch%.zip"
 
 [Process]
@@ -67,15 +67,16 @@ Echo,"Program version: v%ProgramExeVer%"
 Echo,"Configuring %ScriptTitle%..."
 
 // Language
-If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\BrowsingHistoryView_lng.ini"
+If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\SecurityQuestionsView_lng.ini"
 Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\SecurityQuestionsView-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\SecurityQuestionsView-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/securityquestionsview_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\SecurityQuestionsView-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 
@@ -272,7 +273,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Password Recovery"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,SecurityQuestionsView
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Czech,"Chinese (Simplified)","Chinese (Traditional)",Dutch,English,French,German,Greek,Italian,Polish,Russian,Slovak,Spanish,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,Czech,"Chinese (Simplified)","Chinese (Traditional)",Dutch,English,French,German,Greek,Hungarian,Italian,Persian,Polish,Russian,Slovak,Spanish,_DeleteCachedLangFile_,True
 lbl_FalsePositiveNote="Note: Some Antivirus/Antimalware software may detect legitimate software as a virus/trojan/potentially unwanted program (PUP). Make sure you read this",1,1,5,375,624,31,9,Bold
 web_FalsePositiveWiki="important information regarding Antivirus False Positives.",1,10,296,385,277,18,https://github.com/PhoenixPE/PhoenixPE/wiki/Security#anti-virus-false-positives
 

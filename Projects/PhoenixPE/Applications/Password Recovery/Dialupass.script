@@ -35,15 +35,15 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="Dialupass"
 %ProgramExe%="Dialupass.exe"
 %DownloadURLx86%=https://www.nirsoft.net/toolsdownload/dialupass.zip
 %DownloadURLx64%=https://www.nirsoft.net/toolsdownload/dialupass.zip
-%aLangMap%=Chinese (Simplified)|dialupass_schinese.zip|Chinese (Traditional)|dialupass_tchinese.zip|Dutch|dialupass_dutch.zip|French|dialupass_french.zip|German|dialupass_german.zip|Greek|dialupass_greek.zip|Hebrew|dialupass_hebrew.zip|Hungarian|dialupass_hungarian.zip|Italian|dialupass_italian1.zip|Persian|dialupass_persian.zip|Polish|dialupass_polish.zip|Portuguese (Brazil)|dialupass_brazilian_portuguese.zip|Romanian|dialupass_romanian.zip|Russian|dialupass_russian.zip|Slovak|dialupass_slovak.zip|Spanish|dialupass_spanish.zip|Taiwanese|dialupass_taiwanese.zip|Turkish|dialupass_turkish.zip|Valencian|dialupass_valencian.zip
+%aLangMap%=Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Dutch|dutch|French|french|German|german|Greek|greek|Hebrew|hebrew|Hungarian|hungarian|Italian|italian1|Persian|persian|Polish|polish|Portuguese (Brazil)|brazilian_portuguese|Romanian|romanian|Russian|russian|Slovak|slovak|Slovenian|slovenian|Spanish|spanish|Taiwanese|taiwanese|Turkish|turkish|Valencian|valencian
 %SetupFile%="Dialupass-%SourceArch%.zip"
 
 [Process]
@@ -67,15 +67,16 @@ Echo,"Program version: v%ProgramExeVer%"
 Echo,"Configuring %ScriptTitle%..."
 
 // Language
-If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\BrowsingHistoryView_lng.ini"
+If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\Dialupass_lng.ini"
 Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\Dialupass-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\Dialupass-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/dialupass_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\Dialupass-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 
@@ -272,7 +273,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Password Recovery"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,Dialupass
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,"Chinese (Simplified)","Chinese (Traditional)",Dutch,English,French,German,Greek,Hebrew,Hungarian,Italian,Persian,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Spanish,Taiwanese,Turkish,Valencian,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,"Chinese (Simplified)","Chinese (Traditional)",Dutch,English,French,German,Greek,Hebrew,Hungarian,Italian,Persian,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Slovenian,Spanish,Taiwanese,Turkish,Valencian,_DeleteCachedLangFile_,True
 lbl_FalsePositiveNote="Note: Some Antivirus/Antimalware software may detect legitimate software as a virus/trojan/potentially unwanted program (PUP). Make sure you read this",1,1,5,375,624,31,9,Bold
 web_FalsePositiveWiki="important information regarding Antivirus False Positives.",1,10,296,385,277,18,https://github.com/PhoenixPE/PhoenixPE/wiki/Security#anti-virus-false-positives
 

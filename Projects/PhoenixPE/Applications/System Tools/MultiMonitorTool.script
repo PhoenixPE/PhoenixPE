@@ -35,15 +35,15 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2023-04-16
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="MultiMonitorTool"
 %ProgramExe%="MultiMonitorTool.exe"
 %DownloadURLx86%=https://www.nirsoft.net/utils/multimonitortool.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/multimonitortool-x64.zip
-%aLangMap%=Arabic|multimonitortool_arabic1.zip|Czech|multimonitortool_czech.zip|Dutch|multimonitortool_dutch.zip|French|multimonitortool_french.zip|German|multimonitortool_german.zip|Greek|multimonitortool_greek.zip|Hungarian|multimonitortool_hungarian.zip|Italian|multimonitortool_italian.zip|Korean|multimonitortool_korean1.zip|Persian|multimonitortool_persian.zip|Polish|multimonitortool_polish.zip|Portuguese (Brazil)|multimonitortool_brazilian_portuguese1.zip|Romanian|multimonitortool_romanian.zip|Russian|multimonitortool_russian.zip|Chinese (Simplified)|multimonitortool_schinese1.zip|Chinese (Traditional)|multimonitortool_tchinese1.zip|Slovak|multimonitortool_slovak.zip|Spanish|multimonitortool_spanish.zip|Turkish|multimonitortool_turkish.zip|Ukrainian|multimonitortool_ukrainian.zip
+%aLangMap%=Arabic|arabic1|Chinese (Simplified)|schinese1|Chinese (Traditional)|tchinese|Czech|czech|Dutch|dutch|French|french|German|german|Greek|greek|Hungarian|hungarian|Italian|italian|Japanese|japanese|Korean|korean1|Persian|persian|Polish|polish|Portuguese (Brazil)|brazilian_portuguese1|Romanian|romanian|Russian|russian|Slovak|slovak|Spanish|spanish|Turkish|turkish|Ukrainian|ukrainian
 %SetupFile%="MultiMonitorTool.zip"
 
 [Process]
@@ -72,10 +72,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\MultiMonitorTool-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+	If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\MultiMonitorTool-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/multimonitortool_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\MultiMonitorTool-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 
@@ -276,7 +277,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"System Tools"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,MultiMonitorTool
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Arabic,Czech,Dutch,English,French,German,Greek,Hungarian,Italian,Korean,Persian,Polish,"Portuguese (Brazil)",Romanian,Russian,"Chinese (Simplified)","Chinese (Traditional)",Slovak,Spanish,Turkish,Ukrainian,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Czech,Dutch,English,French,German,Greek,Hungarian,Italian,Japanese,Korean,Persian,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Spanish,Turkish,Ukrainian,_DeleteCachedLangFile_,True
 cb_AutoSetMaxRes="Set max resolution on startup",1,3,160,155,180,18,True
 
 [InterfaceEncoded]

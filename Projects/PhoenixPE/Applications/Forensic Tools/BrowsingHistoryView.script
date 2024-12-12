@@ -35,15 +35,15 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-01
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="BrowsingHistoryView"
 %ProgramExe%="BrowsingHistoryView.exe"
 %DownloadURLx86%=https://www.nirsoft.net/utils/browsinghistoryview.zip
 %DownloadURLx64%=https://www.nirsoft.net/utils/browsinghistoryview-x64.zip
-%aLangMap%=Arabic|browsinghistoryview_arabic.zip|Chinese (Simplified)|browsinghistoryview_schinese.zip|Chinese (Traditional)|browsinghistoryview_tchinese1.zip|Croatian|browsinghistoryview_croatian.zip|Czech|browsinghistoryview_czech.zip|Dutch|browsinghistoryview_dutch.zip|English|Finnish|browsinghistoryview_finnish.zip|French|browsinghistoryview_french2.zip|German|browsinghistoryview_german.zip|Greek|browsinghistoryview_greek.zip|Hungarian|browsinghistoryview_hungarian.zip|Italian|browsinghistoryview_italian.zip|Japanese|browsinghistoryview_japanese.zip|Polish|browsinghistoryview_polish.zip|Portuguese (Brazil)|browsinghistoryview_brazilian_portuguese.zip|Romanian|browsinghistoryview_romanian.zip|Russian|browsinghistoryview_russian.zip|Slovak|browsinghistoryview_slovak.zip|Spanish|browsinghistoryview_spanish.zip
+%aLangMap%=Arabic|arabic|Bulgarian|bulgarian|Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Croatian|croatian|Czech|czech|Dutch|dutch|English|Finnish|finnish|French|french2|German|german|Greek|greek|Hungarian|hungarian|Italian|italian1|Japanese|japanese|Persian|persian|Polish|polish|Portuguese (Brazil)|brazilian_portuguese|Romanian|romanian|Russian|russian|Slovak|slovak|Spanish|spanish|Turkish|turkish
 %SetupFile%="BrowsingHistoryView-%SourceArch%.zip"
 
 [Process]
@@ -70,10 +70,11 @@ Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\BrowsingHistoryView-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\BrowsingHistoryView-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/browsinghistoryview_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\BrowsingHistoryView-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 
@@ -270,7 +271,7 @@ txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Forensic Tools"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,BrowsingHistoryView
 bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Croatian,Czech,Dutch,English,Finnish,French,German,Greek,Hungarian,Italian,Japanese,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Spanish,_DeleteCachedLangFile_,True
+cmb_Language=English,1,4,160,126,150,21,Arabic,Bulgarian,"Chinese (Simplified)","Chinese (Traditional)",Croatian,Czech,Dutch,English,Finnish,French,German,Greek,Hungarian,Italian,Japanese,Persian,Polish,"Portuguese (Brazil)",Romanian,Russian,Slovak,Spanish,Turkish,_DeleteCachedLangFile_,True
 
 [InterfaceEncoded]
 play-hot.png=841,1220

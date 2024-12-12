@@ -30,20 +30,20 @@
 
 [Main]
 Title=WirelessKeyView
-Description=WirelessKeyView recovers all wireless network security keys/passwords (WEP/WPA) stored in your computer by the 'Wireless Zero Configuration' service of Windows XP or by the 'WLAN AutoConfig' service of Windows Vista, Windows 7, Windows 8, Windows 10, and Windows Server 2008. 
+Description=WirelessKeyView recovers all wireless network security keys/passwords (WEP/WPA) stored in your computer by the 'Wireless Zero Configuration' service of Windows XP or by the 'WLAN AutoConfig' service of Windows Vista and later versions. 
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-01
+Version=1.1.0.0
+Date=2024-12-11
 
 [Variables]
 %ProgramFolder%="WirelessKeyView"
 %ProgramExe%="WirelessKeyView.exe"
 %DownloadURLx86%=https://www.nirsoft.net/toolsdownload/wirelesskeyview.zip
 %DownloadURLx64%=https://www.nirsoft.net/toolsdownload/wirelesskeyview-x64.zip
-%aLangMap%=Arabic|wirelesskeyview_arabic.zip|Belarussian|wirelesskeyview_belarussian.zip|Bulgarian|wirelesskeyview_bulgarian.zip|Chinese (Simplified)|wirelesskeyview_schinese.zip|Chinese (Traditional)|wirelesskeyview_tchinese.zip|Croatian|wirelesskeyview_croatian.zip|Czech|wirelesskeyview_czech.zip|Danish|wirelesskeyview_danish.zip|Dutch|wirelesskeyview_dutch.zip|Finnish|wirelesskeyview_finnish.zip|French|wirelesskeyview_french3.zip|Galician|wirelesskeyview_galician.zip|German|wirelesskeyview_german.zip|Greek|wirelesskeyview_greek.zip|Hebrew|wirelesskeyview_hebrew1.zip|Hungarian|wirelesskeyview_hungarian.zip|Italian|wirelesskeyview_italian.zip|Japanese|wirelesskeyview_japanese1.zip|Korean|wirelesskeyview_korean.zip|Macedonian|wirelesskeyview_macedonian.zip|Norwegian|wirelesskeyview_norwegian2.zip|Persian|wirelesskeyview_persian.zip|Polish|wirelesskeyview_polish.zip|Portuguese (Brazil)|wirelesskeyview_brazilian_portuguese1.zip|Portuguese (Portugal)|wirelesskeyview_portuguese.zip|Romanian|wirelesskeyview_romanian.zip|Russian|wirelesskeyview_russian.zip|Slovak|wirelesskeyview_slovak.zip|Slovenian|wirelesskeyview_slovenian.zip|Spanish|wirelesskeyview_spanish.zip|Swedish|wirelesskeyview_swedish.zip|Taiwanese|wirelesskeyview_taiwanese.zip|Thai|wirelesskeyview_thai.zip|Turkish|wirelesskeyview_turkish.zip|Ukrainian|wirelesskeyview_ukrainian.zip|Valencian|wirelesskeyview_valencian.zip
+%aLangMap%=Arabic|arabic|Belarussian|belarussian|Bulgarian|bulgarian|Chinese (Simplified)|schinese|Chinese (Traditional)|tchinese|Croatian|croatian|Czech|czech|Danish|danish|Dutch|dutch|Finnish|finnish|French|french|Galician|galician|German|german|Greek|greek|Hebrew|hebrew1|Hungarian|hungarian|Italian|italian|Japanese|japanese1|Korean|korean|Macedonian|macedonian|Norwegian|norwegian2|Persian|persian|Polish|polish|Portuguese (Brazil)|brazilian_portuguese1|Portuguese (Portugal)|portuguese|Romanian|romanian|Russian|russian|Slovak|slovak|Slovenian|slovenian|Spanish|spanish|Swedish|swedish|Taiwanese|taiwanese|Thai|thai|Turkish|turkish|Ukrainian|ukrainian|Valencian|valencian
 %SetupFile%="WirelessKeyView-%SourceArch%.zip"
 
 [Process]
@@ -67,15 +67,16 @@ Echo,"Program version: v%ProgramExeVer%"
 Echo,"Configuring %ScriptTitle%..."
 
 // Language
-If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\BrowsingHistoryView_lng.ini"
+If,%cmb_Language%,Equal,"English",FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\WirelessKeyView_lng.ini"
 Else,Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\WirelessKeyView-Lang.zip",Begin
     Echo,"Downloading [%cmb_Language%] language files..."
     List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+    If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
     Math,Add,%ZipPos%,%LangPos%,1
     List,Get,%aLangMap%,%ZipPos%,%LangZip%
 
-    WebGet,"https://www.nirsoft.net/utils/trans/%LangZip%","%ProgramsCache%\%ProgramFolder%\WirelessKeyView-Lang.zip",NOERR
+    WebGet,"https://www.nirsoft.net/utils/trans/wirelesskeyview_%LangZip%.zip","%ProgramsCache%\%ProgramFolder%\WirelessKeyView-Lang.zip",NOERR
     If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
   End
 
