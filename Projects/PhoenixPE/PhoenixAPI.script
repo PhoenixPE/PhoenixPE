@@ -315,7 +315,7 @@ ForEach,%Char%,"/ : * ? #$q < > |",Delim=#$s,StrFormat,Replace,%Folder%,%Char%,"
 
 If,%Folder%,Equal,".",Set,%Folder%,""
 Else,If,Not,%Folder%,Equal,"",Set,%Folder%,"\%Folder%"
-  
+
 // Type
 If,%Type%,Equal,"Desktop",Set,%Cmd-Type%,"@DesktopCommonDir"
 Else,If,%Type%,Equal,"StartMenu",Set,%Cmd-Type%,"@StartMenuCommonDir & #$q\Programs#$q"
@@ -329,7 +329,7 @@ If,%IconIndex%,Equal,"",Set,%IconIndex%,0
 If,%WindowState%,Equal,"Minimized",Set,%Cmd-WindowState%,"@SW_SHOWMINNOACTIVE "
 Else,If,%WindowState%,Equal,"Maximized",Set,%Cmd-WindowState%,"@SW_SHOWMAXIMIZED"
 Else,Set,%Cmd-WindowState%,"@SW_SHOWNORMAL"
-  
+
 // Final command
 TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>CreateShortcuts","MakeShortcut('%ProgramExe%', %Cmd-Type% & '%Folder%\%Title%.lnk', '%WorkDir%', '%Parameters%', '%Tooltip%', '%IconPath%', '%HotKey%', %IconIndex%, %Cmd-WindowState%)#$x#$xEndFunc   ;==>CreateShortcuts"
 
@@ -687,16 +687,16 @@ While,ExistDir,#1,Begin
 
   If,Question,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer.#$x#$xRetry?",Begin
     // User clicked 'Yes'
-	System,ErrorOff
-	DirDelete,#1
-	// Wait a few seconds to give async tasks time to complete...
-	Wait,5
+    System,ErrorOff
+    DirDelete,#1
+    // Wait a few seconds to give async tasks time to complete...
+    Wait,5
   End
   Else,Begin
     // User clicked 'No'
     Halt,"Error: The specified folder could not be deleted."
   End
-  
+
 End
 
 [#_PhoenixAPI_DISM#]
@@ -848,8 +848,8 @@ While,ExistFile,#1,Begin
 
   If,Question,"Error: The specified file could not be deleted.#$x#$x#1#$x#$xPlease make sure the file is not running or in use by another application (eg. Text Editor/vmWare/VirtualBox).#$x#$xRetry?",Begin
     // User clicked 'Yes'
-	Wait,3
-	System,ErrorOff
+    Wait,3
+    System,ErrorOff
     If,ExistFile,#1,FileDelete,#1
   End
   Else,Begin
@@ -1061,26 +1061,26 @@ If,%argc%,>,2,Begin
   ForRange,%i%,3,%argMax%,1,Begin
     GetParam,%i%,%Arg%
     
-	StrFormat,Split,%Arg%,"=",1,%ArgKey%
-	
+    StrFormat,Split,%Arg%,"=",1,%ArgKey%
+
     If,%ArgKey%,Equal,"PASSWORD",Begin
       StrFormat,Split,%Arg%,"=",2,%Password%
-	  Set,%Password%," -p#$q%Password%#$q "
+      Set,%Password%," -p#$q%Password%#$q "
       Continue
     End
-	
-	If,%ArgKey%,Equal,"CDIR",Begin
-	  StrFormat,Split,%Arg%,"=",2,%CurrentDir%
-	  Set,%CurrentDir%," -c#$q%CurrentDir%#$q "
-	  Continue
+
+    If,%ArgKey%,Equal,"CDIR",Begin
+      StrFormat,Split,%Arg%,"=",2,%CurrentDir%
+      Set,%CurrentDir%," -c#$q%CurrentDir%#$q "
+      Continue
     End
-	
-	If,%ArgKey%,Equal,"LIST",Begin
-	  StrFormat,Split,%Arg%,"=",2,%ListFile%
-	  Set,%ListFile%," #$q@%ListFile%#$q"
-	  Continue
+
+    If,%ArgKey%,Equal,"LIST",Begin
+      StrFormat,Split,%Arg%,"=",2,%ListFile%
+      Set,%ListFile%," #$q@%ListFile%#$q"
+      Continue
     End
-  
+
     Halt,"InnoExtract Syntax Error: Invalid Argument [%Arg%] at position [%i%]."
   End
 End
@@ -1131,7 +1131,7 @@ If,%Filter%,Equal,"",Halt,"InnoRename Syntax Error: You must specify a file filt
 If,%Suffix%,Equal,"",Halt,"InnoRename Syntax Error: You must specify the suffix to process."
 If,%Arg4%,Equal,"NOREC",Set,%Recurse%,False
 Else,Set,%Recurse%,True
-  
+
 StrFormat,Replace,%Filter%," ","",%Filter%
 StrFormat,Replace,%Filter%,",","#$c",%Filter%
 
@@ -1396,14 +1396,14 @@ Else,Begin
   If,Not,ExistFile,"%TargetSystem32%\PinUtil.ini",FileCreateBlank,"%TargetSystem32%\PinUtil.ini"
   If,%PinPos%,Equal,"Auto",Begin
     // Find an unused pin position
-	ForRange,%i%,0,100,1,Begin
-	  IniRead,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%i%,%CurrentPos%
-	  If,%CurrentPos%,Equal,"",Begin
-	    Set,%PinPos%,%i%
-	    Break
-	  End
-	  Else,Set,%PinPos%,-1
-	End
+    ForRange,%i%,0,100,1,Begin
+      IniRead,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%i%,%CurrentPos%
+      If,%CurrentPos%,Equal,"",Begin
+        Set,%PinPos%,%i%
+        Break
+      End
+      Else,Set,%PinPos%,-1
+    End
   End
   Else,If,%PinPos%,Smaller,0,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
   Else,If,%PinPos%,Bigger,99,Halt,"PinShortcut Syntax Error: [%PinPos%] is not a value from [0-99]."
@@ -1422,13 +1422,13 @@ Else,Begin
     End
 
     // Work around pin restrictions on removable media.
-	IniRead,"%ProjectDir%\Components\330-AimRamdisk.script","Main","Selected",%IsSelectedAim%
-	IniRead,"%ProjectDir%\Components\330-ImDisk.script","Main","Selected",%IsSelectedImDisk%
-	If,%IsSelectedAim%,Equal,True,ReadInterface,Value,"%ProjectDir%\Components\330-AimRamdisk.script",Interface,cmb_DriveLetter,%RamDisk%
-	Else,If,%IsSelectedImDisk%,Equal,True,ReadInterface,Value,"%ProjectDir%\Components\330-ImDisk.script",Interface,cmb_DriveLetter,%RamDisk%
-	Else,Set,%RamDisk%,"B:"
+    IniRead,"%ProjectDir%\Components\330-AimRamdisk.script","Main","Selected",%IsSelectedAim%
+    IniRead,"%ProjectDir%\Components\330-ImDisk.script","Main","Selected",%IsSelectedImDisk%
+    If,%IsSelectedAim%,Equal,True,ReadInterface,Value,"%ProjectDir%\Components\330-AimRamdisk.script",Interface,cmb_DriveLetter,%RamDisk%
+    Else,If,%IsSelectedImDisk%,Equal,True,ReadInterface,Value,"%ProjectDir%\Components\330-ImDisk.script",Interface,cmb_DriveLetter,%RamDisk%
+    Else,Set,%RamDisk%,"B:"
     StrFormat,Replace,%ProgramExe%,"Y:\","%RamDisk%\",%ProgramExe%
-  
+
     IniWrite,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
   End
 End
@@ -1515,7 +1515,7 @@ If,%argc%,>,0,Begin
   ForRange,%i%,1,%argMax%,1,Begin
     GetParam,%i%,%Arg%
     
-	If,%Arg%,Equal,"Force",Begin
+    If,%Arg%,Equal,"Force",Begin
       Set,%ForceUnmount%,True
       Continue
     End
@@ -1527,12 +1527,12 @@ If,%argc%,>,0,Begin
      StrFormat,Split,%Arg%,"=",2,%HKEY%
      Continue
     End
-	
-	If,%ArgKey%,Equal,"TARGET",Begin
-	  StrFormat,Split,%Arg%,"=",2,%UnloadTarget%
-	  Continue
+
+    If,%ArgKey%,Equal,"TARGET",Begin
+      StrFormat,Split,%Arg%,"=",2,%UnloadTarget%
+      Continue
     End
-	
+
     Halt,"RegUnloadHives Syntax Error: Invalid Argument [%Arg%] at position [%i%]."
   End
 End
@@ -1834,7 +1834,7 @@ If,%argc%,>,2,Begin
   ForRange,%i%,3,%argMax%,1,Begin
     GetParam,%i%,%Arg%
     
-	If,%Arg%,Equal,"NOERR",Begin
+    If,%Arg%,Equal,"NOERR",Begin
       Set,%NoErr%,True
       Continue
     End
@@ -1856,32 +1856,32 @@ If,%argc%,>,2,Begin
       StrFormat,Split,%Arg%,"=",2,%UserAgent%
       Continue
     End
-	
-	If,%ArgKey%,Equal,"MD5",Begin
+
+    If,%ArgKey%,Equal,"MD5",Begin
       Set,%HashType%,"MD5"
       StrFormat,Split,%Arg%,"=",2,%HashDigest%
       Continue
     End
-	
-	If,%ArgKey%,Equal,"SHA1",Begin
+
+    If,%ArgKey%,Equal,"SHA1",Begin
       Set,%HashType%,"SHA-1"
       StrFormat,Split,%Arg%,"=",2,%HashDigest%
       Continue
     End
-	
-	If,%ArgKey%,Equal,"SHA256",Begin
+
+    If,%ArgKey%,Equal,"SHA256",Begin
       Set,%HashType%,"SHA-256"
       StrFormat,Split,%Arg%,"=",2,%HashDigest%
       Continue
     End
-	
-	If,%ArgKey%,Equal,"SHA384",Begin
+
+    If,%ArgKey%,Equal,"SHA384",Begin
       Set,%HashType%,"SHA-384"
       StrFormat,Split,%Arg%,"=",2,%HashDigest%
       Continue
     End
-	
-	If,%ArgKey%,Equal,"SHA512",Begin
+
+    If,%ArgKey%,Equal,"SHA512",Begin
       Set,%HashType%,"SHA-512"
       StrFormat,Split,%Arg%,"=",2,%HashDigest%
       Continue
@@ -1907,7 +1907,7 @@ If,Not,%ExitCode%,Equal,0,Begin
   Else,Begin
     Math,Add,%Aria2ErrorDescrPos%,%Aria2ErrorPos%,1
     List,Get,%Aria2Errors%,%Aria2ErrorDescrPos%,%Aria2ErrorDescr%
-	Set,%Aria2ErrorDescr%," %Aria2ErrorDescr%"
+    Set,%Aria2ErrorDescr%," %Aria2ErrorDescr%"
   End
   
   If,%NoErr%,Equal,True,Return,%ExitCode%
