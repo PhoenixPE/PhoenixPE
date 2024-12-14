@@ -2,6 +2,85 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release 20224-12-15
+
+### Added
+- Added WebGetEx command to the PhoenixAPI.
+- Added the option to set x64dbg as the system JIT debugger in PhoenixPE.
+- Added MiniTool Partition Wizard 12.
+- Added QuickShot, a simple screen capture program developed by PC Assist Software.
+
+### Changed
+- 7-Zip script and tools updated to v24.09
+- Added a note regarding US download restrictions to KVRT script.
+- AgentRansack updated to v2022 build 3499
+- AIDA64 updated to v7.50.7200
+- Attribute Changer updated to v11.30c
+- BleachBit updated to v4.6.2
+- BlueScreenView added additional translations.
+- BrowserDownloadsView added additional translations.
+- BrowsingHistoryView added additional translations.
+- ChoEazyCopy updated to v2.0.0.3
+- CPU-Z updated to v.2.12.0
+- CredentialsFileView added additional translations.
+- DataProtectionDecryptor added additional translations.
+- DesktopInfo updated to v3.16.0
+- Dialupass added additional translations.
+- DiskGenius updated to v5.6.1.1580
+- Enhancements to Boot.wim build support when using Win11 23H2 and 24H2 sources.
+- EncryptedRegView added additional translations.
+- ExtPassword added additional translations.
+- FastStone Capture updated to v10.9
+- FastStone Image Viewer updated to v7.9 and added Japanese language.
+- FullEventLogView added additional translations.
+- Google Chrome updated to v131.0.6778.86
+- GPU-Z updated to v2.60.0
+- grepWin updated to v2.1.7
+- HWinfo updated to v8.16
+- ImageCacheViewer added additional translations.
+- IrfanView updated to v4.70
+- LibreOffice updated to v24.8.2
+- LSASecretsView added additional translations.
+- MailPassView added additional translations.
+- Media Player Classic updated to v1.8.2.0
+- MultiMonitorTool added additional translations.
+- Notepad++ updated to v8.7.4.0
+- PowerShell Core updated to v7.4.6
+- PreviousFilesRecovery added additional translations.
+- ProduKey added additional translations.
+- PstPassword added additional translations.
+- RegistryChangesView added additional translations.
+- Removed old unneeded digital certificates from AOMEI Partition Assistant script.
+- RustDesk updated to v1.3.5
+- SecurityQuestionsView added additional translations.
+- ServiWin added additional translations.
+- ShadowCopyView added additional translations.
+- Simplewall updated to v3.8.5
+- Some PhoenixAPI commands were optimized.
+- USBDriveLog added additional translations.
+- VaultPasswordView added additional translations.
+- VeraCrypt updated to v1.26.15
+- WebBrowserPassView added additional translations.
+- WinDirStat script updated for WinDirStat v2.x
+- WinMailPassRec added additional translations.
+- WinMerge updated to v2.16.44
+- WinSCP updated to v6.3.6
+- WinXShell updated to v5.1.4 beta4
+- WirelessKeyView added additional translations.
+- WizTree updated to v4.23
+
+### Fixed
+- Ignore errors caused by M$ evil UCPD driver that prevents disabling taskbar widgets via TaskbarDa. This caused the StartIsBack script to fail writing the registry.
+- Fixed an issue with the working directory in the Offline SFC tool. (https://theoven.org/viewtopic.php?p=2007)
+- Fixed a bug with ScriptFactory that caused a logic error when creating a new script and prevented token replacement from completing.
+- Fix unquoted paths in OfflineSFC.
+- Fixed ClassicCalc download failure.
+- Fixed an issue with RDP under Win11 sources crashing shortly after connecting to a host due to a missing media foundation dependency. (https://theoven.org/viewtopic.php?p=2060)
+- Fixed an issue where Korean IME did not work in windows 10.0.18363 or later. (Issue #108)
+- Fixed BeyondCompare.Snapshot file extension in BeyondCompare4 script.
+
+### Removed
+
 ## Release 2024-09-13
 
 ### Added
@@ -198,7 +277,7 @@ Notable changes to the PhoenixPE project.
 - Attribute Changer updated language selections. (Issue #67)
 - AudioSrvPolicyManager patching process was modified to work with Win11 10.0.22621.1702 (Issue #58)
 - BeyondCompare updated to v4.4.7.28397
-- BleachBit updated v4.6.0 (now requires writable dir and VC++ 10)
+- BleachBit updated to v4.6.0 (now requires writable dir and VC++ 10)
 - Bumped StartAllBack supported version to v3.7.3
 - CPU-Z updated to v.2.08.0
 - DesktopInfo updated to v3.11.0
