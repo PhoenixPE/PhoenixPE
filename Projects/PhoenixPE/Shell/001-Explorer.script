@@ -157,6 +157,9 @@ End
 // Prevent explorer from initializing start menu defaults/pins/recent apps/etc. (Prevents explorer crash in 23H2v2)
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","StartMenuInit",13
 
+// Fix statusbar resizing on display res switch. (24H2 26100.1742)
+If,%SourceVer%,BiggerEqual,10.0.26100.1742,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSizeMove",0
+
 // Set the My Computer > Properties context menu to open the classic System Properties dialog
 RegWrite,HKLM,0x2,"Tmp_Software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Properties\command","","%WinDir%\System32\SystemPropertiesComputerName.exe"
 
