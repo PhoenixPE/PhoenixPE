@@ -5,12 +5,16 @@ Notable changes to the PhoenixPE project.
 ## Release 20224-12-15
 
 ### Added
+- Microsoft .NET 9 runtime.
 - Added WebGetEx command to the PhoenixAPI.
 - Added the option to set x64dbg as the system JIT debugger in PhoenixPE.
 - Added MiniTool Partition Wizard 12.
 - Added QuickShot, a simple screen capture program developed by PC Assist Software.
+- Added Zulu JRE21 v21.38.21
 
 ### Changed
+- .Net 6 runtime updated to v6.0.36
+- .Net 8 runtime updated to v8.0.11
 - 7-Zip script and tools updated to v24.09
 - Added a note regarding US download restrictions to KVRT script.
 - AgentRansack updated to v2022 build 3499
@@ -59,6 +63,7 @@ Notable changes to the PhoenixPE project.
 - Some PhoenixAPI commands were optimized.
 - USBDriveLog added additional translations.
 - VaultPasswordView added additional translations.
+- MS Visual C++ Runtime updated to v14.42.34433.0
 - VeraCrypt updated to v1.26.15
 - WebBrowserPassView added additional translations.
 - WinDirStat script updated for WinDirStat v2.x
@@ -68,6 +73,8 @@ Notable changes to the PhoenixPE project.
 - WinXShell updated to v5.1.4 beta4
 - WirelessKeyView added additional translations.
 - WizTree updated to v4.23
+- Zulu JRE11 updated to v11.76.31
+- Zulu JRE17 updated to v17.52.17
 
 ### Fixed
 - Ignore errors caused by M$ evil UCPD driver that prevents disabling taskbar widgets via TaskbarDa. This caused the StartIsBack script to fail writing the registry.
