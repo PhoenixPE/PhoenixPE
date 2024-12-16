@@ -64,7 +64,7 @@ Notable changes to the PhoenixPE project.
 - USBDriveLog added additional translations.
 - VaultPasswordView added additional translations.
 - MS Visual C++ Runtime updated to v14.42.34433.0
-- VeraCrypt updated to v1.26.15
+- VeraCrypt updated to v1.26.15
 - WebBrowserPassView added additional translations.
 - WinDirStat script updated for WinDirStat v2.x
 - WinMailPassRec added additional translations.
