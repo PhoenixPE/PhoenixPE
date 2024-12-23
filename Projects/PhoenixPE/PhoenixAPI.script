@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.11.3.0
-Date=2024-11-02
+Version=1.12.0.0
+Date=2024-12-23
 Level=0
 Selected=None
 
@@ -1797,8 +1797,8 @@ System,EndLocal
 // ===============================================================================================================================
 // Name...........: WebGetEx
 // Description....: An extended version of WebGet utilizing Aria2 as the download engine. Useful for URL's that include javascript based redirects or CDN protection such as CloudFlare.
-// Syntax.........: WebGetEx,<URL>,<DestDir>
-// Parameters.....: #1 URL - URL of the file to download.
+// Syntax.........: WebGetEx,<URL>,<DestPath>[,<HashType>=<HashDigest>][,Referer=<URL>][,TimeOut=<Int>][,UserAgent=<Agent>][,NOERR]
+// Parameters.....: #1 URL - URL of the file to download. Valid URI's are `HTTP`, `HTTPS`, `FTP`, `SFTP`
 //                  #2 DestPath - The full path where the downloaded file will be saved. If the path does not exist it will be created. If the file exists it will be overwritten.
 //                  Hash Verification - (Optional) Downloads can be verified by validating the hash value of the downloaded file in the form of <HashType>=<HashDigest>.
 //                  HashType= - Hash type to calculate. Supported hash types: MD5, SHA1, SHA256, SHA384, SHA512.
@@ -1806,6 +1806,10 @@ System,EndLocal
 //                  TimeOut= - (Optional) The time-span (in seconds) to wait for a response before the request times out. Default: 10
 //                  UserAgent= - (Optional) Set a custom User-Agent string used to identify PEBakery to the website.
 //                  NOERR - (Optional) Do not halt the build if the download fails. It will be the script developer's responsibility to handle the situation gracefully.
+//                  FTP-User= - (Optional) Set the FTP/SFTP user. Default: `anonymous`.
+//                  FTP-Password= - (Optional) Set the FTP/SFTP password. Default: `PhoenixPE`.
+//                  FTP-Passive= - (Optional) Use passive mode in FTP. Default: `true`. This option is ignored for SFTP transfers.
+//                  FTP-Type= - (Optional) Set the FTP transfer type. Supported values are: `binary` or `ascii`. Default: `binary`. This option is ignored for SFTP transfers.
 // Return values..: #r - Success: 0, Fail: Non-Zero - See Aria2 exit code reference.
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
@@ -1827,6 +1831,10 @@ Set,%Referer%,"*"
 Set,%ConnTimeout%,600
 Set,%UserAgent%,"aria2/1.37.0"
 Set,%NoErr%,False
+Set,%FTP-User%,"anonymous"
+Set,%FTP-Password%,"PhoenixPE"
+Set,%FTP-Passive%,"true"
+Set,%FTP-Type%,"binary"
 
 If,%argc%,>,2,Begin
   // Process additional arguments
@@ -1887,18 +1895,61 @@ If,%argc%,>,2,Begin
       Continue
     End
 
+    If,%ArgKey%,Equal,"FTP-User",Begin
+      StrFormat,Split,%Arg%,"=",2,%FTP-User%
+      Continue
+    End
+
+    If,%ArgKey%,Equal,"FTP-Password",Begin
+      StrFormat,Split,%Arg%,"=",2,%FTP-Password%
+      Continue
+    End
+
+    If,%ArgKey%,Equal,"FTP-Passive",Begin
+      StrFormat,Split,%Arg%,"=",2,%FTP-Passive%
+      Set,%AllowedValues%,"true|false"
+      List,Pos,%AllowedValues%,%FTP-Passive%,%FTP-PassivePos%
+      If,%FTP-PassivePos%,Equal,0,Halt,"WebGetEx Syntax Error: [%ArgKey%] must be one of [%AllowedValues%]."
+      Continue
+    End
+
+    If,%ArgKey%,Equal,"FTP-Type",Begin
+      StrFormat,Split,%Arg%,"=",2,%FTP-Type%
+      Set,%AllowedValues%,"ascii|binary"
+      List,Pos,%AllowedValues%,%FTP-Type%,%FTP-TypePos%
+      If,%FTP-TypePos%,Equal,0,Halt,"WebGetEx Syntax Error: [%ArgKey%] must be one of [%AllowedValues%]."
+      Continue
+    End
+
     Halt,"WebGetEx Syntax Error: Invalid Argument [%Arg%] at position [%i%]."
   End
 End
 
+// Build hash check specific commands
 If,Not,%HashType%,Equal,"",Set,%CheckIntegrity%,"--check-integrity=true --checksum=%HashType%=%HashDigest% "
 Else,Set,%CheckIntegrity%,""
 
+// Build FTP/SFTP specific commands
+StrFormat,Left,%URL%,3,%URI%
+If,%URI%,Equal,"FTP",Set,%IsFTP%,"True"
+Else,Begin
+  StrFormat,Left,%URL%,4,%URI%
+  If,%URI%,Equal,"SFTP",Set,%IsFTP%,"True"
+End
+Else,Set,%IsFTP%,"False"
+
+If,%IsFTP%,Equal,"True",Begin
+  Set,%FTPcmd%,"--ftp-user=%FTP-User% --ftp-passwd=%FTP-Password% "
+  If,%URI%,Equal,"FTP",Set,%FTPcmd%,"%FTPcmd%--ftp-pasv=%FTP-Passive% --ftp-type=%FTP-Type% "
+End
+Else,Set,%FTPcmd%,""
+
+// Aria2 needs us to split out the directory and file name from the DestPath.
 StrFormat,DirPath,%DestPath%,%DestPathDir%
 StrFormat,EndTrim,%DestPathDir%,"\","%DestPathDir%"
 StrFormat,FileName,%DestPath%,%DestFileName%
 
-ShellExecute,Hide,"%Tools%\%HostArch%\aria2c.exe","%CheckIntegrity%--referer=#$q%Referer%#$q --user-agent=#$q%UserAgent%#$q --connect-timeout=%ConnTimeout% --log-level=info --log=- --allow-overwrite=true --auto-file-renaming=false --dir=#$q%DestPathDir%#$q --out=#$q%DestFileName%#$q #$q%URL%#$q"
+ShellExecute,Hide,"%Tools%\%HostArch%\aria2c.exe","%CheckIntegrity%%FTPcmd%--referer=#$q%Referer%#$q --user-agent=#$q%UserAgent%#$q --connect-timeout=%ConnTimeout% --log-level=info --log=- --allow-overwrite=true --auto-file-renaming=false --dir=#$q%DestPathDir%#$q --out=#$q%DestFileName%#$q #$q%URL%#$q"
 If,Not,%ExitCode%,Equal,0,Begin
   Set,%Aria2Errors%,"0|All downloads were successful|1|An unknown error occurred|2|Download timed out|3|A resource was not found|4|Resource not found threshold reached|5|A download aborted because download speed was too slow|6|A network issue occurred|7|Download aborted by user|8|The remote server did not support resume when resume was required to complete the download|9|Not enough disk space available|10|The piece length is different from one in .aria2 control file|11|The same file is already being downloaded|12|The same info hash torrent is already being downloaded|13|The file already exists|14|Renaming the downloaded file failed|15|Could not open the existing file|16|Could not create a new file or truncate the existing file|17|File I/O error|18|Could not create the directory|19|DNS name resolution failed|20|Could not parse Metalink document|21|FTP command failed|22|The HTTP response header was bad or unexpected|23|Too many redirects occurred|24|HTTP authorization failed|25|Could not parse bencoded file|26|The .torrent file was corrupted or incomplete|27|Bad magnet URI|28|Syntax error. Unrecognized option or unexpected argument|29|The remote server was unable to handle the request due to overloading or maintenance|30|Could not parse JSON-RPC request|31|Reserved|32|Checksum validation failed. The downloaded file's hash does not match [%HashDigest%]"
 
