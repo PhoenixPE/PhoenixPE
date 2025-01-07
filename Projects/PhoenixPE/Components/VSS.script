@@ -36,8 +36,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-23
+Version=1.0.1.0
+Date=2025-01-03
 
 [Variables]
 %ProgramFolder%="%TargetSystem32%"
@@ -133,13 +133,13 @@ AddAutoRun,PostShell,HideNoWait,"Starting Volume Shadow Copy Services...","#$pSy
 // ===============================================================================================================================
 [PatchVSS]
 Echo,"Patching VSS files..."
-ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u #$q%TargetSystem32%\vssapi.dll#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
-ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetSystem32%\vssapi.dll#$q -s 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730073 -r 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730074"
-ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetSystem32%\VSSVC.exe#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
+Binmay,"-u #$q%TargetSystem32%\vssapi.dll#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
+Binmay,"-u  #$q%TargetSystem32%\vssapi.dll#$q -s 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730073 -r 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730074"
+Binmay,"-u  #$q%TargetSystem32%\VSSVC.exe#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
 
 If,ExistFile,"%TargetWindows%\SysWOW64\vssapi.dll",Begin
-  ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetWindows%\SysWOW64\vssapi.dll#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
-  ShellExecute,Hide,%Tools%\%HostArch%\binmay.exe,"-u  #$q%TargetWindows%\SysWOW64\vssapi.dll#$q -s 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730073 -r 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730074"
+  Binmay,"-u  #$q%TargetWindows%\SysWOW64\vssapi.dll#$q -s 4D0069006E0069004E0054 -r 4D0069006E0069004E0058"
+  Binmay,"-u  #$q%TargetWindows%\SysWOW64\vssapi.dll#$q -s 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730073 -r 530079007300740065006D005300650074007500700049006E00500072006F00670072006500730074"
 End
 
 [#SetDefaultOptions#]
