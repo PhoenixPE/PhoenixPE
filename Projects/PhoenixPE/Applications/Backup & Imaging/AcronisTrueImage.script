@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.2.0.0
-Date=2024-07-19
+Version=1.3.0.0
+Date=2025-01-13
 
 [Variables]
 %ProgramFolder%="TrueImage"
@@ -64,86 +64,62 @@ Echo,"Configuring %ScriptTitle%..."
 
 RegLoadHives
 
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\GlobalComponents","snapapi.dll","x:\Windows\system32\snapapi.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\GlobalComponents","volume_tracker_driver_api.dll","x:\Windows\system32\volume_tracker_driver_api.dll"
-
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","resource.dll","%PEPrograms%\%ProgramFolder%\resource.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","icu38.dll","%PEPrograms%\%ProgramFolder%\icu38.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","libcrypto10.dll","%PEPrograms%\%ProgramFolder%\libcrypto10.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","thread_pool.dll","%PEPrograms%\%ProgramFolder%\thread_pool.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","libssl10.dll","%PEPrograms%\%ProgramFolder%\libssl10.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","kb_link.dll","%PEPrograms%\%ProgramFolder%\kb_link.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","rpc_client.dll","%PEPrograms%\%ProgramFolder%\rpc_client.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","tib_api.dll","%PEPrograms%\%ProgramFolder%\tib_api.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","tib_mounter.dll","%PEPrograms%\%ProgramFolder%\tib_mounter.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","oem_doc_source.dll","%PEPrograms%\%ProgramFolder%\oem_doc_source.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","ulxmlrpcpp.dll","%PEPrograms%\%ProgramFolder%\ulxmlrpcpp.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","expat.dll","%PEPrograms%\%ProgramFolder%\expat.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","logging.dll","%PEPrograms%\%ProgramFolder%\logging.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","boot_assist.dll","%PEPrograms%\%ProgramFolder%\boot_assist.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","mspack.dll","%PEPrograms%\%ProgramFolder%\mspack.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","backup_worker.exe","%PEPrograms%\%ProgramFolder%\backup_worker.exe"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","archive3.dll","%PEPrograms%\%ProgramFolder%\archive3.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","archive3_adapter.dll","%PEPrograms%\%ProgramFolder%\archive3_adapter.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","astor_client.dll","%PEPrograms%\%ProgramFolder%\astor_client.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","disk_backup.dll","%PEPrograms%\%ProgramFolder%\disk_backup.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","file_backup.dll","%PEPrograms%\%ProgramFolder%\file_backup.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","onig.dll","%PEPrograms%\%ProgramFolder%\onig.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","pcs_io.dll","%PEPrograms%\%ProgramFolder%\pcs_io.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","re2.dll","%PEPrograms%\%ProgramFolder%\re2.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","winpthreads4.dll","%PEPrograms%\%ProgramFolder%\winpthreads4.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","zstd.dll","%PEPrograms%\%ProgramFolder%\zstd.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","auto_reactivate.bin","%PEPrograms%\%ProgramFolder%\auto_reactivate.bin"
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\CommonComponents","auto_reactivate64.bin","%PEPrograms%\%ProgramFolder%\auto_reactivate64.bin"
-
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\TrueImageHome\Settings","ServiceDir","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Acronis\TrueImageHome\Settings","ServiceDir","%PEPrograms%\%ProgramFolder%"
 
 System,ErrorOff,3
 RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Class\{4d36e967-e325-11ce-bfc1-08002be10318}","UpperFilters",Append,"PartMgr"
 RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Class\{4d36e967-e325-11ce-bfc1-08002be10318}","UpperFilters",Append,"fltsrv"
 RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Class\{71a27cdd-812a-11d0-bec7-08002be2092f}","UpperFilters",Append,"fltsrv"
 
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\fltsrv","DisplayName","Acronis Storage Filter Management"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\fltsrv","ErrorControl",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\fltsrv","Group","PnP Filter"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\fltsrv","ImagePath","System32\Drivers\fltsrv.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\fltsrv","Start",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\fltsrv","Tag",8
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\fltsrv","Type",1
-//--
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\snapman","DisplayName","Acronis Snapshot Manager"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\snapman","ErrorControl",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\snapman","ImagePath","System32\Drivers\snapman.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\snapman","Start",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\snapman","Type",1
-//--
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\volume_tracker","DisplayName","Acronis Volume Tracker"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\volume_tracker","ErrorControl",1
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\volume_tracker","ImagePath","System32\Drivers\volume_tracker.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\volume_tracker","Start",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\volume_tracker","Type",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\volume_tracker","Group","PnP Filter"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\fltsrv","DisplayName","Acronis Storage Filter Management"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\fltsrv","ErrorControl",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\fltsrv","Group","PnP Filter"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\fltsrv","ImagePath","System32\Drivers\fltsrv.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\fltsrv","Start",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\fltsrv","Tag",8
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\fltsrv","Type",1
+
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\snapman","DisplayName","Acronis Snapshot Manager"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\snapman","ErrorControl",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\snapman","ImagePath","System32\Drivers\snapman.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\snapman","Start",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\snapman","Type",1
+
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\volume_tracker","DisplayName","Acronis Volume Tracker"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\volume_tracker","ErrorControl",1
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\volume_tracker","ImagePath","System32\Drivers\volume_tracker.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\volume_tracker","Start",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\volume_tracker","Type",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\volume_tracker","Group","PnP Filter"
 
 // File Associations
+Associate,".tib","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 Associate,".tibx","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTRIM,%Lang%,1,%Lang%
-RegWrite,HKLM,0x1,"Tmp_Software\Acronis\Global","language","%Lang%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Acronis\Global","language","%Lang%"
 
 // iSCSI
 If,%cb_Include_iSCSI_Drivers%,Equal,True,Run,%ScriptFile%,iSCSIsupport
 
 // License
 If,%cmb_SoftwareLicense%,Equal,"Use Host License",Begin
-  If,ExistRegSubKey,HKLM,"Software\Acronis\TrueImageHome",RegCopy,HKLM,"Software\Acronis\TrueImageHome",HKLM,"Tmp_Software\Acronis\TrueImageHome"
+  If,ExistRegValue,HKLM,"Software\Acronis\TrueImageHome","standard",Begin
+    RegRead,HKLM,"Software\Acronis\TrueImageHome","standard",%RegValue%
+    RegWrite,HKLM,REG_SZ,"Tmp_Software\Acronis\TrueImageHome","standard",%RegValue%
+  End
+  Else,If,ExistRegValue,HKLM,"Software\WOW6432Node\Acronis\TrueImageHome","standard",Begin
+    RegRead,HKLM,"Software\WOW6432Node\Acronis\TrueImageHome","standard",%RegValue%
+    RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Acronis\TrueImageHome","standard",%RegValue%
+  End
   Else,Echo,"Warning: The software license was not found in the Host registry. Acronis True Image will run in Evaluation Mode.",Warn
 End
 Else,If,%cmb_SoftwareLicense%,Equal,"License from .reg file",Begin
   If,Not,%fb_SoftwareLicense%,Equal,"",If,ExistFile,%fb_SoftwareLicense%,Begin
     // Find/Replace Software hive with our mounted PE Software hive
-	FileCopy,%fb_SoftwareLicense%,"%ProjectTemp%\ATIReg.reg"
+    FileCopy,%fb_SoftwareLicense%,"%ProjectTemp%\ATIReg.reg"
     TXTReplace,"%ProjectTemp%\ATIReg.reg","HKEY_LOCAL_MACHINE\SOFTWARE\","HKEY_LOCAL_MACHINE\Tmp_Software\"
     // Not checking for a valid .reg file at the moment. Just being lazy and letting RegImport fail if there is an error.
     RegImport,"%ProjectTemp%\ATIReg.reg"
@@ -210,56 +186,56 @@ Else,Begin
 End
   
 // iScsiPrt Service
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\iScsiPrt","ImagePath","system32\DRIVERS\msiscsi.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt","Type",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt","Start",3
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt","ErrorControl",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\iScsiPrt","DisplayName","iScsiPort Driver"
-RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\iScsiPrt","Owners","iscsi.inf"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt","BootFlags",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\iScsiPrt","Group","iSCSI"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum",0,"ROOT\ISCSIPRT\0000"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","Count",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","NextInstance",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","INITSTARTFAILED",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\iScsiPrt\Parameters","BusType",9
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\iScsiPrt","ImagePath","system32\DRIVERS\msiscsi.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\iScsiPrt","Type",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\iScsiPrt","Start",3
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\iScsiPrt","ErrorControl",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\iScsiPrt","DisplayName","iScsiPort Driver"
+RegWrite,HKLM,REG_MULTI_SZ,"Tmp_System\ControlSet001\Services\iScsiPrt","Owners","iscsi.inf"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\iScsiPrt","BootFlags",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\iScsiPrt","Group","iSCSI"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum",0,"ROOT\ISCSIPRT\0000"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","Count",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","NextInstance",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\iScsiPrt\Enum","INITSTARTFAILED",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\iScsiPrt\Parameters","BusType",9
 
 // MSiSCSI Service
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI","ErrorControl",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","ImagePath","system32\iscsiexe.exe"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI","Start",2
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI","Type",16
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","Description","Manages Internet SCSI (iSCSI) sessions from this computer to remote iSCSI target devices. If this service is stopped, this computer will not be able to login or access iSCSI targets. If this service is disabled, any services that explicitly depend on it will fail to start."
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","DisplayName","Microsoft iSCSI Initiator Service"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","Objectname","LocalSystem"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI","Group","iSCSI"
-RegWrite,HKLM,0x3,"Tmp_System\ControlSet001\Services\MSiSCSI","FailureActions",80,51,01,00,00,00,00,00,00,00,00,00,03,00,00,00,14,00,00,00,02,00,00,00,60,ea,00,00,02,00,00,00,60,ea,00,00,02,00,00,00,60,ea,00,00
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","Count",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","NextInstance",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","INITSTARTFAILED",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum",0,"ROOT\LEGACY_MSISCSI\0000"
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\MSiSCSI"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\MSiSCSI","ErrorControl",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\MSiSCSI","ImagePath","system32\iscsiexe.exe"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\MSiSCSI","Start",2
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\MSiSCSI","Type",16
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\MSiSCSI","Description","Manages Internet SCSI (iSCSI) sessions from this computer to remote iSCSI target devices. If this service is stopped, this computer will not be able to login or access iSCSI targets. If this service is disabled, any services that explicitly depend on it will fail to start."
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\MSiSCSI","DisplayName","Microsoft iSCSI Initiator Service"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\MSiSCSI","Objectname","LocalSystem"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\MSiSCSI","Group","iSCSI"
+RegWrite,HKLM,REG_BINARY,"Tmp_System\ControlSet001\Services\MSiSCSI","FailureActions",80,51,01,00,00,00,00,00,00,00,00,00,03,00,00,00,14,00,00,00,02,00,00,00,60,ea,00,00,02,00,00,00,60,ea,00,00,02,00,00,00,60,ea,00,00
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","Count",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","NextInstance",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum","INITSTARTFAILED",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\MSiSCSI\Enum",0,"ROOT\LEGACY_MSISCSI\0000"
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\MSiSCSI"
 
 // Microsoft iSCSI Initiator
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","ClassGUID","{4D36E97B-E325-11CE-BFC1-08002BE10318}"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Class","SCSIAdapter"
-RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","HardwareID","Root\iSCSIPrt"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Driver","{4D36E97B-E325-11CE-BFC1-08002BE10318}\0000"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Mfg","Microsoft"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Service","iScsiPrt"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","DeviceDesc","Microsoft iSCSI Initiator"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","ConfigFlags",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Capabilities",0
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000\Control","ActiveService","iScsiPrt"
-RegWrite,HKLM,0x0,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000\LogConf"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI","NextInstance",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Service","MSiSCSI"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Legacy",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","ConfigFlags",0
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Class","LegacyDriver"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","ClassGUID","{8ECC055D-047F-11D1-A537-0000F8753ED1}"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","DeviceDesc","Microsoft iSCSI Initiator Service"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000\Control","ActiveService","MSiSCSI"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","ClassGUID","{4D36E97B-E325-11CE-BFC1-08002BE10318}"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Class","SCSIAdapter"
+RegWrite,HKLM,REG_MULTI_SZ,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","HardwareID","Root\iSCSIPrt"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Driver","{4D36E97B-E325-11CE-BFC1-08002BE10318}\0000"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Mfg","Microsoft"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Service","iScsiPrt"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","DeviceDesc","Microsoft iSCSI Initiator"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","ConfigFlags",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000","Capabilities",0
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000\Control","ActiveService","iScsiPrt"
+RegWrite,HKLM,REG_NONE,"Tmp_System\ControlSet001\Enum\Root\ISCSIPRT\0000\LogConf"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI","NextInstance",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Service","MSiSCSI"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Legacy",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","ConfigFlags",0
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","Class","LegacyDriver"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","ClassGUID","{8ECC055D-047F-11D1-A537-0000F8753ED1}"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000","DeviceDesc","Microsoft iSCSI Initiator Service"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Enum\Root\LEGACY_MSISCSI\0000\Control","ActiveService","MSiSCSI"
 
 [#ExtractProgram#]
 // ===============================================================================================================================
@@ -479,8 +455,8 @@ lbl_Language=Language,1,1,159,110,153,16,8,Normal
 cmb_Language="English [en]",1,4,160,126,150,21,"Chinese (Traditional) [zh-TW]","Chinese (Simplified) [zh-CN]","Dutch (Belgium) [nl-be]","Dutch (Netherlands) [nl]","English [en]","French [fr]","German [de]","Italian [it]","Japanese [jp]","Portuguese (Brazil) [pt]","Spanish [es]","Turkish [tr]"
 cb_Include_iSCSI_Drivers="Include iSCSI Drivers",1,3,160,155,151,18,False
 lbl_SoftwareLicense="Software License:",1,1,160,185,149,16,8,Normal
-cmb_SoftwareLicense="Evaluation license",1,4,160,200,175,21,"Evaluation license","Use Host license","License from .reg file",_ToggleLicenseReg_,True,"__Acronis True Image is not free software. A valid license is required for full functionality.#$x#$xEvaluation license - ATI will operate in a limited Evaluation Mode#$x#$xUse Host license - If you have ATI installed and licensed on your host (build) computer this option will#$ximport the license to your PE.#$x#$xLicense from .reg file - If you have ATI installed and licensed on another computer you can export the#$xregistry key containing the license code (HKLM\Software\Acronis\TrueImage) and import the .reg file into your PE."
-fb_SoftwareLicense=,0,13,160,228,200,20,file,"__Please select a .reg file containing the exported license key.#$xHKLM\Software\Acronis\TrueImage"
+cmb_SoftwareLicense="Use Host license",1,4,160,200,175,21,"Evaluation license","Use Host license","License from .reg file",_ToggleLicenseReg_,True,"__Acronis True Image is not free software. A valid license is required for full functionality.#$x#$xEvaluation license - ATI will operate in a limited Evaluation Mode#$x#$xUse Host license - If you have ATI installed and licensed on your host (build) computer this option will#$ximport the license to your PE.#$x#$xLicense from .reg file - If you have ATI installed and licensed on another computer you can export the#$xregistry key containing the license code (HKLM\Software\Acronis\TrueImage or HKLM\Software\WOW6432Node\Acronis\TrueImage) and import the .reg file into your PE."
+fb_SoftwareLicense=,0,13,160,228,200,20,file,"__Please select a .reg file containing the exported license key. This will be either #$x- HKLM\Software\Acronis\TrueImage#$x- HKLM\Software\WOW6432Node\Acronis\TrueImage"
 
 [InterfaceEncoded]
 Trash.ico=1150,1212
