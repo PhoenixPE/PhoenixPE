@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.12.0.0
-Date=2024-12-23
+Version=1.12.1.0
+Date=2025-01-03
 Level=0
 Selected=None
 
@@ -917,6 +917,12 @@ System,EndLocal
 // Author.........: Homes32
 // Remarks........: Depends on GetBinaryResource.exe in %Tools%.
 //                  GetBinaryResource.exe <Source> <ResourceType> <ResourceID> <OutputPath>
+//
+//                  Note: Due to the horrendous Winbuilder syntax we inherited that uses a single # as an argument designation
+//                        (eg. #1, #2, etc.) for arguments passed via Exec to a section, we need to check for and escape single #
+//                        on the ResourceType and ResourceID arguments or they will be dereferenced as variables if the user
+//                        specifies an ordinal such as #400. We also must check for, and handle ## in case the user thought to
+//                        escape any of the arguments themselves.
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_GetBinaryResource]
@@ -935,11 +941,30 @@ GetParam,5,%Arg5%
 
 If,%Arg5%,Equal,"NOERR",Set,%NOERR%,"True"
 
+StrFormat,Left,%ResourceType%,1,%Left1ResourceType%
+If,%Left1ResourceType%,Equal,"#",Begin
+  // Escape ResourceType ordinal
+  StrFormat,StartTrim,%ResourceType%,"#",%ResourceType%
+  Set,%ResourceType%,"##%ResourceType%"
+End
+
+StrFormat,Left,%ResourceID%,1,%Left1ResourceID%
+If,%Left1ResourceID%,Equal,"#",Begin
+  // Escape ResourceID ordinal
+  StrFormat,StartTrim,%ResourceID%,"#",%ResourceID%
+  Set,%ResourceID%,"##%ResourceID%"
+End
+
 ShellExecute,Hide,"%Tools%\%HostArch%\GetBinaryResource.exe","#$q%Source%#$q %ResourceType% %ResourceID% #$q%OutputPath%#$q"
 If,%ExitCode%,Equal,0,Return,%ExitCode%
 Else,If,%NOERR%,Equal,"True",Return,%ExitCode%
-Else,Halt,"GetBinaryResource Error: Unable to extract resource [%ResourceID%]. The command returned [%ExitCode%]."
-
+Else,Begin
+  Set,%GetBinaryResourceErrors%,"0|Success|1|Could not load exe|2|Could not find resource|3|Could not load resource|4|Could not lock resource|5|Could not save resource to file|99|Syntax error"
+  List,Pos,%GetBinaryResourceErrors%,%ExitCode%,%ErrorPos%
+  Math,Add,%ErrorDescrPos%,%ErrorPos%,1
+  List,Get,%GetBinaryResourceErrors%,%ErrorDescrPos%,%ErrorDescr%
+  Halt,"GetBinaryResource Error: Unable to extract resource [%ResourceID%]. The command returned: [%ExitCode%] %ErrorDescr%."
+End
 System,EndLocal
 
 [#_PhoenixAPI_GetStringResource#]
@@ -1050,6 +1075,7 @@ If,#2,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the destination 
 GetParam,1,%SetupFile%
 Getparam,2,%DestDir%
 Set,%argc%,#a
+Set,%argOptStart%,3
 
 Set,%Password%,""
 Set,%CurrentDir%,""
@@ -1058,7 +1084,7 @@ Set,%ListFile%,""
 If,%argc%,>,2,Begin
   // Process additional arguments
   Math,Add,%argMax%,%argc%,1
-  ForRange,%i%,3,%argMax%,1,Begin
+  ForRange,%i%,%argOptStart%,%argMax%,1,Begin
     GetParam,%i%,%Arg%
     
     StrFormat,Split,%Arg%,"=",1,%ArgKey%
@@ -1153,7 +1179,7 @@ System,EndLocal
 // Author.........: Homes32
 // Remarks........: This command is a wrapper for Innounp.exe and passes any arguments directly to the executable. You are
 //                  responsible for checking the return code and handling any errors. Unless you need advanced features such
-//                  extracting using a @filelist or filemask it is recommended to use the Innounp macro instead.
+//                  extracting using a @filelist or filemask it is recommended to use the InnoExtract macro instead.
 //                  Innounp Website: http://innounp.sourceforge.net/
 // Related........: Innounp.exe
 // ===============================================================================================================================
@@ -1384,6 +1410,8 @@ GetParam,1,%PinLocation%
 GetParam,2,%PinPos%
 GetParam,3,%ProgramExe%
 
+Set,%MaxPins%,100
+
 If,Not,%PinLocation%,Equal,"StartMenu",If,Not,%PinLocation%,Equal,"Taskbar",Halt,"PinShortcut Syntax Error: [%PinLocation%] is not a valid pin location."
 
 If,"%Shell%-%PinLocation%",Equal,"WinXShell-Taskbar",Begin
@@ -1396,7 +1424,7 @@ Else,Begin
   If,Not,ExistFile,"%TargetSystem32%\PinUtil.ini",FileCreateBlank,"%TargetSystem32%\PinUtil.ini"
   If,%PinPos%,Equal,"Auto",Begin
     // Find an unused pin position
-    ForRange,%i%,0,100,1,Begin
+    ForRange,%i%,0,%MaxPins%,1,Begin
       IniRead,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%i%,%CurrentPos%
       If,%CurrentPos%,Equal,"",Begin
         Set,%PinPos%,%i%
@@ -1787,6 +1815,7 @@ GetParam,1,%RegKey%
 Echo,"Taking ownership of [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
 If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of [%RegKey%]. The command returned: [%ExitCode%]."
+
 Echo,"Granting full access to [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
 ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
 If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on [%RegKey%]. The command returned: [%ExitCode%]."
@@ -1824,6 +1853,7 @@ If,#2,Equal,"",Halt,"WebGetEx Syntax Error: You must specify the destination pat
 GetParam,1,%URL%
 Getparam,2,%DestPath%
 Set,%argc%,#a
+Set,%argOptStart%,3
 
 Set,%HashType%,""
 Set,%HashDigest%,""
@@ -1839,9 +1869,10 @@ Set,%FTP-Type%,"binary"
 If,%argc%,>,2,Begin
   // Process additional arguments
   Math,Add,%argMax%,%argc%,1
-  ForRange,%i%,3,%argMax%,1,Begin
+  ForRange,%i%,%argOptStart%,%argMax%,1,Begin
     GetParam,%i%,%Arg%
     
+    // Process Flags
     If,%Arg%,Equal,"NOERR",Begin
       Set,%NoErr%,True
       Continue
