@@ -35,7 +35,7 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.3.0.0
+Version=1.3.1.0
 Date=2025-01-13
 
 [Variables]
@@ -43,6 +43,7 @@ Date=2025-01-13
 %ProgramExe%="TrueImage_starter.exe"
 %SetupFile%="AcronisTrueImage.exe"
 %DownloadURL%=https://download.acronis.com/AcronisTrueImage.exe
+%FileAssoc%=tib|tibx
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -93,8 +94,7 @@ RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\volume_tracker","Type
 RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\volume_tracker","Group","PnP Filter"
 
 // File Associations
-Associate,".tib","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-Associate,".tibx","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+ForEach,%Ext%,%FileAssoc%,Associate,%Ext%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
@@ -455,7 +455,7 @@ lbl_Language=Language,1,1,159,110,153,16,8,Normal
 cmb_Language="English [en]",1,4,160,126,150,21,"Chinese (Traditional) [zh-TW]","Chinese (Simplified) [zh-CN]","Dutch (Belgium) [nl-be]","Dutch (Netherlands) [nl]","English [en]","French [fr]","German [de]","Italian [it]","Japanese [jp]","Portuguese (Brazil) [pt]","Spanish [es]","Turkish [tr]"
 cb_Include_iSCSI_Drivers="Include iSCSI Drivers",1,3,160,155,151,18,False
 lbl_SoftwareLicense="Software License:",1,1,160,185,149,16,8,Normal
-cmb_SoftwareLicense="Use Host license",1,4,160,200,175,21,"Evaluation license","Use Host license","License from .reg file",_ToggleLicenseReg_,True,"__Acronis True Image is not free software. A valid license is required for full functionality.#$x#$xEvaluation license - ATI will operate in a limited Evaluation Mode#$x#$xUse Host license - If you have ATI installed and licensed on your host (build) computer this option will#$ximport the license to your PE.#$x#$xLicense from .reg file - If you have ATI installed and licensed on another computer you can export the#$xregistry key containing the license code (HKLM\Software\Acronis\TrueImage or HKLM\Software\WOW6432Node\Acronis\TrueImage) and import the .reg file into your PE."
+cmb_SoftwareLicense="Evaluation license",1,4,160,200,175,21,"Evaluation license","Use Host license","License from .reg file",_ToggleLicenseReg_,True,"__Acronis True Image is not free software. A valid license is required for full functionality.#$x#$xEvaluation license - ATI will operate in a limited Evaluation Mode#$x#$xUse Host license - If you have ATI installed and licensed on your host (build) computer this option will#$ximport the license to your PE.#$x#$xLicense from .reg file - If you have ATI installed and licensed on another computer you can export the#$xregistry key containing the license code (HKLM\Software\Acronis\TrueImage or HKLM\Software\WOW6432Node\Acronis\TrueImage) and import the .reg file into your PE."
 fb_SoftwareLicense=,0,13,160,228,200,20,file,"__Please select a .reg file containing the exported license key. This will be either #$x- HKLM\Software\Acronis\TrueImage#$x- HKLM\Software\WOW6432Node\Acronis\TrueImage"
 
 [InterfaceEncoded]
