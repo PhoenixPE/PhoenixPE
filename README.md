@@ -67,7 +67,6 @@ Please use the [GitHub issue tracker](https://github.com/PhoenixPE/PhoenixPE/iss
 PhoenixPE is supported by a vibrant community of developers, boot disk/WinPE enthusiasts, and volunteers. Please post general questions and support requests in one of our forums.
 
 * [The Oven](https://theoven.org/viewforum.php?f=26)
-* [reboot.pro](http://reboot.pro/index.php?showforum=147)
 
 ## Frequently Asked Questions (FAQ)
 
