@@ -30,19 +30,19 @@
 
 [Main]
 Title=Google Chrome
-Description=(v131.0.6778.86) Google Chrome is a cross-platform web browser developed by Google.
+Description=(v132.0.6834.111) Google Chrome is a cross-platform web browser developed by Google.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
 Version=1.1.13.0
-Date=2024-12-10
+Date=2025-01-24
 
 [Variables]
 %ProgramFolder%="Chrome"
 %ProgramExe%="chrome.exe"
-%DownloadURLx86%=https://dl.google.com/release2/chrome/aqmxuhx6n6oht6hc64tkuxpwgm_131.0.6778.86/131.0.6778.86_chrome_installer.exe
-%DownloadURLx64%=https://dl.google.com/release2/chrome/admgxlt4d5c5rctnozw3wzphw2wq_131.0.6778.86/131.0.6778.86_chrome_installer.exe
+%DownloadURLx86%=https://dl.google.com/release2/chrome/adw4jnt6tqyyol4x5dltdi7lynja_132.0.6834.111/132.0.6834.111_chrome_installer.exe
+%DownloadURLx64%=https://dl.google.com/release2/chrome/pizcqi7ku37mwzpaxjiw2bftxy_132.0.6834.111/132.0.6834.111_chrome_installer.exe
 %SetupFile%="Chrome_x86.exe"
 
 [Process]
@@ -104,7 +104,7 @@ FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\master_preferences"
 FileCreateBlank,"%TargetPrograms%\%ProgramFolder%\master_preferences"
 StrFormat,EndTrim,"%PEPrograms%\%ProgramFolder%","\",%ProgramDirEsc%
 StrFormat,Replace,"%PEPrograms%\%ProgramFolder%","\","\\",%ProgramDirEsc%
-TxtAddLine,"%TargetPrograms%\%ProgramFolder%\master_preferences","{#$qdistribution#$q:{#$qimport_bookmarks_from_file#$q:#$q%ProgramDirEsc%\\bookmarks.html#$q,#$qsuppress_first_run_bubble#$q:true,#$qdo_not_create_desktop_shortcut#$q:true,#$qdo_not_create_quick_launch_shortcut#$q:true,#$qdo_not_launch_chrome#$q:true,#$qdo_not_register_for_update_launch#$q:true,#$qmake_chrome_default#$q:true,#$qmake_chrome_default_for_user#$q:true,#$qsuppress_first_run_default_browser_prompt#$q:true,#$qsystem_level#$q:true},#$qhomepage#$q:#$q${txt_Homepage}#$q,#$qhomepage_is_newtabpage#$q:true,#$qfirst_run_tabs#$q:[#$q${txt_Homepage}#$q]}",APPEND
+TxtAddLine,"%TargetPrograms%\%ProgramFolder%\master_preferences","{#$qdistribution#$q:{#$qimport_bookmarks_from_file#$q:#$q%ProgramDirEsc%\\bookmarks.html#$q,#$qsuppress_first_run_bubble#$q:true,#$qdo_not_create_desktop_shortcut#$q:true,#$qdo_not_create_quick_launch_shortcut#$q:true,#$qdo_not_launch_chrome#$q:true,#$qdo_not_register_for_update_launch#$q:true,#$qmake_chrome_default#$q:true,#$qmake_chrome_default_for_user#$q:true,#$qsuppress_first_run_default_browser_prompt#$q:true,#$qsystem_level#$q:true},#$qhomepage#$q:#$q${txt_Homepage}#$q,#$qhomepage_is_newtabpage#$q:${homepage_is_newtabpage},#$qfirst_run_tabs#$q:[#$q${txt_Homepage}#$q]}",APPEND
 
 // App Path
 RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
@@ -147,8 +147,14 @@ If,%cb_DisableSearchSuggestions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Poli
 Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","SearchSuggestEnabled",1
 
 // Homepage (master_preferences)
-If,Not,%txt_Homepage%,Equal,"",TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}","%txt_Homepage%"
-Else,TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}",""
+If,Not,%txt_Homepage%,Equal,"",Begin
+  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}","%txt_Homepage%"
+  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${homepage_is_newtabpage}","false"
+End
+Else,Begin
+  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}",""
+  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${homepage_is_newtabpage}","true"
+End
 
 // Import Bookmarks
 If,ExistFile,%fb_ImportBookmarks%,Begin
