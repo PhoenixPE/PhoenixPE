@@ -147,13 +147,13 @@ If,%cb_DisableSearchSuggestions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Poli
 Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","SearchSuggestEnabled",1
 
 // Homepage (master_preferences)
-If,Not,%txt_Homepage%,Equal,"",Begin
-  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}","%txt_Homepage%"
-  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${homepage_is_newtabpage}","false"
-End
-Else,Begin
+If,%txt_Homepage%,Equal,"",Begin
   TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}",""
   TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${homepage_is_newtabpage}","true"
+End
+Else,Begin
+  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${txt_Homepage}","%txt_Homepage%"
+  TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","${homepage_is_newtabpage}","false"
 End
 
 // Import Bookmarks
