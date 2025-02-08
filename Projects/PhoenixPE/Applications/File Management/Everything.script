@@ -29,23 +29,24 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=grepWin
-Description=(v2.1.7) grepWin is a simple search and replace tool that can use regular expressions to perform powerful search/replace operations.
+Title=Everything
+Description=(v1.4.1.1026) Everything is a search engine that locates files and folders by name instantly.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.6.0
-Date=2024-12-09
+Version=1.0.0.0
+Date=2025-02-07
 
 [Variables]
-%ProgramFolder%="grepWin"
-%ProgramExe%="grepWin.exe"
-%ProgramVersion%=2.1.7
-%DownloadURLx86%=https://github.com/stefankueng/grepWin/releases/download/%ProgramVersion%/grepWin-%ProgramVersion%.msi
-%DownloadURLx64%=https://github.com/stefankueng/grepWin/releases/download/%ProgramVersion%/grepWin-%ProgramVersion%-x64.msi 
-%SetupFile%="setup_%SourceArch%.exe"
-%aLangMap%=Afrikaans|Afrikaans.lang|Belarusian|Belarusian.lang|Chinese|Chinese.lang|Dutch|Dutch.lang|English||French|French.lang|German|German.lang|Greek|Greek.lang|Hindi|Hindi.lang|Hungarian|Hungarian.lang|Italian|Italian.lang|Japanese|Japanese.lang|Korean|Korean.lang|Polish|Polish.lang|Portuguese (Brazil)|Portuguese Brazilian.lang|Portuguese|Portuguese.lang|Russian|Russian.lang|Slovak|Slovak.lang|Spanish (Mexico)|Spanish Mexican.lang|Spanish (Spain)|Spanish.lang|Swedish|Swedish.lang|Turkish|Turkish
+%ProgramFolder%="Everything"
+%ProgramExe%="Everything.exe"
+%ProgramVersion%="1.4.1.1026"
+%DownloadURLx86%=https://www.voidtools.com/Everything-%ProgramVersion%.x86.zip
+%DownloadURLx64%=https://www.voidtools.com/Everything-%ProgramVersion%.x64.zip
+%SetupFile%="Everything_%SourceArch%.zip"
+%ConfigFile%="%TargetPrograms%\%ProgramFolder%\Everything.ini"
+%aLangMap%=Afrikaans|1078|Arabic (Yemen)|9217|Bosnian|5146|Chinese (Simplified)|2052|Chinese (Traditional)|1028|Croatian|1050|Czech|1029|Danish|1030|Dutch|1043|English (AU)|3081|English (UK)|2057|English (US)|1033|Estonian|1061|Finnish|1035|French|1036|German|1031|Greek|1032|Hebrew|1037|Hungarian|1038|Italian|1040|Japanese|1041|Korean|1042|Kurdish (Kurdish)|31890|Kurdish (Sorani)|1170|Macedonian|1071|Moldavian|1353Norwegian (Bokmål)|1044|Persian|1065|Polish|1045|Portuguese (Brazil)|1046|Romanian|1048|Russian|1049|Serbian|2074|Slovak|1051|Slovenian|1060|Spanish (Venezuela)|8202|Spanish|1034|Swedish|1053|Thai|1054|Turkish|1055|Uighur|1152|Ukrainian|1058|Uzbek|1091|Vietnamese|1066
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -65,48 +66,45 @@ Echo,"Configuring %ScriptTitle%..."
 RegLoadHives
 
 // Disable Update Check
-RegWrite,HKLM,0x4,"Tmp_Default\Software\grepWin","CheckForUpdates",0
+IniWrite,%ConfigFile%,"Everything","check_for_updates_on_startup",0
 
 // Language
 List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
 Math,Add,%Pos%,%LangPos%,1
-List,Get,%aLangMap%,%Pos%,%LanguageFile%
-RegWrite,HKLM,0x1,"Tmp_Default\Software\grepWin","languagefile","%PEPrograms%\%ProgramFolder%\%LanguageFile%"
+List,Get,%aLangMap%,%Pos%,%LCID%
+IniWrite,%ConfigFile%,"Everything","language",%LCID%
 
-// Dark Mode
-If,%cb_EnableDarkMode%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\grepWin","DarkMode",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\grepWin","DarkMode",0
+// Keep custom config after script config so we don't overwrite it.
+If,ExistFile,%fb_ImportCfg%,Begin
+  // Import User Provided Everything.ini
+  StrFormat,EXT,%fb_ImportCfg%,%FileExt%
+  If,Not,%FileExt%,Equal,".ini",Halt,"ERROR: Config must be in .ini format."
+  Else,Begin
+    Echo,"Importing user provided config file..."
+    FileCopy,%fb_ImportCfg%,"%TargetPrograms%\%ProgramFolder%\Everything.ini"
+  End
+End
 
 // AppPath
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\grepWin.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\grepWin.exe","Path","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Everything.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Everything.exe","Path","%PEPrograms%\%ProgramFolder%"
 
 // Shell Ext.
 If,%cb_ContextMenu%,Equal,True,Begin
   // Always sanity check user input ;)
-  If,%txt_ShellContextMenuTxt%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,txt_ShellContextMenuTxt,"Search with grepWin"
+  If,%txt_ShellContextMenuTxt%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,txt_ShellContextMenuTxt,"Search Everything"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\grepWin","MultiSelectModel","Player"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
-
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q /searchpath:#$q#$pV#$q"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\Everything","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\Everything","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\Everything\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -path #$q#$pV#$q"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q /searchpath:#$q#$p1#$q"
-  
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
-  
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\Everything","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\Everything","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
+  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\Everything\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -path #$q#$p1#$q"
 End
+
+// Autorun (Background Tray/Indexer)
+If,%cb_Autorun%,Equal,True,AddAutoRun,PostShell,NoWait,"Starting Everything search indexer...","%PEPrograms%\%ProgramFolder%\%ProgramExe%","-startup"
 
 RegUnloadHives
 
@@ -131,10 +129,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-// MSIExtract does not overwrite files, so we want to make sure we start with a clean dir...
-DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\SourceDir\PFiles\grepWin\*.*",#1
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -200,17 +195,18 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // ===============================================================================================================================
 [SetDefaultOptions]
 System,Cursor,Wait
-WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Management"
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"grepWin"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
-WriteInterface,Value,%ScriptFile%,Interface,cb_EnableDarkMode,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Everything"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English (US)"
+WriteInterface,Value,%ScriptFile%,Interface,cb_Autorun,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenu,True
-WriteInterface,Value,%ScriptFile%,Interface,txt_ShellContextMenuTxt,"Search with grepWin"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShellContextMenuTxt,"Search Everything..."
+WriteInterface,Value,%ScriptFile%,Interface,fb_ImportCfg,""
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -225,7 +221,24 @@ System,Cursor,Normal
 // Related........: btn_AdvancedOptions
 // ===============================================================================================================================
 [ToggleAdvancedOptions]
-Message,"There are no advanced options available for this script."
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,lbl_ImportCfg,%state%
+If,%state%,Equal,False,Begin
+  If,Question,"WARNING!#$x#$xAdvanced options are intended for expert users only!#$x#$xModifying advanced options without knowing what you are doing can cause permanent damage to your project and may result in unexpected behavior and/or build failures.#$x#$xAre you sure you want to continue?",Begin
+	Set,%Toggle%,True
+    WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_Exit_16.png
+	WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Hide Advanced Options"
+  End
+  Else,Set,%Toggle%,False
+End
+Else,Begin
+  Set,%Toggle%,False
+  WriteInterface,Resource,%ScriptFile%,Interface,btn_AdvancedOptions,Advanced_16.png
+  WriteInterface,Tooltip,%ScriptFile%,Interface,btn_AdvancedOptions,"Show Advanced Options"
+End
+
+WriteInterface,Visible,%ScriptFile%,Interface,lbl_ImportCfg,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,fb_ImportCfg,%Toggle%
 
 [#ShowScriptInfo#]
 // ===============================================================================================================================
@@ -239,7 +252,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"grepWin is a simple search and replace tool that can use regular expressions to perform powerful search/replace operations.#$x#$xOn first run this script will download the setup file (~1.5 MB) and cache it for future builds.#$x#$xgrepWin is free and open-source software developed by Stefan Kueng#$x#$xhttps://github.com/stefankueng/grepWin"
+Message,"Everything is search engine that locates files and folders by filename instantly. Unlike Windows search Everything initially displays every file and folder on your computer (hence the name Everything). You type in a search filter to limit what files and folders are displayed.#$x#$xOn first run this script will download the setup file (~1.5 MB) and cache it for future builds.#$x#$xEverything is free software developed by voidtools.#$x#$xIf you enjoy the software please consider supporting the author."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -253,29 +266,31 @@ Message,"grepWin is a simple search and replace tool that can use regular expres
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch grepWin",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+btn_LaunchProgram="Launch Program",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://tools.stefankueng.com/grepWin.html
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.voidtools.com/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
-btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_Disabled_16.png,True,"__Show Advanced Options"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
-cb_RunFromRam="Run From RAM",1,3,12,54,100,18,False,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,True,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
 bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
 cb_DesktopShc=Desktop,1,3,12,104,122,18,False
 cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
 cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"File Management"
-txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,grepWin
-bvl_Options=Options,1,12,150,90,197,184,8,Bold
-lbl_Language=Language,1,1,159,110,153,16,8,Normal
-cmb_Language=English,1,4,160,126,150,21,Afrikaans,Belarusian,Chinese,Dutch,English,French,German,Greek,Hindi,Hungarian,Italian,Japanese,Korean,Polish,"Portuguese (Brazil)",Portuguese,Russian,Slovak,"Spanish (Mexico)","Spanish (Spain)",Swedish,Turkish
-cb_EnableDarkMode="Dark Mode",1,3,160,161,174,18,False
-cb_ContextMenu="Enable Shell Context Menu",1,3,160,181,177,18,True,"__Add grepWin to Explorer's context menu."
-txt_ShellContextMenuTxt="Shell Context Menu Text",1,0,160,218,179,21,"Search with grepWin"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,Everything
+bvl_Options=Options,1,12,150,90,203,184,8,Bold
+lbl_Language=Language,1,1,159,105,153,16,8,Normal
+cmb_Language="English (US)",1,4,160,121,150,21,Afrikaans,"Arabic (Yemen)",Bosnian,"Chinese (Simplified)","Chinese (Traditional)",Croatian,Czech,Danish,Dutch,"English (AU)","English (UK)","English (US)",Estonian,Finnish,French,German,Greek,Hebrew,Hungarian,Italian,Japanese,Korean,"Kurdish (Kurdish)","Kurdish (Sorani)",Macedonian,Moldavian,"Norwegian (Bokmål)",Persian,Polish,"Portuguese (Brazil)",Romanian,Russian,Serbian,Slovak,Slovenian,"Spanish (Venezuela)",Spanish,Swedish,Thai,Turkish,Uighur,Ukrainian,Uzbek,Vietnamese
+cb_Autorun="Run on startup",1,3,160,145,176,18,False,"__Start Everything in the system tray on boot. (Faster Indexing)"
+cb_ContextMenu="Enable shell context menu",1,3,160,162,177,18,True,"__Add Everything to Explorer's context menu."
+txt_ShellContextMenuTxt="Shell context menu text",1,0,160,199,180,21,"Search Everything..."
+lbl_ImportCfg="Import custom config file:",0,1,160,227,177,16,8,Normal
+fb_ImportCfg=,0,13,160,244,180,20,file,"Title=Select your Everything config file","Filter=Everything Config|Everything.ini|Config Files|*.ini|All Files|*.*","__Select your customized Everything.ini file here to include it in your build.#$xYour custom config will override any settings configured in this script's interface."
 
 [InterfaceEncoded]
 play-hot.png=841,1220
@@ -283,11 +298,12 @@ Trash.ico=1150,1212
 SetDefaults_16.png=2475,3404
 Help_16.png=2830,3868
 VistalcoDownload_16.png=927,1348
-Advanced_Disabled_16.png=474,744
+Advanced_16.png=2000,2768
+Advanced_Exit_16.png=705,1048
 
 [AuthorEncoded]
-grepWin_80.png=3478,4736
-Logo=grepWin_80.png
+Everything_80.png=4954,6708
+Logo=Everything_80.png
 
 [EncodedFile-InterfaceEncoded-play-hot.png]
 lines=0
@@ -309,11 +325,15 @@ lines=0
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
 
-[EncodedFile-AuthorEncoded-grepWin_80.png]
-lines=1
-0=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
-1=7HHDga7ol2Lhv+DlgGfBdz27CpMBTlPxXD6L6ut/daPZsdiweDc1eajm2YAbEh2L3u+gDzVNBy4J+AX9n8/AHMbyWsAb4opDyT8XpPFZzO9ULKeg5aP0GDJDZr4Xoc+DPMNLl7gG9S/6nJPuDfMJPer8acARyuKHMM85MqY3U8/wngr+u0renfjSkDP524wCRgDSax12BmgfkmyqmYGRFxTEKOAUeAd+epqw8zs3YfVQ6Cz4K6A8v5PuRxfOJqFvow03frIbGuwLKwdoXsQR/mrKAed645sHwUCQTT/ddT3xc8agosH1UC4TwFlo8ygXAusMTqqLsN+Ju5Cn3UCYRzgSVWR93HmaMnXgoEQhMDy6VCIDQeWCx74qVEIDQWWCwn2ZcagVB/YHnOSngpEgi1B5aXgc9Z3bhUCYT5B5aXMb8MZ4lLmUCYO7DMSh5cJhCqB5YdzEEeXCZwEpOBZbInPg/cOZ+KC+ObJQsDfZg7jRuBf5xvJXH5PyNoDJdduEFcJrBB/D+EwclPo7/omgAAAABJRU5ErkJggnic40svSi0Iz8yLtzDQK8hLZxgFIwtM48UvzyngJ8fIAAADuwZO0NcPMgEAAAACAAAAJgAAAJYNAAAAAAAAAQAAAAAAAAAAAAAA
-
-[EncodedFile-InterfaceEncoded-Advanced_Disabled_16.png]
+[EncodedFile-InterfaceEncoded-Advanced_16.png]
 lines=0
-0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVQ4y43Tz4tNcRgG8M+dOTGuRLhF9hi/h81IKRuR1IhSxIIssPAn3J1mb2oSNso0O2oWiIwNu2FWw21YkEm6ykwmv5XNc+rQnfLW6Zy+z/d9zvO+z/vWms2mBeIcjuMrhnC/06Wi8r0Ku/EIX9DACixHbwgW4wieo1UlWIsLOIWbmEA/fuI3NmMv9uEknmAQrZKgL8mvcAjH8A2LgveHYB5vQvSgSvAUI9iPOdQwhcngO7Ap2MqoHKuWMIu7+XMX7uAGZoKvw1kMoAfP8LkkOJAaN+I7XmAY7UqDZ3K2IUrOpLEfC1zEGvyI9Ml/kstoB9seh47iU4F6Erv8X9TiTjdqBUaxOjPQk4Y1OqhoBPuFt5mF+QLXcmEAl1Pb+QWa2BsFj3G96sIy7MzYzoVsfQcbZ7EUu3AP70qCwziN6fhcx7YkSs319KmNgyG/WhJMYBx7cCujeiIquvEeV+LApezLw2oJrcx2H25nHrZiC5akaeN5XuNl3n9tY6vcsMQUPqTm6cr5WNWaPzh+YcvU7DU1AAAAAElFTkSuQmCCeJyTcEwpS8xLTk2Jd8ksTkzKATIMzfQK8tIZRsFIALcY8ct/c/M8xcgAANAVDAqUbKQXAQAAAAIAAAAvAAAA2gEAAAAAAAABAAAAAAAAAAAAAAA
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGMmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3NTgwZWU4NC04ZDRlLTlkNDQtOTBjYS03MzYzZWI5YTZhOGEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NWE2M2YxZGQtNTk3ZS0yNzQ0LThmZGYtMjMxNThmNjgyNDBkIiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIwVDE5OjQwOjExLTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjc1ODBlZTg0LThkNGUtOWQ0NC05MGNhLTczNjNlYjlhNmE4YSIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MjozNy0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PshFAqcAAAFESURBVDgRjcExaxphAADQtwUKgUJxCGYLxV/RQiGQUFKSMWSuOHRJiQ52MGChc7cOgWQ51w46am8oFmnifSZ6lcal91MiOHgYLHnPf5TRQwd7nuAFDvDMwicMcYNTCxs4RsmKLXxGhiYO0cYAfVzgNc4xwxVKct4iQw8JpghIkWKCeyToIsOJnOf4giFiBESooooIATESNLFpxSvMENBA0VIRDQRMcSRnH2e4wAQtFDxWQAsjtFFH2VwHN/iFFDXr1ZBigCG65n5giAFS1KxXwx/8xDV65sqoo40RWih4rIAW7hDhDBU5R5gioIGipSIaCBjjvRWbaCJBjIAIVVQRISDGb3zDtpwTZOgiwV+MkSLFCPe4RRcZKnJKuMIM59jFJfoY4Dve4BT/cIkdK0o4xoaFj7jGBF8tvcNLT7CHDmJ8sMYD9WpkFHmxHNIAAAAASUVORK5CYIJ4nON3TClLzEtOTYk3NNMryEtnGAUjClxgxy9f4tTwh5EBAInYCGlNR/4PAQAAAAIAAAAnAAAA0AcAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-Everything_80.png]
+lines=1
+0=iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFyWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgOS4wLWMwMDEgNzkuYzAyMDRiMiwgMjAyMy8wMi8wOS0wNjoyNjoxNCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDI0LjQgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAyNS0wMi0wN1QyMzowMjo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMjUtMDItMDdUMjM6MDQ6MjUtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjUtMDItMDdUMjM6MDQ6MjUtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjQ5ZTBlMDY4LTE1OTctNjg0ZS1hNGU1LTM1OWM2MTZkY2M2MyIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOmIxOGExZTZlLWMwNTItMGI0OC05OWEyLWZlMjNkNGZjN2U2NiIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjM1YjhkODQxLTIxMDAtY2Q0NS1hZTFjLWViNDg3YmIzODAzZiI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzViOGQ4NDEtMjEwMC1jZDQ1LWFlMWMtZWI0ODdiYjM4MDNmIiBzdEV2dDp3aGVuPSIyMDI1LTAyLTA3VDIzOjAyOjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjQuNCAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjQ5ZTBlMDY4LTE1OTctNjg0ZS1hNGU1LTM1OWM2MTZkY2M2MyIgc3RFdnQ6d2hlbj0iMjAyNS0wMi0wN1QyMzowNDoyNS0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDI0LjQgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pm18uAEAAA03SURBVHja7Vx5dJTVFb+tx+NyrG0t7Tm2Pe2xeEJDdggQdhQEEtlpMWGvIEtEdpAt+TKTzGSykIWEJoBQREE2WRQVTumpIoiAgmyyCUjZ1wJhKVB4/d3vvSTTHJz5ZpLvm4TwxzuBZJb3fu/e+/vd++77SAhBD4f/4yEIDwGsRgD+NYaq5ShsQr/Li6bY7Cga7AqnpPQwyk0LoYWpajjDqBC/17KiaHhuQ+pS2Jj+YOZ8agSARRK48OkNKNERSosx9qSH0wUAdLegMYk5zUm81RKjBQm8TgBgkRFBl52hdACvXQ6wJ+B1MbUKwKKm+s8gLN6WWp+2Z0WSmAuQ1nYjsW0AiUNDSZweQ+LieBI3p5K4lYwxjcQl/P8Mfn94OIntA0ms70ni7TYkAL7A5+zPjKDsmU0oWn3+gwcgLwwLjIFrvucIITGvFYnP4kn8aySJOxqmlokxHSNb/duF4cRwqMH/z1B/59dlkbhnA9hjSXzZh8S7L5JwhZGA26+DVcZWFshqA2CRBO83rgh6xwnglnYgsQ9W9F8sXuRIIHSAUvwYaQrsHPkZh98gsboT3DycBGLmJ/j+SH+BrBYAFmPyiFtjbcF0/W+wuAOJbgvmxWt+Aldx8OekllvwCbj6e+1I2IPh4lGUVdy0BgKISf8MVvBhNmLcpt4KsFy10KoC7n5A2hSQcPcdg0jMaIgYGUJfwRLrFdUUADHR5xGLTsxpRuLkOHxtnopnZgF3PyB5w/JJXAYRLXwB1lifbiEGtzHq0gEBUO1wi+R6dHlJW8S5NGUNKQEaWjkpfdyZBOYlQDD9jIAYKAtsDHcRH8Thq9IVQWgBBLAURJcE8vNXdJZmEBO8gWg5gLC+utjhax/GKZJgyZHs56JtKlY63Eaa+r2/IDqlS2/sRSIJlohMpk1RdQEQhPFYWiidY7fVLc/lh+WlKotVBCDsUkD/Z6oc+mtcblrR4QeIDvnedV30mCgw9+cCDiBLBKRfq7Cb4l4pCMk+WkaOBPAYdNwXYOw1naUMmdNCpnM8WCh/8DKJDRDf3yUq8Z2jNkzz4ftUaFmEz7OH0LfFzQIIILtAfjQNBYDi9Gi1IM0H3QZZczdVpnDzWut5LkuOvchzZ2VG0tSchtQZeXE7jLisKBoPWVSAtO0r/j4G9/MEEjeSlTxy+PDdAPDaFJlbI6UsuF88tAbApvR0CsTqlt5KqhixgmTlonDHXa/JQgGE9lXkslmQGRFFxpi+LhY+Ce87jfeIL/spS87yAUTEw0ND8N1w5ZkxFGo5gLxrSM+Wc06r774RnafJGMbyZnlHEhqCOSxtBj7rV37O4fHpDUgDeZXMhwWXTFPWaDTmIh6uiNWtfnfFbMV0ALHzoSAOcSxRTdogeCxs32quW92JqqielObakCdbZ0Qr4Z5jXCNenkCCK0IzGlEPywDkRSMevb+svcpt7QbcFuBdnVqWWm3Ejj9TpWQGMnCF05L0MBKnxhjc1BQJ9voeOivvdd9Msy3wWTCY+G6ogYlqMuYxWbDlAbytP8R8VaEIAOJCkI4omarkTrJ3Qrk4Vg8lLLCbWwJgdiRpXF3hepwucL3FGhDGyg4kQDjnscinTC1iYHPgztvmtYTUSVWx2Ztox/xWdNRLYMtMB5BjDsz94MZ4A7JFkxZ68DWp/hHzgi0q3v5kahCVbI43QCpqjnsH6d5xA+9/0lQAC5tQEJv7qZFKNniaHHb/nl1KFbynqKrK7UZGbjQNwxDXJqs47WmeENc3JpWdu3QxFUA+AGL3uKd5cV+VKeyESNaC6SbAe9LqYi6+9+g/exqoCNnkZi8HKYKE8kwFEFnCynXdDOxqqgR4QRsSCOz5RQE4hwGZDGahrefS6V7mC8LZ0ocEpNkeCOtHzARw1/YBiuE8TQjufXKkTM+wiKAAHWQ9hrhWsmeQASvE349A06ZH0I3CxvR7UwAEEE8hD71yaJgBADGhzb31hH2/lbGv4gAjr17bVXmMp3IY/n52jMyPMV4yBcCCRvQcayz+Io8urK
+1=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
