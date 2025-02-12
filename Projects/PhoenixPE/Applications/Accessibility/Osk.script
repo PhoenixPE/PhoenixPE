@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-03-01
+Version=1.0.1.0
+Date=2025-02-11
 
 [Variables]
 %ProgramFolder%="%TargetSystem32%"
@@ -63,10 +63,10 @@ RequireFileEx,ExtractList
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts & Autorun
 
-If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"#$pWinDir#$p\system32\%ProgramExe%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"#$pWinDir#$p\system32\%ProgramExe%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pWinDir#$p\system32\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pWinDir#$p\system32\%ProgramExe%"
 
 If,%cb_OskTray%,Equal,True,AddAutoRun,PostShell,NoWait,"","OskTray.exe"
 
@@ -142,7 +142,7 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,102,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,121,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,161,119,21,Accessibility
 txt_ShortcutName="Shortcut Name:",1,0,12,203,119,21,"On Screen Keyboard"
-cb_OskTray="Show icon in Notification Area",1,3,152,64,192,18,False,"__Allows you to show/hide the On Screen Keyboard from the System Tray"
+cb_OskTray="Show icon in Notification Area",1,3,152,64,192,18,True,"__Allows you to show/hide the On Screen Keyboard from the System Tray"
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
