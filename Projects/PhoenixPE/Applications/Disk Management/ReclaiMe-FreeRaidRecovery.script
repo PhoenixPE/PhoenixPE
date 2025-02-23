@@ -113,8 +113,9 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Related........: btn_LaunchProgram
 // ===============================================================================================================================
 [LaunchProgram]
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",Run,%ScriptFile%,DownloadProgram
-ShellExecuteEx,Open,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================
