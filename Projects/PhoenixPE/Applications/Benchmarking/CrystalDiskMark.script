@@ -32,9 +32,9 @@
 Title=CrystalDiskMark
 Author=Homes32
 Level=5
-Version=1.0.0.0
+Version=1.0.1.0
 Description=CrystalDiskMark is a simple disk benchmark software.
-Date=2024-06-20
+Date=2025-02-23
 Selected=False
 Mandatory=False
 
@@ -44,8 +44,10 @@ Mandatory=False
 %ProgramExex64%="DiskMark64.exe"
 %DownloadURL%=https://crystalmark.info/redirect.php?product=CrystalDiskMark
 %SetupFile%="CrystalDiskMark.zip"
-%ConfigFilex86%="%TargetPrograms%\%ProgramFolder%\DiskMark32.ini"
-%ConfigFilex64%="%TargetPrograms%\%ProgramFolder%\DiskMark64.ini"
+// CrystalDiskMark v8.0.6 (and possibly earlier versions) does not correctly identify and process .ini files in the same
+// directory as the .exe and will always look in the %AppData% folder for the settings.
+%ConfigFilex86%="%TargetAppData%\%ProgramFolder%\DiskMark32.ini"
+%ConfigFilex64%="%TargetAppData%\%ProgramFolder%\DiskMark64.ini"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
