@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2025-02-10
+Version=1.0.2.0
+Date=2025-02-23
 
 [Variables]
 %ProgramFolder%="Macrium Reflect X"
@@ -82,9 +82,19 @@ RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\mimkrnl","ErrorContro
 RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\mimkrnl","ImagePath","System32\drivers\mimkrnl.sys"
 RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\mimkrnl","DisplayName","Macrium Image Mount Driver"
 
-// File Assoc. - Reflect corrupts the shell menu entries on every run, but we try anyway...
-ForEach,%Ext%,%FileAssoc%,Associate,%Ext%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+// Register Macrium Image Explorer Driver (Browse backup images with explorer...not stable yet...)
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\EventLog\System\PSMounterEx","EventMessageFile","#$pSYSTEMROOT#$p\System32\drivers\psmounterex.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\EventLog\System\PSMounterEx","TypesSupported",7
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\PSMounterEx","Type",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\PSMounterEx","Start",3
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\PSMounterEx","ErrorControl",1
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\PSMounterEx","ImagePath","#$pSYSTEMROOT#$p\System32\drivers\psmounterex.sys"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\PSMounterEx","DisplayName","Macrium Reflect Image Explorer Driver"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\PSMounterEx","Description","Allows Macrium Reflect images and backups to be accessed by Windows Explorer"
 
+// File Assoc. - Reflect corrupts the shell menu 'command' entries on every run, but we try anyway...
+ForEach,%Ext%,%FileAssoc%,Associate,%Ext%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+ 
 // Product Registration
 If,%cmb_RegMethod%,Equal,"Trial License",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Macrium\Reflect","License",""
 Else,If,%cmb_RegMethod%,Equal,"Import License From Host",Begin
