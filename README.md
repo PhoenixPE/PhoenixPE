@@ -71,3 +71,5 @@ PhoenixPE is supported by a vibrant community of developers, boot disk/WinPE ent
 ## Frequently Asked Questions (FAQ)
 
 Please check out our [Frequently Asked Questions](https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ) before posting an issue or asking for help in the forums.
+
+We also ask that you take the time to read our statement on [Security](https://github.com/PhoenixPE/PhoenixPE/wiki/Security) and [Antivirus False Positives](https://github.com/PhoenixPE/PhoenixPE/wiki/Security).
