@@ -139,6 +139,7 @@ Echo,"Building a list of required files...#$x#$xThis can take awhile, please be 
 // Common IME Files
 
 RequireFileEx,AppendList,\Windows\IME\SPTIP.DLL
+RequireFileEx,AppendList,\Windows\IME\??-??\SpTip.dll.mui
 RequireFileEx,AppendList,\Windows\System32\IME\SHARED\
 RequireFileEx,AppendList,\Windows\System32\InputMethod\SHARED
 If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,AppendList,\Windows\System32\clbcatq.dll
@@ -173,6 +174,17 @@ If,%SourceVer%,BiggerEqual,10.0.18363,RequireFileEx,AppendList,\Windows\System32
 RequireFileEx,AppendList,\Windows\System32\Winlangdb.dll
 RequireFileEx,AppendList,\Windows\System32\Winsta.dll
 If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,AppendList,\Windows\System32\WordBreakers.dll
+If,%SourceVer%,BiggerEqual,10.0.20251,RequireFileEx,AppendList,\Windows\System32\ime_textinputhelpers.dll
+If,%SourceVer%,BiggerEqual,10.0.26100,RequireFileEx,AppendList,\Windows\SystemApps\MicrosoftWindows.Client.Core_cw5n1h2txyewy\SystemTray\Assets\AXPIcons.ttf
+
+If,ExistFile,"%TargetSystem32%\InputService.dll",Begin
+  Echo,"Patching InputService..."
+  FileVersion,"%TargetSystem32%\InputService.dll",%InputServiceVersion%
+  If,%InputServiceVersion%,Bigger,10.0.18300,Begin
+    ShellExecute,Hide,"%Tools%\%HostArch%\binmay.exe","-v -u #$q%TargetSystem32%\InputService.dll#$q -s u:MiniNT -r u:NiniNT"
+    If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\InputService.dll] failed. IME may not be available. The error returned was [#r].",WARN
+  End
+End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // WoW64 
