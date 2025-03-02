@@ -177,15 +177,6 @@ If,%SourceVer%,BiggerEqual,10.0.18362,RequireFileEx,AppendList,\Windows\System32
 If,%SourceVer%,BiggerEqual,10.0.20251,RequireFileEx,AppendList,\Windows\System32\ime_textinputhelpers.dll
 If,%SourceVer%,BiggerEqual,10.0.26100,RequireFileEx,AppendList,\Windows\SystemApps\MicrosoftWindows.Client.Core_cw5n1h2txyewy\SystemTray\Assets\AXPIcons.ttf
 
-If,ExistFile,"%TargetSystem32%\InputService.dll",Begin
-  Echo,"Patching InputService..."
-  FileVersion,"%TargetSystem32%\InputService.dll",%InputServiceVersion%
-  If,%InputServiceVersion%,Bigger,10.0.18300,Begin
-    ShellExecute,Hide,"%Tools%\%HostArch%\binmay.exe","-v -u #$q%TargetSystem32%\InputService.dll#$q -s u:MiniNT -r u:NiniNT"
-    If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\InputService.dll] failed. IME may not be available. The error returned was [#r].",WARN
-  End
-End
-
 ///////////////////////////////////////////////////////////////////////////////////
 // WoW64 
 
@@ -232,6 +223,17 @@ End
 RequireFileEx,ExtractList
 
 ///////////////////////////////////////////////////////////////////////////////////
+
+// Patching
+If,ExistFile,"%TargetSystem32%\InputService.dll",Begin
+  Echo,"Patching InputService..."
+  FileVersion,"%TargetSystem32%\InputService.dll",%InputServiceVersion%
+  If,%InputServiceVersion%,Bigger,10.0.18300,Begin
+    Binmay,"-u #$q%TargetSystem32%\InputService.dll#$q -s u:MiniNT -r u:NiniNT"
+    If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\InputService.dll] failed. IME may not be available. The error returned was [#r].",WARN
+  End
+End
+
 // Registry
 
 Echo,"Registering IME common components..."
@@ -403,6 +405,7 @@ Echo,"Building a list of required files...#$x#$xThis can take awhile, please be 
 
 RequireFileEx,AppendList,\Windows\InputMethod\CHS\ChsPinyin.lex
 RequireFileEx,AppendList,\Windows\InputMethod\CHS\ChsPinyin.lm
+RequireFileEx,AppendList,\Windows\InputMethod\CHS\ChsPinyinStx.lex
 RequireFileEx,AppendList,\Windows\InputMethod\CHS\ChsWubi.lex
 RequireFileEx,AppendList,\Windows\System32\InputMethod\CHS
 RequireFileEx,AppendList,\Windows\System32\MSWB70804.dll
@@ -472,6 +475,10 @@ RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{3474
 RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",134481924
 RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000804,00000804
 RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}\LanguageProfile\0x00000804\{FA550B04-5AD7-411F-A5AC-CA038EC515D7}","Enable",1
+
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","Default Mode",1
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","EnableUMode",1
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","EnableVMode",1
 
 [#Process-zh-TW#]
 // ===============================================================================================================================
