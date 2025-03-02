@@ -37,8 +37,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=2.0.2.1
-Date=2022-05-30
+Version=2.1.0.0
+Date=2025-03-02
 
 [Variables]
 %Debug%=False
@@ -224,12 +224,12 @@ RequireFileEx,ExtractList
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-// Patching
+// Patch InputService to allow running in WinPE
 If,ExistFile,"%TargetSystem32%\InputService.dll",Begin
   Echo,"Patching InputService..."
   FileVersion,"%TargetSystem32%\InputService.dll",%InputServiceVersion%
   If,%InputServiceVersion%,Bigger,10.0.18300,Begin
-    Binmay,"-u #$q%TargetSystem32%\InputService.dll#$q -s u:MiniNT -r u:NiniNT"
+    Binmay,"-u #$q%TargetSystem32%\InputService.dll#$q -s u:MiniNT -r u:ZiniNT"
     If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\InputService.dll] failed. IME may not be available. The error returned was [#r].",WARN
   End
 End
