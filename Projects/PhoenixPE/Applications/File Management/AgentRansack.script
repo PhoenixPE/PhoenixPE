@@ -30,18 +30,18 @@
 
 [Main]
 Title=AgentRansack
-Description=(v2022 Build 3499) Agent Ransack is a free file search tool for finding files on your PC or network drives.
+Description=(v2022 Build 3503) Agent Ransack is a free file search tool for finding files on your PC or network drives.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.14.0
+Version=1.0.15.0
 Date=2024-12-09
 
 [Variables]
 %ProgramFolder%="AgentRansack"
 %ProgramExe%="AgentRansack.exe"
-%ProgramVersion%=3499
+%ProgramVersion%=3503
 %DownloadURLx86%=https://download.mythicsoft.com/flp/%ProgramVersion%/agentransack_in_%ProgramVersion%.exe
 %DownloadURLx64%=https://download.mythicsoft.com/flp/%ProgramVersion%/agentransack_inx64_%ProgramVersion%.exe
 
@@ -70,18 +70,18 @@ If,ExistFile,%fb_ImportCfg%,Begin
   StrFormat,EXT,%fb_ImportCfg%,%FileExt%
   If,Not,%FileExt%,Equal,".xml",Halt,"ERROR: Config must be in .XML format."
   Else,Begin
-    Echo,"Importing user config.xml..."
+    Echo,"Importing user provided config.xml..."
     FileCopy,%fb_ImportCfg%,"%TargetPrograms%\%ProgramFolder%\config"
   End
 End
 Else,Begin
   // Default Config (Language + Professional Mode)
-  Set,%Cfg%,"%TargetPrograms%\%ProgramFolder%\config\config.xml"
-  FileCreateBlank,%Cfg%
-  TXTAddLine,%Cfg%,"<cfg ver=#$q2#$q>",Append
-  TXTAddLine,%Cfg%,"<section name=#$qLanguage#$q><File t=#$q3#$q>lang-%Lang%.xml</File></section>",Append
-  TXTAddLine,%Cfg%,"<section name=#$qShell#$q><AddToDirCM n=#$q1#$q/><AssociateSRF n=#$q1#$q/><USBDriveConfig n=#$q0#$q/><AddToFileCM n=#$q1#$q/><AddToFindMenu n=#$q1#$q/><ReplaceF3 n=#$q1#$q/><EnableHotKey n=#$q1#$q/></section>",Append
-  TXTAddLine,%Cfg%,"</cfg>",Append
+  Set,%ConfigFile%,"%TargetPrograms%\%ProgramFolder%\config\config.xml"
+  FileCreateBlank,%ConfigFile%
+  TXTAddLine,%ConfigFile%,"<cfg ver=#$q2#$q>",Append
+  TXTAddLine,%ConfigFile%,"<section name=#$qLanguage#$q><File t=#$q3#$q>lang-%Lang%.xml</File></section>",Append
+  TXTAddLine,%ConfigFile%,"<section name=#$qShell#$q><AddToDirCM n=#$q1#$q/><AssociateSRF n=#$q1#$q/><USBDriveConfig n=#$q0#$q/><AddToFileCM n=#$q1#$q/><AddToFindMenu n=#$q1#$q/><ReplaceF3 n=#$q1#$q/><EnableHotKey n=#$q1#$q/></section>",Append
+  TXTAddLine,%ConfigFile%,"</cfg>",Append
 End
 
 // ShellExt
@@ -392,7 +392,7 @@ lbl_Language=Language,1,1,159,110,153,16,8,Normal
 cmb_Language="English [en]",1,4,160,126,150,21,"Chinese [cn]","German [de]","English [en]","Spanish [es]","French [fr]","Hindi [hi]","Nederlands [nl]","Polish [pl]","Turkish [tr]"
 cb_RegisterShellExt="Register Shell Extensions",0,3,160,154,152,18,True,"__Adds AgentRansack to Explorer's context menus."
 lbl_ImportCfg="Import custom config file:",0,1,160,227,177,16,8,Normal
-fb_ImportCfg=,0,13,160,244,177,20,file,"Title=Select your AgentRansack confg file","Filter=AgentRansack Config|*.xml","__Select your customized config.xml file here to include it in your build.#$xYour custom config will override any settings configured in this script's interface."
+fb_ImportCfg=,0,13,160,244,177,20,file,"Title=Select your AgentRansack config file","Filter=AgentRansack Config|*.xml","__Select your customized config.xml file here to include it in your build.#$xYour custom config will override any settings configured in this script's interface."
 
 [InterfaceEncoded]
 play-hot.png=841,1220
