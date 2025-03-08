@@ -6,8 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2023 Julian Frohmüller (ISpillMyDrink)
-// Copyright (c) 2024 Jonathan Holmgren (Homes32)
+// Copyright (c) 2024-2025 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -30,20 +29,19 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=Intel MEI Driver
-Description=(v2413.5.67.0) Integrates the Intel Management Engine Interface (HECI) Driver for 6th to 13th Generation Intel® Core™ Processors.
-Author=ISpillMyDrink
+Title=Intel RST Driver
+Description=(v20.0.0.1038.3) Integrates the Intel Rapid Storage Technology (RST) driver to enable management of Intel VMD capable platforms for RAID or Intel Optane memory configuration on 11th generation and greater Intel processors.
+Author=Homes32
 Level=6
 Selected=False
 Mandatory=False
-Version=1.0.3.0
-Date=2025-01-11
+Version=1.0.0.0
+Date=2025-02-11
 
 [Variables]
-%ProgramFolder%="IntelMEI"
-%ProgramVersion%=2413.5.67.0
-%DownloadURL%=https://downloadmirror.intel.com/733739/ME_SW_%ProgramVersion%.zip
-%SetupFile%=ME_SW_%ProgramVersion%.zip
+%ProgramFolder%="IntelRST"
+%DownloadURL%=https://downloadmirror.intel.com/820815/SetupRST.exe
+%SetupFile%=IntelRST.exe
 %DismLog%="%TargetWindows%\Logs\DISM\dism.log"
 
 [Process]
@@ -54,14 +52,14 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,
 
 // Extract
 Echo,"Extracting Files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
+ShellExecute,Hide,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","-extractdrivers %ProjectTemp%\%ProgramFolder%"
 
 // Integrate
 Echo,"Integrating Driver..."
 StrFormat,PATH,%DismLog%,%DismLogPath%
 If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
-DISM,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%ProjectTemp%\%ProgramFolder%\Drivers\MEI#$q /recurse /LogPath:#$q%DismLog%#$q"
+DISM,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%ProjectTemp%\%ProgramFolder%#$q /recurse /LogPath:#$q%DismLog%#$q"
 If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
 // Dism doesn't always unload hives correctly. Force unload just to make sure.
 RegUnloadHives,Force,"Target=%TargetSystem32%\config"
@@ -151,7 +149,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"This script integrates the Intel Management Engine Interface (HECI) Driver for 6th to 13th Generation Intel® Core™ Processors. This driver is needed for running some of the Intel System Tools.#$x#$xThe first time this script is run it will download the setup file (~405MB) and cache it for future builds."
+Message,"Integrates the Intel Rapid Storage Technology (RST) driver to enable management of Intel VMD capable platforms for RAID or Intel Optane memory configuration on 11th generation and greater Intel processors.#$x#$xThe first time this script is run it will download the setup file (~15MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -166,7 +164,7 @@ Message,"This script integrates the Intel Management Engine Interface (HECI) Dri
 // ===============================================================================================================================
 [Interface]
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
-web_Homepage=Homepage,1,10,377,9,60,18,https://www.intel.com/content/www/us/en/download/682431/intel-management-engine-drivers-for-windows-10-and-windows-11.html
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.intel.com/content/www/us/en/download/19512/intel-rapid-storage-technology-driver-installation-software-with-intel-optane-memory-10th-and-11th-gen-platforms.html
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
 btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_ViewDismLog=,1,8,511,5,25,25,ViewDismLog,Health.ico,True,"__View the DISM log from the last integration."
