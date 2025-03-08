@@ -33,10 +33,10 @@ Title=StartAllBack
 Description=A full featured Start Menu replacement for Win11 that allows you to replicate taskbar and start menu behavior from Win7/Win10.
 Author=Homes32
 Level=3
-Selected=False
+Selected=True
 Mandatory=False
-Version=1.0.2.0
-Date=2024-09-22
+Version=1.1.0.0
+Date=2025-01-22
 
 [Variables]
 %ProgramFolder%=StartAllBack
@@ -45,6 +45,8 @@ Date=2024-09-22
 
 [Process]
 Echo,"Configuring [ StartAllBack ] as the start menu..."
+
+If,%SourceVer%,Smaller,10.0.22621.0,Halt,"StartAllBack is intended for use with Windows 11 sources. For Windows 10 sources please enable the StartIsBack++ script instead."
 
 RunFromRam
 
@@ -100,141 +102,346 @@ RegHiveLoad,Tmp_Default,%RegDefault%
 // Adjust some Windows taskbar settings
 
 // Align icons (0 - Left, 1 - Center)
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarAl",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarAl",0
 // Remove Chat icon from taskbar
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarMn",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarMn",0
 // Remove search from taskbar
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Search","SearchboxTaskbarMode",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Search","SearchboxTaskbarMode",0
 // Remove Task View 
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowTaskViewButton",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowTaskViewButton",0
 // Remove Widgets from taskbar - Ignore errors as UCPD blocks attempts to modify this key as of the ?Aug 2024 Cumulative update?. Pretty sloppy pattern matching on behalf of M$ to block this in an offline/user mounted hive.
 System,ErrorOff,1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarDa",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarDa",0
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Config Defaults
 
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","AutoUpdates",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","SettingsVersion",5
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","WelcomeShown",3
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack\Cache","IdealHeight.9",196614
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack\Cache","IdealHeight.6",1
-RegWrite,HKLM,0x1,"Tmp_Default\Software\StartIsBack\Cache","IdealWidth.9","Control Panel"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","AutoUpdates",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","SettingsVersion",5
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","WelcomeShown",3
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","IdealHeight.9",196614
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","IdealHeight.6",1
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack\Cache","IdealWidth.9","Control Panel"
 
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","StartMenuFavorites",2
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","StartMetroAppsFolder",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_AdminToolsRoot",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_NotifyNewApps",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_RightPaneIcons",2
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowCommandPrompt",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowControlPanel",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowDownloads",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowMyComputer",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowMyDocs",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowMyMusic",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowMyPics",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowNetConn",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowNetPlaces",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowNetPlaces",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowPCSettings",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowPrinters",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowRecentDocs",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowRun",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowSetProgramAccessAndDefaults",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowSkyDrive",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowTerminal",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowUser",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_ShowVideos",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","StartMenuFavorites",2
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","StartMetroAppsFolder",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_AdminToolsRoot",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_NotifyNewApps",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_RightPaneIcons",2
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowCommandPrompt",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowControlPanel",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowDownloads",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowMyComputer",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowMyDocs",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowMyMusic",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowMyPics",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowNetConn",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowNetPlaces",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowNetPlaces",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowPCSettings",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowPrinters",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowRecentDocs",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowRun",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowSetProgramAccessAndDefaults",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowSkyDrive",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowTerminal",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowUser",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowVideos",0
 
 ///////////////////////////////////////////////////////////////////////////////////
 // User Defined StartAllBack Options
 
 // Theme (Decoupled from Style/Orb)
 If,%cmb_Theme%,Equal,"Proper 11",Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","FrameStyle",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","ModernIconsColorized",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","SysTrayStyle",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",30
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",36
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","BottomDetails",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","FrameStyle",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","ModernIconsColorized",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","SysTrayStyle",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",30
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",36
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","BottomDetails",0
 End
 Else,If,%cmb_Theme%,Equal,"Kinda 10",Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","FrameStyle",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","ModernIconsColorized",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","SysTrayStyle",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",30
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",36
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","BottomDetails",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","FrameStyle",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","ModernIconsColorized",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","SysTrayStyle",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",30
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",36
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","BottomDetails",0
 End
 Else,If,%cmb_Theme%,Equal,"Remastered 7",Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","FrameStyle",2
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","ModernIconsColorized",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","SysTrayStyle",2
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",54
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",54
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","BottomDetails",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","FrameStyle",2
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","ModernIconsColorized",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","SysTrayStyle",2
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",54
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",54
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","BottomDetails",1
 End
 Else,Halt,"INTERNAL LOGIC ERROR: No configuration defined for theme [%cmb_Theme%]"
 
 // Style
 If,Not,%cmb_Style%,Equal,"Default",Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\StartIsBack","AlterStyle","X:\Program Files\StartIsBack\Styles\%cmb_Style%.msstyles"
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\StartIsBack","TaskbarStyle","X:\Program Files\StartIsBack\Styles\%cmb_Style%.msstyles"
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","AlterStyle","X:\Program Files\StartIsBack\Styles\%cmb_Style%.msstyles"
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle","X:\Program Files\StartIsBack\Styles\%cmb_Style%.msstyles"
 End
 
 // Orb Bitmap
-If,%cmb_Orb%,Equal,"Default",RegWrite,HKLM,0x1,"Tmp_Default\Software\StartIsBack","OrbBitmap",""
-Else,If,%cmb_Orb%,Equal,"Clover",RegWrite,HKLM,0x1,"Tmp_Default\Software\StartIsBack","OrbBitmap","%PEPrograms%\%ProgramFolder%\Orbs\clover.svg"
-Else,If,%cmb_Orb%,Equal,"Win8",RegWrite,HKLM,0x1,"Tmp_Default\Software\StartIsBack","OrbBitmap","%PEPrograms%\%ProgramFolder%\Orbs\w8logo.svg"
-Else,If,%cmb_Orb%,Equal,"Win7",RegWrite,HKLM,0x1,"Tmp_Default\Software\StartIsBack","OrbBitmap","%PEPrograms%\%ProgramFolder%\Orbs\Windows 7.orb"
-Else,If,%cmb_Orb%,Equal,"E1even",RegWrite,HKLM,0x1,"Tmp_Default\Software\StartIsBack","OrbBitmap","%PEPrograms%\%ProgramFolder%\Orbs\e1evenorb-pr.png"
+If,%cmb_Orb%,Equal,"Default",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","OrbBitmap",""
+Else,If,%cmb_Orb%,Equal,"Clover",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","OrbBitmap","%PEPrograms%\%ProgramFolder%\Orbs\clover.svg"
+Else,If,%cmb_Orb%,Equal,"Win8",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","OrbBitmap","%PEPrograms%\%ProgramFolder%\Orbs\w8logo.svg"
+Else,If,%cmb_Orb%,Equal,"Win7",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","OrbBitmap","%PEPrograms%\%ProgramFolder%\Orbs\Windows 7.orb"
+Else,If,%cmb_Orb%,Equal,"E1even",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","OrbBitmap","%PEPrograms%\%ProgramFolder%\Orbs\e1evenorb-pr.png"
 Else,Halt,"INTERNAL LOGIC ERROR: No configuration defined for Orb Bitmap [%cmb_Orb%]"
 
 // User Account Picture
-If,%cb_ShowUserPic%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","HideUserFrame",0
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","HideUserFrame",1
+If,%cb_ShowUserPic%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","HideUserFrame",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","HideUserFrame",1
 
 // Transparency
 If,%cb_MakeOpaque%,Equal,True,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","StartMenuAlpha",255
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","StartMenuBlur",2
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","StartMenuColor",-1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","TaskbarAlpha",255
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","TaskbarBlur",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","TaskbarColor",-1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","StartMenuAlpha",255
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","StartMenuBlur",2
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","StartMenuColor",-1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarAlpha",255
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarBlur",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarColor",-1
 End
 
 // Large menu icons
-If,%cb_UseLargeIcons%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",0
+If,%cb_UseLargeIcons%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",0
 
 // Sort items by name
-If,%cb_SortByName%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_SortByName",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_SortByName",0
+If,%cb_SortByName%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_SortByName",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_SortByName",0
 
 // Display folders before items
-If,%cb_SortFoldersFirst%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_SortFoldersFirst",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_SortFoldersFirst",0
+If,%cb_SortFoldersFirst%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_SortFoldersFirst",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_SortFoldersFirst",0
 
 // Fly-out menu (Windows XP style)
-If,%cb_FlyoutMenu%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","AllProgramsFlyout",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","AllProgramsFlyout",0
+If,%cb_FlyoutMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","AllProgramsFlyout",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","AllProgramsFlyout",0
 
 // Show search in menu
 If,%cb_ShowSearch%,Equal,True,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchPrograms",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchFiles",2
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchPrograms",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchFiles",2
 End
 Else,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchPrograms",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchFiles",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchPrograms",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchFiles",0
 End
 
 // Number of recent programs to display
-RegWrite,HKLM,0x4,"Tmp_Default\Software\StartIsBack","Start_MinMFU",%nb_MaxRecentPgm%
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_MinMFU",%nb_MaxRecentPgm%
+
+// Taskbar Settings
+
+// Visual Style
+If,%cmb_TaskbarVisualStyle%,Equal,"Default",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle",""
+Else,If,%cmb_TaskbarVisualStyle%,Equal,"Plain8",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle","Plain8.msstyles"
+Else,If,%cmb_TaskbarVisualStyle%,Equal,"Windows 7",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle","Windows 7.msstyles"
+Else,Halt,"Logic Error: [%cmb_TaskbarVisualStyle%] is not a valid taskbar visual style."
+
+// Icon Size & Margins
+If,%cmb_TaskbarIconSize%,Equal,"S",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarLargerIcons",0
+  If,%cmb_TaskbarIconMargins%,Equal,"XS",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",1
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",4294967294
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",38
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",28
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"S",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",1
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",4294967295
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",38
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",32
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"M",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",0
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",38
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",36
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"L",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",1
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",38
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",40
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"XL",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",2
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",38
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",44
+  End
+  Else,Halt,"Logic Error: [%cmb_TaskbarIconMargins%] is not a valid taskbar margin size."
+End
+Else,If,%cmb_TaskbarIconSize%,Equal,"M",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarLargerIcons",0
+  If,%cmb_TaskbarIconMargins%,Equal,"XS",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",1
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",4294967294
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",48
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",40
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"S",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",1
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",4294967295
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",48
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",44
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"M",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",0
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",48
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",48
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"L",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",1
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",48
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",52
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"XL",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",2
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",48
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",56
+  End
+  Else,Halt,"Logic Error: [%cmb_TaskbarIconMargins%] is not a valid taskbar margin size."
+End
+Else,If,%cmb_TaskbarIconSize%,Equal,"L",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarLargerIcons",1
+  If,%cmb_TaskbarIconMargins%,Equal,"XS",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",4294967294
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",56
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",48
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"S",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",4294967295
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",56
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",52
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"M",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",0
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",56
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",56
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"L",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",1
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",56
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",60
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"XL",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",2
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",56
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",64
+  End
+  Else,Halt,"Logic Error: [%cmb_TaskbarIconMargins%] is not a valid taskbar margin size."
+End
+Else,If,%cmb_TaskbarIconSize%,Equal,"XL",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarLargerIcons",2
+    If,%cmb_TaskbarIconMargins%,Equal,"XS",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",4294967294
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",80
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",64
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"S",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",4294967295
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",80
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",68
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"M",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",0
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",80
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",72
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"L",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",1
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",80
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",76
+  End
+  Else,If,%cmb_TaskbarIconMargins%,Equal,"XL",Begin
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarSpacierIcons",2
+	RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbHeight.96",80
+    RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack\Cache","OrbWidth.96",80
+  End
+  Else,Halt,"Logic Error: [%cmb_TaskbarIconMargins%] is not a valid taskbar margin size."
+End
+Else,Halt,"Logic Error: [%cmb_TaskbarIconSize%] is not a valid taskbar icon size."
+
+// Taskbar Location
+// Note: Since we do not have any documentation for the Settings bitmask we just update the entire thing for the taskbar position at its defaults.
+//       It's important to keep this first as we modify individual bits for other setting such as Auto Hide later on in this script.
+If,%cmb_TaskbarLocation%,Equal,"Bottom",RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\StartIsBack\Taskbaz","Settings",30 00 00 00 FE FF FF FF 02 00 00 00 03 00 00 00 38 00 00 00 26 00 00 00 00 00 00 00 DA 02 00 00 00 04 00 00 00 03 00 00 60 00 00 00 01 00 00 00
+Else,If,%cmb_TaskbarLocation%,Equal,"Top",RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\StartIsBack\Taskbaz","Settings",30 00 00 00 FE FF FF FF 02 00 00 00 01 00 00 00 38 00 00 00 26 00 00 00 00 00 00 00 00 00 00 00 00 04 00 00 26 00 00 00 60 00 00 00 01 00 00 00
+Else,If,%cmb_TaskbarLocation%,Equal,"Right",RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\StartIsBack\Taskbaz","Settings",30 00 00 00 FE FF FF FF 02 00 00 00 02 00 00 00 38 00 00 00 26 00 00 00 C8 03 00 00 00 00 00 00 00 04 00 00 00 03 00 00 60 00 00 00 01 00 00 00
+Else,If,%cmb_TaskbarLocation%,Equal,"Left",RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\StartIsBack\Taskbaz","Settings",30 00 00 00 FE FF FF FF 02 00 00 00 00 00 00 00 38 00 00 00 26 00 00 00 00 00 00 00 00 00 00 00 38 00 00 00 00 03 00 00 60 00 00 00 01 00 00 00
+Else,Halt,"Logic Error: [%cmb_TaskbarLocation%] is not a valid taskbar location."
+
+// Taskbar Combine Buttons
+If,%cmb_TaskbarCombineButtons%,Equal,"Always, hide labels",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarGrouping",1
+End
+Else,If,%cmb_TaskbarCombineButtons%,Equal,"When taskbar is full",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarGrouping",1
+End
+Else,If,%cmb_TaskbarCombineButtons%,Equal,"Never",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",2
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarGrouping",1
+End
+Else,If,%cmb_TaskbarCombineButtons%,Equal,"Never, hide labels",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",3
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarGrouping",1
+End
+Else,If,%cmb_TaskbarCombineButtons%,Equal,"Never group",Begin
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",3
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarGrouping",0
+End
+Else,Halt,"Logic Error: [%cmb_TaskbarCombineButtons%] is not a valid option for combining taskbar buttons."
+
+// Plumpness: 0 - Off, 1 - Buffer, 2 - Aura
+If,%cmb_TaskbarPlumpness%,Equal,"None",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","FatTaskbar",0
+Else,If,%cmb_TaskbarPlumpness%,Equal,"Buffer",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","FatTaskbar",1
+Else,If,%cmb_TaskbarPlumpness%,Equal,"Aura",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","FatTaskbar",2
+Else,Halt,"Logic Error: [%cmb_TaskbarPlumpness%] is not a valid Plumpness setting."
+
+// Center Taskbar Icons
+If,%cb_TaskbarCenterIcons%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarCenterIcons",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarCenterIcons",0
+
+// Auto hide taskbar - Bit group 9 bit 1 (0x03 - Hide, 0x02 - Show)
+RegRead,HKLM,"Tmp_Default\Software\StartIsBack\Taskbaz","Settings",%TaskbazSettings%
+If,%cb_TaskbarAutoHide%,Equal,True,BitSet,%TaskbazSettings%,9,0,8
+Else,BitClear,%TaskbazSettings%,9,0,8
+
+Set,%NewTaskbazSettings%,#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\StartIsBack\Taskbaz","Settings",%NewTaskbazSettings%
+
+// Segments (? TaskbarOneSegment)
+If,%cb_TaskbarSegments%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarTranslucentEffect",2
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarTranslucentEffect",0
+
+// Dynamic Transparency/Aura/Shyness
+If,%cb_TaskbarDynamicTransparency%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarTranslucentEffect",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarTranslucentEffect",0
 
 RegHiveUnload,Tmp_Default
 
@@ -255,91 +462,91 @@ Echo,"Registering StartAllBack..."
 
 RegHiveLoad,Tmp_Software,%RegSoftware%
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}","","StartIsBack Menu Pin"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}","","StartIsBack Menu Pin"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","DisplayName","StartAllBack"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","IconBackgroundColor",0
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","ShowInSettings",0
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","CustomActivator","{da3306b1-2554-420b-8d0e-6bd29bb4d8ed}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","DisplayName","StartAllBack"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","IconBackgroundColor",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","ShowInSettings",0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","CustomActivator","{da3306b1-2554-420b-8d0e-6bd29bb4d8ed}"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{117E3954-5034-453A-A18B-7B79493646E6}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%LoaderDLL%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{117E3954-5034-453A-A18B-7B79493646E6}\InProcServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{117E3954-5034-453A-A18B-7B79493646E6}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%LoaderDLL%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{117E3954-5034-453A-A18B-7B79493646E6}\InProcServer32","ThreadingModel","Apartment"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}","","StartIsBack All Programs Folder"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}\InProcServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}\ShellFolder","Attributes",672137216
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}","","StartIsBack All Programs Folder"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}\InProcServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}\ShellFolder","Attributes",672137216
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}","","Settings Pages"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\InProcServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\ShellFolder","Attributes",-1610612736
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}","","God Mode"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}\InProcServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}\ShellFolder","Attributes",-1610612736
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}","","Settings Pages"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\InProcServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\ShellFolder","Attributes",-1610612736
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}","","God Mode"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}\InProcServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}\ShellFolder","Attributes",-1610612736
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}","ImplementsVerbs","startpin;startunpin"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}\InprocServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}\InprocServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}","ImplementsVerbs","startpin;startunpin"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}\InprocServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{ab0b37ec-56f6-4a0e-a8fd-7a8bf7c2da97}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{ab0b37ec-56f6-4a0e-a8fd-7a8bf7c2da97}\InProcServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{ab0b37ec-56f6-4a0e-a8fd-7a8bf7c2da97}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{ab0b37ec-56f6-4a0e-a8fd-7a8bf7c2da97}\InProcServer32","ThreadingModel","Apartment"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD1405D2-30CF-4877-8468-1EE1C52C759F}","","All Apps"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD1405D2-30CF-4877-8468-1EE1C52C759F}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD1405D2-30CF-4877-8468-1EE1C52C759F}\InProcServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\CLSID\{AD1405D2-30CF-4877-8468-1EE1C52C759F}\ShellFolder","Attributes",-1610612736
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD1405D2-30CF-4877-8468-1EE1C52C759F}","","All Apps"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD1405D2-30CF-4877-8468-1EE1C52C759F}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD1405D2-30CF-4877-8468-1EE1C52C759F}\InProcServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\CLSID\{AD1405D2-30CF-4877-8468-1EE1C52C759F}\ShellFolder","Attributes",-1610612736
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}\InProcServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}\InProcServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","","StartAllBack"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","System.Software.TasksFileUrl","Internal"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","System.ControlPanel.EnableInSafeMode",3
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","System.ApplicationName","StartIsBack.Config"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","System.ControlPanel.Category",1
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}\DefaultIcon","","%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}\Shell\Open\Command","","%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}\ShellFolder","Attributes",0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","","StartAllBack"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","System.Software.TasksFileUrl","Internal"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","System.ControlPanel.EnableInSafeMode",3
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","System.ApplicationName","StartIsBack.Config"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","System.ControlPanel.Category",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}\DefaultIcon","","%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe,0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}\Shell\Open\Command","","%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}\ShellFolder","Attributes",0
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shellex\FolderExtensions\{117E3954-5034-453A-A18B-7B79493646E6}","","StartAllBack"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\Drive\shellex\FolderExtensions\{117E3954-5034-453A-A18B-7B79493646E6}","DriveMask",255
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\FolderExtensions\{117E3954-5034-453A-A18B-7B79493646E6}","","StartAllBack"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\Drive\shellex\FolderExtensions\{117E3954-5034-453A-A18B-7B79493646E6}","DriveMask",255
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\MSILink\shellex\ContextMenuHandlers\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}","","Start Menu Pin"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\MSILink\shellex\ContextMenuHandlers\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}","","Start Menu Pin"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\sib-activate","URL Protocol",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\sib-activate\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe#$q /activate #$p1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\sib-reactivate","URL Protocol",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\sib-reactivate\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe#$q /reactivate #$p1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\sib-activate","URL Protocol",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\sib-activate\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe#$q /activate #$p1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\sib-reactivate","URL Protocol",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\sib-reactivate\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe#$q /reactivate #$p1"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\ChangeIcon","MuiVerb","@shell32.dll,-34608"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\ChangeIcon\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\Delete","MuiVerb","@shell32.dll,-33553"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\Delete","Position","Bottom"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\Delete\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\ChangeIcon","MuiVerb","@shell32.dll,-34608"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\ChangeIcon\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\Delete","MuiVerb","@shell32.dll,-33553"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\Delete","Position","Bottom"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.AppsFolder\Shell\Delete\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication","","Open"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\CopyPath","Extended",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\CopyPath","Position","Bottom"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\CopyPath","MuiVerb","@shell32.dll,-30329"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\CopyPath\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete","","Uninstall Modern App"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete","MuiVerb","@appwiz.cpl,-173"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete","Position","Bottom"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete","SeparatorBefore",1
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\OpenFolder","MuiVerb","@shell32.dll,-32960"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\OpenFolder","Extended",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\OpenFolder\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties","","Modern App Settings"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties","MuiVerb","@shell32.dll,-16534"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties","Position","Bottom"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties","SeparatorBefore",1
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication","","Open"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\CopyPath","Extended",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\CopyPath","Position","Bottom"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\CopyPath","MuiVerb","@shell32.dll,-30329"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\CopyPath\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete","","Uninstall Modern App"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete","MuiVerb","@appwiz.cpl,-173"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete","Position","Bottom"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete","SeparatorBefore",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Delete\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\OpenFolder","MuiVerb","@shell32.dll,-32960"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\OpenFolder","Extended",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\OpenFolder\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties","","Modern App Settings"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties","MuiVerb","@shell32.dll,-16534"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties","Position","Bottom"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties","SeparatorBefore",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\StartIsBack.ImmersiveApplication\Shell\Properties\Command","DelegateExecute","{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\StartIsBackCfg.exe","","%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","","Start menu"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\StartIsBackCfg.exe","","%PEPrograms%\%ProgramFolder%\StartAllBackCfg.exe"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","","Start menu"
 
 RegHiveUnload,Tmp_Software
 
@@ -388,6 +595,8 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 [SetDefaultOptions]
 System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+
+// Start Menu
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Theme,"Proper 11"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Style,"Default"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Orb,"Default"
@@ -399,6 +608,18 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_SortFoldersFirst,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_FlyoutMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowSearch,True
 WriteInterface,Value,%ScriptFile%,Interface,nb_MaxRecentPgm,20
+
+// Taskbar
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarVisualStyle,"Default"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarIconSize,"S"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarIconMargins,"XS"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarLocation,"Bottom"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarCombineButtons,"Never"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarPlumpness,"Aura"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarCenterIcons,"No"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarSegments,"None"
+WriteInterface,Value,%ScriptFile%,Interface,cb_TaskbarAutoHide,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_TaskbarDynamicTransparency,False
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -448,26 +669,45 @@ btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all 
 btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_Disabled_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
-bvl_MenuOptions="Start Menu Options",1,12,5,50,275,327,8,Bold
-lbl_VisualOptions="Visual Style",1,1,11,73,70,18,8,Bold
-lbl_Theme=Theme:,1,1,16,96,78,18,8,Normal
-cmb_Theme="Proper 11",1,4,102,90,150,21,"Proper 11","Kinda 10","Remastered 7"
-lbl_Style="Interface style:",1,1,16,123,78,18,8,Normal
-cmb_Style=Default,1,4,102,117,150,21,Default,Plain8,"Windows 7"
-lbl_Orb="Start button orb:",1,1,16,149,86,18,8,Normal
-cmb_Orb=Default,1,4,102,144,150,21,Default,Clover,"Win 8","Win 7",E1even
-cb_ShowUserPic="Show user account picture",1,3,15,177,180,16,True
-cb_MakeOpaque="Disable transparency",1,3,15,195,180,16,True
-lbl_Menu="All Programs Menu",1,1,11,229,108,18,8,Bold
-cb_UseLargeIcons="Use large icons",1,3,15,249,180,16,False
-cb_SortByName="Sort items by name",1,3,15,267,180,16,True
-cb_SortFoldersFirst="Display folders before items",1,3,15,285,180,16,False
-cb_FlyoutMenu="Fly-out menu (Windows XP style)",1,3,15,303,233,16,False
-cb_ShowSearch="Show the Search Box",1,3,15,321,233,16,True
-lbl_RecentItems="Number of recent programs to display:",1,1,16,347,187,18,8,Normal
-nb_MaxRecentPgm=,1,2,206,341,40,22,20,1,20,1
-lbl_SupportStartIsBack="If you enjoy StartAllBack please support the developer and purchase a license.",1,1,5,405,522,16,8,Normal
-cb_AlwaysDownload="Always download latest version",1,3,295,54,177,18,False,"__Enable this option to ensure you always included the latest version of StartIsBack in your build."
+bvl_MenuOptions="Start Menu Options",1,12,5,85,275,319,8,Bold
+lbl_VisualOptions="Visual Style",1,1,11,103,70,18,8,Bold
+lbl_Theme=Theme:,1,1,16,126,78,18,8,Normal
+cmb_Theme="Proper 11",1,4,102,120,150,21,"Proper 11","Kinda 10","Remastered 7"
+lbl_Style="Visual style:",1,1,16,153,78,18,8,Normal
+cmb_Style=Default,1,4,102,147,150,21,Default,Plain8,"Windows 7"
+lbl_Orb="Start button orb:",1,1,16,179,86,18,8,Normal
+cmb_Orb=Default,1,4,102,174,150,21,Default,Clover,"Win 8","Win 7",E1even
+cb_ShowUserPic="Show user account picture",1,3,15,207,180,16,True
+cb_MakeOpaque="Disable transparency",1,3,15,225,180,16,True
+lbl_Menu="All Programs Menu",1,1,11,259,108,18,8,Bold
+cb_UseLargeIcons="Use large icons",1,3,15,279,180,16,False
+cb_SortByName="Sort items by name",1,3,15,297,180,16,True
+cb_SortFoldersFirst="Display folders before items",1,3,15,315,180,16,False
+cb_FlyoutMenu="Fly-out menu (Windows XP style)",1,3,15,333,233,16,False
+cb_ShowSearch="Show the Search Box",1,3,15,351,233,16,True
+lbl_RecentItems="Number of recent programs to display:",1,1,16,377,187,18,8,Normal
+nb_MaxRecentPgm=,1,2,206,371,40,22,20,1,20,1
+lbl_SupportStartIsBack="If you enjoy StartAllBack please support the developer and purchase a license.",1,1,5,435,522,16,8,Normal
+cb_AlwaysDownload="Always download latest version",1,3,5,50,177,18,False,"__Enable this option to ensure you always included the latest version of StartIsBack in your build."
+bvl_TaskbarOptions="Taskbar Options",1,12,290,85,312,319,8,Bold
+lbl_TaskbarVisualStyle="Visual style:",1,1,300,125,68,16,8,Normal
+cmb_TaskbarVisualStyle=Default,1,4,390,120,150,21,Default,Plain8,"Windows 7"
+lbl_TaskbarIconSize="Icon size:",1,1,300,152,48,16,8,Normal
+cmb_TaskbarIconSize=S,1,4,360,147,50,21,S,M,L,XL
+lbl_TaskbarIconMargins="Icon margins:",1,1,423,152,66,16,8,Normal
+cmb_TaskbarIconMargins=XS,1,4,490,147,50,21,XS,S,M,L,XL
+lbl_TaskbarLocation="Taskbar location:",1,1,300,179,81,16,8,Normal
+cmb_TaskbarLocation=Bottom,1,4,390,174,150,21,Left,Top,Right,Bottom
+lbl_TaskbarCombineButtons="Combine buttons:",1,1,300,206,89,16,8,Normal
+cmb_TaskbarCombineButtons=Never,1,4,390,201,150,21,"Always#$c hide labels","When taskbar is full",Never,"Never#$c hide labels","Never group"
+lbl_TaskbarPlumpness=Plumpness:,1,1,300,233,86,16,8,Normal
+cmb_TaskbarPlumpness=Aura,1,4,390,228,150,21,None,Buffer,Aura
+lbl_TaskbarCenterIcons="Center Icons:",1,1,300,260,86,16,8,Normal
+cmb_TaskbarCenterIcons=No,1,4,390,255,199,21,No,"Separately from start button","Together with Start button"
+lbl_TaskbarSegments=Segments:,1,1,300,287,86,16,8,Normal
+cmb_TaskbarSegments=None,1,4,390,282,199,21,None,"Up to three segments","Just central segment"
+cb_TaskbarAutoHide="Auto hide taskbar",1,3,300,315,200,18,False
+cb_TaskbarDynamicTransparency="Dynamic transparency/aura/shyness",1,3,300,333,200,18,False
 
 [AuthorEncoded]
 StartAllBack_80.png=2093,2896
