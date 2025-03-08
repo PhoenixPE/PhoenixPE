@@ -32,12 +32,12 @@
 Title=VMware
 Author=Homes32
 Description=Run your ISO in VMware Player/Workstation
-Version=1.1.4.0
+Version=1.1.5.0
 Level=9
 Selected=False
 Mandatory=False
 NoWarning=False
-Date=2025-02-08
+Date=2025-02-15
 
 [Variables]
 %VMPath%="%ProjectTemp%\VMware"
@@ -123,8 +123,8 @@ StrFormat,Split,%VMwareVer%,.,1,%VMwareVer%
 TXTAddLine,%VMCfg%,"virtualHW.version = #$q%VMwareVer%#$q",Append
 
 // Guest OS
-If,%SourceArch%,Equal,x64,Set,%VMOS%,windows9-64
-Else,Set,%VMOS%,windows9
+If,%SourceArch%,Equal,x64,Set,%VMOS%,"windows9-64"
+Else,Set,%VMOS%,"windows9"
 TXTAddLine,%VMCfg%,"guestOS = #$q%VMOS%#$q",Append
 
 // Video RAM (in bytes). 16-128MB - Default is auto-detect. Uncomment the next 2 lines to set manually.
@@ -132,7 +132,7 @@ TXTAddLine,%VMCfg%,"guestOS = #$q%VMOS%#$q",Append
 //TxtAddLine,%VMCfg%,"svga.vramSize = #$q134217728#$q",Append
 
 // Processor
-If,%cmb_numProc%,Equal,Auto,Begin
+If,%cmb_numProc%,Equal,"Auto",Begin
   System,GetEnv,"NUMBER_OF_PROCESSORS",%numProcessors%
   If,%numProcessors%,Equal,"",Set,%numProcessors%,1
   Else,Begin
@@ -164,10 +164,10 @@ TXTAddLine,%VMCfg%,"sata0:1.fileName = #$q%ISOFile%#$q",Append
 TXTAddLine,%VMCfg%,"floppy0.present = #$qFALSE#$q",Append
 
 // Network
-If,Not,%cmb_NetworkAdapter%,Equal,Disabled,Begin
+If,Not,%cmb_NetworkAdapter%,Equal,"Disabled",Begin
   TXTAddLine,%VMCfg%,"Ethernet0.present = #$qTRUE#$q",Append
-  If,%cmb_NetworkMode%,Equal,Bridged,TXTAddLine,%VMCfg%,"Ethernet0.connectionType = #$qbridged#$q",Append
-  Else,If,%cmb_NetworkMode%,Equal,NAT,TXTAddLine,%VMCfg%,"Ethernet0.connectionType = #$qnat#$q",Append
+  If,%cmb_NetworkMode%,Equal,"Bridged",TXTAddLine,%VMCfg%,"Ethernet0.connectionType = #$qbridged#$q",Append
+  Else,If,%cmb_NetworkMode%,Equal,"NAT",TXTAddLine,%VMCfg%,"Ethernet0.connectionType = #$qnat#$q",Append
   Else,Halt,"INTERNAL LOGIC ERROR: No configuration has been defined for Network Connection [%cmb_NetworkMode%]"
  
   TXTAddLine,%VMCfg%,"Ethernet0.addressType = #$qgenerated#$q",Append
@@ -179,7 +179,7 @@ If,Not,%cmb_NetworkAdapter%,Equal,Disabled,Begin
 End
 
 // Audio
-If,Not,%cmb_Audio%,Equal,Disabled,Begin
+If,Not,%cmb_Audio%,Equal,"Disabled",Begin
   TXTAddLine,%VMCfg%,"sound.present = #$qTRUE#$q",Append
   TXTAddLine,%VMCfg%,"sound.fileName = #$q-1#$q",Append
   TXTAddLine,%VMCfg%,"sound.autodetect = #$qTRUE#$q",Append
@@ -221,7 +221,7 @@ TxtAddLine,%VMCfg%,"serial0.yieldOnMsrRead = #$qTRUE#$q",Append
 TxtAddLine,%VMCfg%,"serial0.present = #$qTRUE#$q",Append
 
 // Shared Folder
-If,Not,%cmb_SharedFolder%,Equal,Disabled,Begin
+If,Not,%cmb_SharedFolder%,Equal,"Disabled",Begin
 
   If,Not,ExistDir,%fb_SharedFolder%,DirMake,%fb_SharedFolder%
   StrFormat,EndTrim,%fb_SharedFolder%,\,%fb_SharedFolder%
@@ -251,7 +251,7 @@ If,Not,%cmb_SharedFolder%,Equal,Disabled,Begin
 End
 
 // Virtual HDD (sata0:0)
-If,Not,%cmb_VirtualHDD%,Equal,Disabled,Begin
+If,Not,%cmb_VirtualHDD%,Equal,"Disabled",Begin
   
   TXTAddLine,%VMCfg%,"sata0:0.present = #$qTRUE#$q",Append
 
@@ -314,7 +314,7 @@ ShellExecuteEx,Explore,%fb_SharedFolder%
 // Related........: cmb_SharedFolder
 // ===============================================================================================================================
 [ToggleSharedFolderFilebox]
-If,%cmb_SharedFolder%,Equal,Disabled,Begin
+If,%cmb_SharedFolder%,Equal,"Disabled",Begin
   WriteInterface,Visible,%ScriptFile%,Interface,fb_SharedFolder,False
   WriteInterface,Visible,%ScriptFile%,Interface,btn_ExploreSharedFolder,False
 End
@@ -441,7 +441,7 @@ Message,"VMware Workstation Player is a desktop virtualization application that 
 btn_Launch="Launch VMware",1,8,5,5,130,25,Process,play-hot.png,False,"__Launch VMware and boot the most recent ISO file created."
 btn_RebuildWimISO=" Rebuild WIM + ISO",1,8,142,5,130,25,RebuildWIM+ISO,Refresh.ico,False,"__Rebuild BOOT.WIM and ISO file.#$xThis has the same effect as processing the Finalize\Capture Wim and Media Creation\Create ISO scripts."
 bvl_Homepage=bvl_Homepage,1,12,392,5,108,25
-web_DownloadVMware="Download VMware",1,10,400,10,101,18,https://my.vmware.com/web/vmware/downloads
+web_DownloadVMware="Download VMware",1,10,400,10,101,18,https://www.vmware.com/products/desktop-hypervisor/workstation-and-fusion
 btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
