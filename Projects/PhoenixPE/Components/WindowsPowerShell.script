@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.1.0.0
-Date=2024-06-22
+Version=1.1.1.0
+Date=2025-03-09
 
 [Variables]
 %ProgramFolder%="WindowsPowerShell"
@@ -68,22 +68,22 @@ RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App P
 // Add to system PATH
 RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%SysPath%
 StrFormat,CTrim,%SysPath%,";",%SysPath%
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;%SystemRoot%\system32\WindowsPowerShell\v1.0\;"
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","PSModulePath","#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0\Modules\"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0\;"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","PSModulePath","#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0\Modules\"
 
 // Execution Policy
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell","ExecutionPolicy",%cmb_ExecutionPolicy%
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell","ExecutionPolicy",%cmb_ExecutionPolicy%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell","ExecutionPolicy",%cmb_ExecutionPolicy%
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell","ExecutionPolicy",%cmb_ExecutionPolicy%
 
 RegUnloadHives
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 
-If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"%SystemRoot%\system32\WindowsPowerShell\v1.0\%ProgramExe%"
-If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%SystemRoot%\system32\WindowsPowerShell\v1.0\%ProgramExe%"
-If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%SystemRoot%\system32\WindowsPowerShell\v1.0\%ProgramExe%"
-If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%SystemRoot%\system32\WindowsPowerShell\v1.0\%ProgramExe%"
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_ShortcutName%,"#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0\%ProgramExe%","","#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0\%ProgramExe%","","#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"#$pSystemRoot#$p\system32\WindowsPowerShell\v1.0\%ProgramExe%"
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================

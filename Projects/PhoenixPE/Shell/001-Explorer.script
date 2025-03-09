@@ -78,8 +78,8 @@ RegHiveUnload,Tmp_Install_System
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 
-If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,"#$pwindir#$p\Explorer.exe"
-If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"#$pwindir#$p\Explorer.exe"
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_ShortcutName%,"#$pwindir#$p\Explorer.exe","","#$pWwinDir#$p"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"#$pwindir#$p\Explorer.exe","","#$pWinDir#$p"
 If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,0,"#$pwindir#$p\Explorer.exe"
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,0,"#$pwindir#$p\Explorer.exe"
 
@@ -158,7 +158,7 @@ End
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","StartMenuInit",13
 
 // Set the My Computer > Properties context menu to open the classic System Properties dialog
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Properties\command","","%WinDir%\System32\SystemPropertiesComputerName.exe"
+RegWrite,HKLM,0x2,"Tmp_Software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Properties\command","","#$pWinDir#$p\System32\SystemPropertiesComputerName.exe"
 
 //Cleanup Desktop Context Menu
 If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\DesktopBackground\Shell\Display",RegDelete,HKLM,"Tmp_Software\Classes\DesktopBackground\Shell\Display"

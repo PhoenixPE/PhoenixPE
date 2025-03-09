@@ -35,11 +35,12 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.0.1.0
-Date=2024-01-21
+Version=1.0.2.0
+Date=2025-03-07
 
 [Variables]
-%ProgramExe%="#$pWinDir#$p\System32\cmd.exe"
+%ProgramFolder%="#$pWinDir#$p\System32"
+%ProgramExe%="cmd.exe"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -47,8 +48,8 @@ Echo,"Processing %ScriptTitle%..."
 If,%cb_CmdPromptHere%,Equal,True,Run,%ScriptFile%,OpenCmdHere
 
 // Shortcuts
-If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,,%txt_ShortcutName%,%ProgramExe%
-If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,%ProgramExe%
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_ShortcutName%,%ProgramExe%,"","%ProgramFolder%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,%ProgramExe%,"","%ProgramFolder%"
 If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,%ProgramExe%
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,%ProgramExe%
 
@@ -73,46 +74,46 @@ RegHiveLoad,Tmp_Software,%RegSoftware%
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Drive\shell\cmd","Extended",RegDelete,HKLM,"Tmp_Software\Classes\Drive\shell\cmd","Extended"
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Directory\shell\cmd","Extended",RegDelete,HKLM,"Tmp_Software\Classes\Directory\shell\cmd","Extended"
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Directory\background\shell\cmd","Extended",RegDelete,HKLM,"Tmp_Software\Classes\Directory\background\shell\cmd","Extended"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\Drive\shell\cmd"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\cmd","icon","cmd.exe"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\Directory\shell\cmd"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\cmd","icon","cmd.exe"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\Directory\background\shell\cmd"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\background\shell\cmd","icon","cmd.exe"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\cmd","","@shell32.dll,-8506"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\cmd","icon","cmd.exe"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\cmd\command","","cmd.exe"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\Drive\shell\cmd"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\cmd","icon","cmd.exe"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\Directory\shell\cmd"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\cmd","icon","cmd.exe"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\Directory\background\shell\cmd"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\background\shell\cmd","icon","cmd.exe"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\cmd","","@shell32.dll,-8506"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\cmd","icon","cmd.exe"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\cmd\command","","cmd.exe"
 
 // Replace the PowerShell menu item with our "Open command prompt here" menu item
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Drive\shell\cmd","HideBasedOnVelocityId",Begin
   RegRead,HKLM,"Tmp_Software\Classes\Drive\shell\cmd","HideBasedOnVelocityId",%VelocityIdValue%
   RegDelete,HKLM,"Tmp_Software\Classes\Drive\shell\cmd","HideBasedOnVelocityId"
-  RegWrite,HKLM,0x4,"Tmp_Software\Classes\Drive\shell\cmd","ShowBasedOnVelocityId",%VelocityIdValue%
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\Drive\shell\cmd","ShowBasedOnVelocityId",%VelocityIdValue%
 End
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Directory\shell\cmd","HideBasedOnVelocityId",Begin
   RegRead,HKLM,"Tmp_Software\Classes\Directory\shell\cmd","HideBasedOnVelocityId",%VelocityIdValue%
   RegDelete,HKLM,"Tmp_Software\Classes\Directory\shell\cmd","HideBasedOnVelocityId"
-  RegWrite,HKLM,0x4,"Tmp_Software\Classes\Directory\shell\cmd","ShowBasedOnVelocityId",%VelocityIdValue%
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\Directory\shell\cmd","ShowBasedOnVelocityId",%VelocityIdValue%
 End
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Directory\background\shell\cmd","HideBasedOnVelocityId",Begin
   RegRead,HKLM,"Tmp_Software\Classes\Directory\background\shell\cmd","HideBasedOnVelocityId",%VelocityIdValue%
   RegDelete,HKLM,"Tmp_Software\Classes\Directory\background\shell\cmd","HideBasedOnVelocityId"
-  RegWrite,HKLM,0x4,"Tmp_Software\Classes\Directory\background\shell\cmd","ShowBasedOnVelocityId",%VelocityIdValue%
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\Directory\background\shell\cmd","ShowBasedOnVelocityId",%VelocityIdValue%
 End
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Drive\shell\PowerShell","ShowBasedOnVelocityId",Begin
   RegRead,HKLM,"Tmp_Software\Classes\Drive\shell\PowerShell","ShowBasedOnVelocityId",%VelocityIdValue%
   RegDelete,HKLM,"Tmp_Software\Classes\Drive\shell\PowerShell","ShowBasedOnVelocityId"
-  RegWrite,HKLM,0x4,"Tmp_Software\Classes\Drive\shell\PowerShell","HideBasedOnVelocityId",%VelocityIdValue%
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\Drive\shell\PowerShell","HideBasedOnVelocityId",%VelocityIdValue%
 End
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Directory\shell\PowerShell","ShowBasedOnVelocityId",Begin
   RegRead,HKLM,"Tmp_Software\Classes\Directory\shell\PowerShell","ShowBasedOnVelocityId",%VelocityIdValue%
   RegDelete,HKLM,"Tmp_Software\Classes\Directory\shell\PowerShell","ShowBasedOnVelocityId"
-  RegWrite,HKLM,0x4,"Tmp_Software\Classes\Directory\shell\PowerShell","HideBasedOnVelocityId",%VelocityIdValue%
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\Directory\shell\PowerShell","HideBasedOnVelocityId",%VelocityIdValue%
 End
 If,ExistRegValue,HKLM,"Tmp_Software\Classes\Directory\background\shell\PowerShell","ShowBasedOnVelocityId",Begin
   RegRead,HKLM,"Tmp_Software\Classes\Directory\background\shell\PowerShell","ShowBasedOnVelocityId",%VelocityIdValue%
   RegDelete,HKLM,"Tmp_Software\Classes\Directory\background\shell\PowerShell","ShowBasedOnVelocityId"
-  RegWrite,HKLM,0x4,"Tmp_Software\Classes\Directory\background\shell\PowerShell","HideBasedOnVelocityId",%VelocityIdValue%
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\Directory\background\shell\PowerShell","HideBasedOnVelocityId",%VelocityIdValue%
 End
 RegHiveUnload,Tmp_Software
 
