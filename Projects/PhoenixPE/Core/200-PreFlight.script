@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.2.1.0
-Date=2024-07-08
+Version=1.2.2.0
+Date=2025-03-07
 
 [Variables]
 // Minimum PEBakery version that has the command/feature set that is compatible with PhoenixPE.
@@ -288,6 +288,8 @@ DirDeleteEx,"%Tools%\x64\BCDBOOT"
 //                           10.0.19045   06/28/2022     22H2          Windows 10 2022 Update     Not Verified   
 //           Win11  21H2     10.0.22000   10/04/2021     Sun Valley                               Experimental
 //                  22H2     10.0.22621   09/20/2022     Sun Valley 2                             Verified
+//                  23H2     10.0.22631   10/31/2023     Sim Valley 3                             Verified (v1)
+//                  24H2     10.0.26100   10/01/2024     Hudson Valley                            Verified
 //
 // Syntax.........: 
 // Parameters.....: 
@@ -304,10 +306,10 @@ Echo,"Checking source version against known working builds..."
 Set,%MinimumSourceVer%,"10.0.16299.0"
 
 // Supported Sources (x.x.x - do not include SPbuild)
-Set,%aSupportedVersions%,10.0.17634|10.0.17763|10.0.18362|10.0.18363|10.0.19041|10.0.22621
+Set,%aSupportedVersions%,10.0.17634|10.0.17763|10.0.18362|10.0.18363|10.0.19041|10.0.22621|10.0.22631|10.0.26100
 
 // Latest Verified Source - This string is used in the warning message if the user is attempting to use an unverified source.
-Set,%MostRecentVerifiedSource%,"* Win10: 10.0.19041 - May 2020 Update (20H1) 2004#$x* Win11: 10.0.22621 - 22H2"
+Set,%PreferredSources%,"* Win10: 10.0.19041 - May 2020 Update (20H1) 2004#$x* Win11: 10.0.22621 - 22H2"
 
 If,%SourceVer%,Smaller,%MinimumSourceVer%,Begin
   Message,"Unsupported Source!#$x#$xBuilding with Windows version [%SourceVer%] sources are not supported.#$x#$xPlease select a valid Windows 10 Source.",Error,10
@@ -321,7 +323,7 @@ StrFormat,EndTrim,%tmp_SourceVer%,".",%tmp_SourceVer%
 List,Pos,%aSupportedVersions%,%tmp_SourceVer%,%VerPos%
 If,%VerPos%,Equal,0,Begin
   Echo,"Warning: This Windows source version [%SourceVer%] has not been tested.",Warn
-  Message,"This Windows source version [%SourceVer%] has not been tested and verified to be compatible with PhoenixPE. This doesn't necessarily mean the build will fail, but if you run into problems you will be on your own.#$x#$xSome project scripts might not work with an untested/unknown source!#$x#$xIf possible please use the most recent verified source - #$x#$x%MostRecentVerifiedSource%",Warning,10
+  Message,"This Windows source version [%SourceVer%] has not been tested and verified to be compatible with PhoenixPE. This doesn't necessarily mean the build will fail, but if you run into problems you will be on your own.#$x#$xSome project scripts might not work with an untested/unknown source!#$x#$xIf possible please use one of the following verified sources - #$x#$x%PreferredSources%",Warning,10
 End
 
 System,EndLocal
