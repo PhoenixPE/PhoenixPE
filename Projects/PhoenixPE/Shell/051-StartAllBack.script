@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.1.0.0
-Date=2025-01-22
+Version=1.2.0.0
+Date=2025-03-10
 
 [Variables]
 %ProgramFolder%=StartAllBack
@@ -181,11 +181,17 @@ Else,If,%cmb_Theme%,Equal,"Remastered 7",Begin
 End
 Else,Halt,"INTERNAL LOGIC ERROR: No configuration defined for theme [%cmb_Theme%]"
 
-// Style
-If,Not,%cmb_Style%,Equal,"Default",Begin
-  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","AlterStyle","X:\Program Files\StartIsBack\Styles\%cmb_Style%.msstyles"
-  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle","X:\Program Files\StartIsBack\Styles\%cmb_Style%.msstyles"
+// Start Menu Style
+If,Not,%cmb_StartMenuStyle%,Equal,"Default",Begin
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","AlterStyle","X:\Program Files\StartIsBack\Styles\%cmb_StartMenuStyle%.msstyles"
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle","X:\Program Files\StartIsBack\Styles\%cmb_StartMenuStyle%.msstyles"
 End
+
+// Icon size
+If,%cmb_StartMenuIconSize%,Equal,"S",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",0
+Else,If,%cmb_StartMenuIconSize%,Equal,"M",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",2
+Else,If,%cmb_StartMenuIconSize%,Equal,"L",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",1
+Else,Halt,"INTERNAL LOGIC ERROR: [%cmb_StartMenuIconSize%] is not a valid Start Menu icon size."
 
 // Orb Bitmap
 If,%cmb_Orb%,Equal,"Default",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","OrbBitmap",""
@@ -210,8 +216,12 @@ If,%cb_MakeOpaque%,Equal,True,Begin
 End
 
 // Large menu icons
-If,%cb_UseLargeIcons%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",1
-Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeMFUIcons",0
+If,%cb_UseLargeIcons%,Equal,False,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeAllAppsIcons",0
+Else,Begin
+  If,%cmb_StartMenuLargeAllAppsIcons%,Equal,"M",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeAllAppsIcons",2
+  Else,If,%cmb_StartMenuLargeAllAppsIcons%,Equal,"L",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_LargeAllAppsIcons",1
+  Else,Halt,"INTERNAL LOGIC ERROR: [%cmb_StartMenuLargeAllAppsIcons%] is not a valid All Apps icon size."
+End
 
 // Sort items by name
 If,%cb_SortByName%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_SortByName",1
@@ -598,11 +608,13 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
 
 // Start Menu
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Theme,"Proper 11"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_Style,"Default"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_StartMenuStyle,"Default"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_StartMenuIconSize,"S"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Orb,"Default"
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowUserPic,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_MakeOpaque,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_UseLargeIcons,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_StartMenuLargeAllAppsIcons,"M"
 WriteInterface,Value,%ScriptFile%,Interface,cb_SortByName,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_SortFoldersFirst,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_FlyoutMenu,False
@@ -674,19 +686,22 @@ lbl_VisualOptions="Visual Style",1,1,11,103,70,18,8,Bold
 lbl_Theme=Theme:,1,1,16,126,78,18,8,Normal
 cmb_Theme="Proper 11",1,4,102,120,150,21,"Proper 11","Kinda 10","Remastered 7"
 lbl_Style="Visual style:",1,1,16,153,78,18,8,Normal
-cmb_Style=Default,1,4,102,147,150,21,Default,Plain8,"Windows 7"
-lbl_Orb="Start button orb:",1,1,16,179,86,18,8,Normal
-cmb_Orb=Default,1,4,102,174,150,21,Default,Clover,"Win 8","Win 7",E1even
-cb_ShowUserPic="Show user account picture",1,3,15,207,180,16,True
-cb_MakeOpaque="Disable transparency",1,3,15,225,180,16,True
-lbl_Menu="All Programs Menu",1,1,11,259,108,18,8,Bold
-cb_UseLargeIcons="Use large icons",1,3,15,279,180,16,False
-cb_SortByName="Sort items by name",1,3,15,297,180,16,True
-cb_SortFoldersFirst="Display folders before items",1,3,15,315,180,16,False
-cb_FlyoutMenu="Fly-out menu (Windows XP style)",1,3,15,333,233,16,False
-cb_ShowSearch="Show the Search Box",1,3,15,351,233,16,True
-lbl_RecentItems="Number of recent programs to display:",1,1,16,377,187,18,8,Normal
-nb_MaxRecentPgm=,1,2,206,371,40,22,20,1,20,1
+cmb_StartMenuStyle=Default,1,4,102,147,150,21,Default,Plain8,"Windows 7"
+lbl_StartMenuIconSize="Icon size:",1,1,16,179,67,16,8,Normal
+cmb_StartMenuIconSize=S,1,4,102,174,150,21,S,M,L
+lbl_Orb="Start button orb:",1,1,16,206,86,18,8,Normal
+cmb_Orb=Default,1,4,102,201,150,21,Default,Clover,"Win 8","Win 7",E1even
+cb_ShowUserPic="Show user account picture",1,3,15,227,180,16,True
+cb_MakeOpaque="Disable transparency",1,3,15,245,180,16,True
+lbl_Menu="All Programs Menu",1,1,11,268,108,18,8,Bold
+cb_UseLargeIcons="Use large icons",1,3,15,284,180,16,False
+cmb_StartMenuLargeAllAppsIcons=M,1,4,115,282,46,21,M,L
+cb_SortByName="Sort items by name",1,3,15,302,180,16,True
+cb_SortFoldersFirst="Display folders before items",1,3,15,320,180,16,False
+cb_FlyoutMenu="Fly-out menu (Windows XP style)",1,3,15,338,233,16,False
+cb_ShowSearch="Show the Search Box",1,3,15,356,233,16,True
+lbl_RecentItems="Number of recent programs to display:",1,1,16,382,187,18,8,Normal
+nb_MaxRecentPgm=,1,2,206,376,40,22,20,1,20,1
 lbl_SupportStartIsBack="If you enjoy StartAllBack please support the developer and purchase a license.",1,1,5,435,522,16,8,Normal
 cb_AlwaysDownload="Always download latest version",1,3,5,50,177,18,False,"__Enable this option to ensure you always included the latest version of StartIsBack in your build."
 bvl_TaskbarOptions="Taskbar Options",1,12,290,85,312,319,8,Bold
