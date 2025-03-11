@@ -40,13 +40,13 @@ Version=1.0.1.0
 Date=2025-01-03
 
 [Variables]
-%ProgramFolder%="%TargetSystem32%"
+%ProgramFolder%="#$pSystemRoot#$p\system32"
 %ProgramExe%="start_vss.cmd"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
-ExtractFile,%ScriptFile%,cmd,"start_vss.cmd",%ProgramFolder%
+ExtractFile,%ScriptFile%,cmd,"start_vss.cmd",%TargetSystem32%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Build File List
@@ -92,16 +92,10 @@ RequireFileEx,ExtractList
 
 // Register EvenSystem Service
 Echo,"Registering EventSystem service..."
-RegHiveLoad,Tmp_Software,%RegSoftware%
-RegHiveLoad,Tmp_System,%RegSystem%
-RegHiveLoad,Tmp_Install_Software,%RegInstallSoftware%
-RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
+RegLoadHives
 RegCopy,HKLM,"Tmp_Install_Software\Microsoft\EventSystem",HKLM,"Tmp_Software\Microsoft\EventSystem"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\EventSystem",HKLM,"Tmp_System\ControlSet001\Services\EventSystem"
-RegHiveUnLoad,Tmp_Software
-RegHiveUnLoad,Tmp_System
-RegHiveUnLoad,Tmp_Install_Software
-RegHiveUnLoad,Tmp_Install_System
+RegUnloadHives
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Patch VSS files
@@ -111,12 +105,12 @@ Run,%ScriptFile%,PatchVSS
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts & Autorun
 
-If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%","","%ProgramFolder%"
-If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%","","%ProgramFolder%"
-If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_ShortcutName%,"%ProgramFolder%\%ProgramExe%","",%ProgramFolder%
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%ProgramFolder%\%ProgramExe%","",%ProgramFolder%
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%ProgramFolder%\%ProgramExe%"
 
-AddAutoRun,PostShell,HideNoWait,"Starting Volume Shadow Copy Services...","#$pSystemRoot#$p\system32\start_vss.cmd"
+AddAutoRun,PostShell,HideNoWait,"Starting Volume Shadow Copy Services...","%ProgramFolder%\%ProgramExe%"
 
 
 [#PatchVSS#]

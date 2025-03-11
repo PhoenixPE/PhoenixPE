@@ -30,18 +30,19 @@
 
 [Main]
 Title=Recuva
-Description=(v1.53.x) Recuva recovers lost and deleted files from your hard-drive, recycle bin, digital camera card, or MP3 player!
+Description=(v1.54.x) Recuva recovers lost and deleted files from your hard-drive, recycle bin, digital camera card, or MP3 player!
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2023-01-10
+Version=1.0.2.0
+Date=2025-03-09
 
 [Variables]
 %ProgramFolder%="Recuva"
 %ProgramExe%="recuva.exe"
-%DownloadURL%=https://download.ccleaner.com/rcsetup153.exe
+%ProgramVersion%=154
+%DownloadURL%=https://download.ccleaner.com/rcsetup%ProgramVersion%.exe
 %SetupFile%="rcsetup.exe"
 
 [Process]
@@ -71,15 +72,15 @@ RegHiveLoad,Tmp_Default,%RegDefault%
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%LCID%
 StrFormat,RTRIM,%LCID%,1,%LCID%
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","Language",%LCID%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","Language",%LCID%
 
 // View Mode
 StrFormat,LEFT,%cmb_ViewMode%,1,%ViewMode%
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","ViewMode",%ViewMode%
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","ViewMode",%ViewMode%
 
 // Run Wizard on startup
-If,%cb_RunWizard%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","ShowWizard",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","ShowWizard",0
+If,%cb_RunWizard%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","ShowWizard",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","ShowWizard",0
 
 // Shell Extension
 If,%cb_ShellExt%,Equal,True,Begin
@@ -89,32 +90,38 @@ If,%cb_ShellExt%,Equal,True,Begin
     ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\lang-%LCID%.dll#$q 563 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
     If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",563,%ShellContextMenuTxt%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","ShellStringRecoverRecycleBin",%ShellContextMenuTxt%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","ShellStringScanFolder",%ShellContextMenuTxt%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","ShellStringRecoverRecycleBin",%ShellContextMenuTxt%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","ShellStringScanFolder",%ShellContextMenuTxt%
   End
   Else,Begin
     // English doesn't have a resource .dll Use the .exe instead
     ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 563 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
     If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",563,%ShellContextMenuTxt%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","ShellStringRecoverRecycleBin",%ShellContextMenuTxt%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","ShellStringScanFolder",%ShellContextMenuTxt%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","ShellStringRecoverRecycleBin",%ShellContextMenuTxt%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","ShellStringScanFolder",%ShellContextMenuTxt%
   End
   Run,%ScriptFile%,RegisterShellExtension
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","InstallPath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","ShellEnableFolder",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","ShellEnableRecycleBin",1
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","InstallPath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","ShellEnableFolder",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","ShellEnableRecycleBin",1
 End
 Else,Begin
   // Disable context menu
   FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\RecuvaShell.dll.new"
   FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\RecuvaShell64.dll.new"
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","ShellEnableFolder",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","ShellEnableRecycleBin",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","ShellEnableFolder",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","ShellEnableRecycleBin",0
 End
 
 // Disable Update Check
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","UpdateCheck",0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Software\Piriform\Recuva","UpdateCheck",0
+
+// Disable Telemetry & Ads
+ RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","PrefsPrivacyShareData1stParty",0
+ RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","PrefsPrivacyShareData3rdParty",0
+ RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","PrefsPrivacyShowOffers1stParty",0
+ RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","PrefsPrivacyShowOffers3rdParty",0
 
 RegHiveUnLoad,Tmp_Default
 
@@ -153,13 +160,13 @@ Else,Begin
 End
 
 RegHiveLoad,Tmp_Software,%RegSoftware%
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\RecuvaShell.DLL","AppID","{80109467-DE5A-42A1-9445-7E3952C80B6E}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\{80109467-DE5A-42A1-9445-7E3952C80B6E}","","RecuvaShell"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{435E5DF5-2510-463C-B223-BDA47006D002}","","RecuvaShellExt Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{435E5DF5-2510-463C-B223-BDA47006D002}\InprocServer32","","%PEPrograms%\%ProgramFolder%\%ShellExtDll%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{435E5DF5-2510-463C-B223-BDA47006D002}\InprocServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\RecuvaShellExt","","{435E5DF5-2510-463C-B223-BDA47006D002}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\RecuvaShellExt","","{435E5DF5-2510-463C-B223-BDA47006D002}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppID\RecuvaShell.DLL","AppID","{80109467-DE5A-42A1-9445-7E3952C80B6E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppID\{80109467-DE5A-42A1-9445-7E3952C80B6E}","","RecuvaShell"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{435E5DF5-2510-463C-B223-BDA47006D002}","","RecuvaShellExt Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{435E5DF5-2510-463C-B223-BDA47006D002}\InprocServer32","","%PEPrograms%\%ProgramFolder%\%ShellExtDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{435E5DF5-2510-463C-B223-BDA47006D002}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\RecuvaShellExt","","{435E5DF5-2510-463C-B223-BDA47006D002}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\RecuvaShellExt","","{435E5DF5-2510-463C-B223-BDA47006D002}"
 RegHiveUnLoad,Tmp_Software
 
 [#ExtractProgram#]
