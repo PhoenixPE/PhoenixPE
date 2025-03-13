@@ -133,10 +133,12 @@ RequireFileEx,AppendList,\Windows\INF\ks.inf,NOMUI
 RequireFileEx,AppendList,\Windows\INF\kscaptur.inf,NOMUI
 RequireFileEx,AppendList,\Windows\INF\ksfilter.inf,NOMUI
 RequireFileEx,AppendList,\Windows\INF\modemcsa.inf,NOMUI
+If,%SourceVer%,BiggerEqual,10.0.15063.0,RequireFileEx,AppendList,\Windows\INF\usbaudio2.inf,NOMUI
 RequireFileEx,AppendList,\Windows\INF\usbvideo.inf,NOMUI
 RequireFileEx,AppendList,\Windows\INF\wave.inf,NOMUI
 
 RequireFileEx,AppendList,\Windows\System32\drivers\beep.sys,NOMUI
+If,%SourceVer%,BiggerEqual,10.0.15063.0,RequireFileEx,AppendList,\Windows\System32\drivers\usbaudio2.sys,NOMUI
 
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\bda.inf*,NOMUI
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\c_media.inf*,NOMUI
@@ -145,6 +147,7 @@ RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\ks.inf*,NO
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\kscaptur.inf*,NOMUI
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\ksfilter.inf*,NOMUI
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\modemcsa.inf*,NOMUI
+If,%SourceVer%,BiggerEqual,10.0.15063.0,RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\usbaudio2.inf*,NOMUI
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\usbvideo.inf*,NOMUI
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\wave.inf*,NOMUI
 
@@ -414,20 +417,20 @@ Message,"Enable Audio support in PhoenixPE."
 // ===============================================================================================================================
 [Interface]
 btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
-btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
+btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_Exit_16.png,True,"__Hide Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_Options=Options,1,12,5,48,400,83,8,Bold
 cb_IncludeMPG123="Include MPG123 Player",1,3,15,65,140,15,True,"__MPG123 is a lightweight open source audio player."
-cb_AppSoundEvents="Register App Event Sounds",1,3,15,84,200,18,False,"__Use default sounds for application events. (~25 MB)"
+cb_AppSoundEvents="Register App Event Sounds",1,3,15,84,200,18,True,"__Use default sounds for application events. (~25 MB)"
 bvl_SysVol="System Volume",1,12,230,65,160,49,8,Normal
-num_VolLevel=num_VolLevel,1,2,240,81,40,22,67,0,100,1,"__Ajust the system volume %"
+num_VolLevel=num_VolLevel,1,2,240,81,40,22,80,0,100,1,"__Ajust the system volume %"
 lbl_Percent=%,1,1,285,88,20,16,8,Normal
 cb_VolMute=Mute,1,3,315,85,61,18,False
 bvl_StartupSound="Startup Sound",1,12,5,145,400,69,8,Bold
 cmb_StartupSound="Default startup sound",1,4,15,160,192,21,"No startup sound","Default startup sound","Custom startup sound",_ToggleStartupSound_,True
 fb_StartupSound=,0,13,15,185,378,20,file,"Title=Select an MP3 file","Filter=MP3 Files|*.mp3","__.mp3 file that waill be played on statup.#$x#$x(Requires 'Include MPG123 Player')"
-bvl_AdvancedOptions="Advanced Options",0,12,5,228,400,83,8,Bold
-cb_PatchAudioSrvPolicyManager="Patch AudioSrvPolicyManager (Win11)",0,3,15,244,208,18,True,"__Patch PatchAudioSrvPolicyManager.dll to enable audio in the SYSTEM session. (Win11)"
+bvl_AdvancedOptions="Advanced Options",1,12,5,228,400,83,8,Bold
+cb_PatchAudioSrvPolicyManager="Patch AudioSrvPolicyManager (Win11)",1,3,15,244,208,18,True,"__Patch PatchAudioSrvPolicyManager.dll to enable audio in the SYSTEM session. (Win11)"
 
 [Reg]
 Audio-Drivers.reg=11742,1316
