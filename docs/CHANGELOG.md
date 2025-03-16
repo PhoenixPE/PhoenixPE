@@ -2,7 +2,91 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release 20224-12-15
+## Release 2025-03-15
+
+### Added
+- Added a GUI to PhoneixPE tray menu for loading drivers from various locations.
+- Added a minimal .script code editor based on Notepad++ to the release package.
+- Added Everything file search engine.
+- Added Furmark 2 Benchmark
+- Added Hasleo Backup Suite
+- Added Hasleo Data Recovery
+- Added HDD Low Level Format
+- Added HDD Raw copy
+- Added Intel RST Driver integration script.
+- Added Macrium Reflect X
+- Added NonVisual Desktop Access (NVDA) screen reader.
+- Added PStart portable app launcher.
+- Added ReclaiMe Free RAID Recovery
+- Include setupapi.offline.log in support bundle for troubleshooting driver integration.
+- Include USB Audio 2.0 driver (PR #134)
+- StartAllBack - Configure start menu icon sizes added to script UI.
+- StartAllBack - Taskbar settings added to StartAllBack script UI (Experimental).
+- WebGetEx can now download files from an FTP/SFTP server.
+- Wim Image Converter in Toolbox. Convert .esd images to .wim without 3rd party tools.
+
+### Changed
+- AIDA64 updated to v7.60.7300
+- .Net 8 runtime updated to v8.0.14
+- .Net 9 runtime updated to v9.0.3
+- Added Zulu JRE21 v21.40.17
+- AgentRansack updated to v2022 build 3503
+- Arsenal Image Mounter updated (Driver v1.2.19.79 / GUI v3.11.303.0).
+- CPU-Z updated to v.2.14.0
+- DesktopInfo updated to v3.17.1
+- DISM Tool updated to v2.9.0
+- DMDE updated to v4.2.4.818
+- DriverStoreExplorer updated to v0.12.55
+- FastStone Capture updated to v11.0
+- Furmark 1 will now download on demand instead of being embedded in the script. (~20 MB space reduction)
+- GetBinaryResource will now create the destination directory if it does not exist.
+- Google Chrome updated to v133.0.6943.142
+- GPU-Z updated to v2.64.0
+- grepWin updated to v2.1.8
+- HDClone updated to X.6.FE
+- HDTune Pro updated to v.6.10
+- HWinfo updated to v8.22
+- innounp.exe updated to v2.64.2, supports unpacking Inno Setup up to 6.4.0.
+- Macrium Reflect updated v8.1.8439 and to accept a registration key.
+- MPC-BE updated to v1.7.3.0
+- Notepad++ updated to v8.7.8.0
+- Notepad3 updated to v6.24.1221.1
+- Open-Shell updated to v4.4.195
+- PEBakery engine recompiled for .Net Core v8.
+- PhoenixAPI - Enhanced error handling for GetBinaryResource.
+- PhoenixPE.au3 optimizations: Split common functions into PhoenixPE.Common.au3 to allow users to #include and use in custom scripts.
+- PowerShell Core updated to v7.5.0
+- PreShell: Added config for user to specify cd/usb and boot.wim custom config files in script interface.
+- Recuva updated to v1.54.x
+- Rufus updated to v 4.6
+- RustDesk updated to v1.3.8
+- The default build model was changed from WinRE.wim to Boot.wim in order to support newer Win11 builds.
+- The default StartMenu script was changed from OpenShell to StartAllBack in order to support newer Win11 builds.
+- TotalCommander updated to v11.51
+- VeraCrypt updated to v1.26.20 **Note:** This version drops support for x86 Windows.
+- WinMerge updated to v2.16.46
+- WinNTSetup updated to v5.4.1.0, added German translation + x86 binaries.
+- WinRAR updated to v7.10
+- WinSCP updated to v6.3.7
+- WizTree updated to v4.25
+- Zulu JRE11 updated to v11.78.15
+- Zulu JRE17 updated to v17.56.15
+
+### Fixed
+- Fixed URL's for latest Notepad3 RC3 download.
+- Fixed ProgramExe for 32bit SumatraPDF.
+- Fixed shortcut icon on NT6Repair.
+- Fixed Chrome Homepage button opened new tab instead of homepage. (PR #122)
+- Fixed shortcut creation bug in On Screen keyboard script. (Issue #125)
+- Fixed an issue caused by a bug in CrystalDiskMark that won't recognize settings in the same directory as the executable. (Issue #128)
+- Fixed IME InputService for Simplified Chinese. (PR #129)
+- Other Misc. additions and tweaks for better Win11 24H2 support.
+
+### Removed
+
+None.
+
+## Release 2024-12-15
 
 ### Added
 - Microsoft .NET 9 runtime.
@@ -33,7 +117,7 @@ Notable changes to the PhoenixPE project.
 - DiskGenius updated to v5.6.1.1580
 - Enhancements to Boot.wim build support when using Win11 23H2 and 24H2 sources.
 - EncryptedRegView added additional translations.
-- ExtPassword added additional translations.
+- ExtPassword added additional translations.
 - FastStone Capture updated to v10.9
 - FastStone Image Viewer updated to v7.9 and added Japanese language.
 - FullEventLogView added additional translations.
