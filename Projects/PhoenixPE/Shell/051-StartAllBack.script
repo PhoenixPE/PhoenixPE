@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.2.0.0
-Date=2025-03-10
+Version=1.2.1.0
+Date=2025-03-15
 
 [Variables]
 %ProgramFolder%=StartAllBack
@@ -256,7 +256,7 @@ Else,If,%cmb_TaskbarVisualStyle%,Equal,"Plain8",RegWrite,HKLM,REG_SZ,"Tmp_Defaul
 Else,If,%cmb_TaskbarVisualStyle%,Equal,"Windows 7",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle","Windows 7.msstyles"
 Else,Halt,"Logic Error: [%cmb_TaskbarVisualStyle%] is not a valid taskbar visual style."
 
-// Icon Size & Margins
+// Icon Size & Margins (Experimental)
 If,%cmb_TaskbarIconSize%,Equal,"S",Begin
   RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","TaskbarLargerIcons",0
   If,%cmb_TaskbarIconMargins%,Equal,"XS",Begin
@@ -609,7 +609,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
 // Start Menu
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Theme,"Proper 11"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_StartMenuStyle,"Default"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_StartMenuIconSize,"S"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_StartMenuIconSize,"M"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Orb,"Default"
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowUserPic,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_MakeOpaque,True
@@ -619,11 +619,11 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_SortByName,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_SortFoldersFirst,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_FlyoutMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_ShowSearch,True
-WriteInterface,Value,%ScriptFile%,Interface,nb_MaxRecentPgm,20
+WriteInterface,Value,%ScriptFile%,Interface,nb_MaxRecentPgm,10
 
 // Taskbar
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarVisualStyle,"Default"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarIconSize,"S"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarIconSize,"M"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarIconMargins,"XS"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarLocation,"Bottom"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarCombineButtons,"Never"
@@ -688,7 +688,7 @@ cmb_Theme="Proper 11",1,4,102,120,150,21,"Proper 11","Kinda 10","Remastered 7"
 lbl_Style="Visual style:",1,1,16,153,78,18,8,Normal
 cmb_StartMenuStyle=Default,1,4,102,147,150,21,Default,Plain8,"Windows 7"
 lbl_StartMenuIconSize="Icon size:",1,1,16,179,67,16,8,Normal
-cmb_StartMenuIconSize=S,1,4,102,174,150,21,S,M,L
+cmb_StartMenuIconSize=M,1,4,102,174,150,21,S,M,L
 lbl_Orb="Start button orb:",1,1,16,206,86,18,8,Normal
 cmb_Orb=Default,1,4,102,201,150,21,Default,Clover,"Win 8","Win 7",E1even
 cb_ShowUserPic="Show user account picture",1,3,15,227,180,16,True
@@ -701,14 +701,14 @@ cb_SortFoldersFirst="Display folders before items",1,3,15,320,180,16,False
 cb_FlyoutMenu="Fly-out menu (Windows XP style)",1,3,15,338,233,16,False
 cb_ShowSearch="Show the Search Box",1,3,15,356,233,16,True
 lbl_RecentItems="Number of recent programs to display:",1,1,16,382,187,18,8,Normal
-nb_MaxRecentPgm=,1,2,206,376,40,22,20,1,20,1
+nb_MaxRecentPgm=,1,2,206,376,40,22,10,1,20,1
 lbl_SupportStartIsBack="If you enjoy StartAllBack please support the developer and purchase a license.",1,1,5,435,522,16,8,Normal
 cb_AlwaysDownload="Always download latest version",1,3,5,50,177,18,False,"__Enable this option to ensure you always included the latest version of StartIsBack in your build."
 bvl_TaskbarOptions="Taskbar Options",1,12,290,85,312,319,8,Bold
 lbl_TaskbarVisualStyle="Visual style:",1,1,300,125,68,16,8,Normal
 cmb_TaskbarVisualStyle=Default,1,4,390,120,150,21,Default,Plain8,"Windows 7"
 lbl_TaskbarIconSize="Icon size:",1,1,300,152,48,16,8,Normal
-cmb_TaskbarIconSize=S,1,4,360,147,50,21,S,M,L,XL
+cmb_TaskbarIconSize=M,1,4,360,147,50,21,S,M,L,XL
 lbl_TaskbarIconMargins="Icon margins:",1,1,423,152,66,16,8,Normal
 cmb_TaskbarIconMargins=XS,1,4,490,147,50,21,XS,S,M,L,XL
 lbl_TaskbarLocation="Taskbar location:",1,1,300,179,81,16,8,Normal
