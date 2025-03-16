@@ -18,6 +18,7 @@ Notable changes to the PhoenixPE project.
 - Added NonVisual Desktop Access (NVDA) screen reader.
 - Added PStart portable app launcher.
 - Added ReclaiMe Free RAID Recovery
+- Added Zulu JRE21 v21.40.17
 - Include setupapi.offline.log in support bundle for troubleshooting driver integration.
 - Include USB Audio 2.0 driver (PR #134)
 - StartAllBack - Configure start menu icon sizes added to script UI.
@@ -26,10 +27,9 @@ Notable changes to the PhoenixPE project.
 - Wim Image Converter in Toolbox. Convert .esd images to .wim without 3rd party tools.
 
 ### Changed
-- AIDA64 updated to v7.60.7300
+- AIDA64 updated to v7.60.7300
 - .Net 8 runtime updated to v8.0.14
 - .Net 9 runtime updated to v9.0.3
-- Added Zulu JRE21 v21.40.17
 - AgentRansack updated to v2022 build 3503
 - Arsenal Image Mounter updated (Driver v1.2.19.79 / GUI v3.11.303.0).
 - CPU-Z updated to v.2.14.0
