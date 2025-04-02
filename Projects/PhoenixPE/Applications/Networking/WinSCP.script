@@ -30,18 +30,18 @@
 
 [Main]
 Title=WinSCP
-Description=(v6.3.7) WinSCP is a popular SFTP client and FTP client for Microsoft Windows.
+Description=(v6.5.0) WinSCP is a popular SFTP client and FTP client for Microsoft Windows.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.16.0
-Date=2025-03-07
+Version=1.0.17.0
+Date=2025-04-02
 
 [Variables]
 %ProgramFolder%="WinSCP"
 %ProgramExe%="WinSCP.exe"
-%ProgramVersion%=6.3.7
+%ProgramVersion%=6.5
 %SetupExe%="WinSCP-%ProgramVersion%-Setup.exe"
 %DownloadURL%=https://winscp.net/download/WinSCP-%ProgramVersion%-Setup.exe
 %LangMap%=1025|ar|1059|be|1026|bg|1027|ca|2052|ch|1028|chs|1029|cs|1030|da|1031|de|1032|el|1034|es|1061|et|1065|fa|1035|fi|1036|fr|1050|hr|1038|hu|1057|in|1039|is|1040|it|1041|jp|1042|ko|1063|lt|1086|ms|1043|nl|2068|no|1045|pl|1046|pt|2070|ptg|1048|ro|1049|ru|1051|sk|2074|srl|1053|sv|1055|tr|1058|uk|1066|vi|-181|xxk
@@ -90,7 +90,7 @@ If,Not,%LCID%,Equal,"1033",Begin
   Else,Halt,"INTERNAL LOGIC ERROR: The specified language is not defined."
 End
 
-DirCopy,"%ProjectTemp%\%ProgramFolder%\{app}\PuTTY","%TargetPrograms%\%ProgramFolder%\PuTTY"
+DirCopy,"%ProjectTemp%\%ProgramFolder%\{app}\PuTTY","%TargetPrograms%\%ProgramFolder%"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\license.txt","%TargetPrograms%\%ProgramFolder%\license.txt"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\WinSCP.com","%TargetPrograms%\%ProgramFolder%\WinSCP.com"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\WinSCP.exe","%TargetPrograms%\%ProgramFolder%\WinSCP.exe"
@@ -166,15 +166,15 @@ If,ExistRegSubKey,HKLM,"Tmp_Default\Software\Martin Prikryl\WinSCP 2",Begin
   // so we assume if the WinSCP 2 key exists we should use the registry to store settings.
   
   // Language - We still set the lang determined by script UI...
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface","LocaleSafe",%LCID%
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface","LocaleSafe",%LCID%
   
   // Disable Usage Stats
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface","CollectUsage",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface","CollectUsage",0
   
   // Disable Updates
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface\Updates","Period",0
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface\Updates","BetaVersions",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface\Updates","ShowOnStartup",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface\Updates","Period",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface\Updates","BetaVersions",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface\Updates","ShowOnStartup",0
 End
 Else,Begin
   // Ini Settings
@@ -198,11 +198,11 @@ If,%cb_ShellIntergration%,Equal,True,Begin
 
   // Drag n' Drop Shell Ext.
   Echo,"Registering %ScriptTitle% Drag n' Drop Support..."
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E15E1D68-0D1C-49F7-BEB8-812B1E00FA60}","","WinSCP Shell Extension"
-  If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E15E1D68-0D1C-49F7-BEB8-812B1E00FA60}\InProcServer32","","%PEPrograms%\%Programfolder%\DragExt64.dll"
-  Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E15E1D68-0D1C-49F7-BEB8-812B1E00FA60}\InProcServer32","","%PEPrograms%\%Programfolder%\DragExt.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E15E1D68-0D1C-49F7-BEB8-812B1E00FA60}\InProcServer32","ThreadingModel","Apartment"
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface","DDExtEnabled",1
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E15E1D68-0D1C-49F7-BEB8-812B1E00FA60}","","WinSCP Shell Extension"
+  If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E15E1D68-0D1C-49F7-BEB8-812B1E00FA60}\InProcServer32","","%PEPrograms%\%Programfolder%\DragExt64.dll"
+  Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E15E1D68-0D1C-49F7-BEB8-812B1E00FA60}\InProcServer32","","%PEPrograms%\%Programfolder%\DragExt.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E15E1D68-0D1C-49F7-BEB8-812B1E00FA60}\InProcServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Martin Prikryl\WinSCP 2\Configuration\Interface","DDExtEnabled",1
 End
 
 // Script UI Include Extensions - Register PATH for scripts.
@@ -211,7 +211,7 @@ If,%cb_IncludeScriptingInterface%,Equal,True,Begin
   //AddAutoRun,PostShell,HideNoWait,"","%PEPrograms%\%ProgramFolder%\%ProgramExe%","/AddSearchPath"
 
   RegRead,HKLM,"Tmp_Software\SYSTEM\ControlSet001\Control\Session Manager\Environment","Path",%SysPath%
-  RegWrite,HKLM,0x2,"Tmp_Software\SYSTEM\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\SYSTEM\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 End
 
 RegHiveUnLoad,Tmp_Default
