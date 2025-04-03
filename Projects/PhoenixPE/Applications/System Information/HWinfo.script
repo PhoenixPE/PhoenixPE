@@ -30,21 +30,23 @@
 
 [Main]
 Title=HWinfo
-Description=(v8.22) Comprehensive Hardware Analysis, Monitoring and Reporting.
+Description=(v8.24) Comprehensive Hardware Analysis, Monitoring and Reporting.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.27.0
-Date=2025-03-07
+Version=1.1.0.0
+Date=2025-04-02
 
 [Variables]
-%ProgramFolder%="HWinfo"
+%ProgramFolder%="HWiNFO"
 %ProgramExe%="hwinfo32.exe"
 %ProgramCfg%="hwinfo32.ini"
-%ProgramVersion%=822
+%ProgramVersion%=824
 %DownloadURL%=https://www.hwinfo.com/files/hwi_%ProgramVersion%.zip
 %SetupFile%="hwinfo.zip"
+%ConfigFile%="%TargetPrograms%\%ProgramFolder%\%ProgramCfg%"
+%aLangMap%=Arabic|ar|Chinese (Simplified)|zh-CN|Chinese (Traditional)|zh-TW|Czech|cs|Danish|da|Dutch|nl|English|en|Finnish|fi|French|fr|German|de|Greek|el|Hebrew|he|Hungarian|hu|Italian|it|Japanese|ja|Korean|ko|Latvian|lv|Norwegian|no|Polish|pl|Portuguese (Brazil)|pt-BR|Russian|ru|Slovak|sk|Spanish|es|Swedish|sv|Turkish|tr|Ukrainian|uk|Vietnamese|vi
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -62,19 +64,34 @@ Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 Echo,"Configuring %ScriptTitle%..."
 
+// Language
+List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+If,Not,%LangPos%,Equal,0,Begin
+  Math,Add,%LangPos%,%LangPos%,1
+  List,Get,%aLangMap%,%LangPos%,%LangCode%
+  IniWrite,%ConfigFile%,"Settings","Lang",%LangCode%
+End
+Else,Echo,"INTERNAL LOGIC ERROR: The specified language does not exist in [#$paLangMap-Docs#$p]. Help files will not be included.",WARN
+
 // Show Summary
 If,%cb_ShowSummaryOnStartup%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","OpenSystemSummary",1
-Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","OpenSystemSummary",0
+Else,IniWrite,%ConfigFile%,"Settings","OpenSystemSummary",0
 
 // Welcome Screen
 If,%cb_EnableDarkMode%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","ShowWelcomeAndProgress",1
-Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","ShowWelcomeAndProgress",0
+Else,IniWrite,%ConfigFile%,"Settings","ShowWelcomeAndProgress",0
 
 // Dark Theme
 If,%cb_EnableDarkMode%,Equal,True,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","DarkMode",1
-Else,IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","DarkMode",0
+Else,IniWrite,%ConfigFile%,"Settings","DarkMode",0
 
-IniWrite,"%TargetPrograms%\%ProgramFolder%\%ProgramCfg%","Settings","AutoUpdate",0
+IniWrite,%ConfigFile%,"Settings","AutoUpdate",0
+
+// License Key
+If,%cmb_SoftwareLicense%,Equal,"License from file",Begin
+  If,Not,%fb_SoftwareLicense%,Equal,"",If,ExistFile,%fb_SoftwareLicense%,FileCopy,"%fb_SoftwareLicense%","%TargetPrograms%\%ProgramFolder%"
+  Else,Echo,"Warning: The specified license file does not exist. HWiNFO will run as freeware for Non-Commercial use only.",Warn
+End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -109,13 +126,23 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........:
+// Remarks........: HWInfo development is pretty active and they have a habit of removing the ability to download older versions
+//                  from the main website. If the %ProgramVersion% doesn't work we will try to increment the version number up 
+//                  to five times and see if we can grab the new release.
 // Related........: 
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,#r,Equal,200,Begin
+  // Try incrementing the version number up to 5 times
+  ForRange,%i%,0,5,1,Begin
+    Math,Add,%ProgramVersion%,%ProgramVersion%,1
+	WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
+	If,#r,Equal,200,Break
+  End
+  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+End
 
 [#SetProgramArch#]
 // ===============================================================================================================================
@@ -135,6 +162,21 @@ If,%SourceArch%,Equal,x64,Begin
   Set,%ProgramExe%,"hwinfo64.exe"
   Set,%ProgramCfg%,"hwinfo64.ini"
 End  
+
+[#ToggleLicenseReg#]
+// ===============================================================================================================================
+// Name...........: ToggleLicenseReg
+// Description....: Show/Hide the file box for specifying a .reg file for the software license.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_SoftwareLicense
+// ===============================================================================================================================
+[ToggleLicenseReg]
+If,%cmb_SoftwareLicense%,Equal,"License from file",WriteInterface,Visible,%ScriptFile%,Interface,fb_SoftwareLicense,True
+Else,WriteInterface,Visible,%ScriptFile%,Interface,fb_SoftwareLicense,False
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -188,9 +230,13 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"System Information"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"HWinfo"
-WriteInterface,Value,%ScriptFile%,Interface,cb_ShowSummaryOnStartup,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_ShowWelcomeScreen,True
-WriteInterface,Value,%ScriptFile%,Interface,cb_EnableDarkMode,True
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowSummaryOnStartup,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowWelcomeScreen,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_EnableDarkMode,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_SoftwareLicense,"Freeware (Non-Commercial Use)"
+WriteInterface,Value,%ScriptFile%,Interface,fb_SoftwareLicense,""
+Run,%ScriptFile%,ToggleLicenseReg
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -250,10 +296,15 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"System Information"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,HWinfo
-bvl_Options=Options,1,12,150,90,197,184,8,Bold
-cb_ShowSummaryOnStartup="Show Summary on Startup",1,3,157,104,180,18,True
-cb_ShowWelcomeScreen="Show Welcome Screen",1,3,157,124,178,18,True,"__Show the Welcome screen and progress bar on startup."
-cb_EnableDarkMode="Dark Mode",1,3,157,144,179,18,True,"__Use Dark GUI Theme"
+bvl_Options=Options,1,12,150,90,428,184,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language=English,1,4,160,126,150,21,Arabic,"Chinese (Simplified)","Chinese (Traditional)",Czech,Danish,Dutch,English,Finnish,French,German,Greek,Hebrew,Hungarian,Italian,Japanese,Korean,Latvian,Norwegian,Polish,"Portuguese (Brazil)",Russian,Slovak,Spanish,Swedish,Turkish,Ukrainian,Vietnamese
+cb_ShowSummaryOnStartup="Show Summary on Startup",1,3,157,159,180,18,False
+cb_ShowWelcomeScreen="Show Welcome Screen",1,3,157,179,178,18,False,"__Show the Welcome screen and progress bar on startup."
+cb_EnableDarkMode="Dark Mode",1,3,157,199,179,18,False,"__Use Dark GUI Theme"
+lbl_SoftwareLicense="Software License:",1,1,345,111,149,16,8,Normal
+cmb_SoftwareLicense="Freeware (Non-Commercial Use)",1,4,345,126,208,21,"Freeware (Non-Commercial Use)","License from file",_ToggleLicenseReg_,True,"__Non-Commercial Use - HWinfo will operate in freeware more for personal use.#$x#$xLicense from file - Provide your HWiNFO64_KEY.txt license file for commercial use."
+fb_SoftwareLicense=,0,13,345,154,208,21,file,"Title=Select your HWiNFO license file","Filter=HWiNFO License|HWiNFO64_KEY.txt|All Files|*.*","__Select the path to your 'HWiNFO64_KEY.txt' license file."
 
 [InterfaceEncoded]
 play-hot.png=841,1220
