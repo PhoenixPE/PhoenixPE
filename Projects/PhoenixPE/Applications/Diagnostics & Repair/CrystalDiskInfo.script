@@ -32,9 +32,9 @@
 Title=CrystalDiskInfo
 Author=Homes32
 Level=5
-Version=1.0.0.0
+Version=1.0.1.0
 Description=CrystalDiskInfo is an Open Source utility that monitors and displays the health of your hard drive, including basic information, S.M.A.R.T. values, and disk temperature.
-Date=2024-06-20
+Date=2025-04-29
 Selected=False
 Mandatory=False
 
@@ -42,8 +42,8 @@ Mandatory=False
 %ProgramFolder%="CrystalDiskInfo"
 %ProgramExex86%="DiskInfo32.exe"
 %ProgramExex64%="DiskInfo64.exe"
-%DownloadURL%=https://crystalmark.info/redirect.php?product=CrystalDiskInfo
-%SetupFile%="CrystalDiskInfo.zip"
+%DownloadURL%=https://sourceforge.net/projects/crystaldiskinfo/files/latest/download
+%SetupFile%="CrystalDiskInfo.exe"
 %ConfigFile%="%TargetPrograms%\%ProgramFolder%\DiskInfo.ini"
 
 [Process]
@@ -94,10 +94,11 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting files..."
 GetParam,1,%DestDir%
-Decompress,%ProgramsCache%\%ProgramFolder%\%SetupFile%,%DestDir%
-FileDeleteEx,"%DestDir%\DiskInfoA64.exe"
-If,%SourceArch%,Equal,x64,FileDeleteEx,%ProgramExex86%
-Else,FileDeleteEx,%ProgramExex64%
+InnoExtract,%ProgramsCache%\%ProgramFolder%\%SetupFile%,"%ProjectTemp%\%ProgramFolder%"
+FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\DiskInfoA64.exe"
+If,%SourceArch%,Equal,x64,FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\%ProgramExex86%"
+Else,FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\%ProgramExex64%"
+FileCopy,"%ProjectTemp%\%ProgramFolder%\{App}\*.*",%DestDir%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
