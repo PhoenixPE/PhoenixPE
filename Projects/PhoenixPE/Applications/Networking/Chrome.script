@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.16.0
-Date=2025-05-06
+Version=1.1.17.0
+Date=2025-05-11
 
 [Variables]
 %ProgramFolder%="Chrome"
@@ -107,20 +107,20 @@ StrFormat,Replace,"%PEPrograms%\%ProgramFolder%","\","\\",%ProgramDirEsc%
 TxtAddLine,"%TargetPrograms%\%ProgramFolder%\master_preferences","{#$qdistribution#$q:{#$qimport_bookmarks_from_file#$q:#$q%ProgramDirEsc%\\bookmarks.html#$q,#$qsuppress_first_run_bubble#$q:true,#$qdo_not_create_desktop_shortcut#$q:true,#$qdo_not_create_quick_launch_shortcut#$q:true,#$qdo_not_launch_chrome#$q:true,#$qdo_not_register_for_update_launch#$q:true,#$qmake_chrome_default#$q:true,#$qmake_chrome_default_for_user#$q:true,#$qsuppress_first_run_default_browser_prompt#$q:true,#$qsystem_level#$q:true},#$qhomepage#$q:#$q${txt_Homepage}#$q,#$qhomepage_is_newtabpage#$q:${homepage_is_newtabpage},#$qfirst_run_tabs#$q:[#$q${txt_Homepage}#$q]}",APPEND
 
 // App Path
-RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","Path","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","Path","%PEPrograms%\%ProgramFolder%"
 If,%SourceArch%,Equal,"x64",Begin
-  RegWrite,HKLM,0x2,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-  RegWrite,HKLM,0x2,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","Path","%PEPrograms%\%ProgramFolder%"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\%ProgramExe%","Path","%PEPrograms%\%ProgramFolder%"
 End	
 
 // Active Setup
 FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","","Google Chrome"
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","IsInstalled",1
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","Localized Name","Google Chrome"
-RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","StubPath","#$q%PEPrograms%\%ProgramFolder%\%ProgramVer%\Installer\chrmstp.exe#$q --configure-user-settings --verbose-logging --system-level --multi-install --chrome"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","Version",%ProgramVer%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","","Google Chrome"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","IsInstalled",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","Localized Name","Google Chrome"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","StubPath","#$q%PEPrograms%\%ProgramFolder%\%ProgramVer%\Installer\chrmstp.exe#$q --configure-user-settings --verbose-logging --system-level --multi-install --chrome"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}","Version",%ProgramVer%
   
 ///////////////////////////////////////////////////////////////////////////////////
 // User Config - Script Interface
@@ -128,23 +128,23 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Active Setup\Installed Components\{8A6
 // Language (Policy)
 StrFormat,Split,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTrim,%Lang%,1,%Lang%
-RegWrite,HKLM,0x1,"Tmp_Software\Policies\Google\Chrome\Recommended","ApplicationLocaleValue","%Lang%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Google\Chrome\Recommended","ApplicationLocaleValue","%Lang%"
 
 // Show Home Button (Policy)
-If,%cb_ShowHomeBtn%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowHomeButton",1
-Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowHomeButton",0
+If,%cb_ShowHomeBtn%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowHomeButton",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowHomeButton",0
 
 // ShowBookmarksToolbar (Policy)
-If,%cb_ShowBookmarksToolbar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","BookmarkBarEnabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","BookmarkBarEnabled",0
+If,%cb_ShowBookmarksToolbar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome\Recommended","BookmarkBarEnabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome\Recommended","BookmarkBarEnabled",0
 
 // Show Apps shortcut in bookmark toolbar (Policy)
-If,%cb_ShowAppsShortcutInBookmarkBar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowAppsShortcutInBookmarkBar",1
-Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowAppsShortcutInBookmarkBar",0
+If,%cb_ShowAppsShortcutInBookmarkBar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowAppsShortcutInBookmarkBar",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome\Recommended","ShowAppsShortcutInBookmarkBar",0
 
 // Disable Search Suggestions (Policy)
-If,%cb_DisableSearchSuggestions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","SearchSuggestEnabled",0
-Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome\Recommended","SearchSuggestEnabled",1
+If,%cb_DisableSearchSuggestions%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome\Recommended","SearchSuggestEnabled",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome\Recommended","SearchSuggestEnabled",1
 
 // Homepage (master_preferences)
 If,%txt_Homepage%,Equal,"",Begin
@@ -168,7 +168,7 @@ End
 Else,Begin
   Echo,"Importing default bookmarks."
   TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","#$qimport_bookmarks_from_file#$q:#$q%ProgramDirEsc%\\bookmarks.html#$q,",""
-  RegWrite,HKLM,0x1,"Tmp_Software\Policies\Google\Chrome","ManagedBookmarks","[{#$qtoplevel_name#$q: #$qWinPE#$q},{#$qname#$q:#$qThe Oven#$q,#$qurl#$q:#$qtheoven.org#$q},{#$qname#$q:#$qReboot#$q,#$qurl#$q:#$qreboot.pro#$q},{#$qname#$q:#$qMSFN#$q,#$qurl#$q:#$qmsfn.org#$q},{#$qname#$q:#$qPhoenixPE#$q,#$qurl#$q:#$qgithub.com/PhoenixPE#$q},{#$qname#$q:#$qPEBakery#$q,#$qurl#$q:#$qgithub.com/pebakery/#$q}]"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Google\Chrome","ManagedBookmarks","[{#$qtoplevel_name#$q: #$qWinPE#$q},{#$qname#$q:#$qThe Oven#$q,#$qurl#$q:#$qtheoven.org#$q},{#$qname#$q:#$qReboot#$q,#$qurl#$q:#$qreboot.pro#$q},{#$qname#$q:#$qMSFN#$q,#$qurl#$q:#$qmsfn.org#$q},{#$qname#$q:#$qPhoenixPE#$q,#$qurl#$q:#$qgithub.com/PhoenixPE#$q},{#$qname#$q:#$qPEBakery#$q,#$qurl#$q:#$qgithub.com/pebakery/#$q}]"
 End
 
 Echo,"Configuring Extensions..."
@@ -211,13 +211,13 @@ Set,%ExtensionJSON%,"%ExtensionJSON% }"
 // END: Build JSON string for selected extensions
 
 // ExtensionSettings (Policy)
-RegWrite,HKLM,0x1,"Tmp_Software\Policies\Google\Chrome\","ExtensionSettings","%ExtensionJSON%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Google\Chrome\","ExtensionSettings","%ExtensionJSON%"
   
 ///////////////////////////////////////////////////////////////////////////////////
 // Other Preferences - Not configured via script interface
 
 // Don't show default browser warning (Policy)
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome","DefaultBrowserSettingEnabled",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome","DefaultBrowserSettingEnabled",0
 
 [#RegisterFileExtensions#]
 // ===============================================================================================================================
@@ -234,89 +234,87 @@ RegWrite,HKLM,0x4,"Tmp_Software\Policies\Google\Chrome","DefaultBrowserSettingEn
 Echo,"Configuring Google Chrome as the Default Browser..."
 
 // File Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.htm","","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.htm\OpenWithProgids","ChromeHTML",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.html","","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.html\OpenWithProgids","ChromeHTML",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.shtml","","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.shtml\OpenWithProgids","ChromeHTML",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xht","","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xht\OpenWithProgids","ChromeHTML",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xhtml","","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xhtml\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.htm","","ChromeHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.htm\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.html","","ChromeHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.html\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.shtml","","ChromeHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.shtml\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xht","","ChromeHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xht\OpenWithProgids","ChromeHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xhtml","","ChromeHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xhtml\OpenWithProgids","ChromeHTML",""
 
 // FTP Protocol
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ftp","URL Protocol",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ftp","","URL:File Transfer Protocol"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\ftp\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\ftp\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ftp","URL Protocol",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ftp","","URL:File Transfer Protocol"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\ftp\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\ftp\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 // HTTP Protocol
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\http","URL Protocol",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\http","","URL:HyperText Transfer Protocol"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\http\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\http\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\http","URL Protocol",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\http","","URL:HyperText Transfer Protocol"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\http\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\http\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 // HTTPS Protocol
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\https","URL Protocol",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\https","","URL:HyperText Transfer Protocol with Privacy"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\https\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\https\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\https","URL Protocol",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\https","","URL:HyperText Transfer Protocol with Privacy"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\https\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\https\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 // HTML File Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML","","Chrome HTML Document"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML","FriendlyTypeName","Chrome HTML Document"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML","URL Protocol",""
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\ChromeHTML","EditFlags",2
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML\shell","","open"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeHTML\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeHTML","","Chrome HTML Document"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeHTML","FriendlyTypeName","Chrome HTML Document"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeHTML","URL Protocol",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\ChromeHTML","EditFlags",2
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeHTML\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,10"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeHTML\shell","","open"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeHTML\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q --single-argument #$q#$p1#$q"
 
 // URL File Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeURL","","Chrome URL"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeURL","FriendlyTypeName","Chrome URL"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeURL","URL Protocol",""
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\ChromeURL","EditFlags",2
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeURL\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeURL\shell","","open"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ChromeURL\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeURL","","Chrome URL"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeURL","FriendlyTypeName","Chrome URL"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeURL","URL Protocol",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\ChromeURL","EditFlags",2
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeURL\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeURL\shell","","open"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ChromeURL\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 // URL Associations
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\InternetShortcut\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\Applications\chrome.exe\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -- #$q#$p1#$q"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\InternetShortcut\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\Applications\chrome.exe\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 // Open-With Programs List
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.shtml",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.xht",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.htm",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.xhtml",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.html",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_FTP",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_HTTP",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_HTTPS",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.shtml",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.xht",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.htm",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.xhtml",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeHTML_.html",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_FTP",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_HTTP",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","ChromeURL_HTTPS",0
 
 // Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.htm\UserChoice","ProgId","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice","ProgId","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.shtml\UserChoice","ProgId","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xht\UserChoice","ProgId","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xhtml\UserChoice","ProgId","ChromeHTML"
+// Newer Windows UCPD aggressively blocks writing to the offline registry keys (Prohibited Operation), so we have to write them during PE startup.
+// More Info: https://theoven.org/viewtopic.php?p=1957
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.htm\UserChoice","ProgId","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.html\UserChoice","ProgId","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.shtml\UserChoice","ProgId","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xht\UserChoice","ProgId","ChromeHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xhtml\UserChoice","ProgId","ChromeHTML"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.htm\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.shtml\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xht\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xhtml\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\FTP\UserChoice","ProgId","ChromeURL"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\http\UserChoice","ProgId","ChromeURL"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\https\UserChoice","ProgId","ChromeURL"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.htm\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.html\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.shtml\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xht\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xhtml\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeHTML#$q)"
 
-//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice","ProgId","ChromeURL"
-//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice","ProgId","ChromeURL"
-//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice","ProgId","ChromeURL"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\FTP\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\http\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\https\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"
 
-// Newer Windows aggressively blocks writing to the offline registry keys (Prohibited Operation), so we have to write them during PE startup.
 AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"
 AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"
 AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qChromeURL#$q)"

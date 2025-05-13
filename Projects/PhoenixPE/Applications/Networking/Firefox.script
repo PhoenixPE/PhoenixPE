@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=True
 Mandatory=False
-Version=1.1.4.0
-Date=2024-11-10
+Version=1.1.5.0
+Date=2025-05-11
 
 [Variables]
 %ProgramFolder%="Firefox"
@@ -142,38 +142,38 @@ Echo,"Configuring Firefox..."
 // User Config - Script Interface
 
 // Show Menu Bar
-If,%cb_ShowMenuBar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisplayMenuBar",1
-Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisplayMenuBar",0
+If,%cb_ShowMenuBar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisplayMenuBar",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisplayMenuBar",0
 
 // ShowBookmarksToolbar
-If,%cb_ShowBookmarksToolbar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisplayBookmarksToolbar",1
-Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisplayBookmarksToolbar",0
+If,%cb_ShowBookmarksToolbar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisplayBookmarksToolbar",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisplayBookmarksToolbar",0
 
 // Show Search Bar
-If,%cb_ShowSearchBar%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox","SearchBar","unified"
-Else,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox","SearchBar","separate"
+If,%cb_ShowSearchBar%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","SearchBar","unified"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","SearchBar","separate"
 
 // Disable Search Suggestions
-If,%cb_DisableSearchSuggestions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","SearchSuggestEnabled",0
-Else,RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","SearchSuggestEnabled",1
+If,%cb_DisableSearchSuggestions%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","SearchSuggestEnabled",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","SearchSuggestEnabled",1
 
 // Warn On Close
 If,%cb_WarnOnClose%,Equal,False,Begin
-  RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnClose",1
-  RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnCloseOtherTabs",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnClose",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnCloseOtherTabs",1
 End
 Else,Begin
-  RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnClose",0
-  RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnCloseOtherTabs",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnClose",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnCloseOtherTabs",0
 End
 
 // Homepage
 If,Not,%txt_Homepage%,Equal,"",Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Homepage","StartPage","homepage"
-  RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Homepage","URL","%txt_Homepage%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox","OverrideFirstRunPage","%txt_Homepage%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Homepage","StartPage","homepage"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Homepage","URL","%txt_Homepage%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","OverrideFirstRunPage","%txt_Homepage%"
 End
-Else,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Homepage","StartPage","none"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Homepage","StartPage","none"
 
 // Import Bookmarks
 If,ExistFile,%fb_ImportBookmarks%,Begin
@@ -189,83 +189,83 @@ Else,Begin
   ExtractFile,%ScriptFile%,"Config","bookmarks.html","%TargetPrograms%\%ProgramFolder%"
 End
 
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.places.importBookmarksHTML",1
-RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.bookmarks.file","%PEPrograms%\%ProgramFolder%\bookmarks.html"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.places.importBookmarksHTML",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.bookmarks.file","%PEPrograms%\%ProgramFolder%\bookmarks.html"
 
 // Addons
-If,%cb_AddonuBlockOrgin%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","1","https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
-If,%cb_AddonNoScript%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","2","https://addons.mozilla.org/firefox/downloads/latest/noscript/latest.xpi"
-If,%cb_AddonToGoogleTranslate%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","3","https://addons.mozilla.org/firefox/downloads/latest/to-google-translate/latest.xpi"
+If,%cb_AddonuBlockOrgin%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","1","https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
+If,%cb_AddonNoScript%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","2","https://addons.mozilla.org/firefox/downloads/latest/noscript/latest.xpi"
+If,%cb_AddonToGoogleTranslate%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","3","https://addons.mozilla.org/firefox/downloads/latest/to-google-translate/latest.xpi"
 
-If,%cb_AdditionalAddon01%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","4",%txt_AdditionalAddon01%
-If,%cb_AdditionalAddon02%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","5",%txt_AdditionalAddon02%
-If,%cb_AdditionalAddon03%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","6",%txt_AdditionalAddon03%
+If,%cb_AdditionalAddon01%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","4",%txt_AdditionalAddon01%
+If,%cb_AdditionalAddon02%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","5",%txt_AdditionalAddon02%
+If,%cb_AdditionalAddon03%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Extensions\Install","6",%txt_AdditionalAddon03%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Other Preferences - Not configured via script interface
 
 // Always ask where to save files
-RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox","PromptForDownloadLocation",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","PromptForDownloadLocation",1
 
 // Disable default browser check
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DontCheckDefaultBrowse",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DontCheckDefaultBrowse",1
 
 // Don't check for Search updates
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.search.update",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.search.update",0
 
 // Disable Flash
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FlashPlugin","Default",0
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FlashPlugin","Locked",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\FlashPlugin","Default",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\FlashPlugin","Locked",1
 
 // Don't ask to remember passwords
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","OfferToSaveLogins",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","OfferToSaveLogins",0
 
 // Allow Extension updates
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","ExtensionUpdate",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","ExtensionUpdate",1
 
 // Disable App updates
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisableAppUpdate",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","app.update.auto",0
-RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox","OverridePostUpdatePag",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisableAppUpdate",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","app.update.auto",0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","OverridePostUpdatePag",""
 
 // Disable Telemetry
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisableTelemetry",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisableTelemetry",1
 
 // Disable Reporting
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","security.ssl.errorReporting.enabled",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","security.ssl.errorReporting.enabled",0
 
 // Sanitize
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","Cache",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","Cookies",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","Downloads",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","FormData",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","History",0
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","Sessions",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","SiteSettings",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","OfflineApps",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","Cache",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","Cookies",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","Downloads",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","FormData",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","History",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","Sessions",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","SiteSettings",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\SanitizeOnShutdown","OfflineApps",1
 
 // Disable useless stuff
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisableFeedbackCommands",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisableFirefoxScreenshots",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisableFirefoxAccounts",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisableFirefoxStudies",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisablePocket",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisableProfileImport",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox","DisableProfileRefresh",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisableFeedbackCommands",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisableFirefoxScreenshots",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisableFirefoxAccounts",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisableFirefoxStudies",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisablePocket",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisableProfileImport",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisableProfileRefresh",1
 
 // Cookies
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Cookies","Default",1
-RegWrite,HKLM,0x1,"Tmp_Software\Policies\Mozilla\Firefox\Cookies","AcceptThirdParty","from-visited"
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Cookies","ExpireAtSessionEnd",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\Cookies","RejectTracker",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Cookies","Default",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox\Cookies","AcceptThirdParty","from-visited"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Cookies","ExpireAtSessionEnd",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Cookies","RejectTracker",1
 
 // Firefox Home
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Search",1
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","TopSites",0
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Highlights",0
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Pocket",0
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Snippets",0
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Locked",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Search",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","TopSites",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Highlights",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Pocket",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Snippets",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Locked",1
 
 [#RegisterFileExtensions#]
 // ===============================================================================================================================
@@ -282,89 +282,87 @@ RegWrite,HKLM,0x4,"Tmp_Software\Policies\Mozilla\Firefox\FirefoxHome","Locked",1
 Echo,"Configuring Firefox as the Default Browser..."
 
 // File Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.htm","","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.htm\OpenWithProgids","FirefoxHTML",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.html","","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.html\OpenWithProgids","FirefoxHTML",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.shtml","","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.shtml\OpenWithProgids","FirefoxHTML",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xht","","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xht\OpenWithProgids","FirefoxHTML",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xhtml","","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xhtml\OpenWithProgids","FirefoxHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.htm","","FirefoxHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.htm\OpenWithProgids","FirefoxHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.html","","FirefoxHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.html\OpenWithProgids","FirefoxHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.shtml","","FirefoxHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.shtml\OpenWithProgids","FirefoxHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xht","","FirefoxHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xht\OpenWithProgids","FirefoxHTML",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xhtml","","FirefoxHTML"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xhtml\OpenWithProgids","FirefoxHTML",""
 
 // FTP Protocol
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ftp","URL Protocol",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ftp","","URL:File Transfer Protocol"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\ftp\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\ftp\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ftp","URL Protocol",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ftp","","URL:File Transfer Protocol"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\ftp\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\ftp\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
 
 // HTTP Protocol
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\http","URL Protocol",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\http","","URL:HyperText Transfer Protocol"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\http\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\http\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\http","URL Protocol",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\http","","URL:HyperText Transfer Protocol"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\http\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\http\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
 
 // HTTPS Protocol
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\https","URL Protocol",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\https","","URL:HyperText Transfer Protocol with Privacy"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\https\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\https\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\https","URL Protocol",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\https","","URL:HyperText Transfer Protocol with Privacy"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\https\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\https\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
 
 // HTML File Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxHTML","","Firefox HTML Document"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxHTML","FriendlyTypeName","Firefox HTML Document"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxHTML","URL Protocol",""
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\FirefoxHTML","EditFlags",2
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxHTML\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxHTML\shell","","open"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxHTML\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxHTML","","Firefox HTML Document"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxHTML","FriendlyTypeName","Firefox HTML Document"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxHTML","URL Protocol",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\FirefoxHTML","EditFlags",2
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxHTML\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxHTML\shell","","open"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxHTML\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
 
 // URL File Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL","","Firefox URL"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL","FriendlyTypeName","Firefox URL"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL","URL Protocol",""
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\FirefoxURL","EditFlags",2
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL\shell","","open"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FirefoxURL\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxURL","","Firefox URL"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxURL","FriendlyTypeName","Firefox URL"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxURL","URL Protocol",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\FirefoxURL","EditFlags",2
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxURL\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxURL\shell","","open"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FirefoxURL\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
 
 // URL Associations
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\InternetShortcut\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\Applications\Firefox.exe\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\InternetShortcut\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\Applications\Firefox.exe\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -osint -url #$q#$p1#$q"
 
 // Open-With Programs List
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.shtml",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.xht",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.htm",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.xhtml",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.html",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxURL_FTP",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxURL_HTTP",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxURL_HTTPS",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.shtml",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.xht",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.htm",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.xhtml",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxHTML_.html",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxURL_FTP",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxURL_HTTP",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts","FirefoxURL_HTTPS",0
 
 // Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.htm\UserChoice","ProgId","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice","ProgId","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.shtml\UserChoice","ProgId","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xht\UserChoice","ProgId","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xhtml\UserChoice","ProgId","FirefoxHTML"
+// Newer Windows UCPD aggressively blocks writing to the offline registry keys (Prohibited Operation), so we have to write them during PE startup.
+// More Info: https://theoven.org/viewtopic.php?p=1957
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.htm\UserChoice","ProgId","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.html\UserChoice","ProgId","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.shtml\UserChoice","ProgId","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xht\UserChoice","ProgId","FirefoxHTML"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xhtml\UserChoice","ProgId","FirefoxHTML"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.htm\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.shtml\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xht\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xhtml\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\FTP\UserChoice","ProgId","FirefoxURL"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\http\UserChoice","ProgId","FirefoxURL"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\https\UserChoice","ProgId","FirefoxURL"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.htm\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.html\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.shtml\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xht\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.xhtml\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxHTML#$q)"
 
-//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice","ProgId","FirefoxURL"
-//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice","ProgId","FirefoxURL"
-//RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice","ProgId","FirefoxURL"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\FTP\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\http\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
+AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Roaming\OpenWith\UrlAssociations\https\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
 
-// Newer Windows aggressively blocks writing to the offline registry keys (Prohibited Operation), so we have to write them during PE startup.
 AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\FTP\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
 AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
 AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice#$q, #$qProgId#$q, #$qREG_SZ#$q, #$qFirefoxURL#$q)"
