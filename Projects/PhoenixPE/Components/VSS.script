@@ -36,8 +36,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2025-01-03
+Version=1.0.2.0
+Date=2025-05-14
 
 [Variables]
 %ProgramFolder%="#$pSystemRoot#$p\system32"
@@ -110,7 +110,7 @@ If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt
 If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%ProgramFolder%\%ProgramExe%"
 If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%ProgramFolder%\%ProgramExe%"
 
-AddAutoRun,PostShell,HideNoWait,"Starting Volume Shadow Copy Services...","%ProgramFolder%\%ProgramExe%"
+If,%cb_AutoStartVSS%,Equal,True,AddAutoRun,PostShell,HideNoWait,"Starting Volume Shadow Copy Services...","%ProgramFolder%\%ProgramExe%"
 
 
 [#PatchVSS#]
@@ -214,12 +214,11 @@ cb_AutoStartVSS="Auto start Volume Shadow Copy Services",1,3,152,50,225,18,False
 cmd
 
 [cmd]
-start_vss.cmd=89,280
+start_vss.cmd=255,400
 
 [EncodedFile-cmd-start_vss.cmd]
 lines=0
-0=/Td6WFoAAATm1rRGBMBLWSEBFgAAAAAAAAAAAGnEwlTgAFgAQ10AIBFEb71wHaR2IZc0u+Kr61d35RnkT18eyV4pLZdCN/8dL6iCYJxyUUzONc2ypIm1Pj4VwoUcO5cR25bmwoDY0j8AAAAAE7hVpU5rkFsAAWdZG6GNGB+2830BAAAAAARZWnic4y0uSSwqiS8rLtZLzk1hGAUjDERC6Q4c8kZLlN2Z2AB87geClgNWSQEAAAACAAAAJgAAAIgAAAAAAAAAAQAAAAAAAAAAAAAA
-
+0=/Td6WFoAAATm1rRGBMCeAf8BIQEWAAAAAAAAADs5nbXgAP4All0AIBFEb71wHaR2IZcwmoQY9e+HH/yjwFMSLLbM+RHJ7OXOMv3BHqtTJhsKNiCheJy0uKaR258z8G6yq6hqiakAEelgP9qDo+H7vmOITToaxuOEniWSoElur/LExXtFdKXYcgE9T2clXSbknf3m1mD/gmIRA7nXdNj+wxLMSA58PX8vttxPkoGlgQjRYZaDNyxVl+81G3UAAAAAIJ9VMic5s0IAAboB/wEAALiho5qxxGf7AgAAAAAEWVp4nOMtLkksKokvKy7WS85NYRgFIwz8h9IPcMjvlI/fzsQGAKKzCS4KFHdNAQAAAAIAAAAnAAAA4AAAAAAAAAABAAAAAAAAAAAAAAA
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
 Help_16.png=2830,3868
