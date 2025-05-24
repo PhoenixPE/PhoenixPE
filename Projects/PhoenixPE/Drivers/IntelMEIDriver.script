@@ -31,18 +31,18 @@
 
 [Main]
 Title=Intel MEI Driver
-Description=(v2413.5.67.0) Integrates the Intel Management Engine Interface (HECI) Driver for 6th to 13th Generation Intel® Core™ Processors.
+Description=(v2514.7.16.0) Integrates the Intel Management Engine Interface (HECI) Driver for 6th to 13th Generation Intel® Core™ Processors.
 Author=ISpillMyDrink
 Level=6
 Selected=False
 Mandatory=False
-Version=1.0.3.0
-Date=2025-01-11
+Version=1.0.4.0
+Date=2025-05-23
 
 [Variables]
 %ProgramFolder%="IntelMEI"
-%ProgramVersion%=2413.5.67.0
-%DownloadURL%=https://downloadmirror.intel.com/733739/ME_SW_%ProgramVersion%.zip
+%ProgramVersion%=2514.7.16.0
+%DownloadURL%=https://downloadmirror.intel.com/853739/Intel_R_ME_SW_%ProgramVersion%.zip
 %SetupFile%=ME_SW_%ProgramVersion%.zip
 %DismLog%="%TargetWindows%\Logs\DISM\dism.log"
 
@@ -61,7 +61,7 @@ Echo,"Integrating Driver..."
 StrFormat,PATH,%DismLog%,%DismLogPath%
 If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
-DISM,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%ProjectTemp%\%ProgramFolder%\Drivers\MEI#$q /recurse /LogPath:#$q%DismLog%#$q"
+DISM,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%ProjectTemp%\%ProgramFolder%\Intel_R_ME_SW_%ProgramVersion%\Drivers\MEI#$q /recurse /LogPath:#$q%DismLog%#$q"
 If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
 // Dism doesn't always unload hives correctly. Force unload just to make sure.
 RegUnloadHives,Force,"Target=%TargetSystem32%\config"
@@ -151,7 +151,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"This script integrates the Intel Management Engine Interface (HECI) Driver for 6th to 13th Generation Intel® Core™ Processors. This driver is needed for running some of the Intel System Tools.#$x#$xThe first time this script is run it will download the setup file (~405MB) and cache it for future builds."
+Message,"This script integrates the Intel Management Engine Interface (HECI) Driver for 6th to 13th Generation Intel® Core™ Processors. This driver is needed for running some of the Intel System Tools.#$x#$xThe first time this script is run it will download the setup file (~1.3GB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
