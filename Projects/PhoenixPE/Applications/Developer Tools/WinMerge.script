@@ -30,18 +30,18 @@
 
 [Main]
 Title=WinMerge
-Description=(v2.16.46) WinMerge is an Open Source differencing and merging tool for Windows. WinMerge can compare both folders and files, presenting differences in a visual text format that is easy to understand and handle.
+Description=(v2.16.48.2) WinMerge is an Open Source differencing and merging tool for Windows. WinMerge can compare both folders and files, presenting differences in a visual text format that is easy to understand and handle.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.13.0
-Date=2025-03-07
+Version=1.0.14.0
+Date=2025-05-31
 
 [Variables]
 %ProgramFolder%="WinMerge"
 %ProgramExe%="WinMergeU.exe"
-%ProgramVer%=2.16.46
+%ProgramVer%=2.16.48.2
 %DownloadURLx86%=https://github.com/WinMerge/winmerge/releases/download/v%ProgramVer%/winmerge-%ProgramVer%-exe.zip
 %DownloadURLx64%=https://github.com/WinMerge/winmerge/releases/download/v%ProgramVer%/winmerge-%ProgramVer%-x64-exe.zip
 %SetupFile%="WinMerge_%SourceArch%.zip"
@@ -165,6 +165,7 @@ RegWrite,HKLM,0x2,"Tmp_Software\Classes\TypeLib\{06029E17-28B5-456A-B866-4E79D98
 [ExtractProgram]
 Echo,"Extracting files..."
 Run,%ScriptFile%,SetProgramArch
+If,ExistDir,"%ProjectTemp%\%ProgramFolder%",DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
 Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\WinMerge\*.*",#1
 
@@ -211,7 +212,7 @@ ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 // Parameters.....: 
 // Return values..: Sets the following local variables:
 //                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
-//                  %ShellExtDLL%     - The x86 or x64 shell extension dll file.
+//                  %ShellExtDLL%    - The x86 or x64 shell extension dll file.
 // Author.........: Homes32
 // Remarks........:
 // Related........: 
