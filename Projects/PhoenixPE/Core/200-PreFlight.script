@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.2.2.0
-Date=2025-03-07
+Version=1.2.1.0
+Date=2025-05-31
 
 [Variables]
 // Minimum PEBakery version that has the command/feature set that is compatible with PhoenixPE.
@@ -51,6 +51,7 @@ If,%cb_VerifyOutputPath%,Equal,True,Run,%ScriptFile%,CheckOutputPath
 If,%cb_CheckFreeSpace%,Equal,True,Run,%ScriptFile%,CheckDiskSpace
 If,%cb_CheckForSupportedBuildVer%,Equal,True,Run,%ScriptFile%,CheckVerifiedBuilds
 Run,%ScriptFile%,CheckWinREVersion
+Run,%ScriptFile%,CheckAntivirus
 
 [#CheckOutputPath#]
 // ===============================================================================================================================
@@ -423,6 +424,22 @@ If,%FreeMegabytes%,Smaller,%MinimumFreeMegabytes%,Begin
 End
 
 System,EndLocal
+
+[#CheckAntivirus#]
+// ===============================================================================================================================
+// Name...........: CheckAntivirus
+// Description....: Check the state of Antivirus on the host system. This information is useful in debugging.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[CheckAntivirus]
+// Log Antivirus Program/State
+Echo,"Checking Antivirus protection..."
+ShellExecute,Hide,powershell.exe,"-ExecutionPolicy Bypass -NoProfile -Command Get-CimInstance -Namespace root/SecurityCenter2 -Classname AntiVirusProduct"
 
 [#DownloadTools#]
 // ===============================================================================================================================
