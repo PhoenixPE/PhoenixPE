@@ -36,10 +36,15 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.7.2.0
-Date=2024-04-03
+Version=1.8.0.0
+Date=2025-04-27
 
 [Variables]
+%SID-Netprofm%="S-1-5-80-3635958274-2059881490-2225992882-984577281-633327304"
+%SID-NlaSvc%="S-1-5-80-3141615172-2057878085-1754447212-2405740020-3916490453"
+%SID-WwanSvc%="S-1-5-80-3981856537-581775623-1136376035-2066872258-409572886"
+%SID-UnknownAccount1%="S-1-5-32-556"
+%SID-UnknownAccount2%="S-1-5-92-1467204242-1103346305-4253404563-2848856930-0"
 
 [Process]
 Echo,"Configuring Network Support..."
@@ -101,7 +106,6 @@ If,%cb_EnableNetworkListService%,Equal,True,Begin
   RequireFileEx,AppendList,\Windows\System32\networklist\
 
   RequireFileEx,AppendList,\Windows\System32\ImplatSetup.dll
-  RequireFileEx,AppendList,\Windows\System32\networklist
   RequireFileEx,AppendList,\Windows\System32\netprofm.dll
   RequireFileEx,AppendList,\Windows\System32\netprofmsvc.dll
   RequireFileEx,AppendList,\Windows\System32\nlmgp.dll
@@ -375,7 +379,7 @@ RequireFileEx,AppendList,\Windows\System32\NetworkUXBroker.dll
 RequireFileEx,AppendList,\Windows\System32\WcnApi.dll
 RequireFileEx,AppendList,\Windows\System32\wcncsvc.dll
 RequireFileEx,AppendList,\Windows\System32\WcnEapAuthProxy.dll
-RequireFileEx,AppendList,\Windows\System32\WcnEapPeerProxy.dll
+RequireFileEx,AppendList,\Windows\System32\WcnNetsh.dll
 RequireFileEx,AppendList,\Windows\System32\wcnwiz.dll
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -424,6 +428,11 @@ RequireFileEx,AppendList,\Windows\System32\netevent.dll
 RequireFileEx,AppendList,\Windows\System32\shwebsvc.dll 
 
 ///////////////////////////////////////////////////////////////////////////////////
+// Network Tray icon - Win11 24H2+
+If,%SourceVer%,BiggerEqual,10.0.26100.0,RequireFileEx,AppendList,\Windows\System32\NetworkIcon.dll
+
+
+///////////////////////////////////////////////////////////////////////////////////
 // Resources
 RequireFileEx,AppendList,\Windows\System32\wbem\nlasvc.mof
 RequireFileEx,AppendList,\Windows\System32\wbem\wlan.mof
@@ -453,41 +462,61 @@ Echo,"Configuring network support..."
 // Network List Service
 
 If,%cb_EnableNetworkListService%,Equal,True,Begin
-  // Use NetworkSetup2 and NetworkUxManager registry keys from a full Win10 install
-  ExtractFile,%ScriptFile%,Reg,NetworkList-RegSystem.reg,"%ProjectTemp%"
-  RegImport,"%ProjectTemp%\NetworkList-RegSystem.reg"
-
+  // Use NetworkSetup2 and NetworkUxManager 
+  If,ExistFile,"%TargetSystem32%\tsdiscon.exe",Begin
+    RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\NetworkSetup2",HKLM,"Tmp_System\ControlSet001\Control\NetworkSetup2"
+  End
+  Else,Begin
+    RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\NetworkSetup2\Filters",HKLM,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters"
+	// Remove QoS Packet Scheduler (ms_pacer filter)
+	RegDelete,HKLM,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters\{B5F4D659-7DAA-4565-8E41-BE220ED60542}"
+	RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\NetworkSetup2\Plugins",HKLM,"Tmp_System\ControlSet001\Control\NetworkSetup2\Plugins"
+  End
+  
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\NetworkUXManager",HKLM,"Tmp_System\ControlSet001\Control\NetworkUXManager"
+  
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows NT\CurrentVersion\NetworkList",HKLM,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\NetworkList"
 
   // AllowStart Network List Service
   // netprofm requires SystemSetupInProgress=0 > net start netprofm > SystemSetupInProgress=1
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\netprofm",HKLM,"Tmp_System\ControlSet001\Services\netprofm"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\netprofm","Start",3
-  RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\netprofm"
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\netprofm","Start",3
+  RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\netprofm"
 
-  // NetworkList: Netprofm SID: S-1-5-80-3635958274-2059881490-2225992882-984577281-633327304
-  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%TargetSystem32%\networklist#$q -ot file -actn ace -ace #$qn:S-1-5-80-3635958274-2059881490-2225992882-984577281-633327304;p:full;s:y#$q"
+  // Permissions:
+	
+  // NetworkList Files:
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%TargetSystem32%\networklist#$q -ot file -actn ace -ace #$qn:%SID-Netprofm%;p:full;s:y#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$x%TargetSystem32%\networklist#$x#$xThe command returned: %ExitCode%"
 
-  // NetworkList\Nla: Netprofm inherited from NetworkList - NlaSvc SID: S-1-5-80-3141615172-2057878085-1754447212-2405740020-3916490453
-  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Nla#$q -ot reg -actn ace -ace #$qn:S-1-5-80-3141615172-2057878085-1754447212-2405740020-3916490453;p:full;s:y#$q"
+  // NetworkList\:
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList#$q -ot reg -actn ace -ace #$qn:%SID-Netprofm%;p:full;s:y#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList#$x#$xThe command returned: %ExitCode%"
 
-  // NetworkList\Permissions: Netprofm inherited from NetworkList - WwanSvc SID: S-1-5-80-3981856537-581775623-1136376035-2066872258-409572886 - Unknown account S-1-5-32-556 - Unknown account: S-1-5-92-1467204242-1103346305-4253404563-2848856930-0
-  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:S-1-5-80-3981856537-581775623-1136376035-2066872258-409572886;p:full;s:y#$q"
+  // NetworkList\Nla:
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Nla#$q -ot reg -actn ace -ace #$qn:%SID-NlaSvc%;p:full;s:y#$q"
+  If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Nla#$x#$xThe command returned: %ExitCode%"
+
+  // NetworkList\Permissions:
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:%SID-WwanSvc%;p:full;s:y#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$x#$xThe command returned: %ExitCode%"
 
-  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:S-1-5-32-556;p:full#$q"
+  // Unknown account S-1-5-32-556
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:%SID-UnknownAccount1%;p:full#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$x#$xThe command returned: %ExitCode%"
 
-  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:S-1-5-92-1467204242-1103346305-4253404563-2848856930-0;p:full#$q"
+  // Unknown account: S-1-5-92-1467204242-1103346305-4253404563-2848856930-0
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:%SID-UnknownAccount2%;p:full#$q"
+  If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$x#$xThe command returned: %ExitCode%"
+
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:Everyone;p:full;s:y#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$x#$xThe command returned: %ExitCode%"
 
 End
 Else,Begin
   // netprofm service is required for wlansvc and wcmsvc service in 1903 even disabled and not started.
   RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\netprofm",HKLM,"Tmp_System\ControlSet001\Services\netprofm"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\netprofm","Start",4
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\netprofm","Start",4
 End
 
 // End Network List Service
@@ -515,6 +544,7 @@ End
 ///////////////////////////////////////////////////////////////////////////////////
 
 If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
+  RegCopy,HKLM,"Tmp_Install_Software\Microsoft\WlanSvc",HKLM,"Tmp_Software\Microsoft\WlanSvc"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\wcmsvc",HKLM,"Tmp_Software\Microsoft\wcmsvc"
   RegCopy,HKLM,"Tmp_Install_Software\Policies\Microsoft\Windows\WcmSvc",HKLM,"Tmp_Software\Policies\Microsoft\Windows\WcmSvc"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\SettingSync\WindowsSettingHandlers\Tethering",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SettingSync\WindowsSettingHandlers\Tethering"
@@ -526,24 +556,52 @@ If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{b92cf7fd-dc10-4c6b-a72d-1613bf25e597}",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{b92cf7fd-dc10-4c6b-a72d-1613bf25e597}"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{c100becc-d33a-4a4b-bf23-bbef4663d017}",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{c100becc-d33a-4a4b-bf23-bbef4663d017}"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{c100becf-d33a-4a4b-bf23-bbef4663d017}",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\WINEVT\Publishers\{c100becf-d33a-4a4b-bf23-bbef4663d017}"
-  RegCopy,HKLM,"Tmp_Install_Software\Microsoft\WlanSvc",HKLM,"Tmp_Software\Microsoft\WlanSvc"
 End
 
+// WinPE-WiFi-Package related
+If,%SourceBaseWimName%,Equal,"Boot.wim",Begin
+  // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\tdx, HKLM\Tmp_System\ControlSet001\Services\vwifibus
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\tdx",HKLM,"Tmp_System\ControlSet001\Services\tdx"
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwifibus",HKLM,"Tmp_System\ControlSet001\Services\vwifibus"
+  
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Network\{4d36e974-e325-11ce-bfc1-08002be10318}\{5CBF81BF-5055-47CD-9055-A76B2B4E3698}",HKLM,"Tmp_System\ControlSet001\Control\Network\{4d36e974-e325-11ce-bfc1-08002be10318}\{5CBF81BF-5055-47CD-9055-A76B2B4E3698}"
+
+  //RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\vwifibus","Owners","netvwifibus.inf"
+
+  // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\vwififlt
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwififlt",HKLM,"Tmp_System\ControlSet001\Services\vwififlt"
+
+  // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\wcncsvc, HKLM\Tmp_System\ControlSet001\Services\wdiwifi
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wcncsvc",HKLM,"Tmp_System\ControlSet001\Services\wcncsvc"
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wdiwifi",HKLM,"Tmp_System\ControlSet001\Services\wdiwifi"
+  
+  // Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\NativeWifiP
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\NativeWifiP",HKLM,"Tmp_System\ControlSet001\Services\NativeWifiP"
+
+  // Included in Winre.wim (Partial): HKLM\Tmp_System\ControlSet001\Services\WinSock, HKLM\Tmp_System\ControlSet001\Services\WinSock2
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock",HKLM,"Tmp_System\ControlSet001\Services\WinSock"
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock2",HKLM,"Tmp_System\ControlSet001\Services\WinSock2"
+  
+  RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\WMI\Autologger\WiFiSession",HKLM,"Tmp_System\ControlSet001\Control\WMI\Autologger\WiFiSession"
+End
+
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WlanSvc",HKLM,"Tmp_System\ControlSet001\Services\WlanSvc"
+RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\WlanSvc","DependOnService","nativewifip","RpcSs","Ndisuio","wcmsvc",NOWARN
+
+RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\Wcmsvc",HKLM,"Tmp_System\ControlSet001\Services\Wcmsvc"
+
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\LanmanWorkstation",HKLM,"Tmp_System\ControlSet001\Services\LanmanWorkstation"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\LanmanWorkstation\Parameters","AllowInsecureGuestAuth",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\LanmanWorkstation\Parameters","AllowInsecureGuestAuth",1
 
 // Removed in 10.0.26040.1000
 System,ErrorOff,1
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\NetTrace\Scenarios\WLAN",HKLM,"Tmp_System\ControlSet001\Control\NetTrace\Scenarios\WLAN"
 
-RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WlanSvc",HKLM,"Tmp_System\ControlSet001\Services\WlanSvc"
-RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\WlanSvc","DependOnService","nativewifip","RpcSs","Ndisuio","wcmsvc",NOWARN
-
 If,%SourceVer%,BiggerEqual,10.0.17000.0,Begin
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\WlanSvc","ErrorControl",1
-  RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\WlanSvc","ImagePath","#$pSystemRoot#$p\System32\Svchost.exe -k LocalSystemNetworkRestricted -p"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\WlanSvc","Start",2
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\WlanSvc","Type",32
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\WlanSvc","ErrorControl",1
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\WlanSvc","ImagePath","#$pSystemRoot#$p\System32\Svchost.exe -k LocalSystemNetworkRestricted -p"
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\WlanSvc","Start",2
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\WlanSvc","Type",32
 End
 
 // wfplwfs
@@ -554,9 +612,9 @@ RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WFPLWFS",HKLM,"Tmp_Syste
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Network\{4d36e974-e325-11ce-bfc1-08002be10318}\{E475CF9A-60CD-4439-A75F-0079CE0E18A1}",HKLM,"Tmp_System\ControlSet001\Control\Network\{4d36e974-e325-11ce-bfc1-08002be10318}\{E475CF9A-60CD-4439-A75F-0079CE0E18A1}"
 
 // Holger: Fix WFPLWFS and both services nativewifip, wlanscv.
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters\{3BFD7820-D65C-4C1B-9FEA-983A019639EA}\Kernel","FilterClass","ms_medium_converter_top"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters\{B70D6460-3635-4D42-B866-B8AB1A24454C}\Kernel","FilterClass","ms_medium_converter_top"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters\{E475CF9A-60CD-4439-A75F-0079CE0E18A1}\Kernel","FilterClass","ms_medium_converter_top"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters\{3BFD7820-D65C-4C1B-9FEA-983A019639EA}\Kernel","FilterClass","ms_medium_converter_top"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters\{B70D6460-3635-4D42-B866-B8AB1A24454C}\Kernel","FilterClass","ms_medium_converter_top"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Control\NetworkSetup2\Filters\{E475CF9A-60CD-4439-A75F-0079CE0E18A1}\Kernel","FilterClass","ms_medium_converter_top"
 
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\RadioManagement",HKLM,"Tmp_System\ControlSet001\Control\RadioManagement"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\VAN",HKLM,"Tmp_System\ControlSet001\Control\VAN"
@@ -574,9 +632,9 @@ If,ExistRegSubKey,HKLM,"Tmp_Install_System\ControlSet001\Services\EventLog\Syste
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\EventLog\System\Microsoft-Windows-WLAN-AutoConfig",HKLM,"Tmp_System\ControlSet001\Services\EventLog\System\Microsoft-Windows-WLAN-AutoConfig"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\IPNAT",HKLM,"Tmp_System\ControlSet001\Services\IPNAT"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\IpFilterDriver",HKLM,"Tmp_System\ControlSet001\Services\IpFilterDriver"
-// In WinRE.wim: HKLM\Tmp_System\ControlSet001\Services\HTTP, HKLM\Tmp_System\ControlSet001\Services\NativeWifiP
+// In WinRE.wim: HKLM\Tmp_System\ControlSet001\Services\HTTP
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\HTTP",HKLM,"Tmp_System\ControlSet001\Services\HTTP"
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\NativeWifiP",HKLM,"Tmp_System\ControlSet001\Services\NativeWifiP"
+
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\HTTP\Parameters\UrlAclInfo",HKLM,"Tmp_System\ControlSet001\Services\HTTP\Parameters\UrlAclInfo"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\NdisCap",HKLM,"Tmp_System\ControlSet001\Services\NdisCap"
 // In WinRE.wim: HKLM\Tmp_System\ControlSet001\Services\NlaSvc
@@ -585,38 +643,24 @@ If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\Control
 // Internet Connection Sharing (ICS)
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\SharedAccess",HKLM,"Tmp_System\ControlSet001\Services\SharedAccess"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\tcpipreg",HKLM,"Tmp_System\ControlSet001\Services\tcpipreg"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","NdisMajorVersion",6
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","NdisMinorVersion",40
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","DriverMajorVersion",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","DriverMinorVersion",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","NdisMajorVersion",6
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","NdisMinorVersion",40
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","DriverMajorVersion",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\TCPIPTUNNEL","DriverMinorVersion",0
 
 // Telephony service
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TapiSrv",HKLM,"Tmp_System\ControlSet001\Services\TapiSrv"
 
-// Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\tdx, HKLM\Tmp_System\ControlSet001\Services\vwifibus
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\tdx",HKLM,"Tmp_System\ControlSet001\Services\tdx"
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwifibus",HKLM,"Tmp_System\ControlSet001\Services\vwifibus"
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Network\{4d36e974-e325-11ce-bfc1-08002be10318}\{5CBF81BF-5055-47CD-9055-A76B2B4E3698}",HKLM,"Tmp_System\ControlSet001\Control\Network\{4d36e974-e325-11ce-bfc1-08002be10318}\{5CBF81BF-5055-47CD-9055-A76B2B4E3698}"
-//RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\vwifibus","Owners","netvwifibus.inf"
-// Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\vwififlt
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\vwififlt",HKLM,"Tmp_System\ControlSet001\Services\vwififlt"
-RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\Wcmsvc",HKLM,"Tmp_System\ControlSet001\Services\Wcmsvc"
-// Included in Winre.wim: HKLM\Tmp_System\ControlSet001\Services\wcncsvc, HKLM\Tmp_System\ControlSet001\Services\wdiwifi
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wcncsvc",HKLM,"Tmp_System\ControlSet001\Services\wcncsvc"
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\wdiwifi",HKLM,"Tmp_System\ControlSet001\Services\wdiwifi"
-// Included in Winre.wim (Partial): HKLM\Tmp_System\ControlSet001\Services\WinSock, HKLM\Tmp_System\ControlSet001\Services\WinSock2
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock",HKLM,"Tmp_System\ControlSet001\Services\WinSock"
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WinSock2",HKLM,"Tmp_System\ControlSet001\Services\WinSock2"
-
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\dnscache"
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\nlasvc"
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\wcmsvc"
-RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3","Settings",30,00,00,00,fe,ff,ff,ff,02,00,00,00,03,00,00,00,3e,00,00,00,28,00,00,00,00,00,00,00,f2,03,00,00,90,06,00,00,1a,04,00,00,60,00,00,00,01,00,00,00
-
-If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\WMI\Autologger\WiFiSession",HKLM,"Tmp_System\ControlSet001\Control\WMI\Autologger\WiFiSession"
-
 // iSCSI
 If,%SourceBaseWimName%,Equal,"Boot.wim",RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\MSiSCSI",HKLM,"Tmp_System\ControlSet001\Services\MSiSCSI"
+
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\dnscache"
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\nlasvc"
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\wcmsvc"
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3","Settings",30,00,00,00,fe,ff,ff,ff,02,00,00,00,03,00,00,00,3e,00,00,00,28,00,00,00,00,00,00,00,f2,03,00,00,90,06,00,00,1a,04,00,00,60,00,00,00,01,00,00,00
+
+// Fix blank Wifi Network List in 24H2 (Issue #147)
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\Capabilities\wlanLocationBypass","RequireWindowsCert",0
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
@@ -719,15 +763,6 @@ Advanced_Disabled_16.png=474,744
 Network_80.png=14183,19012
 Logo=Network_80.png
 
-[Reg]
-NetworkList-RegSystem.reg=161296,11156
-
-[EncodedFile-Reg-NetworkList-RegSystem.reg]
-lines=2
-0=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
-1=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
-2=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
-
 [EncodedFile-InterfaceEncoded-SetDefaults_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
@@ -735,9 +770,6 @@ lines=0
 [EncodedFile-InterfaceEncoded-Help_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
-
-[EncodedFolders]
-Reg
 
 [EncodedFile-InterfaceEncoded-Advanced_Disabled_16.png]
 lines=0
