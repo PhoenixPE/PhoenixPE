@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.0.0
-Date=2025-06-01
+Version=1.2.0.0
+Date=2025-06-09
 
 [Variables]
 %ProgramFolder%="WinFE"
@@ -107,11 +107,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting program files..."
 7z,"e -y -r #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q IntelWinFE\%SourceArch%\%ProgramExe% -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Begin
-  // Try without subdir...
-  7z,"e -y -r #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q %SourceArch%\%ProgramExe% -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
-End
+If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 [#DownloadProgram#]
 // ===============================================================================================================================
