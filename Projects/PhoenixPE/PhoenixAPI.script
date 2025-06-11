@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.12.1.0
-Date=2025-01-03
+Version=1.13.0.0
+Date=2025-06-10
 Level=0
 Selected=None
 
@@ -168,9 +168,9 @@ Else,If,%Mode%,Equal,HideWait,Begin
 End
 Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
 
-If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","SetSplashText(#$q%Title%#$q)#$x%ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>PreShellConfig"
-Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PostShellConfig","SetSplashText(#$q%Title%#$q)#$x%ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>PostShellConfig"
-Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>InitNetwork","SetSplashText(#$q%Title%#$q)#$x%ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>InitNetwork"
+If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","    SetSplashText(#$q%Title%#$q)#$x    %ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>PreShellConfig"
+Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PostShellConfig","    SetSplashText(#$q%Title%#$q)#$x    %ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>PostShellConfig"
+Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>InitNetwork","    SetSplashText(#$q%Title%#$q)#$x    %ExecMode%('%ProgramExe%', '%Parameters%', '', %ShowFlag%)#$x#$xEndFunc   ;==>InitNetwork"
 Else,If,%RunGroup%,Equal,"RunOnce",Run,%API%,__PhoenixAPI_AddAutoRun_RunOnce
 Else,If,%RunGroup%,Equal,"AfterNetwork",Run,%API%,__PhoenixAPI_AddAutoRun_AfterNetwork
 Else,Halt,"AddAutoRun Syntax Error: [%RunGroup%] is not a supported Run group."
@@ -331,7 +331,7 @@ Else,If,%WindowState%,Equal,"Maximized",Set,%Cmd-WindowState%,"@SW_SHOWMAXIMIZED
 Else,Set,%Cmd-WindowState%,"@SW_SHOWNORMAL"
 
 // Final command
-TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>CreateShortcuts","MakeShortcut('%ProgramExe%', %Cmd-Type% & '%Folder%\%Title%.lnk', '%WorkDir%', '%Parameters%', '%Tooltip%', '%IconPath%', '%HotKey%', %IconIndex%, %Cmd-WindowState%)#$x#$xEndFunc   ;==>CreateShortcuts"
+TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>CreateShortcuts","    MakeShortcut('%ProgramExe%', %Cmd-Type% & '%Folder%\%Title%.lnk', '%WorkDir%', '%Parameters%', '%Tooltip%', '%IconPath%', '%HotKey%', %IconIndex%, %Cmd-WindowState%)#$xEndFunc   ;==>CreateShortcuts"
 
 System,EndLocal
 
@@ -364,15 +364,15 @@ If,#2,Equal,"",Halt,"AddStartupConfig Syntax Error: Code was not specified."
 If,#3,Equal,"",Set,%Position%,"Append"
 
 If,%Position%,Equal,"Append",Begin
-  If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","%Code%#$x#$xEndFunc   ;==>PreShellConfig"
-  Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PostShellConfig","%Code%#$x#$xEndFunc   ;==>PostShellConfig"
-  Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>InitNetwork","%Code%#$x#$xEndFunc   ;==>InitNetwork"
+  If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","    %Code%#$x#$xEndFunc   ;==>PreShellConfig"
+  Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PostShellConfig","    %Code%#$x#$xEndFunc   ;==>PostShellConfig"
+  Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>InitNetwork","    %Code%#$x#$xEndFunc   ;==>InitNetwork"
   Else,Halt,"AddStartupConfig Syntax Error: [%RunGroup%] is not a supported Run group."
 End
 Else,If,%Position%,Equal,"Prepend",Begin
-  If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func PreShellConfig()","%Code%#$x#$xFunc PreShellConfig()"
-  Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func PostShellConfig()","%Code%#$x#$xFunc PostShellConfig()"
-  Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func InitNetwork()","%Code%#$x#$xFunc InitNetwork()"
+  If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func PreShellConfig()","    %Code%#$x#$xFunc PreShellConfig()"
+  Else,If,%RunGroup%,Equal,"Postshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func PostShellConfig()","    %Code%#$x#$xFunc PostShellConfig()"
+  Else,If,%RunGroup%,Equal,"Network",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","Func InitNetwork()","    %Code%#$x#$xFunc InitNetwork()"
   Else,Halt,"AddStartupConfig Syntax Error: [%RunGroup%] is not a supported Run group."
 End
 Else,Halt,"AddStartupConfig Syntax Error: [%Position%] must be either [Append] or [Prepend]."
@@ -876,6 +876,11 @@ End
 //                  OutputFile - A standard .ini formatted File
 //                    [Results] contains key=value pairs of paths found in the format of 0-n=Path where 0 is the number of results and n is the index
 //                    [String] contains one key=value pair List= where the value is a | separated list of paths
+//                  RETURN= (Optional) - Specifies whether to return files, folders or both and omit those with certain attributes
+//                    FilesFolders - Return both files and folders.
+//                    Files - (Default) Return files only.
+//                    Folders - Return Folders only.
+//         
 //                  Exit codes: 0 - Success
 //                              1 - Syntax Error
 // Related........:
@@ -888,12 +893,40 @@ GetParam,2,%SearchFilter%
 If,%Path%,Equal,"",Halt,"Syntax Error: Path was not specified."
 If,%SearchFilter%,Equal,"",Halt,"Syntax Error: Search filter was not specified."
 
-// Recurse the path looking for the specified file
-ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","#$q%Tools%\a3x\PhoenixAPI-FileSearch.a3x#$q #$q%Path%#$q #$q%SearchFilter%#$q #$q%ProjectTemp%\PhoenixAPI-FileSearch.ini#$q"
+Set,%argc%,#a
+Set,%argOptStart%,3
 
-// Return the result as #r
-IniRead,"%ProjectTemp%\PhoenixAPI-FileSearch.ini","String","List",%SearchResult%,"Default="
-Return,%SearchResult%
+Set,%ReturnFilter%,"Files"
+
+If,%argc%,>,2,Begin
+  // Process additional arguments
+  Math,Add,%argMax%,%argc%,1
+  ForRange,%i%,%argOptStart%,%argMax%,1,Begin
+    GetParam,%i%,%Arg%
+    
+    StrFormat,Split,%Arg%,"=",1,%ArgKey%
+
+    If,%ArgKey%,Equal,"RETURN",Begin
+      StrFormat,Split,%Arg%,"=",2,%ReturnFilter%
+      If,%ReturnFilter%,Equal,"FilesFolders",Set,%ReturnFilter%,0
+	  Else,If,%ReturnFilter%,Equal,"Files",Set,%ReturnFilter%,1
+	  Else,If,%ReturnFilter%,Equal,"Folders",Set,%ReturnFilter%,2
+	  Else,Halt,"FileSearch Syntax Error: RETURN= argument must be one of the following values: [FilesFolders, Files, Folders]."
+      Continue
+    End
+
+    Halt,"FileSearch Syntax Error: Invalid Argument [%Arg%] at position [%i%]."
+  End
+End
+
+// Recurse the path looking for the specified file
+ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","#$q%Tools%\a3x\PhoenixAPI-FileSearch.a3x#$q #$q%Path%#$q #$q%SearchFilter%#$q #$q%ProjectTemp%\PhoenixAPI-FileSearch.ini#$q %ReturnFilter%"
+If,#r,Equal,0,Begin
+  // Return the result as #r
+  IniRead,"%ProjectTemp%\PhoenixAPI-FileSearch.ini","String","List",%SearchResult%,"Default="
+  Return,%SearchResult%
+End
+Else,Return,""
 
 System,EndLocal
 
@@ -1045,8 +1078,8 @@ Else,Set,%Recurse%,True
 StrFormat,Replace,%Filter%," ","",%Filter%
 StrFormat,Replace,%Filter%,",","#$c",%Filter%
 
-If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | Where-Object {$_.Name -Like '*#$c*.*'} | Remove-Item -Force#$q","%Path%"
-Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | Where-Object {$_.Name -Like '*#$c*.*'} | Remove-Item -Force#$q","%Path%"
+If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -NoProfile -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | Where-Object {$_.Name -Like '*#$c*.*'} | Remove-Item -Force#$q","%Path%"
+Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -NoProfile -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | Where-Object {$_.Name -Like '*#$c*.*'} | Remove-Item -Force#$q","%Path%"
 If,Not,%ExitCode%,Equal,0,Halt,"InnoCleanup Error: Failed to rename files. [%ExitCode%]."
 
 System,EndLocal
@@ -1161,8 +1194,8 @@ Else,Set,%Recurse%,True
 StrFormat,Replace,%Filter%," ","",%Filter%
 StrFormat,Replace,%Filter%,",","#$c",%Filter%
 
-If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | ForEach { $NewName = $_.Name.Replace('#$c%Suffix%.','.'); $Destination = Join-Path -Path $_.Directory.FullName -ChildPath $NewName; Move-Item -Path $_.FullName -Destination $Destination -Force }#$q","%Path%"
-Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | ForEach { Move-Item $_ $_.Name.Replace('#$c%Suffix%.','.') -Force }#$q","%Path%"
+If,%Recurse%,Equal,True,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -NoProfile -Command #$qGet-ChildItem -Path '%Path%' -Include %Filter% -Recurse | ForEach { $NewName = $_.Name.Replace('#$c%Suffix%.','.'); $Destination = Join-Path -Path $_.Directory.FullName -ChildPath $NewName; Move-Item -Path $_.FullName -Destination $Destination -Force }#$q","%Path%"
+Else,ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -NoProfile -Command #$qGet-ChildItem -Path '%Path%\*' -Include %Filter% | ForEach { Move-Item $_ $_.Name.Replace('#$c%Suffix%.','.') -Force }#$q","%Path%"
 If,Not,%ExitCode%,Equal,0,Halt,"InnoRename Error: Failed to cleanup files. [%ExitCode%]."
 
 System,EndLocal
