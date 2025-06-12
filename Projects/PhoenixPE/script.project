@@ -244,7 +244,7 @@ FileDeleteEx,"%BaseDir%\Logs\%LogFile%"
 
 // Cleanup old logs (%num_LogsToKeep% var is read by PostBuildCleanup section)
 Echo,"Removing old support logs..."
-ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -Command #$q$files = Get-ChildItem -Path '%BaseDir%\Logs' -Recurse | Where-Object {-not $_.PsIsContainer}; if ($files.Count -gt %num_LogsToKeep%) { $files | Sort-Object CreationTime | Select-Object -First ($files.Count - %num_LogsToKeep%) | Remove-Item -Force }#$q"
+ShellExecute,Hide,"powershell.exe","-ExecutionPolicy Bypass -NoProfile -Command #$q$files = Get-ChildItem -Path '%BaseDir%\Logs' -Recurse | Where-Object {-not $_.PsIsContainer}; if ($files.Count -gt %num_LogsToKeep%) { $files | Sort-Object CreationTime | Select-Object -First ($files.Count - %num_LogsToKeep%) | Remove-Item -Force }#$q"
 If,Not,%ExitCode%,Equal,0,Echo,"Error: Failed to remove old support logs. [%ExitCode%].",WARN
 
 System,EndLocal
