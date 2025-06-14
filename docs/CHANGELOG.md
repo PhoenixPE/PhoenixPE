@@ -2,6 +2,71 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release 2025-06-14
+
+### Added
+- Sysinternals Disk2VHD
+
+### Changed
+- .Net 8 runtime updated to v8.0.16
+- .Net 9 runtime updated to v9.0.5
+- AIDA64 updated to v7.65.7400
+- Arsenal Image Mounter updated. (Driver v1.2.22.83 / GUI v3.11.307.0)
+- Attribute Changer updated to v11.40a
+- BleachBit updated to v5.0.0
+- CPU-Z updated to v.2.15.0
+- DesktopInfo updated to v3.19.5
+- DiskGenius updated to v6.0.1.1645
+- DriverStoreExplorer updated to v0.12.88, additional translations added, implemented changes for new config file.
+- Everything updated to v1.4.1.1027
+- FastStone Image Viewer updated to v8.0
+- FurMark 1 updated to v1.39.2.0
+- FurMark 2 updated to v2.8.1.0
+- Google Chrome updated to v136.0.7103.93
+- GPU-Z updated to v2.66.0
+- HWinfo updated to v8.26, added language translations and license key options.
+- Innounp updated to v2.64.3
+- Intel MEI Driver updated to v2413.5.67.0 (Issue #142)
+- Intel RST Driver updated to v20.2.1.1016.4
+- IrfanView updated to v4.72
+- LibreOffice updated to v25.2.3
+- LinuxReader - Added license registration and additional config options.
+- MPC-BE updated to v1.8.4.0
+- MS Visual C++ Runtime updated to v14.44.35208.0
+- Network script refactoring
+- Notepad++ updated to v8.8.1.0
+- NVDA updated to v2024.4.2
+- Open-Shell updated to v4.4.196
+- PowerShell Core updated to v7.5.1
+- ProtectPE removed 2038-01-19 max unix timestamp limit.
+- RustDesk updated to v1.4.0
+- Simplewall updated to v3.8.6.1
+- Ventoy updated to v1.1.05
+- VeraCrypt updated to v1.26.24
+- Windows Login Unlocker updated to v2.3.0.6404, added Spanish translation.
+- WinMerge updated to v2.16.48.2
+- WinRAR updated to v7.11
+- WinSCP updated to v6.5.1
+- WinXShell updated to v5.1.4 beta9d
+- Zulu JRE11 updated to v11.80.21
+- Zulu JRE17 updated to v17.58.21
+- Zulu JRE17 updated to v21.42.19
+
+### Fixed
+- Browsing Macrium Reflect backups/images now works in WinPE.
+- Fixed `Attempted to perform an unauthorized operation` error when setting Google Chrome & Firefox as default browser due to new MS UCPD blacklist. (Issue #139)
+- Fixed autorun checkbox state not honored in VSS script. (https://theoven.org/viewtopic.php?p=2530#p2530)
+- Fixed explorer crash in 24H2 due to missing mscms.dll if certain scripts were not selected.
+- Fixed Class not registered error when trying to open .xml files on some Win10 builds. (Issue #143)
+- Fixed Q-Dir not switching setup file if different source arch is selected. (Issue #144)
+- Fixed software edition selection for AOMEI Partition Assistant.
+- Fixed WinFE sometimes using a subdir in the zip causing extraction to fail.
+- Fixed KVRT launch errors due to the program hard-coding the default report path to C:\.
+- Fixed empty Wifi network list in 24H2. (Issue #137)
+- Fixed HDDLowLevelFormat and HDDRawCopy now uses embedded binaries due to download issues.
+
+### Removed
+
 ## Release 2025-03-15
 
 ### Added
