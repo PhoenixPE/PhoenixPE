@@ -2,6 +2,20 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release UNRELEASED
+
+### Added
+
+### Changed
+- grepWin updated to v2.1.9
+- Rufus updated to v4.8
+- Added an option to always download XYplorer.
+
+### Fixed
+- Fixed regression in ProtectPE that caused the expiration date to not be correctly set on initial config. (Back-ported to release 2025-06-14)
+
+### Removed
+
 ## Release 2025-06-14
 
 ### Added
@@ -64,8 +78,6 @@ Notable changes to the PhoenixPE project.
 - Fixed KVRT launch errors due to the program hard-coding the default report path to C:\.
 - Fixed empty Wifi network list in 24H2. (Issue #137)
 - Fixed HDDLowLevelFormat and HDDRawCopy now uses embedded binaries due to download issues.
-
-### Removed
 
 ## Release 2025-03-15
 
