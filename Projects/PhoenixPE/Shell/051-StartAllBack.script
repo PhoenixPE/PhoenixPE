@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.2.1.0
-Date=2025-03-15
+Version=1.2.2.0
+Date=2025-06-21
 
 [Variables]
 %ProgramFolder%=StartAllBack
@@ -183,8 +183,8 @@ Else,Halt,"INTERNAL LOGIC ERROR: No configuration defined for theme [%cmb_Theme%
 
 // Start Menu Style
 If,Not,%cmb_StartMenuStyle%,Equal,"Default",Begin
-  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","AlterStyle","X:\Program Files\StartIsBack\Styles\%cmb_StartMenuStyle%.msstyles"
-  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle","X:\Program Files\StartIsBack\Styles\%cmb_StartMenuStyle%.msstyles"
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","AlterStyle","%PEPrograms%\%ProgramFolder%\Styles\%cmb_StartMenuStyle%.msstyles"
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\StartIsBack","TaskbarStyle","%PEPrograms%\%ProgramFolder%\Styles\%cmb_StartMenuStyle%.msstyles"
 End
 
 // Icon size
@@ -627,7 +627,7 @@ WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarIconSize,"M"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarIconMargins,"XS"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarLocation,"Bottom"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarCombineButtons,"Never"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarPlumpness,"Aura"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarPlumpness,"None"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarCenterIcons,"No"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_TaskbarSegments,"None"
 WriteInterface,Value,%ScriptFile%,Interface,cb_TaskbarAutoHide,False
@@ -716,7 +716,7 @@ cmb_TaskbarLocation=Bottom,1,4,390,174,150,21,Left,Top,Right,Bottom
 lbl_TaskbarCombineButtons="Combine buttons:",1,1,300,206,89,16,8,Normal
 cmb_TaskbarCombineButtons=Never,1,4,390,201,150,21,"Always#$c hide labels","When taskbar is full",Never,"Never#$c hide labels","Never group"
 lbl_TaskbarPlumpness=Plumpness:,1,1,300,233,86,16,8,Normal
-cmb_TaskbarPlumpness=Aura,1,4,390,228,150,21,None,Buffer,Aura
+cmb_TaskbarPlumpness=None,1,4,390,228,150,21,None,Buffer,Aura
 lbl_TaskbarCenterIcons="Center Icons:",1,1,300,260,86,16,8,Normal
 cmb_TaskbarCenterIcons=No,1,4,390,255,199,21,No,"Separately from start button","Together with Start button"
 lbl_TaskbarSegments=Segments:,1,1,300,287,86,16,8,Normal
