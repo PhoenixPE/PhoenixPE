@@ -32,9 +32,9 @@
 Title=CrystalDiskMark
 Author=Homes32
 Level=5
-Version=1.0.2.0
+Version=1.1.0.0
 Description=CrystalDiskMark is a simple disk benchmark software.
-Date=2025-04-29
+Date=2025-06-21
 Selected=False
 Mandatory=False
 
@@ -43,7 +43,7 @@ Mandatory=False
 %ProgramExex86%="DiskMark32.exe"
 %ProgramExex64%="DiskMark64.exe"
 %DownloadURL%=https://sourceforge.net/projects/crystaldiskmark/files/latest/download
-%SetupFile%="CrystalDiskMark.exe"
+%SetupFile%="CrystalDiskMark.zip"
 // CrystalDiskMark v8.0.6 (and possibly earlier versions) does not correctly identify and process .ini files in the same
 // directory as the .exe and will always look in the %AppData% folder for the settings.
 %ConfigFilex86%="%TargetAppData%\%ProgramFolder%\DiskMark32.ini"
@@ -93,11 +93,10 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting files..."
 GetParam,1,%DestDir%
-InnoExtract,%ProgramsCache%\%ProgramFolder%\%SetupFile%,"%ProjectTemp%\%ProgramFolder%"
-FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\DiskMarkA64.exe"
-If,%SourceArch%,Equal,x64,FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\%ProgramExex86%"
-Else,FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\{App}\%ProgramExex64%"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{App}\*.*",%DestDir%
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",%DestDir%
+FileDeleteEx,"%DestDir%\DiskMarkA64.exe"
+If,%SourceArch%,Equal,x64,FileDeleteEx,"%DestDir%\%ProgramExex86%"
+Else,FileDeleteEx,"%DestDir%\%ProgramExex64%"
 
 [#DownloadProgram#]
 // ===============================================================================================================================
