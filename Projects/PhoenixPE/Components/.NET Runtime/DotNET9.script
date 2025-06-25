@@ -30,18 +30,18 @@
 
 [Main]
 Title=.NET 9
-Description=(v9.0.5) .NET 9 is a cross-platform software development framework for building and running applications.
+Description=(v9.0.6) .NET 9 is a cross-platform software development framework for building and running applications.
 Selected=False
 Level=4
 Author=Homes32
-Version=1.0.3.0
+Version=1.0.4.0
 Date=2025-06-01
 Mandatory=False
 
 [Variables]
 %ProgramTitle%=".NET 9 Desktop Runtime"
 %ProgramFolder%="dotnet"
-%ProgramVersion%="9.0.5"
+%ProgramVersion%="9.0.6"
 %DownloadURLx86%=https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%ProgramVersion%/windowsdesktop-runtime-%ProgramVersion%-win-x86.exe
 %DownloadURLx64%=https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%ProgramVersion%/windowsdesktop-runtime-%ProgramVersion%-win-x64.exe
 
@@ -75,9 +75,13 @@ RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment"
 If,%SourceArch%,Equal,x64,Begin
   RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x64",%ProgramVersion%,1
   RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64","InstallLocation","%PEPrograms%\dotnet\"
+  RegWrite,HKLM,0x4,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
+  RegWrite,HKLM,0x4,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
 End
 Else,Begin
   RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86",%ProgramVersion%,1
+  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
+  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
 End
 
 RegUnloadHives

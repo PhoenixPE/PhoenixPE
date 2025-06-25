@@ -34,8 +34,8 @@ Description=(v5.0.17) .NET 5 is a cross-platform software development framework 
 Selected=False
 Level=4
 Author=Homes32
-Version=1.0.0.0
-Date=2024-07-05
+Version=1.0.1.0
+Date=2025-06-25
 Mandatory=False
 
 [Variables]
@@ -75,9 +75,13 @@ RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment"
 If,%SourceArch%,Equal,x64,Begin
   RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x64",%ProgramVersion%,1
   RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64","InstallLocation","%PEPrograms%\dotnet\"
+  RegWrite,HKLM,0x4,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
+  RegWrite,HKLM,0x4,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
 End
 Else,Begin
   RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86",%ProgramVersion%,1
+  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
+  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
 End
 
 RegUnloadHives
