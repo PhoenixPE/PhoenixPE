@@ -30,47 +30,33 @@
 
 [Main]
 Title=OpenHashTab
-Description=(v3.0.5) OpenHashTab is a shell extension for conveniently calculating and checking file hashes from file properties.
+Description=(v3.1.1) OpenHashTab is a shell extension for conveniently calculating and checking file hashes from file properties.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.2.0
-Date=2025-04-03
+Version=1.0.3.0
+Date=2025-07-19
 
 [Variables]
 %ProgramFolder%="OpenHashTab"
-%SetupFile%="OpenHashTab_Setup.exe"
-%ProgramVersion%=3.0.5
-%DownloadURL%=https://github.com/namazso/OpenHashTab/releases/download/v%ProgramVersion%/OpenHashTab_setup.exe
+%SetupFile%="OpenHashTab_Setup_%SourceArch%.msi"
+%ProgramVersion%=3.1.1
+%DownloadURL%=https://github.com/namazso/OpenHashTab/releases/download/%ProgramVersion%/OpenHashTab_Machine_%SourceArch%.msi
+%ShellExtx86%="%PEPrograms%\%ProgramFolder%\OpenHashTab32.dll"
+%ShellExtx64%="%PEPrograms%\%ProgramFolder%\OpenHashTab64.dll"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 RunFromRam
-If,%SourceArch%,Equal,x86,Exit,"OpenHashTab does not support building from an x86 source image."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
-Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
-
-// Debug symbols take up alot of space...
-FileDelete,"%ProjectTemp%\%ProgramFolder%\{app}\*.pdb"
-
-// ,1 - x64 | ,2 - ARM64
-If,%SourceArch%,Equal,x64,Begin
-  InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll, *.exe",1
-  InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
-End
-Else,Begin
-  InnoRename,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll, *.exe",2
-  InnoCleanup,"%ProjectTemp%\%ProgramFolder%\{app}","*.dll,*.exe"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
-End
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Register Ext.
@@ -119,53 +105,62 @@ Echo,"Registering Property Sheet Handlers..."
 RegHiveLoad,Tmp_Software,%RegSoftware%
 
 // Register Shell Ext.
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","","OpenHashTab Shell Extension"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","","%PEPrograms%\%ProgramFolder%\OpenHashTab.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","","OpenHashTab Shell Extension"
+If,%SourceArch%,Equal,x64,Begin
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","",%ShellExtx64%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","",%ShellExtx32%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","ThreadingModel","Apartment"
+End
+Else,Begin
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","",%ShellExtx32%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}\InprocServer32","ThreadingModel","Apartment"
+End
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","",""
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AllFilesystemObjects\shellex\PropertySheetHandlers\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AllFilesystemObjects\shellex\PropertySheetHandlers\{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","",""
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","OpenHashTab Shell Extension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{23b5bdd4-7669-42b8-9cdc-beebc8a5baa9}","OpenHashTab Shell Extension"
 
 // Register Sumfile Assoc
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\OpenHashTab","","Checksum file"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\OpenHashTab\DefaultIcon","","%PEPrograms%\%ProgramFolder%\OpenHashTab.dll#$c0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\OpenHashTab\shell\open\command","","%PEPrograms%\%ProgramFolder%\OpenHashTab.dll#$cStandaloneEntry #$q%1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\OpenHashTab","","Checksum file"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\OpenHashTab\DefaultIcon","","%ShellExtx64%#$c0"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\OpenHashTab\DefaultIcon","","%ShellExtx32%#$c0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\OpenHashTab\shell\open\command","","%PEPrograms%\%ProgramFolder%\StandaloneStub.exe #$q%1#$q"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.blake3","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.blake2sp","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.hash","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.k12-264","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.md4","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.md5","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.md5sum","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.md5sums","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ph128-264","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ph256-528","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ripemd160","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha1","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha1sum","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha1sums","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha224","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha224sum","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha256","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha256sum","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha256sums","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha384","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha512","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha512sum","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha512sums","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3-512","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3-224","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3-256","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sha3-384","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sums","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xxh32","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xxh64","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xxh3-64","","OpenHashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xxh3-128","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.blake3","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.blake2sp","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.hash","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.k12-264","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.md4","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.md5","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.md5sum","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.md5sums","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ph128-264","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ph256-528","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ripemd160","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha1","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha1sum","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha1sums","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha224","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha224sum","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha256","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha256sum","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha256sums","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha384","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha512","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha512sum","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha512sums","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha3","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha3-512","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha3-224","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha3-256","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sha3-384","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sums","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xxh32","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xxh64","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xxh3-64","","OpenHashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xxh3-128","","OpenHashTab"
 
 RegHiveUnLoad,Tmp_Software
 
@@ -182,7 +177,10 @@ RegHiveUnLoad,Tmp_Software
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -o#$q#1#$q"
+
+// Debug symbols take up alot of space...
+FileDelete,"#1\*.pdb"
 
 [#DownloadProgram#]
 // ===============================================================================================================================
