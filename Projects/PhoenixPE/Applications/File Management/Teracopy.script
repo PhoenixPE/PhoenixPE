@@ -1,0 +1,398 @@
+[License]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This script is part of the PhoenixPE project and distributed under the MIT License.
+//
+// Additional 3rd party tools, encoded files, and programs used by the project are the property
+// of their respective authors and may be subject to their own license agreement.
+//
+// Copyright (c) 2014-2025 Jonathan Holmgren (Homes32)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// In Progress:
+//       Advanced Options - Include custom options.ini
+//       Window pref on script Interface
+//       Default copy handler
+//       License Reg?
+
+[Main]
+Title=Teracopy
+Description=Streamline your file management tasks by enhancing Windows file copy and move functions. 
+Author=Homes32
+Level=5
+Selected=False
+Mandatory=False
+Version=1.0.0.0
+Date=2025-07-09
+
+[Variables]
+%ProgramFolder%="TeraCopy"
+%ProgramExe%="TeraCopy.exe"
+%DownloadURL%=https://www.codesector.com/files/teracopy.exe
+%SetupFile%="TeraCopy.exe"
+%ConfigFile%="%TargetPrograms%\%ProgramFolder%\Options.ini"
+%aLangMap%=System Default||English|internal|Afrikaans|af|Arabic|ar|Bengali|bn|Bulgarian|bg|Catalan|ca|Chinese (Simplified)|zh-CN|Chinese (Traditional)|zh-TW|Croatian|hr|Czech|cs|Danish|da|Dutch|nl|Estonian|et|Finnish|fi|French|fr|Georgian|ka|German|de|Greek|el|Hebrew|he|Hindi|hi|Hungarian|hu|Indonesian|id|Italian|it|Japanese|ja|Korean|ko|Lithuanian|lt|Malay|ms|Norwegian|no|Persian|fa|Polish|pl|Portuguese|pt-PT|Portuguese (Brazil)|pt-BR|Romanian|ro|Russian|ru|Santali|sat|Serbian|sr|Slovak|sk|Slovenian|sl|Spanish (Spain)|es-ES|Spanish (Argentina)|es-AR|Spanish (Mexico)|es-MX|Swedish|sv-SE|Thai|th|Turkish|tr|Ukrainian|uk|Vietnamese|vi
+%aChecksumFileExt%=bk3|blake2sp|blake3|exf|hash|md2|md4|md5|sfv|sha|sha1|sha256|sha3|sha3-224|sha3-256|sha3-384|sha3-512|sha384|sha512|xxh|xxh32|xxh64
+
+[Process]
+Echo,"Processing %ScriptTitle%..."
+
+If,%cb_RunFromRam%,Equal,True,RunFromRam
+
+///////////////////////////////////////////////////////////////////////////////////
+// Extract
+If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
+FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+Echo,"Program version: v%ProgramExeVer%"
+
+If,%SourceArch%,Equal,x86,FileCopy,"%TargetPrograms%\%ProgramFolder%\32-bit\*.*","%TargetPrograms%\%ProgramFolder%",NOWARN
+
+RequireFile,\Windows\System32\rstrtmgr.dll
+
+///////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+Echo,"Configuring %ScriptTitle%..."
+
+// Language
+List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
+If,%LangPos%,Equal,0,Halt,"Error: Language [%cmb_Language%] is not defined."
+Math,Add,%ValuePos%,%LangPos%,1
+List,Get,%aLangMap%,%ValuePos%,%Lang%
+
+IniWrite,%ConfigFile%,"Main","Language",%Lang%
+
+RegLoadHives
+
+// Shell Ext.
+If,%cb_ShellExt%,Equal,True,Run,%ScriptFile%,RegisterShellExtension
+
+If,%cb_RegisterChecksumFiles%,Equal,True,Begin
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TeraCopy RC.ChecksumFile\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\TeraCopy.exe#$q,0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TeraCopy RC.ChecksumFile\Shell\Open\command","","#$q%PEPrograms%\%ProgramFolder%\TeraCopy.exe#$q #$q#$p1#$q"
+
+  ForEach,%FileExt%,%aChecksumFileExt%,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.%FileExt%","","TeraCopy RC.ChecksumFile"
+End
+
+RegUnloadHives
+
+///////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+Echo,"Creating shortcuts..."
+If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%","","%PEPrograms%\%ProgramFolder%"
+If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%","","%PEPrograms%\%ProgramFolder%"
+If,%cb_PinToTaskbar%,Equal,True,PinShortcut,Taskbar,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+
+[#RegisterShellExtension#]
+// ===============================================================================================================================
+// Name...........: RegisterShellExtension
+// Description....: Register the TeraCopy shell extensions and Drag/Drop handlers.
+// Syntax.........: Run,%ScriptFile%,RegisterShellExtension
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Registry hives must be loaded before calling this function.
+// Related........: 
+// ===============================================================================================================================
+[RegisterShellExtension]
+Echo,"Registering shell extensions..."
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\TeraCopy","","{2386CB87-96FF-473D-A009-957E3BFE6F88}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\DragDropHandlers\TeraCopy","","{C2175ABC-D15D-4828-AA36-10C662E32999}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\TeraCopy","","{2386CB87-96FF-473D-A009-957E3BFE6F88}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\DragDropHandlers\TeraCopy","","{C2175ABC-D15D-4828-AA36-10C662E32999}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\ContextMenuHandlers\TeraCopy","","{2386CB87-96FF-473D-A009-957E3BFE6F88}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\DragDropHandlers\TeraCopy","","{C2175ABC-D15D-4828-AA36-10C662E32999}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\folder\ShellEx\ContextMenuHandlers\TeraCopy","","{2386CB87-96FF-473D-A009-957E3BFE6F88}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\folder\ShellEx\DragDropHandlers\TeraCopy","","{C2175ABC-D15D-4828-AA36-10C662E32999}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\lnkfile\shellex\ContextMenuHandlers\TeraCopy","","{2386CB87-96FF-473D-A009-957E3BFE6F88}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\lnkfile\shellex\DragDropHandlers\TeraCopy","","{C2175ABC-D15D-4828-AA36-10C662E32999}"
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2386CB87-96FF-473D-A009-957E3BFE6F88}","","TeraCopy Shell Extension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2386CB87-96FF-473D-A009-957E3BFE6F88}\InprocServer32","","%PEPrograms%\%ProgramFolder%\Context.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2386CB87-96FF-473D-A009-957E3BFE6F88}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2386CB87-96FF-473D-A009-957E3BFE6F88}\TypeLib","","{FAB1DB47-6F6D-4448-9AF9-3B14DD3FF0FC}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2386CB87-96FF-473D-A009-957E3BFE6F88}\Version","","1.0"
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{C2175ABC-D15D-4828-AA36-10C662E32999}","","TeraCopy Shell Extension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{C2175ABC-D15D-4828-AA36-10C662E32999}\InprocServer32","","%PEPrograms%\%ProgramFolder%\TeraCopy.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{C2175ABC-D15D-4828-AA36-10C662E32999}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{C2175ABC-D15D-4828-AA36-10C662E32999}\TypeLib","","{FEEBE75A-7A94-46AF-A2EC-414CBA625DB4}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{C2175ABC-D15D-4828-AA36-10C662E32999}\Version","","1.0"
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{62E0915E-032E-46A5-85E9-19E1DACDBFC6}","","ITeraCopyMenu"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{62E0915E-032E-46A5-85E9-19E1DACDBFC6}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{62E0915E-032E-46A5-85E9-19E1DACDBFC6}\TypeLib","","{FAB1DB47-6F6D-4448-9AF9-3B14DD3FF0FC}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{62E0915E-032E-46A5-85E9-19E1DACDBFC6}\TypeLib","Version","1.0"
+
+If,%SourceArch%,Equal,x64,Begin
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{62E0915E-032E-46A5-85E9-19E1DACDBFC6}","","ITeraCopyMenu"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{62E0915E-032E-46A5-85E9-19E1DACDBFC6}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{62E0915E-032E-46A5-85E9-19E1DACDBFC6}\TypeLib","","{FAB1DB47-6F6D-4448-9AF9-3B14DD3FF0FC}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{62E0915E-032E-46A5-85E9-19E1DACDBFC6}\TypeLib","Version","1.0"
+End
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{F036C4B3-00EF-443D-B706-76BBD7B2CA9D}","","IDropHander"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{F036C4B3-00EF-443D-B706-76BBD7B2CA9D}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{F036C4B3-00EF-443D-B706-76BBD7B2CA9D}\TypeLib","","{FEEBE75A-7A94-46AF-A2EC-414CBA625DB4}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{F036C4B3-00EF-443D-B706-76BBD7B2CA9D}\TypeLib","Version","1.0"
+
+If,%SourceArch%,Equal,x64,Begin
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{F036C4B3-00EF-443D-B706-76BBD7B2CA9D}","","IDropHander"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{F036C4B3-00EF-443D-B706-76BBD7B2CA9D}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{F036C4B3-00EF-443D-B706-76BBD7B2CA9D}\TypeLib","","{FEEBE75A-7A94-46AF-A2EC-414CBA625DB4}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{F036C4B3-00EF-443D-B706-76BBD7B2CA9D}\TypeLib","Version","1.0"
+End
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FAB1DB47-6F6D-4448-9AF9-3B14DD3FF0FC}\1.0","","Context"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FAB1DB47-6F6D-4448-9AF9-3B14DD3FF0FC}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\Context.dll"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FAB1DB47-6F6D-4448-9AF9-3B14DD3FF0FC}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\Context.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FAB1DB47-6F6D-4448-9AF9-3B14DD3FF0FC}\1.0\FLAGS","",0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FAB1DB47-6F6D-4448-9AF9-3B14DD3FF0FC}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%\"
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FEEBE75A-7A94-46AF-A2EC-414CBA625DB4}\1.0","","DropHandlerLib"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FEEBE75A-7A94-46AF-A2EC-414CBA625DB4}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\TeraCopy.dll"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FEEBE75A-7A94-46AF-A2EC-414CBA625DB4}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\TeraCopy.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FEEBE75A-7A94-46AF-A2EC-414CBA625DB4}\1.0\FLAGS","",0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{FEEBE75A-7A94-46AF-A2EC-414CBA625DB4}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%\"
+
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{2386CB87-96FF-473D-A009-957E3BFE6F88}","TeraCopy Shell Extension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{C2175ABC-D15D-4828-AA36-10C662E32999}","TeraCopy Shell Extension"
+
+[#ExtractProgram#]
+// ===============================================================================================================================
+// Name...........: ExtractProgram
+// Description....: Extract program files from script/setup files.
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
+// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: TeraCopy an run in installed mode (settings in AppData) or portable mode (settings in program folder).
+//                  In this case, we run in portable mode because the user may want to run TeraCopy from a host system as well as in PhoenixPE.
+// Related........: 
+// ===============================================================================================================================
+[ExtractProgram]
+Echo,"Extracting files..."
+
+DirMake,"%ProjectTemp%\%ProgramFolder%"
+ShellExecute,Hide,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","/extract %ProjectTemp%\%ProgramFolder%"
+If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+
+// Teracopy uses an annoying folder structure that changes with each version.
+FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
+If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%] in the setup file: The code returned was [#r]."
+Else,List,Get,#r,1,%ProgramExePath%
+
+StrFormat,DirPath,%ProgramExePath%,%ProgramExeDir%
+
+// Cleanup some junk
+FileDeleteEx,"%ProgramExeDir%\*.msi"
+
+// Portable Mode
+If,Not,ExistFile,"%ProgramExeDir%\Portable",FileCreateBlank,"%ProgramExeDir%\Portable"
+FileCopy,"%ProgramExeDir%\AppDataFolder\%ProgramFolder%\*.*",%ProgramExeDir%
+DirDeleteEx,"%ProgramExeDir%\AppDataFolder"
+PathMove,"%ProgramExeDir%\%ProgramFolder%\Scripts\","%ProgramExeDir%\App\Scripts\"
+
+FileCopy,"%ProgramExeDir%\*.*",#1
+
+[#DownloadProgram#]
+// ===============================================================================================================================
+// Name...........: DownloadProgram
+// Description....: Download the program files from the author's website.
+// Syntax.........: Run,%ScriptFile%,DownloadProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: 
+// ===============================================================================================================================
+[DownloadProgram]
+Echo,"Downloading %ScriptTitle%..."
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+
+[#LaunchProgram#]
+// ===============================================================================================================================
+// Name...........: LaunchProgram
+// Description....: Unpack and launch the program.
+// Syntax.........: Run,%ScriptFile%,LaunchProgram
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_LaunchProgram
+// ===============================================================================================================================
+[LaunchProgram]
+Echo,"Launching %ScriptTitle%..."
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+If,%HostArch%,Equal,x64,ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
+Else,ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\32-bit\%ProgramExe%"
+
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
+[#SetDefaultOptions#]
+// ===============================================================================================================================
+// Name...........: SetDefaultOptions
+// Description....: Sets script options to default values.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: 
+// Related........: btn_SetDefaultOptions
+// ===============================================================================================================================
+[SetDefaultOptions]
+System,Cursor,Wait
+WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToTaskbar,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
+WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"File Management"
+WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"TeraCopy"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"System Default"
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShellExt,True
+System,Cursor,Normal
+
+[#ToggleAdvancedOptions#]
+// ===============================================================================================================================
+// Name...........: ToggleAdvancedOptions
+// Description....: Show/Hide advanced options.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_AdvancedOptions
+// ===============================================================================================================================
+[ToggleAdvancedOptions]
+Message,"There are no advanced options available for this script."
+
+[#ShowScriptInfo#]
+// ===============================================================================================================================
+// Name...........: ShowScriptInfo
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_ScriptInfo
+// ===============================================================================================================================
+[ShowScriptInfo]
+Message,"Streamline your file management tasks by enhancing Windows file copy and move functions.#$x#$xOn first run this script will download the setup file (~15 MB) and cache it for future builds."
+
+[#Interface#]
+// ===============================================================================================================================
+// Name...........: Interface
+// Description....: 
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........:
+// ===============================================================================================================================
+[Interface]
+btn_LaunchProgram="Launch Program",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
+web_Homepage=Homepage,1,10,377,9,60,18,https://www.codesector.com/teracopy
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
+btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
+btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_Disabled_16.png,True,"__Show Advanced Options"
+btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
+bvl_RunFromRam=bvl_RunFromRam,1,12,5,50,133,25
+cb_RunFromRam="Run From RAM",1,3,12,54,100,18,True,"__When this option is enabled the program files will be stored in Boot.wim and loaded into memory on boot.#$x#$xYou should only select this option if you are booting from Read-Only media and your program requires write-access to the file system."
+bvl_Shortcuts=Shortcuts,1,12,5,90,133,184,8,Bold
+cb_DesktopShc=Desktop,1,3,12,104,122,18,False
+cb_StartMenuShc="Start Menu",1,3,12,123,122,18,True
+cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
+cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
+txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,"File Management"
+txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,TeraCopy
+cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of the program in your build."
+bvl_Options=Options,1,12,150,90,197,184,8,Bold
+lbl_Language=Language,1,1,159,110,153,16,8,Normal
+cmb_Language="System Default",1,4,160,126,150,21,"System Default",English,Afrikaans,Arabic,Bengali,Bulgarian,Catalan,"Chinese (Simplified)","Chinese (Traditional)",Croatian,Czech,Danish,Dutch,Estonian,Finnish,French,Georgian,German,Greek,Hebrew,Hindi,Hungarian,Indonesian,Italian,Japanese,Korean,Lithuanian,Malay,Norwegian,Persian,Polish,Portuguese,"Portuguese (Brazil)",Romanian,Russian,Santali,Serbian,Slovak,Slovenian,"Spanish (Spain)","Spanish (Argentina)","Spanish (Mexico)",Swedish,Thai,Turkish,Ukrainian,Vietnamese
+cb_ShellExt="Enable Shell Extension",1,3,160,161,177,18,True,"__Add TeraCopy to Explorer's context menu."
+cb_RegisterChecksumFiles="Associate with checksum files",1,3,160,180,181,21,True
+
+[InterfaceEncoded]
+play-hot.png=841,1220
+Trash.ico=1150,1212
+SetDefaults_16.png=2475,3404
+Help_16.png=2830,3868
+VistalcoDownload_16.png=927,1348
+Advanced_Disabled_16.png=474,744
+
+[AuthorEncoded]
+TeraCopy_80.png=9011,12116
+Logo=TeraCopy_80.png
+
+[EncodedFile-InterfaceEncoded-play-hot.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eJx10/1PEnEcB/DzYT2s7GHNHpYrY2221dbjVlsPs9asNVdtPfsHNEtt+ZRsyXjyNAFBHgQjKQi0YEIiBmJmoM5MwTISrOzB0jSndRToYctPd7Yro/re3vfD9+51973P53sIEkEcixYhxDkeSY1GkKUIgqwjQkwRMz/nyZEYjfw1Dh08MGff3sSYlDOndyQkJAiIyIko/hM5jUbjxsWtXL5t65b5R48cnkU+o1wiijx54jjb5eoEj8cDvT4f4DgOg4ODYLXWQUWFEszmGnj6tBtkMhnQ4uOXZV9Ii5i5DpTFyFKpVFMajQa0Wi1YLBYwGAwgkYgBRQugtFQEarUaOGxWIHHXzsXh36EuZpx67+vGxj68w0IT41goFMI+j41ifZ4n/h5XO9bV0jQdvbT4MW31qiXh3iTnn6d8T2NtsFHKDnVZTcG7gsu4hUfHOx/Yp71NI38VHRm5NNzfEjDyST/U1+u3C/NDtuKcSVetPlgvZOBmNCvUqCkPkP7+7RsDC+bNXRPuDWKuiPQ9TdavzUoejo2M+Mn1v3rWjTVXKoPmwks46R2mqqHYhTEbw3217IqG9B57TcBemP6NWMcX0r/xPcNqWecnbSLmBOlb64wfaSti91wVFP5R/3taeR3ph1+/wF4+dAbc+oqJkcEBrNOkCzq15cF2W42f9O0NltENa+KS5byCP7zluqSNqt/rR86Ag5/5zV1TOd6Apk/aRQycqr/L0fBpx/q1KWU8NJKyrfW1Ea13tL2Ux8cD2AuHNeg26cbbNJKJ7pYmP+XdzfexpO2bzmWnpUZRXlcmnNNpqx74V//7+55jM/tP5tj+3fnJB5NmU76Qw0rj83lTErEYhCUloFQqp/egQqEADocDubk5QKfToaioCMTEPedSU8cOHUiaR3leEcro6HgEPq8XHne5YXh4CIj3Q39/P9TX20ClugY6nRaczU7wenuIf0D6PetC+q+/UaVUbMjIyLgnlUqnyH1ebdCDvqoSblXqpve+Ql4GIqEQTEYjCPh8yM3JloX3nxzE2jfT8/K4N9XqD1U6nYfPK85mMpk3Mi9ezEMLCoxcDvssyuXGhzsW0UlH1D8S8Tus8BDX3xIV/AEUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUBoV2bs8iFCkXoMbAB8oQUybAHR5gEAAAACAAAAJAAAAEUDAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-SetDefaults_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHEGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE5LTEwLTIxVDE3OjIxOjEyLTA1OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpiMWM3ZDhlNS1mMGMxLTMwNDgtOGNiOS03YWU4YjgyNDgyNmQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDowNzhkNDM1MC04NWRmLTg4NDQtOTY0Mi1lYTIxNmU3YjUwNDIiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+SG9tZXMzMjwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMDM1MDg3Mi1hYmUxLWU5NDAtOTE2NC1kYzRjMzdjOGIwOTUiIHN0RXZ0OndoZW49IjIwMTktMTAtMjFUMTc6MjE6MTItMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDdmNDNiMDctMTg1NC1hNjQwLWEwM2UtYTQxMTM2YTA0ODA2IiBzdEV2dDp3aGVuPSIyMDE5LTEwLTIxVDE3OjIxOjQ3LTA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmIxYzdkOGU1LWYwYzEtMzA0OC04Y2I5LTdhZThiODI0ODI2ZCIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MTo1Mi0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlYy9voAAAJBSURBVDiNpdHLThNRHAbwvkCjpalcSyyUEDo09Jw5MxZeggXdQHSpa96ARTclolWpLYtG20IDwdpaoeVOW63G0gvEmEaj3cFKYrxMXLjw88wAbQ3smOQ3OTn/73yZiw6A7jK0G9tjJ0rcPmtnB8zNFbnjU0VtT52VWD1/UcE4KzOFw39K3D6D44NDYRWeOVdQYKoxDue8YxjeH4b1lRXm5S70v+7HSHlkjO83FeSZkcNFnAUnDFsGuOIu7L0v4M7GbXRlusDeMGO9QMyIHikrYSA7ACEnQF2LuyLkrIzuTDd6Q704rB1CvabWp6B/qYeYFT31AmlTqtrX7XAmb2AwLsCyZoFz2wn7th2GqAHxfEI7nM6voW2+DY4dB8QNsVovsKVsCl2myOXyGrpA0LHSAWOsBZOxSeAL8LH0GWJYRGeyE/KqDHFFVOoFQkJQBucFpFNb+JH/gxeJFMx+M4SADW/TZdR2jnAzdAtXo1cgJ2XQ51TVKGBLrGqJXofkl7C5uotvld9YiC/hSSyCr8VfmF6cQcucAUPPhkAX6ZnGK9Aw9UhRCdeCJhAvQblwAPzkk+9ApXgA6z0rLGELWISBRuiZxkckQWLkIIUkGH1G9Ln7UPtUA/4Co75R6O/rIT2VoGaaNH4jmSM6EiAu4ieQgzJava2QZ2RMBCZgvmsGDVLweTOXeqZR8Jic8JFx8ogosl9Gj7cHpmkTqJ8/7iwvmCUqRcuc5i8q0JGHpJ08IG6uyB1rvNrarc18RHeu4DL+AeXUQV071uymAAAAAElFTkSuQmCCeJwTCk4tcUlNSyzNKSmONzTTK8hLZxgFIwes5sQv/03zkSgjAwBGXgl7UO9x9wEAAAACAAAAKgAAAKsJAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Help_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHAWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxOC0wMi0yMlQxNjo1OTo1MC0wNjowMCIgeG1wOk1vZGlmeURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTktMTItMDJUMjE6NTM6MDQtMDY6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2OTFmMzItY2FiZC1hZTQzLTlmNjAtMzk5YjQyOTBlMTNiIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6OTBjZmFlNjAtYWJhZS1iNTQ3LWIyODEtOWYxNzg2YzM1NjQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIj4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkhvbWVzMzI8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MzUwYTZiYzMtZDFiMi03MjRjLTlmZWQtY2RmYTM4YzhjM2FkIiBzdEV2dDp3aGVuPSIyMDE4LTAyLTIyVDE2OjU5OjUwLTA2OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MmNhNWFiYy05Mzg0LWUwNGYtOGE5NC0yMTk1NjY1NjY1YTUiIHN0RXZ0OndoZW49IjIwMTgtMDItMjJUMTc6MTA6MDUtMDY6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmFkNjkxZjMyLWNhYmQtYWU0My05ZjYwLTM5OWI0MjkwZTEzYiIgc3RFdnQ6d2hlbj0iMjAxOS0xMi0wMlQyMTo1MzowNC0wNjowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PozE0ngAAAOzSURBVDgRBcF9TJR1AMDx7/N7nnuOez/kxUJe4q2pWEgoykxLpqkzx6bhlszN/soZ/dE0W9bWZrVZ2WYt/ypn5VrmzDkZZk2INoRyNJEUUDg4TuC4g7vjjrvjHu7uefp8pJljb2KymMlr2g5rq5H0ZQj6V+mzwYOh4qrGbDyadqN1GfOhK7Hp2cV4VQWRE5+SF42QUVUUAEOSkDJZsMvuQEg68/OgfOBPjzvf4xnDpArW1xQe2rxS/XB/Q8kPzlnv6blYXJeEAEB+Z8MGTOllrE0b13V4uXXk3NDuS3/4rYmoTnGeDUk30f1PkNvDmntQz3/5mecKm2o8//6WGByNY7ehmI0Mec9Xlvw6rf51+Mv7K3IzBmff2sgbB2rJdZpJpZa5NzzJR+fv0dMxwqPZqq0XT37cvqbo/JapvpFl+fPtGxhv2PHjkauxuqJMFpdL5qtTO3A7ZMa8fnJtBmUlKissaR75UmgzER66K4qa1ttVqafvttBLi9d868lpTvkXWVloxunI4cLVfg6/e43GQ9c4e3GAWCDECjVJYikBqsTd30e4mSw9aq0tt4ontvx9vZ4lCi0SmayO2ST45dYYfQNR5r0ZkokkTruG50mYwcdRYnGNwHiQjmHdpW3b2iYixZV74sFFTMJAUWQkIZHSdHwTi5w8VsXpo2WMjgU5ezmA1e7G5bCQ67IyN7FApm7TdpFWFIvIGiiKjCwkxn0R7g/O09pSzmfHy+m6M8He40MMzTgoL3ZiiBzUHDsm1YJsMUtCHfmvU813oMiCJ/4Y4WgKcszUP2sFC1zuijA6qlJT5ULHhGq2ogsHT6+uQNztva8UxWba66rrT10fnkMsazhtKkIxOPeTB99kmP5HOgWVuUjChCzMWK0qWtLOltUWTe3u/VoUKNm/D1Yu9U9rglQ8jWwSxGMp9r5Uxqu7XqTt8CYcFkEqo+ByWPEFFNbWV/Oa5cHV2FR4WgQmw2yd6Gl7v7WIuTmZQDBJPLFMy+5KtjWWcGRfAZKRQVWt+OYkYvYyPtm1EOHCF+8FH3iR366vRQuEppsb3SPyuqr9XQNLUjaR5nr3FOGFBT74ZoBRv5m47iSvZBXfn3DP1E5d2TP43Y3Hsm4gH9/8AlmbHWMp9XBnafbOtj01lSa7rdQbynDrxgQR3DQ0VvB6UwFndgban5q82eqZiD6QRscR2SwKgGToaLKKP5Tu3Gib7Fxd4Ws5+Upd82JuwypTNqMXJANeOTxwCd9i91g4jaSawTAA+B9saZuyCHkkigAAAABJRU5ErkJggnic4/ZIzSmINzTTK8hLZxgFIw7wceOXd9V7kMTIAAAhOQWdbDOZ9gEAAAACAAAAIwAAAA4LAAAAAAAAAQAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Advanced_Disabled_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVQ4y43Tz4tNcRgG8M+dOTGuRLhF9hi/h81IKRuR1IhSxIIssPAn3J1mb2oSNso0O2oWiIwNu2FWw21YkEm6ykwmv5XNc+rQnfLW6Zy+z/d9zvO+z/vWms2mBeIcjuMrhnC/06Wi8r0Ku/EIX9DACixHbwgW4wieo1UlWIsLOIWbmEA/fuI3NmMv9uEknmAQrZKgL8mvcAjH8A2LgveHYB5vQvSgSvAUI9iPOdQwhcngO7Ap2MqoHKuWMIu7+XMX7uAGZoKvw1kMoAfP8LkkOJAaN+I7XmAY7UqDZ3K2IUrOpLEfC1zEGvyI9Ml/kstoB9seh47iU4F6Erv8X9TiTjdqBUaxOjPQk4Y1OqhoBPuFt5mF+QLXcmEAl1Pb+QWa2BsFj3G96sIy7MzYzoVsfQcbZ7EUu3AP70qCwziN6fhcx7YkSs319KmNgyG/WhJMYBx7cCujeiIquvEeV+LApezLw2oJrcx2H25nHrZiC5akaeN5XuNl3n9tY6vcsMQUPqTm6cr5WNWaPzh+YcvU7DU1AAAAAElFTkSuQmCCeJyTcEwpS8xLTk2Jd8ksTkzKATIMzfQK8tIZRsFIALcY8ct/c/M8xcgAANAVDAqUbKQXAQAAAAIAAAAvAAAA2gEAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-AuthorEncoded-TeraCopy_80.png]
+lines=2
+0=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
+1=m5XMbm1au83mwSxhg3DANUkpSvP/wlJqsKSQ/kMHFgGtmBPAGlHfUlbM9ZcNZbQOQc6HAHJxzcMYxySMXi1jqyyZRzLR1p4w5M1wYSR6WnZ2ZSj33nO784c+DAn8bjCcTicZSKxV6AIVVFSFUhyzJCqvrLgdLig0EpRalc7lRM3AzDB5FeCyLt1EQvr63x1fV1TiilsViMRmMxEF8swy2G8tomVucv8VAswg4eP0qmDh2EQAUQ0rF7YD6bRzk4AzjtSJ8bjAuEwg7LWN5Yx4GxCccM7Emh/ykIAmLxxHtlRfnTUDiMZCrVDzASiUCRZWzv7JyYHB8/HNS/6Nov58kBbG9v92QZNKBxRH2fd+HV63V25tw5LsoyTaZSdL+QxlVdSimS8ThhnJNzTz3Hl85f4K+7902IxmOkGw97FJc72DjvSB8n3L1pEEURW7USJqwRCF4p3CdGnZ09cGTx0uLRaCx2NplKQnBCNrE7RRAKQZZlNJrNt8WiURLYQfPV8KrVarBH9Uqi12F44G3v7NjzFy+SZCpFXU8fFFS7ntgt6TMndAmFQoQZFh778v/FHQ/cw/NDBdJDkHJwTsGdMKXjgDoQOe3EemIkhNXNK5gaGUNwn3rvvUw2K506depfZHPZs7FoDLIsQ9O0DkB3dsUZuXiw7w4EQaQUxWKxr6oSFJ70qDSlKJVK9sXlZaTSaer31H0S6KlEu3EfY6z7dxE1RJ5+7Hvs5L13I18YIF2bx3hHdT3SxykH8zgIURSwWS1ienQ8oEeD7hF713S/KEn/NRwOIxQO7wF07B6arVYmnUweudaomQvPNE0YhoFwKLQ/vIB2ZqPZZOcWFlzJc9SH9mUq/nTOWywlhIAz1g24FUmmTzzyGH/zO3+eRxNxwqlX2uherkwIqAPT/dkWCCq1KpLxRA84vxSCEAwNDx+vlMvpUChUjkTCKJdKHYCSJEGWZdQbjeMjhUKEdKzpNWf2isVipzdyjb/pA8I5Tp89yxLJpEAp5YIDbu7YMaRTKTQaDRiGAdM0+8tZ3oY552i1Wm4HjXMAYTWEHz72//h97/x5UELBqJMfe74LC/iOoUgYm8XtLsC9TMgD07lRwyMj8aeffPLIYKHwg1AovOdEuuorCDfKsux8juzbeiSE8Far1QHknJz44rg+mABW1te5IEmCP54cKhQwPDJy7a6cxw5yALqu4ytf/jI0TetmJ1q9iUvn5jFzw2HiSppX2iihYMRJ2wjpHqta8xo2cE8i1VBIAMiNkiT/IBKNdGYdXQkUBQGWZR10Y7vAXq3nZ13TOuV4/3CQC89TcCSEgAO4vLbG0pmM4M9Unn32WVxaXOxWjG3GkM/ncfNNNwGE4OmnnsL29jYURUE4HEY6k4Eiy7Asq3MTeEdVVVUl86fOspkjh4hX4rqvPTfWfQ8gMJkF0+nJ7E1JoAvRvQ5RFIlt2wc7za3IngSKTmVZVdUj3rsAn2S5aq3reo+KEV8mgYAUrVgsckEUaZ+KU9qZNG214LWJyUSi2+7UNA2tVgvNZhPFnR0sLy93EnrnHJxSEM5BCYHZ0sjVK5t8YKTQq0XwaseegycEoIqMerOBVCLZVw3qonA+K0nSNKEEsiKDUuoAFAQwzqHI8qC/IwfP070fuq5DFMW+sTTiK3N7YW5cvYpYLNYXHvnTRH/o47YXBErBPB6561g8N4N3ZhPJyqVFPjgyDOJUFIg/LIHnZxCIkoR6s9kB6LwL1wP7akOJZGKqkzhIIC5AQRTRbDbDlFKlryLiPYVHAmkAMD807+8azSbiicQ1nY0XoG3b3XO4tUbYNrgHlt9uwTlH5epORwXhL9T2fmGXD6UEbat9zR6HK4XtdlusViqqKIm64AJ0vqgiiqLcE8AGlNaJMx3vN/JBht/9iXXahr1OZj+V91S6iQeKV1WDCrHe87V1vTNASdAHr3tEVzcBQmBatue6e6/Ae1mqqkq2bauUUJ0QApHsTUCJoiiKweh7z9Jut3vBemxm310kBNy20TZNHviN/B7cF0N2VdADr89D+97TWxoYY5wKgiuH3lih5xvuXT/vbavu03+TJEmxLFt0/17kvTaF7yu/nO/fwnOmol5yB//lrO14GZ/hviO5xt94J1/97/tYUO8tEN0vRwDLtu32tb68e1JZltH6MdZjEEohy4512AdE33SpZ0GNf3yt7xy+95SwCkopcUoJnmpg8L/P9xkGC0Jtts02IcSEE5qJAGAzBg7opmW1ecCF+U9DneLmvnfSl0G4LU/OfZcUMNfHGQNz1osw53272wTfA9vz9J1PVtVug4v39uTdolbnlTPVCs4hCaK38tpzJd5LNduGRQXBYHanzywCgGVZiIbDmm4YJgLuNPfdbUVRsLu72y/m3s8GzFIzxrrlJL+0uT1dRghg2xAFAdxp3nSb3j7p9D/hFBrShbyTsewB9oLoHp3/MMYgKzL2EPM+HXZWBUAQRD2ZTunrq2tgXoAgBLphrAOYCYLmXaMWUlVYlgVJknpmVnhPMbj3M0ODg+TC4iISyWQ/PAcc4RzctsGdmM/9rJuduCMafqBeSWw2m/z47DRYDzDfDDU8P4PDMi3EUpHuBXDvUgofyWazeSWdScM0zV6ArDNcM8+Bu4Oged9TQyFomtZd1yZyDjhlra46+mxbJpMBu3iRc+8ohtNFY57zu57Xtu1u+9C2bTDb7oxtuCMc7qiGcy4XrhhSOrXBPrh7R1fAuHNkholoNLoHlvdC9JoYTdMuMM5htI1OYRYAjHbbzQUvMNsGF4SegR7vHQaASqWCmXwemYkJtFotW9M0WJZFKSFE03VeqVYt0zQJIUQQBYEwxjjn3BYopZqmkXA43G1BBg2OhUIhSJK0J/GhEBRVRbPZ7B8O8kiirut89sQcIYQQm9n7qHu/7ZWpAFmSOrGjMy4Mz9+6cmjZNhcl8YJlmmg1mnsA2w5AxtjzRrvNJUnau4NeFXCOlmnyd91/P9GiUQiC0K2uOBkDESiV3PecSVOiGwYx2238/Ze/zLe2t0lP0dTTqFZVFfc/8ABEQeh0vgjBTTfdBKPdxje/8Q3out6nxowx2LbNE4kEN3XD4pzL3fFer7lAvzRyzpEKxzzOiKPrXzx9FHAOQ9cZgFPttolm0wPQNE0Y7Tai0eiZUrlcj4TDiSADzTlHqVTir7/jDhTGxnBmcRGxTKZHbf2fo5QiHA4jFo0KlFL88nvegz/+5Cc7VWXXXjr9Fc45ms0mvva1r/WkYO50qqbrPWrrBWlbFj78gQ+QZ579Ea2WKzwSjxHvuC8LCJE459BaGg6NTPeA2oMLj60ErqyvN9Lp9JnOosbWXhxoWhZ0w0A2na4Uy+XToyMjd/njLg8UfvToUcIlCZHOqO2+XtX/HjhHKpXChz/4Qfz1pz8Nm7G9XpBTkmIOxMARX9/cswuv3W6zD77//RjI5+kb7rxL+NTDn7eO3HaTxDyjve7SB79UyjYQj8U9E/1eKeTedXnY2Ng4Nzk1VV5fXUWz6QHIGIOmaWibJmzb/iZn7K5uKdwTepTLZf76O+/s1NI4RyaXw7ZhQFLVrjflTrmduf0MF2Yn1gQHMDY6ig/9+q/jrz796U5e7cDryXOvBdCzJs62bf6RD30I05OTlHGOcDhMDoyMkd1ajYciEcK4x+n4boBl2RhMZvqWR+z3tC37G+12Gw1ngXcXoONdYLTbUBTla7V6/eOpZJL2LlxhHITwuRtuoLzzQGpkBMVTp8AVpScQ5k4M5wJjnZpUFyhlDGNjY/id3/5tfP6hh/jl1VWiqmrf0GVfQO9OJnQiBuSzWfYr73sfGcjnqdczv/HOu4RPffEL9uwtx8TuQKVjE5lnmtVu6RgZm8V+5sqVSHSEx1JV9eu6pqNe3+2fTGi2WtB1Hbls9tz6+voLyUTiBGcMzJGMeq2GO++6C3Ckj3AOSxCQS6ex3W6DOBC7XTNfwNwzV+dIWCqZxEd/4zfIM888w7/17W+zUrlMI5FIt8XZl+oxhmarhXQqxd721reSkydPUkopsXvGeBlUVSXTg8O8UW9wJaSSHniMgfFOdaiQyHRqoYxdV/oWLlw4PzA48EK5
+2=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
