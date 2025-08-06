@@ -38,8 +38,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.0.0
-Date=2023-11-04
+Version=1.2.0.0
+Date=2025-08-05
 
 [Variables]
 %ProgramFolder%="TrueImage2021"
@@ -140,7 +140,14 @@ If,%cb_Include_iSCSI_Drivers%,Equal,True,Run,%ScriptFile%,iSCSIsupport
 
 // License
 If,%cmb_SoftwareLicense%,Equal,"Use Host License",Begin
-  If,ExistRegSubKey,HKLM,"Software\Acronis\TrueImage",RegCopy,HKLM,"Software\Acronis\TrueImage",HKLM,"Tmp_Software\Acronis\TrueImage"
+  If,ExistRegValue,HKLM,"Software\Acronis\TrueImage","standard",Begin
+    RegRead,HKLM,"Software\Acronis\TrueImage","standard",%RegValue%
+    RegWrite,HKLM,REG_SZ,"Tmp_Software\Acronis\TrueImage","standard",%RegValue%
+  End
+  Else,If,ExistRegValue,HKLM,"Software\WOW6432Node\Acronis\TrueImage","standard",Begin
+    RegRead,HKLM,"Software\WOW6432Node\Acronis\TrueImage","standard",%RegValue%
+    RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Acronis\TrueImage","standard",%RegValue%
+  End
   Else,Echo,"Warning: The software license was not found in the Host registry. Acronis True Image will run in Evaluation Mode.",Warn
 End
 Else,If,%cmb_SoftwareLicense%,Equal,"License from .reg file",Begin
