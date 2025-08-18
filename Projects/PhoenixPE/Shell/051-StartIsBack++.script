@@ -78,6 +78,11 @@ ExtractAllFiles,%ScriptFile%,Reg,%ProjectTemp%
 RegHiveLoad,Tmp_Software,%RegSoftware%
 RegHiveLoad,Tmp_Default,%RegDefault%
 
+// Default StartIsBack Config
+RegImport,%ProjectTemp%\StartIsBack-RegDefault.reg
+RegImport,%ProjectTemp%\StartIsBack-RegSoftware.reg
+RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\ImmersiveShell","TabletMode",0
+
 If,%SourceArch%,Equal,x86,Begin
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{865e5e76-ad83-4dca-a109-50dc2113ce9b}\InProcServer32","","X:\Program Files\StartIsBack\StartIsBack32.dll"
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\InProcServer32","","X:\Program Files\StartIsBack\StartIsBack32.dll"
@@ -88,11 +93,6 @@ If,%SourceArch%,Equal,x86,Begin
   RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E5C31EC8-C5E6-4E07-957E-944DB4AAD85E}\InProcServer32","","X:\Program Files\StartIsBack\StartIsBack32.dll"
   RegWrite,HKLM,0x2,"Tmp_Software\Classes\CLSID\{FCEA18FF-BC55-4E63-94D7-1B2EFBFE706F}","LocalizedString","@X:\Program Files\StartIsBack\StartIsBack32.dll,-510"
 End
-
-// Default StartIsBack Config
-RegImport,%ProjectTemp%\StartIsBack-RegDefault.reg
-RegImport,%ProjectTemp%\StartIsBack-RegSoftware.reg
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\ImmersiveShell","TabletMode",0
 
 // User Defined StartIsBack Options
 
