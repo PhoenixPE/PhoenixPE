@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.17.0
-Date=2025-07-20
+Version=1.0.18.0
+Date=2025-09-04
 
 [Variables]
 %ProgramFolder%="CPU-Z"
@@ -52,10 +52,7 @@ Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
 If,%SourceArch%,Equal,x64,Set,%ProgramExe%,"cpuz_x64.exe"
-If,%cmb_Language%,Equal,"Chinese",Begin
-  Set,%DownloadURL%,%DownloadURL-cn%
-  Set,%SetupFile%,%SetupFile-cn%
-End
+If,%cmb_Language%,Equal,"Chinese",Set,%SetupFile%,%SetupFile-cn%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
@@ -108,7 +105,7 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 Echo,"Downloading %ScriptTitle%..."
 If,%cmb_Language%,Equal,"Chinese",Begin
   Set,%DownloadURL%,%DownloadURL-cn%
-  Set,%SetupFile%,%SetupExe-cn%
+  Set,%SetupFile%,%SetupFile-cn%
 End
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
