@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.2.2.0
-Date=2025-06-21
+Version=1.2.3.0
+Date=2025-08-15
 
 [Variables]
 %ProgramFolder%=StartAllBack
@@ -54,7 +54,7 @@ If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 
 Echo,"Extracting files..."
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q * -xr!UpdateCheck.exe -o#$q%TargetPrograms%\%ProgramFolder%#$q"
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q * -o#$q%TargetPrograms%\%ProgramFolder%#$q"
 If,Not,#r,Equal,0,Halt,"ERROR: Failed to extract [%SetupExe%]. The error code returned was [#r]."
 
 FileVersion,"%TargetPrograms%\%ProgramFolder%\StartAllBackX64.dll",%ExeVer%
@@ -136,7 +136,6 @@ RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowMyDocs",0
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowMyMusic",0
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowMyPics",0
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowNetConn",0
-RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowNetPlaces",0
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowNetPlaces",0
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowPCSettings",0
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\StartIsBack","Start_ShowPrinters",0
@@ -472,7 +471,7 @@ Echo,"Registering StartAllBack..."
 
 RegHiveLoad,Tmp_Software,%RegSoftware%
 
-RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}","","StartIsBack Menu Pin"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\{a2a9545d-a0c2-42b4-9708-a0b2badd77c9}","","StartAllBack Menu Pin"
 
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","DisplayName","StartAllBack"
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppUserModelId\StartIsBack.UpdateToast","IconBackgroundColor",0
@@ -491,6 +490,7 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F4
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\InProcServer32","ThreadingModel","Apartment"
 RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BA}\ShellFolder","Attributes",-1610612736
+
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}","","God Mode"
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}\InProcServer32","","%PEPrograms%\%ProgramFolder%\%COMDLL%"
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{99E2B362-3E4E-4255-9B29-41A7F40777BB}\InProcServer32","ThreadingModel","Apartment"
