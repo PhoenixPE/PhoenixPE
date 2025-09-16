@@ -30,17 +30,18 @@
 
 [Main]
 Title=Linux Reader
-Description=DiskInternals Linux Reader for Windows allows you read-only access to Ext2/Ext3/Ext4, HFS/HFS+, and ReiserFS file systems in a Windows environment.
+Description=DiskInternals Linux Reader allows you to access to access files and folders on Ext, UFS, HFS, ReiserFS, APFS, XFS, and ZFS file systems from Windows.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2019-11-11
+Version=1.1.0.0
+Date=2025-05-19
 
 [Variables]
 %ProgramFolder%="LinuxReader"
 %DownloadURL%=https://eu.diskinternals.com/download/Linux_Reader.exe
+%ConfigFile%="%TargetPrograms%\%ProgramFolder%\fsm.ini"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -56,6 +57,85 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\LinuxReader.exe",Run,%ScriptFi
 Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
 FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
 Echo,"Program version: v%ProgramExeVer%"
+
+// Config
+
+// Disk View
+If,%cmb_DiskView%,Equal,"Tiles",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInDiskMode",5
+  IniWrite,%ConfigFile%,"main","view_style",5
+End
+Else,If,%cmb_DiskView%,Equal,"Icons",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInDiskMode",0
+  IniWrite,%ConfigFile%,"main","view_style",0
+End
+Else,If,%cmb_DiskView%,Equal,"Details",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInDiskMode",3
+  IniWrite,%ConfigFile%,"main","view_style",3
+End
+Else,If,%cmb_DiskView%,Equal,"Expert",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInDiskMode",8
+  IniWrite,%ConfigFile%,"main","view_style",
+End
+Else,Halt,"Internal Logic Error: [%cmb_DiskView%] is not a valid Disk View selection."
+
+// Folder view
+If,%cmb_DiskView%,Equal,"Thumbnails",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInFileMode",4
+End
+Else,If,%cmb_DiskView%,Equal,"Tiles",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInFileMode",5
+End
+Else,If,%cmb_DiskView%,Equal,"Icons",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInFileMode",0
+End
+Else,If,%cmb_DiskView%,Equal,"List",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInFileMode",2
+End
+Else,If,%cmb_DiskView%,Equal,"Details",Begin
+  IniWrite,%ConfigFile%,"main","ViewModeInFileMode",3
+End
+Else,Halt,"Internal Logic Error: [%cmb_FolderView%] is not a valid Folder View selection."
+
+// Show Folder Tree
+If,%cb_ShowFolderTree%,Equal,True,IniWrite,%ConfigFile%,"main","filetree",1
+Else,IniWrite,%ConfigFile%,"main","filetree",0
+
+// Auto Preview
+If,%cb_AutoPreview%,Equal,True,IniWrite,%ConfigFile%,"main","AutoPreview",1
+Else,IniWrite,%ConfigFile%,"main","AutoPreview",0
+
+// Disable Update Check
+IniWrite,%ConfigFile%,"main","AutoUpdateCheck",0
+
+// Disable Stats
+IniWrite,%ConfigFile%,"main","SendStat",0
+
+// Registration
+RegLoadHives
+
+// Licensing is currently broken as they are generating a machine specific serial number upon registration.  
+If,%cmb_RegEdition%,Equal,"Use host license",Begin
+  Echo,"Reading registration data from host system..."
+  If,ExistRegValue,HKCU,"Software\DiskInternals\LinuxReader","SerialNum",Begin
+    RegRead,HKCU,"Software\DiskInternals\LinuxReader","SerialNum",%RegSzSerialNum%
+	RegRead,HKCU,"Software\DiskInternals\LinuxReader","id",%RegSzID%
+    RegWrite,HKLM,REG_SZ,"Tmp_Default\DiskInternals\LinuxReader","SerialNum",%RegSzSerialNum%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\DiskInternals\LinuxReader","id",%RegSzID%
+  End
+  Else,Echo,"Warning: Linux Reader registration info was not found on the host system. The program will run in 'Free Mode'.",Warn
+End
+Else,If,%cmb_RegEdition%,Equal,"Use registry file",Begin
+  Echo,"Reading registration data from registry file..."
+  If,Not,%fb_LicRegFile%,Equal,"",If,ExistFile,%fb_LicRegFile%,Begin
+    FileCopy,%fb_LicRegFile%,"%ProjectTemp%\LinuxReader-LicRegFile.reg",NoWarn
+    TXTReplace,"%ProjectTemp%\LinuxReader-LicRegFile.reg","HKEY_CURRENT_USER\SOFTWARE","HKEY_LOCAL_MACHINE\Tmp_Default\Software"
+	RegImport,"%ProjectTemp%\LinuxReader-LicRegFile.reg"
+  End
+  Else,Echo,"Warning: Linux Reader registration file was not found. The program will run in 'Free Mode'.",Warn
+End
+
+RegUnloadHives
 
 // Shortcuts
 If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_ShortcutName%,"%PEPrograms%\%ProgramFolder%\%ProgramExe%","","%PEPrograms%\%ProgramFolder%"
@@ -115,6 +195,24 @@ Else,Set,%ProgramExe%,"LinuxReader.exe"
 
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
+[#ToggleProductReg#]
+// ===============================================================================================================================
+// Name...........: ToggleProductReg
+// Description....: Toggle the visibility of the registration info.
+// Syntax.........: Run,%ScriptFile%,ToggleProductReg
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_RegEdition
+// ===============================================================================================================================
+[ToggleProductReg]
+If,%cmb_RegEdition%,Equal,"Use registry file",Set,%Toggle%,True
+Else,Set,%Toggle%,False
+
+WriteInterface,Visible,%ScriptFile%,Interface,lbl_LicRegFile,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,fb_LicRegFile,%Toggle%
+
 [#ClearDownloadCache#]
 // ===============================================================================================================================
 // Name...........: ClearDownloadCache
@@ -141,6 +239,7 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // Related........: 
 // ===============================================================================================================================
 [SetDefaultOptions]
+System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cb_RunFromRam,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_DesktopShc,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_StartMenuShc,True
@@ -149,6 +248,15 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Disk Management"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"Linux Reader"
 WriteInterface,Value,%ScriptFile%,Interface,cb_AlwaysDownload,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_DiskView,"Tiles"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_FileView,"Icons"
+WriteInterface,Value,%ScriptFile%,Interface,cb_ShowFolderTree,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_AutoPreview,True
+WriteInterface,Value,%ScriptFile%,Interface,cmb_RegEdition,"Free Version"
+WriteInterface,Value,%ScriptFile%,Interface,fb_LicRegFile,""
+Run,%ScriptFile%,ToggleProductReg
+System,Cursor,Normal
+
 
 [#ToggleAdvancedOptions#]
 // ===============================================================================================================================
@@ -176,7 +284,7 @@ Message,"There are no advanced options available for this script."
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"DiskInternals Linux Reader for Windows allows you read-only access to Ext2/Ext3/Ext4, HFS/HFS+, and ReiserFS file systems in a Windows environment.#$x#$xOn first run this script will download the setup file (~50 MB) and cache it for future builds."
+Message,"DiskInternals Linux Reader allows you to access to access files and folders on Ext, UFS, HFS, ReiserFS, APFS, XFS, and ZFS file systems from Windows. Certain file systems and features require a professional license.#$x#$xOn first run this script will download the setup file (~50 MB) and cache it for future builds."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -190,7 +298,7 @@ Message,"DiskInternals Linux Reader for Windows allows you read-only access to E
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch Linux Reader",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
+btn_LaunchProgram="Launch Program",1,8,5,5,132,25,LaunchProgram,play-hot.png,False
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
 web_Homepage=Homepage,1,10,377,9,60,18,https://www.diskinternals.com/linux-reader/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
@@ -208,6 +316,17 @@ cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu folder:",1,0,12,201,119,21,"Disk Management"
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"Linux Reader"
 cb_AlwaysDownload="Always download latest version",1,3,155,54,177,18,False,"__Enable this option to ensure you always included the latest version of LinuxReader in your build."
+bvl_Options=Options,1,12,150,90,478,184,8,Bold
+lbl_DiskView="Disk View",1,1,160,105,153,16,8,Normal
+cmb_DiskView=Tiles,1,4,160,120,151,21,Tiles,Icons,Details,Expert
+lbl_FileView="File View",1,1,160,150,153,16,8,Normal
+cmb_FileView=Icons,1,4,160,165,151,21,Thumbnails,Tiles,Icons,List,Details
+cb_AutoPreview="Auto Preview",1,3,160,198,99,18,True
+lbl_RegEdition="Software Edition",0,1,370,105,153,16,8,Normal
+cmb_RegEdition="Free Version",0,4,370,120,151,21,"Free Version","Use host license","Use registry file",_ToggleProductReg_,True,"__Free license - LinuxReader will operate in Free mode.#$x#$xUse Host license - If you have LinuxReader installed and licensed on your host (build) computer this option will#$ximport the license to your PE.#$x#$xLicense from .reg file - If you have LinuxReader installed and licensed on another computer you can export the#$xregistry key containing the license code (HKCU\Software\DiskInternals\LinuxReader\SerialNum) and import the .reg file into your PE."
+lbl_LicRegFile="License Registry File",0,1,370,149,200,16,8,Normal
+fb_LicRegFile=,0,13,370,166,244,20,file,"Title=Select the registry file containing your Linux Reader serial number","Filter=Registry Files|*.reg;*.txt|All files|*.*","__This option enables you to import your license from another computer.#$x#$xExport your license key from 'HKCU\Software\DiskInternals\LinuxReader\SerialNum' on a host where Linux Reader is installed and registered."
+cb_ShowFolderTree="Show Folder Tree",1,3,160,220,115,18,False
 
 [InterfaceEncoded]
 play-hot.png=841,1220
@@ -224,7 +343,6 @@ Logo=LinuxReader.png
 [EncodedFile-InterfaceEncoded-play-hot.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP4A/gD+6xjUggAAAAlwSFlzAAAASAAAAEgARslrPgAAAAl2cEFnAAAAEAAAABAAXMatwwAAAiJJREFUOMutkz1oU2EUhp/vu3/5ublJappqqDRiIlYXFStKxy4WdCkibhXcXMVRBEGhUB0V3BsFRTqIQnHQRRSnFKzUIuK/TdPGJG2Te2/u/dwq1tIK+k5nOc9wzvPCP0asTUkDFAKlQBOKH/7fU/SRPpS6w4HHA6OHHh25kh/f3ztUGUYUYlvuSgChg8id1SIR/UQqHbnU25+6t/Bgflgv2nrm/K6tAXRCiCu0VSH0VYGtGUd7somJgZHitaTj5E4+PwV95mYABbKDtgraskRf0YkGsXS3nblQLOTvf39aH9YKXXp2tH9jgAoAQmTbwHAj6J6N4TlYHUemI+lj+Z09E0OnB6525eK5My/PQVZfd4NQggLdj2P4DlbHwVRRpBSEmotmddKZ7sTFvQf77k4/LBcOXx789QAAQg0CMIIYMjCpeYtU3Xnqfg2PNioSYjmWSIWZWKfum16ivQ4gFKR3sORWeL+yQKU1jy9diCpkUiANvblcdUufXyxdd0uNOSx+BygRksrsYa45Q0dfhQRoKYHlmEprm9PerBhrlLxJsxhpuTTAXQdAU4SLISIZIJOC+DaLpGU31VejVH/m3aje/vjWiCZYfrP0p4QA0hQ03lXZnbdVtieG3bLL9bI/NnezMpncF28B+K3mxhYDyHqAqs4Ex58MTiUWrS8fpmq3Xo2XZ41YjNrrb5uauFYmM7YdFYZSha7QLSdoNz9t2YP/kp+AfsdFsD8fGgAAAC56VFh0Y3JlYXRlLWRhdGUAAHjaMzIwsNA1sNA1MgkxMLAyMrMyNNY1MLUyMAAAQe0FE0pvDAgAAAAuelRYdG1vZGlmeS1kYXRlAAB42jMyMLDQNbDQNTIIMbSwMrG0MrLQNTC1MjAAAEKCBSOylbeyAAAAInpUWHRTb2Z0d2FyZQAAeNpzTMlPSlXwzE1MTw1KTUypBAAvnAXUrgypTQAAAABJRU5ErkJggnic4ynISazUzcgv0SvIS2cYBSMNeDLjl/9974ElIwMACj8H7bPi5SwBAAAAAgAAACQAAABJAwAAAAAAAAEAAAAAAAAAAAAAAA
-
 
 [EncodedFile-AuthorEncoded-LinuxReader.png]
 lines=2
