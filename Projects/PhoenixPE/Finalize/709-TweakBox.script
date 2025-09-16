@@ -35,8 +35,8 @@ Author=Homes32
 Level=7
 Selected=False
 Mandatory=False
-Version=1.0.4.0
-Date=2025-06-01
+Version=1.1.0.0
+Date=2025-09-10
 
 [Process]
 Echo,"I'm tweaking out!"
@@ -151,11 +151,18 @@ System,SetLocal
 
 Echo,"Merging Registry File..."
 GetParam,1,%RegFile%
-// Better error handling for missing hives
 
 If,Not,%RegFile%,Equal,"",If,ExistFile,%RegFile%,Begin
+
+  If,%cb_AutoConvertRegHives%,Equal,True,Begin
+    TXTReplace,%RegFile%,"HKEY_LOCAL_MACHINE\SOFTWARE\","HKEY_LOCAL_MACHINE\Tmp_Software\"
+    TXTReplace,%RegFile%,"HKEY_LOCAL_MACHINE\SYSTEM\","HKEY_LOCAL_MACHINE\Tmp_System\"
+    TXTReplace,%RegFile%,"HKEY_CURRENT_USER\SOFTWARE\","HKEY_LOCAL_MACHINE\Tmp_Default\Software\"
+    TXTReplace,%RegFile%,"HKEY_CLASSES_ROOT\","HKEY_LOCAL_MACHINE\Tmp_Software\Classes\"
+  End
+
   RegLoadHives
-  RegImport,#1
+  RegImport,%RegFile%
   RegUnloadHives
 End
 
@@ -224,6 +231,7 @@ End
 // ===============================================================================================================================
 [SetDefaultOptions]
 WriteInterface,Value,%ScriptFile%,Interface,cb_Codebox,False
+WriteInterface,Value,%ScriptFile%,Interface,cb_AutoConvertRegHives,True
 WriteInterface,Value,%ScriptFile%,Interface,cb_RegFiles_Enable01,False
 WriteInterface,Value,%ScriptFile%,Interface,fb_RegFiles_File01,""
 WriteInterface,Value,%ScriptFile%,Interface,cb_RegFiles_Enable02,False
@@ -285,22 +293,23 @@ rtf_Codebox=Codebox.txt,1,6,15,99,602,236
 btn_ExecCodebox=Execute,1,8,15,66,80,25,ExecCodebox,play-16.ico,False
 btn_EditCodebox="Edit Codebox",1,8,104,66,100,25,EditCodebox,Log.ico,False
 btn_ResetCodebox="Reset Codebox",1,8,214,66,100,25,ResetCodebox,SetDefaults_16.png,False
-bvl_RegFiles="Merge Registry",1,12,5,369,625,95,8,Bold
+bvl_RegFiles="Merge Registry",1,12,5,369,625,123,8,Bold
 lbl_MergeReg="Merge registry files (*.reg, *.txt) into your build. Tmp_* and Tmp_Install_* hives will be loaded automatically.",1,1,15,385,579,16,8,Normal
-cb_RegFiles_Enable01="Registry file 1",1,3,15,413,90,18,False
-fb_RegFiles_File01=,1,13,105,411,430,20,file,"Title=Select a registry file","Filter=Registry files|*.reg;*.txt|All files|*.*"
-btn_RegFiles_Exec01=Merge,1,8,540,411,80,20,MergeRegFile01,play-16.ico,False
-cb_RegFiles_Enable02="Registry file 2",1,3,15,438,90,18,False
-fb_RegFiles_File02=,1,13,105,436,430,20,file,"Title=Select a registry file","Filter=Registry files|*.reg;*.txt|All files|*.*"
-btn_RegFiles_Exec02=Merge,1,8,540,436,80,20,MergeRegFile01,play-16.ico,False
-bvl_Script="Execute Scripts",1,12,5,485,625,95,8,Bold
-lbl_ExecScript="Execute additional PEBakery scripts, bat/cmd files, powershell scripts, and/or programs.",1,1,15,500,579,16,8,Normal
-cb_Script_Enable01="Script/Exe 1",1,3,15,523,90,18,False
-fb_Script_File01=,1,13,105,521,430,20,file,"Title=Select a .script or executable file","Filter=Programs/Scripts|*.bat;*.cmd;*.exe;*.ps1;*.script|Programs|*.exe|PEBakery scripts|*.script|Batch files|*.bat;*.cmd|Powershell scripts|*.ps1|All files|*.*"
-btn_Script_Exec01=Execute,1,8,540,521,80,20,ExecScript01,play-16.ico,False
-cb_Script_Enable02="Script/Exe 2",1,3,15,548,90,18,False
-fb_Script_File02=,1,13,105,546,430,20,file,"Title=Select a .script or executable file","Filter=Programs/Scripts|*.bat;*.cmd;*.exe;*.ps1;*.script|Programs|*.exe|PEBakery scripts|*.script|Batch files|*.bat;*.cmd|Powershell scripts|*.ps1|All files|*.*"
-btn_Script_Exec02=Execute,1,8,540,546,80,20,ExecScript02,play-16.ico,False
+cb_AutoConvertRegHives="Automatically convert registry files",1,3,15,405,200,18,True,"__Attempt to convert .reg files exported from a host system so they can be imported into PhoenixPE hives."
+cb_RegFiles_Enable01="Registry file 1",1,3,15,433,90,18,False
+fb_RegFiles_File01=,1,13,105,431,430,20,file,"Title=Select a registry file","Filter=Registry files|*.reg;*.txt|All files|*.*"
+btn_RegFiles_Exec01=Merge,1,8,540,431,80,20,MergeRegFile01,play-16.ico,False
+cb_RegFiles_Enable02="Registry file 2",1,3,15,458,90,18,False
+fb_RegFiles_File02=,1,13,105,456,430,20,file,"Title=Select a registry file","Filter=Registry files|*.reg;*.txt|All files|*.*"
+btn_RegFiles_Exec02=Merge,1,8,540,456,80,20,MergeRegFile02,play-16.ico,False
+bvl_Script="Execute Scripts",1,12,5,516,625,95,8,Bold
+lbl_ExecScript="Execute additional PEBakery scripts, bat/cmd files, powershell scripts, and/or programs.",1,1,15,531,579,16,8,Normal
+cb_Script_Enable01="Script/Exe 1",1,3,15,554,90,18,False
+fb_Script_File01=,1,13,105,552,430,20,file,"Title=Select a .script or executable file","Filter=Programs/Scripts|*.bat;*.cmd;*.exe;*.ps1;*.script|Programs|*.exe|PEBakery scripts|*.script|Batch files|*.bat;*.cmd|Powershell scripts|*.ps1|All files|*.*"
+btn_Script_Exec01=Execute,1,8,540,552,80,20,ExecScript01,play-16.ico,False
+cb_Script_Enable02="Script/Exe 2",1,3,15,579,90,18,False
+fb_Script_File02=,1,13,105,577,430,20,file,"Title=Select a .script or executable file","Filter=Programs/Scripts|*.bat;*.cmd;*.exe;*.ps1;*.script|Programs|*.exe|PEBakery scripts|*.script|Batch files|*.bat;*.cmd|Powershell scripts|*.ps1|All files|*.*"
+btn_Script_Exec02=Execute,1,8,540,577,80,20,ExecScript02,play-16.ico,False
 
 [InterfaceEncoded]
 play-16.ico=1150,388
