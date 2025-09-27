@@ -32,9 +32,9 @@
 Title=FastStone Image Viewer
 Author=Homes32
 Level=5
-Version=1.1.5.0
+Version=1.2.0.0
 Description=(v8.1 x86) An image browser, converter and editor that supports all major graphic formats.
-Date=2025-09-21
+Date=2025-09-26
 Selected=False
 Mandatory=False
 
@@ -146,12 +146,21 @@ TXTAddLine,"%TxtDB%","  LanguageNo = %Lang%",APPEND
 // Dark Mode
 TXTAddLine,"%TxtDB%","  DarkSkin = %cb_DarkMode%",APPEND
 
+// Product Registration
+If,%cmb_RegEdition%,Equal,"Registered (Commercial)",Begin
+  TXTAddLine,"%TxtDB%","  UserName = '%txt_RegUser%'",APPEND
+  TXTAddLine,"%TxtDB%","  RegistrationCode = '%txt_RegKey%'",APPEND
+  TXTAddLine,"%TxtDB%","  MonthNo = 0",APPEND
+  TXTAddLine,"%TxtDB%","  TryPro = False",APPEND
+  TXTAddLine,"%TxtDB%","  InstallDate = 0",APPEND
+End
+
 // Finalize our settings file
 TXTAddLine,"%TxtDB%","end",APPEND
 
 // Convert to binary file
 ShellExecute,Hide,"%ProjectTemp%\%ProgramFolder%\dfmconvert.exe","--to-binary #$q%TxtDB%#$q --output #$q%ProjectTemp%\%ProgramFolder%\FSSettings.db#$q"
-Binmay,"-u #$q%ProjectTemp%\%ProgramFolder%\FSSettings.db#$q -s FF0A005450524F4752414D53455454494E47530030102F000000 -r #$q#$q"
+Binmay,"-u #$q%ProjectTemp%\%ProgramFolder%\FSSettings.db#$q -s FF0A005450524F4752414D53455454494E47530030102F000000 -S ffffffffffffffffffffffffffffffffffffffffffff00ffffff -r #$q#$q"
 FileCopy,"%ProjectTemp%\%ProgramFolder%\FSSettings.db","%TargetPrograms%\%ProgramFolder%\FSSettings.db"
 
 Set,%TxtDB%,Nil
@@ -212,6 +221,27 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\FSViewer.zip",Run,%ScriptFile%
 Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
+[#ToggleRegKey#]
+// ===============================================================================================================================
+// Name...........: ToggleRegKey
+// Description....: Toggle the visibility of the registration key textbox.
+// Syntax.........: Run,%ScriptFile%,ToggleRegKey
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: cmb_RegEdition
+// ===============================================================================================================================
+[ToggleRegKey]
+If,Not,%cmb_RegEdition%,Equal,"Free (Home Use Only)",Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_RegUser,True
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_RegKey,True
+End  
+Else,Begin
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_RegUser,False
+  WriteInterface,Visible,%ScriptFile%,Interface,txt_RegKey,False
+End
+
 [#ClearDownloadCache#]
 // ===============================================================================================================================
 // Name...........: ClearDownloadCache
@@ -250,6 +280,10 @@ WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"English"
 WriteInterface,Value,%ScriptFile%,Interface,cb_DarkMode,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_ContextMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_FileAsso,True
+WriteInterface,Value,%ScriptFile%,Interface,cmb_RegEdition,"Free (Home Use Only)"
+WriteInterface,Value,%ScriptFile%,Interface,txt_RegUser,""
+WriteInterface,Value,%ScriptFile%,Interface,txt_RegKey,""
+Run,%ScriptFile%,ToggleRegKey
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -309,12 +343,16 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,142,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,161,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,Multimedia
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"FastStone Viewer"
-bvl_Options=Options,1,12,150,90,171,184,8,Bold
+bvl_Options=Options,1,12,150,90,418,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
 cmb_Language=English,1,4,160,126,150,21,Bulgarian,"Chinese (Simplified)","Chinese (Traditional)",Czech,Danish,Dutch,English,Finish,French,German,Hungarian,Italian,Japanese,Korean,Norwegian,Polish,Portuguese,Russian,Spanish,Swedish,Ukrainian
 cb_DarkMode="Use Dark Theme",1,3,160,155,112,18,False
 cb_ContextMenu="Add Context Menu",1,3,160,174,143,18,False,"__Add 'Browse with FastStone' to explorer's context menu."
 cb_FileAsso="Set As Default Image Viewer",1,3,160,245,152,18,True,"__Set FSViewer as the default image viewer."
+lbl_RegEdition="Software Edition",1,1,360,111,153,16,8,Normal
+cmb_RegEdition="Free (Home Use Only)",1,4,360,126,190,21,"Free (Home Use Only)","Registered (Commercial)",_ToggleRegKey_,True
+txt_RegUser="Registered User",0,0,360,169,190,21,
+txt_RegKey="Registration Key",0,0,360,215,190,21,
 
 [AuthorEncoded]
 FSViewer.ico=7134,4664
