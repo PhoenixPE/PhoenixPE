@@ -2,19 +2,71 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release UNRELEASED
+## Release 2025-09-27
 
 ### Added
+- Display Settings script
+- Emsisoft Emergency Kit
+- MS-DaRT 10 script (Issue #145)
+- Teracopy (Issue #102)
+- Trend Micro HouseCall
 
 ### Changed
-- grepWin updated to v2.1.9
-- Rufus updated to v4.8
+- .Net 8 runtime updated to v8.0.20
+- .Net 9 runtime updated to v9.0.9
+- 7-Zip script and tools updated to v25.01
+- AIDA64 updated to v8.0.8000
+- Add .Net Core version to the registry for detection.
+- Added an option in Tweakbox script to auto convert registry files for import into PhoenixPE.
 - Added an option to always download XYplorer.
+- Added some display config options to the Linux Reader script.
+- Added the option to enter a registration key for FastStoneViewer.
+- AgentRansack updated to v2022 build 3530
+- Attribute Changer updated to v11.40b
+- CPU-Z updated to v.2.16.0
+- DesktopInfo updated to v3.20.4
+- DriverStoreExplorer updated to v0.12.118
+- Everything updated to v1.4.1.1028
+- FastStone Image Viewer updated to v8.1
+- FurMark 2 updated to v2.9.0.0
+- GPU-Z updated to v2.68.0
+- Google Chrome updated to v140.0.7339.186 (Note. For reasons that are incomprehensible, Chrome started shipping unpressed installers that are now 400 MB instead of 130 MB. )
+- HWinfo updated to v8.30
+- Innounp updated to v2.65.2
+- MPC-BE updated to v1.8.7.0
+- Modified CrystalDiskInfo.script and CrystalDiskMark.script downloads to use .zip release package.
+- NVDA updated to v2025.3
+- Notepad++ updated to v8.8.5.0
+- Notepad3 updated to v6.25.822.1
+- OpenHashTab updated to v3.1.1
+- PowerShell Core updated to v7.5.3
+- Rufus updated to v4.10
+- RustDesk updated to v1.4.2
+- TotalCommander updated to v11.56
+- Ventoy updated to v1.1.07
+- WinMerge updated to v2.16.50.2
+- WinRAR updated to v7.13
+- WinSCP updated to v6.5.3
+- WizTree updated to v4.27
+- Zulu JRE11 updated to v11.82.19
+- Zulu JRE17 updated to v17.60.17
+- Zulu JRE21 updated to v21.44.17
+- grepWin updated to v2.1.11
 
 ### Fixed
 - Fixed regression in ProtectPE that caused the expiration date to not be correctly set on initial config. (Back-ported to release 2025-06-14)
+- Corrected the StartAllBack styles config path.
+- Fixed HWinfo welcome screen toggle (Issue #150)
+- Fixed a bug in WinXShell that prevented building. (Issue #151)
+- Fixed a bug in Explorer++ that caused the script to fail if an language other then English was selected.
+- Fixed ATI2021 would not recognize host licenses registered in WoW64.
+- Fixed non-English language selection in WinSCP script.
+- Fixed an issue with Chinese language selection in CPU-Z.script
+- Fixed a bug in Tweakbox that prevented merging of Registry file 2 when the Merge button was pressed.
+- Fixed `This version of StartAllBack is not intended for this Windows version.` error caused by missing UpdateCheck.exe. (https://theoven.org/viewtopic.php?p=2710#p2710)
 
 ### Removed
+- Removed obsolete & nonfunctional "load driver at startup" option from Driver Integration script.
 
 ## Release 2025-06-14
 
