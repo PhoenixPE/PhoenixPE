@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.7.3.0
-Date=2025-05-14
+Version=1.8.0.0
+Date=2025-09-28
 
 [Variables]
 
@@ -65,6 +65,7 @@ Run,%ScriptFile%,Reg-Explorer
 Run,%ScriptFile%,Reg-Themes
 Run,%ScriptFile%,Reg-BitLocker
 Run,%ScriptFile%,Reg-Search
+Run,%ScriptFile%,Reg-StageRepository
 Run,%ScriptFile%,Reg-Options
 
 Echo,"Unloading Registry Hives..."
@@ -358,6 +359,27 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\H:","Vo
 RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\I:","DriveType",3
 RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\I:","VolumeLabel",""
 
+[#Reg-Search#]
+// ===============================================================================================================================
+// Name...........: Reg-StageRepository
+// Description....: Configure Registry settings related to Appx/StateRepository
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: Called from [Process]
+// ===============================================================================================================================
+[Reg-StageRepository]
+Echo,"Registering AppX Services..."
+
+// Service
+RegCopy,HKLM,"Tmp_Install_SYSTEM\ControlSet001\Services\StateRepository",HKLM,"Tmp_SYSTEM\ControlSet001\Services\StateRepository"
+
+// Already present in Full Software Hive
+// RegCopy,HKLM,Tmp_Software\Microsoft\Windows\CurrentVersion\AppModel\StateRepository
+// RegCopy,HKLM,Tmp_Software\Microsoft\Windows\CurrentVersion\Appx
+
 [#Reg-AdditionalFonts#]
 // ===============================================================================================================================
 // Name...........: Reg-AdditionalFonts
@@ -609,6 +631,7 @@ If,%SourceVer%,BiggerEqual,10.0.19041.0,RequireFileEx,AppendList,\windows\System
 // Fix mouse cursor & taskbar/startmenu colors, etc. in 24H2
 If,%SourceVer%,BiggerEqual,10.0.26100.0,RequireFileEx,AppendList,\Windows\System32\Microsoft.Internal.WarpPal.dll
 RequireFileEx,AppendList,\windows\system32\mblctr.exe
+If,%SourceVer%,BiggerEqual,10.0.26000.0,RequireFileEx,AppendList,\Windows\System32\mdmregistration.dll
 RequireFileEx,AppendList,\Windows\System32\mfperfhelper.dll
 RequireFileEx,AppendList,\Windows\System32\MrmCoreR.dll
 If,%SourceVer%,BiggerEqual,10.0.26100.0,RequireFileEx,AppendList,\Windows\System32\mscms.dll
@@ -649,17 +672,10 @@ RequireFileEx,AppendList,\Windows\System32\shfolder.dll,NOMUI
 RequireFileEx,AppendList,\Windows\System32\shpafact.dll
 RequireFileEx,AppendList,\Windows\System32\shutdown.exe
 RequireFileEx,AppendList,\Windows\System32\StartTileData.dll
-If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
-  // AppRepository
-  RequireFileEx,AppendList,\Windows\System32\StateRepository.core.dll
-  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepository.dll
-  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepositoryBroker.dll
-  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepositoryCore.dll
-  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepositoryClient.dll
-End
 RequireFileEx,AppendList,\Windows\System32\stobject.dll
 RequireFileEx,AppendList,\Windows\System32\StorageUsage.dll
 RequireFileEx,AppendList,\Windows\System32\systemcpl.dll
+If,%SourceVer%,BiggerEqual,10.0.26000.0,RequireFileEx,AppendList,\Windows\System32\SystemSettings.DataModel.dll
 RequireFileEx,AppendList,\Windows\System32\TabSvc.dll
 RequireFileEx,AppendList,\Windows\System32\TextInputFramework.dll,NOMUI
 If,%SourceVer%,BiggerEqual,10.0.18300.0,RequireFileEx,AppendList,\Windows\System32\TextInputMethodFormatter.dll,NOMUI
@@ -702,6 +718,21 @@ RequireFileEx,AppendList,\Windows\System32\Windows.Networking.Connectivity.dll
 RequireFileEx,AppendList,\Windows\System32\WorkFoldersShell.dll
 RequireFileEx,AppendList,\Windows\System32\wpdshext.dll
 RequireFileEx,AppendList,\Windows\System32\zipfldr.dll
+
+// AppX
+If,%SourceVer%,BiggerEqual,10.0.17763.0,Begin
+  // AppRepository
+  RequireFileEx,AppendList,\ProgramData\Microsoft\Windows\AppRepository
+  
+  RequireFileEx,AppendList,\Windows\System32\StateRepository.core.dll
+  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepository.dll
+  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepository.dll
+  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepositoryBroker.dll
+  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepositoryClient.dll
+  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepositoryCore.dll
+  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepositoryPS.dll
+  RequireFileEx,AppendList,\Windows\System32\Windows.StateRepositoryUpgrade.dll
+End
 
 // Desktop Context Menu Images
 RequireFileEx,AppendList,\Windows\System32\Display.dll
