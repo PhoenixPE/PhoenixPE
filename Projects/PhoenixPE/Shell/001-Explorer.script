@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.8.0.0
-Date=2025-09-28
+Version=1.8.1.0
+Date=2025-10-01
 
 [Variables]
 
@@ -65,7 +65,9 @@ Run,%ScriptFile%,Reg-Explorer
 Run,%ScriptFile%,Reg-Themes
 Run,%ScriptFile%,Reg-BitLocker
 Run,%ScriptFile%,Reg-Search
-Run,%ScriptFile%,Reg-StageRepository
+// 25H2+
+If,%SourceVer%,BiggerEqual,10.0.26200.0,Run,%ScriptFile%,Reg-StateRepository
+// User Config
 Run,%ScriptFile%,Reg-Options
 
 Echo,"Unloading Registry Hives..."
@@ -361,7 +363,7 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\I:","Vo
 
 [#Reg-Search#]
 // ===============================================================================================================================
-// Name...........: Reg-StageRepository
+// Name...........: Reg-StateRepository
 // Description....: Configure Registry settings related to Appx/StateRepository
 // Syntax.........: 
 // Parameters.....: 
@@ -370,7 +372,7 @@ RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\I:","Vo
 // Remarks........:
 // Related........: Called from [Process]
 // ===============================================================================================================================
-[Reg-StageRepository]
+[Reg-StateRepository]
 Echo,"Registering AppX Services..."
 
 // Service
