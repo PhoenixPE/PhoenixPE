@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.4.0
-Date=2025-09-21
+Version=1.1.5.0
+Date=2025-10-07
 
 [Variables]
 %ProgramFolder%="HWiNFO"
@@ -133,15 +133,15 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
-If,Not,#r,Equal,200,Begin
+WebGetEx,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
+If,Not,#r,Equal,0,Begin
   // Try incrementing the version number up to 5 times
   ForRange,%i%,0,5,1,Begin
     Math,Add,%ProgramVersion%,%ProgramVersion%,1
 	WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
-	If,#r,Equal,200,Break
+	If,#r,Equal,0,Break
   End
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+  If,Not,#r,Equal,0,Halt,"Download failed: The code returned was [#r]."
 End
 
 [#SetProgramArch#]
