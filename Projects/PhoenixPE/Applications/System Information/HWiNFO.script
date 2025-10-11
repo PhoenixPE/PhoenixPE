@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [Main]
-Title=HWinfo
+Title=HWiNFO
 Description=(v8.30) Comprehensive Hardware Analysis, Monitoring and Reporting.
 Author=Homes32
 Level=5
@@ -43,7 +43,7 @@ Date=2025-10-07
 %ProgramExe%="hwinfo32.exe"
 %ProgramCfg%="hwinfo32.ini"
 %ProgramVersion%=830
-%DownloadURL%=https://www.hwinfo.com/files/hwi_%ProgramVersion%.zip
+%DownloadURL%=https://sourceforge.net/projects/hwinfo/files/Windows_Portable/hwi_%ProgramVersion%.zip/download
 %SetupFile%="hwinfo.zip"
 %ConfigFile%="%TargetPrograms%\%ProgramFolder%\%ProgramCfg%"
 %aLangMap%=Arabic|ar|Chinese (Simplified)|zh-CN|Chinese (Traditional)|zh-TW|Czech|cs|Danish|da|Dutch|nl|English|en|Finnish|fi|French|fr|German|de|Greek|el|Hebrew|he|Hungarian|hu|Italian|it|Japanese|ja|Korean|ko|Latvian|lv|Norwegian|no|Polish|pl|Portuguese (Brazil)|pt-BR|Russian|ru|Slovak|sk|Spanish|es|Swedish|sv|Turkish|tr|Ukrainian|uk|Vietnamese|vi
@@ -133,16 +133,8 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGetEx,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
-If,Not,#r,Equal,0,Begin
-  // Try incrementing the version number up to 5 times
-  ForRange,%i%,0,5,1,Begin
-    Math,Add,%ProgramVersion%,%ProgramVersion%,1
-	WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
-	If,#r,Equal,0,Break
-  End
-  If,Not,#r,Equal,0,Halt,"Download failed: The code returned was [#r]."
-End
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
+If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [#SetProgramArch#]
 // ===============================================================================================================================
