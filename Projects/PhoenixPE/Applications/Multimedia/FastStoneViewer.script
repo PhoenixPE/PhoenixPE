@@ -32,9 +32,9 @@
 Title=FastStone Image Viewer
 Author=Homes32
 Level=5
-Version=1.2.0.0
+Version=1.2.1.0
 Description=(v8.1 x86) An image browser, converter and editor that supports all major graphic formats.
-Date=2025-09-26
+Date=2025-10-11
 Selected=False
 Mandatory=False
 
@@ -43,6 +43,7 @@ Mandatory=False
 %ProgramExe%="FSViewer.exe"
 %ProgramVersion%="81"
 %DownloadURL%=http://www.faststonesoft.net/DN/FSViewer%ProgramVersion%.zip
+%SetupFile%="FSViewer.zip"
 %aLangMap%="Bulgarian|20|Chinese (Simplified)|2|Chinese (Traditional)|3|Czech|16|Danish|4|Dutch|5|English|1|Finish|18|French|6|German|7|Hungarian|13|Italian|8|Japanese|21|Korean|15|Norwegian|9|Polish|10|Portuguese|14|Russian|11|Spanish|12|Swedish|17|Ukrainian|19
 
 [Process]
@@ -50,7 +51,7 @@ Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
 
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\FSViewer.zip",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
@@ -182,12 +183,17 @@ TXTAddLine,"%TargetPrograms%\%ProgramFolder%\DBPath.db","*",APPEND
 // Related........: 
 // ===============================================================================================================================
 [ExtractProgram]
+System,SetLocal
 Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\FSViewer.zip",#1
-
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
 // It's annoying when people create zip files containing a directory with an every changing name
-FileCopy,"#1\FSViewer%ProgramVersion%\*.*",#1
-DirDeleteEx,"#1\FSViewer%ProgramVersion%"
+FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
+If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [#r]."
+Else,List,Get,#r,1,%ProgramPath%
+StrFormat,DirPath,%ProgramPath%,%ProgramPathFolder%
+
+FileCopy,"%ProgramPathFolder%\*.*",#1
+System,EndLocal
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -202,7 +208,7 @@ DirDeleteEx,"#1\FSViewer%ProgramVersion%"
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\FSViewer.zip",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [#LaunchProgram#]
@@ -217,7 +223,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Related........: btn_LaunchProgram
 // ===============================================================================================================================
 [LaunchProgram]
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\FSViewer.zip",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
