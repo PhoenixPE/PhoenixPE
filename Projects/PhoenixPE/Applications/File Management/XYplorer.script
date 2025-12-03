@@ -35,18 +35,19 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.1.0
-Date=2025-06-14
+Version=1.2.0.0
+Date=2025-11-29
 
 [Variables]
 %ProgramFolder%="XYplorer"
 %ProgramExe%="XYplorer.exe"
-%DownloadURL%=https://www.xyplorer.com/download/xyplorer_full_noinstall.zip
-%SetupFile%="XYplorer.zip"
+%DownloadURLx86%=https://www.xyplorer.com/download/xyplorer_full_noinstall.rar
+%DownloadURLx64%=https://www.xyplorer.com/download/xyplorer64_full_noinstall.rar
+%SetupFile%="XYplorer_%SourceArch%.rar"
 %ConfigFile%="XYplorer.ini"
 
 // This will need to be updated from time to time. https://www.xyplorer.com/languages.php
-%aLangMap%=Catalan|Catalan_8.70.zip|Chinese (Simplified)|ChineseSimplified_8.120.zip|Chinese (Traditional)|ChineseTraditional_8.124.zip|Croatian|Croatian_8.121.zip|Czech|Czech_8.124.zip|Danish|Danish_8.115.zip|Dutch|Dutch_8.124.zip|Finnish|Finnish_8.68.zip|French|French_8.124.zip|German|German_8.124.zip|Hungarian|Hungarian_8.124.zip|Indonesian|Indonesian_8.99.zip|Italian|Italian_8.124.zip|Japanese|Japanese_8.124.zip|Klingon|Klingon_8.124.zip|Korean|Korean_8.124.zip|Persian (Farsi)|Persian_8.108.zip|Polish|Polish_8.121.zip|Portuguese (Brazil)|PortugueseBrazil_8.63.zip|Portuguese (Europe)|PortugueseEuropean_8.63.zip|Russian|Russian_8.124.zip|Serbian|Serbian_8.83.zip|Spanish|Spanish_8.124.zip|Turkish|Turkish_8.124.zip|Vietnamese|Vietnamese_8.47.zip
+%aLangMap%=Catalan|Catalan_8.70.zip|Chinese (Simplified)|ChineseSimplified_8.400.zip|Chinese (Traditional)|ChineseTraditional_8.400.zip|Croatian|Croatian_8.121.zip|Czech|Czech_8.400.zip|Danish|Danish_8.115.zip|Dutch|Dutch_8.197.zip|Finnish|Finnish_8.68.zip|French|French_8.400.zip|German|German_8.400.zip|Hungarian|Hungarian_8.400.zip|Indonesian|Indonesian_8.99.zip|Italian|Italian_8.400.zip|Japanese|Japanese_8.198.zip|Klingon|Klingon_8.137.zip|Korean|Korean_8.195.zip|Persian (Farsi)|Persian_8.108.zip|Polish|Polish_8.198.zip|Portuguese (Brazil)|PortugueseBrazil_8.400.zip|Portuguese (Europe)|PortugueseEuropean_8.63.zip|Russian|Russian_8.197.zip|Serbian|Serbian_8.83.zip|Spanish|Spanish_8.400.zip|Turkish|Turkish_8.198.zip|Vietnamese|Vietnamese_8.47.zip
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -199,6 +200,10 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
+
+If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
+Else,Set,%DownloadURL%,%DownloadURLx86%
+
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 

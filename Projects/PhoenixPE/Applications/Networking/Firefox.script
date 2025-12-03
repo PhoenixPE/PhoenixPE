@@ -149,7 +149,7 @@ Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisplayMen
 If,%cb_ShowBookmarksToolbar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisplayBookmarksToolbar",1
 Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DisplayBookmarksToolbar",0
 
-// Show Search Bar
+// Add search bar in toolbar
 If,%cb_ShowSearchBar%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","SearchBar","unified"
 Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","SearchBar","separate"
 
@@ -157,8 +157,8 @@ Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","SearchBar","s
 If,%cb_DisableSearchSuggestions%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","SearchSuggestEnabled",0
 Else,RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","SearchSuggestEnabled",1
 
-// Warn On Close
-If,%cb_WarnOnClose%,Equal,False,Begin
+//  Confirm before closing multiple tabs 
+If,%cb_WarnOnClose%,Equal,True,Begin
   RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnClose",1
   RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.tabs.warnOnCloseOtherTabs",1
 End
@@ -208,7 +208,7 @@ If,%cb_AdditionalAddon03%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Mozilla\Firefox","PromptForDownloadLocation",1
 
 // Disable default browser check
-RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DontCheckDefaultBrowse",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox","DontCheckDefaultBrowser",1
 
 // Don't check for Search updates
 RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Mozilla\Firefox\Preferences","browser.search.update",0
@@ -535,7 +535,7 @@ cb_ShowMenuBar="Show the menu bar",1,3,160,173,152,18,False,"__Show the Firefox 
 cb_ShowBookmarksToolbar="Show bookmarks toolbar",1,3,160,192,200,18,True
 cb_ShowSearchBar="Add search bar in toolbar",1,3,160,211,148,18,False,"__Show the search box separately from the address bar."
 cb_DisableSearchSuggestions="Disable search suggestions",1,3,160,230,156,18,True,"__Disable search suggestions/auto-complete for those concerned about privacy"
-cb_WarnOnClose="Warn on close",1,3,160,249,142,18,True
+cb_WarnOnClose="Confirm before closing multiple tabs ",1,3,160,249,202,18,True
 txt_Homepage=Homepage,1,0,370,126,179,21,https://www.google.com
 lbl_ImportBookmarks="Import Bookmarks",1,1,370,161,200,16,8,Normal
 fb_ImportBookmarks=,1,13,370,178,211,20,file,"Title=Select your Firefox bookmarks file","Filter=Firefox Bookmarks|*.htm;*.html","__To export your bookmarks from Firefox, choose Menu > Library > Import and Backup > Export Bookmarks to HTML.#$xThen select the resulting file here to include the bookmarks in your build."
