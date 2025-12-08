@@ -1,0 +1,2887 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WixToolset.Core.Native</name>
+    </assembly>
+    <members>
+        <member name="T:WixToolset.Core.Native.Cabinet">
+            <summary>
+            Cabinet create, enumerate and extract mechanism.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Cabinet.#ctor(System.String)">
+            <summary>
+            Creates a cabinet creation, enumeration, extraction mechanism.
+            </summary>
+            <param name="path">Path of cabinet</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Cabinet.Path">
+            <summary>
+            Cabinet path.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Cabinet.Compress(System.Collections.Generic.IEnumerable{WixToolset.Core.Native.CabinetCompressFile},WixToolset.Data.CompressionLevel,System.Int32,System.Int32)">
+            <summary>
+            Creates a cabinet.
+            </summary>
+            <param name="files">Files to compress.</param>
+            <param name="compressionLevel">Level of compression to apply.</param>
+            <param name="maxSize">Maximum size of cabinet.</param>
+            <param name="maxThresh">Maximum threshold for each cabinet.</param>
+            <returns>>List of CabinetCreated.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Cabinet.Enumerate">
+            <summary>
+            Enumerates all files in a cabinet.
+            </summary>
+            <returns>>List of CabinetFileInfo</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Cabinet.Extract(System.String)">
+            <summary>
+            Extracts all the files from a cabinet to a directory.
+            </summary>
+            <param name="outputFolder">Directory to extract files to.</param>
+        </member>
+        <member name="T:WixToolset.Core.Native.CabinetCompressFile">
+            <summary>
+            Information to compress file into a cabinet.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.CabinetCompressFile.#ctor(System.String,System.String)">
+            <summary>
+            Cabinet compress file.
+            </summary>
+            <param name="path">Path to file to add.</param>
+            <param name="token">The token for the file.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.CabinetCompressFile.#ctor(System.String,System.String,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Cabinet compress file.
+            </summary>
+            <param name="path">Path to file to add.</param>
+            <param name="token">The token for the file.</param>
+            <param name="hash1">Hash 1</param>
+            <param name="hash2">Hash 2</param>
+            <param name="hash3">Hash 3</param>
+            <param name="hash4">Hash 4</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetCompressFile.Path">
+            <summary>
+            Gets the path to the file to compress.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetCompressFile.Token">
+            <summary>
+            Gets the token for the file to compress.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetCompressFile.Hash">
+            <summary>
+            Gets the hash of the file to compress.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.CabinetCreated">
+            <summary>
+            Cabinet created by compressing files.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.CabinetCreated.#ctor(System.String,System.String)">
+            <summary>
+            Constructs CabinetCreated.
+            </summary>
+            <param name="cabinetName">Name of cabinet.</param>
+            <param name="firstFileToken">Token of first file compressed in cabinet.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetCreated.CabinetName">
+            <summary>
+            Gets the name of the cabinet.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetCreated.FirstFileToken">
+            <summary>
+            Gets the token of the first file in the cabinet.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.CabinetFileInfo">
+            <summary>
+            Properties of a file in a cabinet.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.CabinetFileInfo.#ctor(System.String,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Constructs CabinetFileInfo
+            </summary>
+            <param name="fileId">File Id</param>
+            <param name="size">Size of file</param>
+            <param name="date">Last modified date</param>
+            <param name="time">Last modified time</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetFileInfo.FileId">
+            <summary>
+            Gets the file Id of the file.
+            </summary>
+            <value>file Id</value>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetFileInfo.Date">
+            <summary>
+            Gets modified date (DOS format).
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetFileInfo.Time">
+            <summary>
+            Gets modified time (DOS format).
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CabinetFileInfo.Size">
+            <summary>
+            Gets the size of the file in bytes.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.CabinetFileInfo.SameAsDateTime(System.DateTime)">
+            <summary>
+            Compares this file info's date and time with another datetime.
+            </summary>
+            <param name="dateTime">Date and time to compare with/</param>
+            <returns>
+            For some reason DateTime.ToLocalTime() does not match kernel32.dll FileTimeToLocalFileTime().
+            Since cabinets store date and time with the kernel32.dll functions, we need to convert DateTime
+            to local file time using the kernel32.dll functions.
+            </returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.CertificateHashes">
+            <summary>
+            Read certificates' public key and thumbprint hashes.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CertificateHashes.Path">
+            <summary>
+            Path to the file read.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CertificateHashes.PublicKey">
+            <summary>
+            Hash of the certificate's public key.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CertificateHashes.Thumbprint">
+            <summary>
+            Hash of the certificate's thumbprint.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.CertificateHashes.Exception">
+            <summary>
+            Exception encountered while trying to read certificate's hash.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.CertificateHashes.Read(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Read the certificate hashes from the provided paths.
+            </summary>
+            <param name="paths">Paths to read for certificates.</param>
+            <returns>Certificate hashes for the provided paths.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.DateTimeInterop">
+            <summary>
+            Interop class for the date/time handling.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.DateTimeInterop.DateTimeToCabDateAndTime(System.DateTime,System.UInt16@,System.UInt16@)">
+            <summary>
+            Converts DateTime to MS-DOS date and time which cabinet uses.
+            </summary>
+            <param name="dateTime">DateTime</param>
+            <param name="cabDate">MS-DOS date</param>
+            <param name="cabTime">MS-DOS time</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.DateTimeInterop.FileTimeToLocalFileTime(System.Int64@,System.Int64@)">
+            <summary>
+            Converts file time to a local file time.
+            </summary>
+            <param name="fileTime">file time</param>
+            <param name="localTime">local file time</param>
+            <returns>true if successful, false otherwise</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.DateTimeInterop.FileTimeToDosDateTime(System.Int64@,System.UInt16@,System.UInt16@)">
+            <summary>
+            Converts file time to a MS-DOS time.
+            </summary>
+            <param name="fileTime">file time</param>
+            <param name="wFatDate">MS-DOS date</param>
+            <param name="wFatTime">MS-DOS time</param>
+            <returns>true if successful, false otherwise</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.IWindowsInstallerValidatorCallback">
+            <summary>
+            Callbacks during validation.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.IWindowsInstallerValidatorCallback.EncounteredError">
+            <summary>
+            Indicates if the validator callback encountered an error.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.IWindowsInstallerValidatorCallback.ValidationMessage(WixToolset.Core.Native.ValidationMessage)">
+            <summary>
+            Validation message from an ICE.
+            </summary>
+            <param name="message">The validation message.</param>
+            <returns>True if validation should continue; otherwise cancel the validation.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.IWindowsInstallerValidatorCallback.WriteMessage(WixToolset.Data.Message)">
+            <summary>
+            Normal message encountered while preparing for ICE validation.
+            </summary>
+            <param name="message">The message to write.</param>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.Database">
+            <summary>
+            Wrapper class for managing MSI API database handles.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.#ctor(System.String,WixToolset.Core.Native.Msi.OpenDatabase)">
+            <summary>
+            Constructor that opens an MSI database.
+            </summary>
+            <param name="path">Path to the database to be opened.</param>
+            <param name="type">Persist mode to use when opening the database.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msi.Database.MsiMaxStreamNameLength">
+            <summary>
+            Maximum length of stream in an MSI database.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.Create(System.String,System.Boolean)">
+            <summary>
+            Creates a new <see cref="T:WixToolset.Core.Native.Msi.Database"/> with the specified path.
+            </summary>
+            <param name="path">Path of database to be created.</param>
+            <param name="asPatch">Indicates whether the database should be opened as a patch file.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.Open(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Opens an existing <see cref="T:WixToolset.Core.Native.Msi.Database"/> with the specified path.
+            </summary>
+            <param name="path">Path of database to open.</param>
+            <param name="transact">Indicates whether to open the database in transaction mode.</param>
+            <param name="asPatch">Indicates whether the database should be opened as a patch file.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.OpenAsReadOnly(System.String,System.Boolean)">
+            <summary>
+            Opens an existing <see cref="T:WixToolset.Core.Native.Msi.Database"/> with the specified path.
+            </summary>
+            <param name="path">Path of database to open.</param>
+            <param name="asPatch">Indicates whether the database should be opened as a patch file.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.ApplyTransform(System.String)">
+            <summary>
+            Apply a transform to the MSI.
+            </summary>
+            <param name="transformFile">Path to transform to apply.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.ApplyTransform(System.String,WixToolset.Core.Native.Msi.TransformErrorConditions)">
+            <summary>
+            Applies a transform to this database.
+            </summary>
+            <param name="transformFile">Path to the transform file being applied.</param>
+            <param name="errorConditions">Specifies the error conditions that are to be suppressed.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.Commit">
+            <summary>
+            Commits changes made to the database.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.CreateTransformSummaryInfo(WixToolset.Core.Native.Msi.Database,System.String,WixToolset.Core.Native.Msi.TransformErrorConditions,WixToolset.Core.Native.Msi.TransformValidations)">
+            <summary>
+            Creates and populates the summary information stream of an existing transform file.
+            </summary>
+            <param name="referenceDatabase">Required database that does not include the changes.</param>
+            <param name="transformFile">The name of the generated transform file.</param>
+            <param name="errorConditions">Required error conditions that should be suppressed when the transform is applied.</param>
+            <param name="validations">Required when the transform is applied to a database;
+            shows which properties should be validated to verify that this transform can be applied to the database.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.Import(System.String)">
+            <summary>
+            Imports an installer text archive table (idt file) into an open database.
+            </summary>
+            <param name="idtPath">Specifies the path to the file to import.</param>
+            <exception cref="T:WixToolset.Core.Native.Msi.WixInvalidIdtException">Attempted to import an IDT file with an invalid format or unsupported data.</exception>
+            <exception cref="T:WixToolset.Core.Native.Msi.MsiException">Another error occured while importing the IDT file.</exception>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.Export(System.String,System.String,System.String)">
+            <summary>
+            Exports an installer table from an open database to a text archive file (idt file).
+            </summary>
+            <param name="tableName">Specifies the name of the table to export.</param>
+            <param name="folderPath">Specifies the name of the folder that contains archive files. If null or empty string, uses current directory.</param>
+            <param name="fileName">Specifies the name of the exported table archive file.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.GenerateTransform(WixToolset.Core.Native.Msi.Database,System.String)">
+            <summary>
+            Creates a transform that, when applied to the reference database, results in this database.
+            </summary>
+            <param name="referenceDatabase">Required database that does not include the changes.</param>
+            <param name="transformFile">The name of the generated transform file. This is optional.</param>
+            <returns>true if a transform is generated; false if a transform is not generated because
+            there are no differences between the two databases.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.Merge(WixToolset.Core.Native.Msi.Database,System.String)">
+            <summary>
+            Merges two databases together.
+            </summary>
+            <param name="mergeDatabase">The database to merge into the base database.</param>
+            <param name="tableName">The name of the table to receive merge conflict information.</param>
+            <returns>True if there were merge conflicts, otherwise false.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.OpenView(System.String)">
+            <summary>
+            Prepares a database query and creates a <see cref="T:WixToolset.Core.Native.Msi.View">View</see> object.
+            </summary>
+            <param name="query">Specifies a SQL query string for querying the database.</param>
+            <returns>A view object is returned if the query was successful.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.OpenExecuteView(System.String)">
+            <summary>
+            Prepares and executes a database query and creates a <see cref="T:WixToolset.Core.Native.Msi.View">View</see> object.
+            </summary>
+            <param name="query">Specifies a SQL query string for querying the database.</param>
+            <returns>A view object is returned if the query was successful.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.TableExists(System.String)">
+            <summary>
+            Verifies the existence or absence of a table.
+            </summary>
+            <param name="tableName">Table name to to verify the existence of.</param>
+            <returns>Returns true if the table exists, false if it does not.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Database.PrimaryKeys(System.String)">
+            <summary>
+            Returns a <see cref="T:WixToolset.Core.Native.Msi.Record">Record</see> containing the names of all the primary 
+            key columns for a specified table.
+            </summary>
+            <param name="tableName">Specifies the name of the table from which to obtain 
+            primary key names.</param>
+            <returns>Returns a <see cref="T:WixToolset.Core.Native.Msi.Record">Record</see> containing the names of all the 
+            primary key columns for a specified table.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.InstallUIHandler">
+            <summary>
+            A callback function that the installer calls for progress notification and error messages.
+            </summary>
+            <param name="context">Pointer to an application context.
+            This parameter can be used for error checking.</param>
+            <param name="messageType">Specifies a combination of one message box style,
+            one message box icon type, one default button, and one installation message type.</param>
+            <param name="message">Specifies the message text.</param>
+            <returns>-1 for an error, 0 if no action was taken, 1 if OK, 3 to abort.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.Installer">
+            <summary>
+            Represents the Windows Installer, provides wrappers to
+            create the top-level objects and access their methods.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Installer.ExtractPatchXml(System.String)">
+            <summary>
+            Extacts the patch metadata as XML.
+            </summary>
+            <param name="path">Path to patch.</param>
+            <returns>String XML.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Installer.GetFileHash(System.String,System.Int32,System.Int32[]@)">
+            <summary>
+            Takes the path to a file and returns a 128-bit hash of that file.
+            </summary>
+            <param name="filePath">Path to file that is to be hashed.</param>
+            <param name="options">The value in this column must be 0. This parameter is reserved for future use.</param>
+            <param name="hash">Int array that receives the returned file hash information.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Installer.GetFileVersion(System.String,System.String@,System.String@)">
+            <summary>
+            Returns the version string and language string in the format that the installer
+            expects to find them in the database.  If you just want version information, set
+            lpLangBuf and pcchLangBuf to zero. If you just want language information, set
+            lpVersionBuf and pcchVersionBuf to zero.
+            </summary>
+            <param name="filePath">Specifies the path to the file.</param>
+            <param name="version">Returns the file version. Set to 0 for language information only.</param>
+            <param name="language">Returns the file language. Set to 0 for version information only.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Installer.SetExternalUI(WixToolset.Core.Native.Msi.InstallUIHandler,System.Int32,System.IntPtr)">
+            <summary>
+            Enables an external user-interface handler.
+            </summary>
+            <param name="installUIHandler">Specifies a callback function.</param>
+            <param name="messageFilter">Specifies which messages to handle using the external message handler.</param>
+            <param name="context">Pointer to an application context that is passed to the callback function.</param>
+            <returns>The return value is the previously set external handler, or null if there was no previously set handler.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Installer.SetInternalUI(System.Int32,System.IntPtr@)">
+            <summary>
+            Enables the installer's internal user interface.
+            </summary>
+            <param name="uiLevel">Specifies the level of complexity of the user interface.</param>
+            <param name="hwnd">Pointer to a window. This window becomes the owner of any user interface created.</param>
+            <returns>The previous user interface level is returned. If an invalid dwUILevel is passed, then INSTALLUILEVEL_NOCHANGE is returned.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.InstallLogModes">
+            <summary>
+            Windows Installer log modes.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.FatalExit">
+            <summary>
+            Premature termination of installation.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.Error">
+            <summary>
+            The error messages are logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.Warning">
+            <summary>
+            The warning messages are logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.User">
+            <summary>
+            The user requests are logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.Info">
+            <summary>
+            The status messages that are not displayed are logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.ResolveSource">
+            <summary>
+            Request to determine a valid source location.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.OutOfDiskSpace">
+            <summary>
+            The was insufficient disk space.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.ActionStart">
+            <summary>
+            The start of new installation actions are logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.ActionData">
+            <summary>
+            The data record with the installation action is logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.CommonData">
+            <summary>
+            The parameters for user-interface initialization are logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.PropertyDump">
+            <summary>
+            Logs the property values at termination.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.Verbose">
+            <summary>
+            Sends large amounts of information to a log file not generally useful to users.
+            May be used for technical support.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.ExtraDebug">
+            <summary>
+            Sends extra debugging information, such as handle creation information, to the log file.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.Progress">
+            <summary>
+            Progress bar information. This message includes information on units so far and total number of units.
+            See MsiProcessMessage for an explanation of the message format.
+            This message is only sent to an external user interface and is not logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.Initialize">
+            <summary>
+            If this is not a quiet installation, then the basic UI has been initialized.
+            If this is a full UI installation, the full UI is not yet initialized.
+            This message is only sent to an external user interface and is not logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.Terminate">
+            <summary>
+            If a full UI is being used, the full UI has ended.
+            If this is not a quiet installation, the basic UI has not yet ended.
+            This message is only sent to an external user interface and is not logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.ShowDialog">
+            <summary>
+            Sent prior to display of the full UI dialog.
+            This message is only sent to an external user interface and is not logged.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallLogModes.FilesInUse">
+            <summary>
+            Files in use information. When this message is received, a FilesInUse Dialog should be displayed.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.InstallMessage">
+            <summary>
+            Windows Installer message types.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.FatalExit">
+            <summary>
+            Premature termination, possibly fatal out of memory.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.Error">
+            <summary>
+            Formatted error message, [1] is message number in Error table.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.Warning">
+            <summary>
+            Formatted warning message, [1] is message number in Error table.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.User">
+            <summary>
+            User request message, [1] is message number in Error table.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.Info">
+            <summary>
+            Informative message for log, not to be displayed.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.FilesInUse">
+            <summary>
+            List of files in use that need to be replaced.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.ResolveSource">
+            <summary>
+            Request to determine a valid source location.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.OutOfDiskSpace">
+            <summary>
+            Insufficient disk space message.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.ActionStart">
+            <summary>
+            Progress: start of action, [1] action name, [2] description, [3] template for ACTIONDATA messages.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.ActionData">
+            <summary>
+            Action data. Record fields correspond to the template of ACTIONSTART message.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.Progress">
+            <summary>
+            Progress bar information. See the description of record fields below.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.CommonData">
+            <summary>
+            To enable the Cancel button set [1] to 2 and [2] to 1. To disable the Cancel button set [1] to 2 and [2] to 0.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.Initilize">
+            <summary>
+            Sent prior to UI initialization, no string data.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.Terminate">
+            <summary>
+            Sent after UI termination, no string data.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallMessage.ShowDialog">
+            <summary>
+            Sent prior to display or authored dialog or wizard.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.InstallUILevels">
+            <summary>
+            Windows Installer UI levels.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.NoChange">
+            <summary>
+            No change in the UI level. However, if phWnd is not Null, the parent window can change.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.Default">
+            <summary>
+            The installer chooses an appropriate user interface level.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.None">
+            <summary>
+            Completely silent installation.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.Basic">
+            <summary>
+            Simple progress and error handling.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.Reduced">
+            <summary>
+            Authored user interface with wizard dialog boxes suppressed.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.Full">
+            <summary>
+            Authored user interface with wizards, progress, and errors.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.HideCancel">
+            <summary>
+            If combined with the Basic value, the installer shows simple progress dialog boxes but
+            does not display a Cancel button on the dialog. This prevents users from canceling the install.
+            Available with Windows Installer version 2.0.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.ProgressOnly">
+            <summary>
+            If combined with the Basic value, the installer shows simple progress
+            dialog boxes but does not display any modal dialog boxes or error dialog boxes.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.EndDialog">
+            <summary>
+            If combined with any above value, the installer displays a modal dialog
+            box at the end of a successful installation or if there has been an error.
+            No dialog box is displayed if the user cancels.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.InstallUILevels.SourceResOnly">
+            <summary>
+            If this value is combined with the None value, the installer displays only the dialog
+            boxes used for source resolution. No other dialog boxes are shown. This value has no
+            effect if the UI level is not INSTALLUILEVEL_NONE. It is used with an external user
+            interface designed to handle all of the UI except for source resolution. In this case,
+            the installer handles source resolution. This value is only available with Windows Installer 2.0 and later.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.ModifyView">
+            <summary>
+            Enumeration of different modify modes.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.Assign">
+            <summary>
+            Writes current data in the cursor to a table row. Updates record if the primary 
+            keys match an existing row and inserts if they do not match. Fails with a read-only 
+            database. This mode cannot be used with a view containing joins.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.Delete">
+            <summary>
+            Remove a row from the table. You must first call the Fetch function with the same
+            record. Fails if the row has been deleted. Works only with read-write records. This
+            mode cannot be used with a view containing joins.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.Insert">
+            <summary>
+            Inserts a record. Fails if a row with the same primary keys exists. Fails with a read-only
+            database. This mode cannot be used with a view containing joins.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.InsertTemporary">
+            <summary>
+            Inserts a temporary record. The information is not persistent. Fails if a row with the 
+            same primary key exists. Works only with read-write records. This mode cannot be 
+            used with a view containing joins.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.Merge">
+            <summary>
+            Inserts or validates a record in a table. Inserts if primary keys do not match any row
+            and validates if there is a match. Fails if the record does not match the data in
+            the table. Fails if there is a record with a duplicate key that is not identical.
+            Works only with read-write records. This mode cannot be used with a view containing joins.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.Refresh">
+            <summary>
+            Refreshes the information in the record. Must first call Fetch with the
+            same record. Fails for a deleted row. Works with read-write and read-only records.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.Replace">
+            <summary>
+            Updates or deletes and inserts a record into a table. Must first call Fetch with
+            the same record. Updates record if the primary keys are unchanged. Deletes old row and
+            inserts new if primary keys have changed. Fails with a read-only database. This mode cannot
+            be used with a view containing joins.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.Seek">
+            <summary>
+            Refreshes the information in the supplied record without changing the position in the
+            result set and without affecting subsequent fetch operations. The record may then
+            be used for subsequent Update, Delete, and Refresh. All primary key columns of the
+            table must be in the query and the record must have at least as many fields as the
+            query. Seek cannot be used with multi-table queries. This mode cannot be used with
+            a view containing joins. See also the remarks.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.ModifyView.Update">
+            <summary>
+            Updates an existing record. Non-primary keys only. Must first call Fetch. Fails with a
+            deleted record. Works only with read-write records.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.MsiException">
+            <summary>
+            Exception that wraps MsiGetLastError().
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiException.#ctor(System.Int32)">
+            <summary>
+            Instantiate a new MsiException with a given error.
+            </summary>
+            <param name="error">The error code from the MsiXxx() function call.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msi.MsiException.Error">
+            <summary>
+            Gets the error number.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msi.MsiException.MsiError">
+            <summary>
+            Gets the internal MSI error number.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msi.MsiException.ErrorInfo">
+            <summary>
+            Gets any additional the error information.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msi.MsiException.Message">
+            <summary>
+            Overrides Message property to return useful error message.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.MSIFILEHASHINFO">
+            <summary>
+            contains the file hash information returned by MsiGetFileHash and used in the MsiFileHash table.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.MSIFILEHASHINFO.FileHashInfoSize">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.MSIFILEHASHINFO.Data0">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.MSIFILEHASHINFO.Data1">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.MSIFILEHASHINFO.Data2">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.MSIFILEHASHINFO.Data3">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.MsiHandle">
+            <summary>
+            Wrapper class for MSI handle.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiHandle.Finalize">
+            <summary>
+            MSI handle destructor.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msi.MsiHandle.Handle">
+            <summary>
+            Gets or sets the MSI handle.
+            </summary>
+            <value>The MSI handle.</value>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiHandle.Close">
+            <summary>
+            Close the MSI handle.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiHandle.Dispose">
+            <summary>
+            Disposes the managed and unmanaged objects in this object.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiHandle.Dispose(System.Boolean)">
+            <summary>
+            Disposes the managed and unmanaged objects in this object.
+            </summary>
+            <param name="disposing">true to dispose the managed objects.</param>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.MsiInterop">
+            <summary>
+            Class exposing static functions and structs from MSI API.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiCloseHandle(System.IntPtr)">
+            <summary>
+            PInvoke of MsiCloseHandle.
+            </summary>
+            <param name="database">Handle to a database.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiCreateRecord(System.Int32)">
+            <summary>
+            PInvoke of MsiCreateRecord
+            </summary>
+            <param name="parameters">Count of columns in the record.</param>
+            <returns>Handle referencing the record.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiCreateTransformSummaryInfo(System.IntPtr,System.IntPtr,System.String,WixToolset.Core.Native.Msi.TransformErrorConditions,WixToolset.Core.Native.Msi.TransformValidations)">
+            <summary>
+            Creates summary information of an existing transform to include validation and error conditions.
+            </summary>
+            <param name="database">The handle to the database that contains the new database summary information.</param>
+            <param name="referenceDatabase">The handle to the database that contains the original summary information.</param>
+            <param name="transformFile">The name of the transform to which the summary information is added.</param>
+            <param name="errorConditions">The error conditions that should be suppressed when the transform is applied.</param>
+            <param name="validations">Specifies the properties to be validated to verify that the transform can be applied to the database.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseApplyTransform(System.IntPtr,System.String,WixToolset.Core.Native.Msi.TransformErrorConditions)">
+            <summary>
+            Applies a transform to a database.
+            </summary>
+            <param name="database">Handle to the database obtained from MsiOpenDatabase to transform.</param>
+            <param name="transformFile">Specifies the name of the transform file to apply.</param>
+            <param name="errorConditions">Error conditions that should be suppressed.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseCommit(System.IntPtr)">
+            <summary>
+            PInvoke of MsiDatabaseCommit.
+            </summary>
+            <param name="database">Handle to a databse.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseExport(System.IntPtr,System.String,System.String,System.String)">
+            <summary>
+            PInvoke of MsiDatabaseExportW.
+            </summary>
+            <param name="database">Handle to a database.</param>
+            <param name="tableName">Table name.</param>
+            <param name="folderPath">Folder path.</param>
+            <param name="fileName">File name.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseGenerateTransform(System.IntPtr,System.IntPtr,System.String,System.Int32,System.Int32)">
+            <summary>
+            Generates a transform file of differences between two databases.
+            </summary>
+            <param name="database">Handle to the database obtained from MsiOpenDatabase that includes the changes.</param>
+            <param name="databaseReference">Handle to the database obtained from MsiOpenDatabase that does not include the changes.</param>
+            <param name="transformFile">A null-terminated string that specifies the name of the transform file being generated.
+            This parameter can be null. If szTransformFile is null, you can use MsiDatabaseGenerateTransform to test whether two
+            databases are identical without creating a transform. If the databases are identical, the function returns ERROR_NO_DATA.
+            If the databases are different the function returns NOERROR.</param>
+            <param name="reserved1">This is a reserved argument and must be set to 0.</param>
+            <param name="reserved2">This is a reserved argument and must be set to 0.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseImport(System.IntPtr,System.String,System.String)">
+            <summary>
+            PInvoke of MsiDatabaseImportW.
+            </summary>
+            <param name="database">Handle to a database.</param>
+            <param name="folderPath">Folder path.</param>
+            <param name="fileName">File name.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseMerge(System.IntPtr,System.IntPtr,System.String)">
+            <summary>
+            PInvoke of MsiDatabaseMergeW.
+            </summary>
+            <param name="database">The handle to the database obtained from MsiOpenDatabase.</param>
+            <param name="databaseMerge">The handle to the database obtained from MsiOpenDatabase to merge into the base database.</param>
+            <param name="tableName">The name of the table to receive merge conflict information.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseOpenView(System.IntPtr,System.String,System.IntPtr@)">
+            <summary>
+            PInvoke of MsiDatabaseOpenViewW.
+            </summary>
+            <param name="database">Handle to a database.</param>
+            <param name="query">SQL query.</param>
+            <param name="view">View handle.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiExtractPatchXMLData(System.String,System.Int32,System.Text.StringBuilder,System.Int32@)">
+            <summary>
+            PInvoke of MsiExtractPatchXMLDataW.
+            </summary>
+            <param name="szPatchPath">Path to patch.</param>
+            <param name="dwReserved">Reserved for future use.</param>
+            <param name="szXMLData">Output XML data.</param>
+            <param name="pcchXMLData">Count of characters in XML.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiGetFileHash(System.String,System.UInt32,WixToolset.Core.Native.Msi.MSIFILEHASHINFO)">
+            <summary>
+            PInvoke of MsiGetFileHashW.
+            </summary>
+            <param name="filePath">File path.</param>
+            <param name="options">Hash options (must be 0).</param>
+            <param name="hash">Buffer to recieve hash.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiGetFileVersion(System.String,System.Text.StringBuilder,System.Int32@,System.Text.StringBuilder,System.Int32@)">
+            <summary>
+            PInvoke of MsiGetFileVersionW.
+            </summary>
+            <param name="filePath">File path.</param>
+            <param name="versionBuf">Buffer to receive version info.</param>
+            <param name="versionBufSize">Size of version buffer.</param>
+            <param name="langBuf">Buffer to recieve lang info.</param>
+            <param name="langBufSize">Size of lang buffer.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiGetLastErrorRecord">
+            <summary>
+            PInvoke of MsiGetLastErrorRecord.
+            </summary>
+            <returns>Handle to error record if one exists.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseGetPrimaryKeys(System.IntPtr,System.String,System.IntPtr@)">
+            <summary>
+            PInvoke of MsiDatabaseGetPrimaryKeysW.
+            </summary>
+            <param name="database">Handle to a database.</param>
+            <param name="tableName">Table name.</param>
+            <param name="record">Handle to receive resulting record.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDoAction(System.IntPtr,System.String)">
+            <summary>
+            PInvoke of MsiDoActionW.
+            </summary>
+            <param name="product">Handle to the installation provided to a DLL custom action or
+            obtained through MsiOpenPackage, MsiOpenPackageEx, or MsiOpenProduct.</param>
+            <param name="action">Specifies the action to execute.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiGetSummaryInformation(System.IntPtr,System.String,System.UInt32,System.IntPtr@)">
+            <summary>
+            PInvoke of MsiGetSummaryInformationW.  Can use either database handle or database path as input.
+            </summary>
+            <param name="database">Handle to a database.</param>
+            <param name="databasePath">Path to a database.</param>
+            <param name="updateCount">Max number of updated values.</param>
+            <param name="summaryInfo">Handle to summary information.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiDatabaseIsTablePersistent(System.IntPtr,System.String)">
+            <summary>
+            PInvoke of MsiDatabaseIsTablePersitentW.
+            </summary>
+            <param name="database">Handle to a database.</param>
+            <param name="tableName">Table name.</param>
+            <returns>MSICONDITION</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiOpenDatabase(System.String,System.IntPtr,System.IntPtr@)">
+            <summary>
+            PInvoke of MsiOpenDatabaseW.
+            </summary>
+            <param name="databasePath">Path to database.</param>
+            <param name="persist">Persist mode.</param>
+            <param name="database">Handle to database.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiOpenPackage(System.String,System.IntPtr@)">
+            <summary>
+            PInvoke of MsiOpenPackageW.
+            </summary>
+            <param name="packagePath">The path to the package.</param>
+            <param name="product">A pointer to a variable that receives the product handle.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiRecordIsNull(System.IntPtr,System.Int32)">
+            <summary>
+            PInvoke of MsiRecordIsNull.
+            </summary>
+            <param name="record">MSI Record handle.</param>
+            <param name="field">Index of field to check for null value.</param>
+            <returns>true if the field is null, false if not, and an error code for any error.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiRecordGetInteger(System.IntPtr,System.Int32)">
+            <summary>
+            PInvoke of MsiRecordGetInteger.
+            </summary>
+            <param name="record">MSI Record handle.</param>
+            <param name="field">Index of field to retrieve integer from.</param>
+            <returns>Integer value.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiRecordSetInteger(System.IntPtr,System.Int32,System.Int32)">
+            <summary>
+            PInvoke of MsiRectordSetInteger.
+            </summary>
+            <param name="record">MSI Record handle.</param>
+            <param name="field">Index of field to set integer value in.</param>
+            <param name="value">Value to set field to.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiRecordGetString(System.IntPtr,System.Int32,System.Text.StringBuilder,System.Int32@)">
+            <summary>
+            PInvoke of MsiRecordGetStringW.
+            </summary>
+            <param name="record">MSI Record handle.</param>
+            <param name="field">Index of field to get string value from.</param>
+            <param name="valueBuf">Buffer to recieve value.</param>
+            <param name="valueBufSize">Size of buffer.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiRecordSetString(System.IntPtr,System.Int32,System.String)">
+            <summary>
+            PInvoke of MsiRecordSetStringW.
+            </summary>
+            <param name="record">MSI Record handle.</param>
+            <param name="field">Index of field to set string value in.</param>
+            <param name="value">String value.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiRecordSetStream(System.IntPtr,System.Int32,System.String)">
+            <summary>
+            PInvoke of MsiRecordSetStreamW.
+            </summary>
+            <param name="record">MSI Record handle.</param>
+            <param name="field">Index of field to set stream value in.</param>
+            <param name="filePath">Path to file to set stream value to.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiRecordReadStream(System.IntPtr,System.Int32,System.Byte[],System.Int32@)">
+            <summary>
+            PInvoke of MsiRecordReadStreamW.
+            </summary>
+            <param name="record">MSI Record handle.</param>
+            <param name="field">Index of field to read stream from.</param>
+            <param name="dataBuf">Data buffer to recieve stream value.</param>
+            <param name="dataBufSize">Size of data buffer.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiRecordGetFieldCount(System.IntPtr)">
+            <summary>
+            PInvoke of MsiRecordGetFieldCount.
+            </summary>
+            <param name="record">MSI Record handle.</param>
+            <returns>Count of fields in the record.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiSetExternalUI(WixToolset.Core.Native.Msi.InstallUIHandler,System.Int32,System.IntPtr)">
+            <summary>
+            PInvoke of MsiSetExternalUIW.
+            </summary>
+            <param name="installUIHandler">Specifies a callback function that conforms to the INSTALLUI_HANDLER specification.</param>
+            <param name="installLogMode">Specifies which messages to handle using the external message handler. If the external
+            handler returns a non-zero result, then that message will not be sent to the UI, instead the message will be logged
+            if logging has been enabled.</param>
+            <param name="context">Pointer to an application context that is passed to the callback function.
+            This parameter can be used for error checking.</param>
+            <returns>The return value is the previously set external handler, or zero (0) if there was no previously set handler.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiSetInternalUI(System.Int32,System.IntPtr@)">
+            <summary>
+            PInvoke of MsiSetInternalUI.
+            </summary>
+            <param name="uiLevel">Specifies the level of complexity of the user interface.</param>
+            <param name="hwnd">Pointer to a window. This window becomes the owner of any user interface created.
+            A pointer to the previous owner of the user interface is returned.
+            If this parameter is null, the owner of the user interface does not change.</param>
+            <returns>The previous user interface level is returned. If an invalid dwUILevel is passed, then INSTALLUILEVEL_NOCHANGE is returned.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiSummaryInfoGetProperty(System.IntPtr,System.Int32,System.UInt32@,System.Int32@,System.Runtime.InteropServices.ComTypes.FILETIME@,System.Text.StringBuilder,System.Int32@)">
+            <summary>
+            PInvoke of MsiSummaryInfoGetPropertyW.
+            </summary>
+            <param name="summaryInfo">Handle to summary info.</param>
+            <param name="property">Property to get value from.</param>
+            <param name="dataType">Data type of property.</param>
+            <param name="integerValue">Integer to receive integer value.</param>
+            <param name="fileTimeValue">File time to receive file time value.</param>
+            <param name="stringValueBuf">String buffer to receive string value.</param>
+            <param name="stringValueBufSize">Size of string buffer.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiViewGetColumnInfo(System.IntPtr,System.Int32,System.IntPtr@)">
+            <summary>
+            PInvoke of MsiViewGetColumnInfo.
+            </summary>
+            <param name="view">Handle to view.</param>
+            <param name="columnInfo">Column info.</param>
+            <param name="record">Handle for returned record.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiViewExecute(System.IntPtr,System.IntPtr)">
+            <summary>
+            PInvoke of MsiViewExecute.
+            </summary>
+            <param name="view">Handle of view to execute.</param>
+            <param name="record">Handle to a record that supplies the parameters for the view.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiViewFetch(System.IntPtr,System.IntPtr@)">
+            <summary>
+            PInvoke of MsiViewFetch.
+            </summary>
+            <param name="view">Handle of view to fetch a row from.</param>
+            <param name="record">Handle to receive record info.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.MsiInterop.MsiViewModify(System.IntPtr,System.Int32,System.IntPtr)">
+            <summary>
+            PInvoke of MsiViewModify.
+            </summary>
+            <param name="view">Handle of view to modify.</param>
+            <param name="modifyMode">Modify mode.</param>
+            <param name="record">Handle of record.</param>
+            <returns>Error code.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.OpenDatabase">
+            <summary>
+            Enum of predefined persist modes used when opening a database.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.OpenDatabase.ReadOnly">
+            <summary>
+            Open a database read-only, no persistent changes.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.OpenDatabase.Transact">
+            <summary>
+            Open a database read/write in transaction mode.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.OpenDatabase.Direct">
+            <summary>
+            Open a database direct read/write without transaction.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.OpenDatabase.Create">
+            <summary>
+            Create a new database, transact mode read/write.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.OpenDatabase.CreateDirect">
+            <summary>
+            Create a new database, direct mode read/write.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.OpenDatabase.OpenPatchFile">
+            <summary>
+            Indicates a patch file is being opened.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.Record">
+            <summary>
+            Wrapper class around msi.dll interop for a record.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.#ctor(System.Int32)">
+            <summary>
+            Creates a record with the specified number of fields.
+            </summary>
+            <param name="fieldCount">Number of fields in record.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.#ctor(System.IntPtr)">
+            <summary>
+            Creates a record from a handle.
+            </summary>
+            <param name="handle">Handle to create record from.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msi.Record.Item(System.Int32)">
+            <summary>
+            Gets a string value at specified location.
+            </summary>
+            <param name="field">Index into record to get string.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.IsNull(System.Int32)">
+            <summary>
+            Determines if the value is null at the specified location.
+            </summary>
+            <param name="field">Index into record of the field to query.</param>
+            <returns>true if the value is null, false otherwise.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.GetInteger(System.Int32)">
+            <summary>
+            Gets integer value at specified location.
+            </summary>
+            <param name="field">Index into record to get integer</param>
+            <returns>Integer value</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.SetInteger(System.Int32,System.Int32)">
+            <summary>
+            Sets integer value at specified location.
+            </summary>
+            <param name="field">Index into record to set integer.</param>
+            <param name="value">Value to set into record.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.GetString(System.Int32)">
+            <summary>
+            Gets string value at specified location.
+            </summary>
+            <param name="field">Index into record to get string.</param>
+            <returns>String value</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.SetString(System.Int32,System.String)">
+            <summary>
+            Set string value at specified location
+            </summary>
+            <param name="field">Index into record to set string.</param>
+            <param name="value">Value to set into record</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.GetStream(System.Int32,System.Byte[],System.Int32)">
+            <summary>
+            Get stream at specified location.
+            </summary>
+            <param name="field">Index into record to get stream.</param>
+            <param name="buffer">buffer to receive bytes from stream.</param>
+            <param name="requestedBufferSize">Buffer size to read.</param>
+            <returns>Stream read into string.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.SetStream(System.Int32,System.String)">
+            <summary>
+            Sets a stream at a specified location.
+            </summary>
+            <param name="field">Index into record to set stream.</param>
+            <param name="path">Path to file to read into stream.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Record.GetFieldCount">
+            <summary>
+            Gets the number of fields in record.
+            </summary>
+            <returns>Count of fields in record.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.Session">
+            <summary>
+            Controls the installation process.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Session.#ctor(WixToolset.Core.Native.Msi.Database)">
+            <summary>
+            Instantiate a new Session.
+            </summary>
+            <param name="database">The database to open.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.Session.DoAction(System.String)">
+            <summary>
+            Executes a built-in action, custom action, or user-interface wizard action.
+            </summary>
+            <param name="action">Specifies the action to execute.</param>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.SummaryInformation">
+            <summary>
+            Summary information for the MSI files.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.SummaryInformation.Package">
+            <summary>
+            Summary information properties for products.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.CodePage">
+            <summary>PID_CODEPAGE = code page of the summary information stream</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Title">
+            <summary>PID_TITLE = a brief description of the package type</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.PackageName">
+            <summary>PID_SUBJECT = package name</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Manufacturer">
+            <summary>PID_AUTHOR = manufacturer of the patch package</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Keywords">
+            <summary>PID_KEYWORDS = list of keywords used by file browser</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Comments">
+            <summary>PID_COMMENTS = general purpose of the package</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.PlatformsAndLanguages">
+            <summary>PID_TEMPLATE = supported platforms and languages</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Reserved8">
+            <summary>PID_LASTAUTHOR should be null for packages</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.PackageCode">
+            <summary>PID_REVNUMBER = GUID package code</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Reserved11">
+            <summary>PID_LASTPRINTED should be null for packages</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Created">
+            <summary>PID_CREATED datetime when package was created</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.LastModified">
+            <summary>PID_SAVED datetime when package was last modified</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.InstallerRequirement">
+            <summary>PID_PAGECOUNT minimum required Windows Installer</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.FileAndElevatedFlags">
+            <summary>PID_WORDCOUNT elevation privileges of package</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Reserved16">
+            <summary>PID_CHARCOUNT should be null for patches</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.BuildTool">
+            <summary>PID_APPLICATION tool used to create package</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Package.Security">
+            <summary>PID_SECURITY = read-only attribute of the package</summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.SummaryInformation.Transform">
+            <summary>
+            Summary information properties for transforms.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.CodePage">
+            <summary>PID_CODEPAGE = code page for the summary information stream</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.Title">
+            <summary>PID_TITLE = typically just "Transform"</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.TargetSubject">
+            <summary>PID_SUBJECT = original subject of target</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.TargetManufacturer">
+            <summary>PID_AUTHOR = original manufacturer of target</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.Keywords">
+            <summary>PID_KEYWORDS = keywords for the transform, typically including at least "Installer"</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.Comments">
+            <summary>PID_COMMENTS = describes what this package does</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.TargetPlatformAndLanguage">
+            <summary>PID_TEMPLATE = target platform;language</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.UpdatedPlatformAndLanguage">
+            <summary>PID_LASTAUTHOR = updated platform;language</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.ProductCodes">
+            <summary>PID_REVNUMBER = {productcode}version;{newproductcode}newversion;upgradecode</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.Reserved11">
+            <summary>PID_LASTPRINTED should be null for transforms</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.CreationTime">
+            .<summary>PID_CREATE_DTM = the timestamp when the transform was created</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.InstallerRequirement">
+            <summary>PID_PAGECOUNT = minimum installer version</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.ValidationFlags">
+            <summary>PID_CHARCOUNT = validation and error flags</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.CreatingApplication">
+            <summary>PID_APPNAME = the application that created the transform</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Transform.Security">
+            <summary>PID_SECURITY = whether read-only is enforced; should always be 4 for transforms</summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.SummaryInformation.Patch">
+            <summary>
+            Summary information properties for patches.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.CodePage">
+            <summary>PID_CODEPAGE = code page of the summary information stream</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.Title">
+            <summary>PID_TITLE = a brief description of the package type</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.PackageName">
+            <summary>PID_SUBJECT = package name</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.Manufacturer">
+            <summary>PID_AUTHOR = manufacturer of the patch package</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.Sources">
+            <summary>PID_KEYWORDS = alternate sources for the patch package</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.Comments">
+            <summary>PID_COMMENTS = general purpose of the patch package</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.ProductCodes">
+            <summary>PID_TEMPLATE = semicolon delimited list of ProductCodes</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.TransformNames">
+            <summary>PID_LASTAUTHOR = semicolon delimited list of transform names</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.PatchCode">
+            <summary>PID_REVNUMBER = GUID patch code</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.Reserved11">
+            <summary>PID_LASTPRINTED should be null for patches</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.Reserved14">
+            <summary>PID_PAGECOUNT should be null for patches</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.InstallerRequirement">
+            <summary>PID_WORDCOUNT = minimum installer version</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.Reserved16">
+            <summary>PID_CHARCOUNT should be null for patches</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.Patch.Security">
+            <summary>PID_SECURITY = read-only attribute of the patch package</summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.SummaryInformation.InstallerRequirement">
+            <summary>
+            Summary information values for the InstallerRequirement property.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.InstallerRequirement.Version10">
+            <summary>Any version of the installer will do</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.InstallerRequirement.Version12">
+            <summary>At least 1.2</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.InstallerRequirement.Version20">
+            <summary>At least 2.0</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.InstallerRequirement.Version30">
+            <summary>At least 3.0</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.InstallerRequirement.Version31">
+            <summary>At least 3.1</summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.SummaryInformation.#ctor(WixToolset.Core.Native.Msi.Database)">
+            <summary>
+            Instantiate a new SummaryInformation class from an open database.
+            </summary>
+            <param name="db">Database to retrieve summary information from.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.SummaryInformation.#ctor(System.String)">
+            <summary>
+            Instantiate a new SummaryInformation class from a database file.
+            </summary>
+            <param name="databaseFile">The database file.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.SummaryInformation.GetProperty(WixToolset.Core.Native.Msi.SummaryInformation.Package)">
+            <summary>
+            Gets a summary information package property.
+            </summary>
+            <param name="property">The summary information package property.</param>
+            <returns>The summary information property.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.SummaryInformation.GetNumericProperty(WixToolset.Core.Native.Msi.SummaryInformation.Package)">
+            <summary>
+            Gets a summary information package property as a number.
+            </summary>
+            <param name="property">The summary information package property.</param>
+            <returns>The summary information property.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.SummaryInformation.GetProperty(WixToolset.Core.Native.Msi.SummaryInformation.Patch)">
+            <summary>
+            Gets a summary information patch property.
+            </summary>
+            <param name="property">The summary information patch property.</param>
+            <returns>The summary information property.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.SummaryInformation.GetNumericProperty(WixToolset.Core.Native.Msi.SummaryInformation.Transform)">
+            <summary>
+            Gets a summary information transform property.
+            </summary>
+            <param name="property">The summary information transform property.</param>
+            <returns>The summary information property.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.SummaryInformation.GetProperty(System.Int32)">
+            <summary>
+            Gets a summary information property.
+            </summary>
+            <param name="index">Index of the summary information property.</param>
+            <returns>The summary information property.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.SummaryInformation.GetNumericProperty(System.Int32)">
+            <summary>
+            Gets a summary information property as a number.
+            </summary>
+            <param name="index">Index of the summary information property.</param>
+            <returns>The summary information property.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.SummaryInformation.VT">
+            <summary>
+            Variant types in the summary information table.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.VT.EMPTY">
+            <summary>Variant has not been assigned.</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.VT.NULL">
+            <summary>Null variant type.</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.VT.I2">
+            <summary>16-bit integer variant type.</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.VT.I4">
+            <summary>32-bit integer variant type.</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.VT.LPSTR">
+            <summary>String variant type.</summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.SummaryInformation.VT.FILETIME">
+            <summary>Date time (FILETIME, converted to Variant time) variant type.</summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.TransformErrorConditions">
+            <summary>
+            The errors to suppress when applying a transform.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.None">
+            <summary>
+            None of the following conditions.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.AddExistingRow">
+            <summary>
+            Suppress error when adding a row that exists.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.DeleteMissingRow">
+            <summary>
+            Suppress error when deleting a row that does not exist.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.AddExistingTable">
+            <summary>
+            Suppress error when adding a table that exists.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.DeleteMissingTable">
+            <summary>
+            Suppress error when deleting a table that does not exist.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.UpdateMissingRow">
+            <summary>
+            Suppress error when updating a row that does not exist.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.ChangeCodepage">
+            <summary>
+            Suppress error when transform and database code pages do not match, and their code pages are neutral.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.ViewTransform">
+            <summary>
+            Create the temporary _TransformView table when applying a transform.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformErrorConditions.All">
+            <summary>
+            Suppress all errors but the option to create the temporary _TransformView table.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.TransformValidations">
+            <summary>
+            The validation to run while applying a transform.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.None">
+            <summary>
+            Do not validate properties.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.Language">
+            <summary>
+            Default language must match base database.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.Product">
+            <summary>
+            Product must match base database.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.MajorVersion">
+            <summary>
+            Check major version only.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.MinorVersion">
+            <summary>
+            Check major and minor versions only.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.UpdateVersion">
+            <summary>
+            Check major, minor, and update versions.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.NewLessBaseVersion">
+            <summary>
+            Installed version &lt; base version.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.NewLessEqualBaseVersion">
+            <summary>
+            Installed version &lt;= base version.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.NewEqualBaseVersion">
+            <summary>
+            Installed version = base version.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.NewGreaterEqualBaseVersion">
+            <summary>
+            Installed version &gt;= base version.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.NewGreaterBaseVersion">
+            <summary>
+            Installed version &gt; base version.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msi.TransformValidations.UpgradeCode">
+            <summary>
+            UpgradeCode must match base database.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.View">
+            <summary>
+            Wrapper class for MSI API views.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.View.#ctor(WixToolset.Core.Native.Msi.Database,System.String)">
+            <summary>
+            Constructor that creates a view given a database handle and a query.
+            </summary>
+            <param name="db">Handle to the database to run the query on.</param>
+            <param name="query">Query to be executed.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msi.View.Records">
+            <summary>
+            Enumerator that automatically disposes of the retrieved Records.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.View.Execute">
+            <summary>
+            Executes a view with no customizable parameters.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.View.Execute(WixToolset.Core.Native.Msi.Record)">
+            <summary>
+            Executes a query substituing the values from the records into the customizable parameters 
+            in the view.
+            </summary>
+            <param name="record">Record containing parameters to be substituded into the view.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.View.Fetch">
+            <summary>
+            Fetches the next row in the view.
+            </summary>
+            <returns>Returns the fetched record; otherwise null.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.View.Modify(WixToolset.Core.Native.Msi.ModifyView,WixToolset.Core.Native.Msi.Record)">
+            <summary>
+            Updates a fetched record.
+            </summary>
+            <param name="type">Type of modification mode.</param>
+            <param name="record">Record to be modified.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.View.GetColumnNames">
+            <summary>
+            Get the column names in a record.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.View.GetColumnTypes">
+            <summary>
+            Get the column types in a record.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.View.GetColumnInfo(System.Int32)">
+            <summary>
+            Returns a record containing column names or definitions.
+            </summary>
+            <param name="columnType">Specifies a flag indicating what type of information is needed. Either MSICOLINFO_NAMES or MSICOLINFO_TYPES.</param>
+            <returns>The record containing information about the column.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msi.WixInvalidIdtException">
+            <summary>
+            WiX invalid idt exception.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.WixInvalidIdtException.#ctor">
+            <summary>
+            Instantiate a new WixInvalidIdtException.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.WixInvalidIdtException.#ctor(System.String,System.Exception)">
+            <summary>
+            Instantiate a new WixInvalidIdtException.
+            </summary>
+            <param name="message"></param>
+            <param name="innerException"></param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.WixInvalidIdtException.#ctor(System.String)">
+            <summary>
+            Instantiate a new WixInvalidIdtException.
+            </summary>
+            <param name="idtFile">The invalid idt file.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msi.WixInvalidIdtException.#ctor(System.String,System.String)">
+            <summary>
+            Instantiate a new WixInvalidIdtException.
+            </summary>
+            <param name="idtFile">The invalid idt file.</param>
+            <param name="tableName">The table name of the invalid idt file.</param>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.ConfigurationCallback">
+            <summary>
+            Callback object for configurable merge modules.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.ConfigurationCallback.#ctor(System.String)">
+            <summary>
+            Creates a ConfigurationCallback object.
+            </summary>
+            <param name="configData">String to break up into name/value pairs.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.ConfigurationCallback.ProvideTextData(System.String,System.String@)">
+            <summary>
+            Returns text data based on name.
+            </summary>
+            <param name="name">Name of value to return.</param>
+            <param name="configData">Out param to put configuration data into.</param>
+            <returns>S_OK if value provided, S_FALSE if not.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.ConfigurationCallback.ProvideIntegerData(System.String,System.Int32@)">
+            <summary>
+            Returns integer data based on name.
+            </summary>
+            <param name="name">Name of value to return.</param>
+            <param name="configData">Out param to put configuration data into.</param>
+            <returns>S_OK if value provided, S_FALSE if not.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.IMsmConfigureModule">
+            <summary>
+            Callback for configurable merge modules.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmConfigureModule.ProvideTextData(System.String,System.String@)">
+            <summary>
+            Callback to retrieve text data for configurable merge modules.
+            </summary>
+            <param name="name">Name of the data to be retrieved.</param>
+            <param name="configData">The data corresponding to the name.</param>
+            <returns>The error code (HRESULT).</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmConfigureModule.ProvideIntegerData(System.String,System.Int32@)">
+            <summary>
+            Callback to retrieve integer data for configurable merge modules.
+            </summary>
+            <param name="name">Name of the data to be retrieved.</param>
+            <param name="configData">The data corresponding to the name.</param>
+            <returns>The error code (HRESULT).</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.IMsmError">
+            <summary>
+            A merge error.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmError.Type">
+            <summary>
+            Gets the type of merge error.
+            </summary>
+            <value>The type of merge error.</value>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmError.Path">
+            <summary>
+            Gets the path information from the merge error.
+            </summary>
+            <value>The path information from the merge error.</value>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmError.Language">
+            <summary>
+            Gets the language information from the merge error.
+            </summary>
+            <value>The language information from the merge error.</value>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmError.DatabaseTable">
+            <summary>
+            Gets the database table from the merge error.
+            </summary>
+            <value>The database table from the merge error.</value>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmError.DatabaseKeys">
+            <summary>
+            Gets the collection of database keys from the merge error.
+            </summary>
+            <value>The collection of database keys from the merge error.</value>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmError.ModuleTable">
+            <summary>
+            Gets the module table from the merge error.
+            </summary>
+            <value>The module table from the merge error.</value>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmError.ModuleKeys">
+            <summary>
+            Gets the collection of module keys from the merge error.
+            </summary>
+            <value>The collection of module keys from the merge error.</value>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.IMsmErrors">
+            <summary>
+            Collection of merge errors.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmErrors.Item(System.Int32)">
+            <summary>
+            Gets the IMsmError at the specified index.
+            </summary>
+            <param name="index">The one-based index of the IMsmError to get.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmErrors.Count">
+            <summary>
+            Gets the count of IMsmErrors in this collection.
+            </summary>
+            <value>The count of IMsmErrors in this collection.</value>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.IMsmMerge2">
+            <summary>
+            IMsmMerge2 interface.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.OpenDatabase(System.String)">
+            <summary>
+            The OpenDatabase method of the Merge object opens a Windows Installer installation
+            database, located at a specified path, that is to be merged with a module.
+            </summary>
+            <param name="path">Path to the database being opened.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.OpenModule(System.String,System.Int16)">
+            <summary>
+            The OpenModule method of the Merge object opens a Windows Installer merge module
+            in read-only mode. A module must be opened before it can be merged with an installation database.
+            </summary>
+            <param name="fileName">Fully qualified file name pointing to a merge module.</param>
+            <param name="language">A valid language identifier (LANGID).</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.CloseDatabase(System.Boolean)">
+            <summary>
+            The CloseDatabase method of the Merge object closes the currently open Windows Installer database.
+            </summary>
+            <param name="commit">true if changes should be saved, false otherwise.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.CloseModule">
+            <summary>
+            The CloseModule method of the Merge object closes the currently open Windows Installer merge module.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.OpenLog(System.String)">
+            <summary>
+            The OpenLog method of the Merge object opens a log file that receives progress and error messages.
+            If the log file already exists, the installer appends new messages. If the log file does not exist,
+            the installer creates a log file.
+            </summary>
+            <param name="fileName">Fully qualified filename pointing to a file to open or create.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.CloseLog">
+            <summary>
+            The CloseLog method of the Merge object closes the current log file.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.Log(System.String)">
+            <summary>
+            The Log method of the Merge object writes a text string to the currently open log file.
+            </summary>
+            <param name="message">The text string to display.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmMerge2.Errors">
+            <summary>
+            Gets the errors from the last merge operation.
+            </summary>
+            <value>The errors from the last merge operation.</value>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmMerge2.Dependencies">
+            <summary>
+            Gets a collection of Dependency objects that enumerates a set of unsatisfied dependencies for the current database.
+            </summary>
+            <value>A  collection of Dependency objects that enumerates a set of unsatisfied dependencies for the current database.</value>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.Merge(System.String,System.String)">
+            <summary>
+            The Merge method of the Merge object executes a merge of the current database and current
+            module. The merge attaches the components in the module to the feature identified by Feature.
+            The root of the module's directory tree is redirected to the location given by RedirectDir.
+            </summary>
+            <param name="feature">The name of a feature in the database.</param>
+            <param name="redirectDir">The key of an entry in the Directory table of the database.
+            This parameter may be NULL or an empty string.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.Connect(System.String)">
+            <summary>
+            The Connect method of the Merge object connects a module to an additional feature.
+            The module must have already been merged into the database or will be merged into the database.
+            The feature must exist before calling this function.
+            </summary>
+            <param name="feature">The name of a feature already existing in the database.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.ExtractCAB(System.String)">
+            <summary>
+            The ExtractCAB method of the Merge object extracts the embedded .cab file from a module and
+            saves it as the specified file. The installer creates this file if it does not already exist
+            and overwritten if it does exist.
+            </summary>
+            <param name="fileName">The fully qualified destination file.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.ExtractFiles(System.String)">
+            <summary>
+            The ExtractFiles method of the Merge object extracts the embedded .cab file from a module
+            and then writes those files to the destination directory.
+            </summary>
+            <param name="path">The fully qualified destination directory.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.MergeEx(System.String,System.String,WixToolset.Core.Native.Msm.IMsmConfigureModule)">
+            <summary>
+            The MergeEx method of the Merge object is equivalent to the Merge function, except that it
+            takes an extra argument.  The Merge method executes a merge of the current database and
+            current module. The merge attaches the components in the module to the feature identified
+            by Feature. The root of the module's directory tree is redirected to the location given by RedirectDir.
+            </summary>
+            <param name="feature">The name of a feature in the database.</param>
+            <param name="redirectDir">The key of an entry in the Directory table of the database. This parameter may
+            be NULL or an empty string.</param>
+            <param name="configuration">The pConfiguration argument is an interface implemented by the client. The argument may
+            be NULL. The presence of this argument indicates that the client is capable of supporting the configuration
+            functionality, but does not obligate the client to provide configuration data for any specific configurable item.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.ExtractFilesEx(System.String,System.Boolean,System.IntPtr@)">
+            <summary>
+            The ExtractFilesEx method of the Merge object extracts the embedded .cab file from a module and
+            then writes those files to the destination directory.
+            </summary>
+            <param name="path">The fully qualified destination directory.</param>
+            <param name="longFileNames">Set to specify using long file names for path segments and final file names.</param>
+            <param name="filePaths">This is a list of fully-qualified paths for the files that were successfully extracted.
+            The list is empty if no files can be extracted.  This argument may be null.  No list is provided if pFilePaths is null.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmMerge2.ConfigurableItems">
+            <summary>
+            Gets a collection ConfigurableItem objects, each of which represents a single row from the ModuleConfiguration table.
+            </summary>
+            <value>A collection ConfigurableItem objects, each of which represents a single row from the ModuleConfiguration table.</value>
+            <remarks>Semantically, each interface in the enumerator represents an item that can be configured by the module consumer.
+            The collection is a read-only collection and implements the standard read-only collection interfaces of Item(), Count() and _NewEnum().
+            The IEnumMsmConfigItems enumerator implements Next(), Skip(), Reset(), and Clone() with the standard semantics.</remarks>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IMsmMerge2.CreateSourceImage(System.String,System.Boolean,System.IntPtr@)">
+            <summary>
+            The CreateSourceImage method of the Merge object allows the client to extract the files from a module to
+            a source image on disk after a merge, taking into account changes to the module that might have been made
+            during module configuration. The list of files to be extracted is taken from the file table of the module
+            during the merge process. The list of files consists of every file successfully copied from the file table
+            of the module to the target database. File table entries that were not copied due to primary key conflicts
+            with existing rows in the database are not a part of this list. At image creation time, the directory for
+            each of these files comes from the open (post-merge) database. The path specified in the Path parameter is
+            the root of the source image for the install. fLongFileNames determines whether or not long file names are
+            used for both path segments and final file names. The function fails if no database is open, no module is
+            open, or no merge has been performed.
+            </summary>
+            <param name="path">The path of the root of the source image for the install.</param>
+            <param name="longFileNames">Determines whether or not long file names are used for both path segments and final file names. </param>
+            <param name="filePaths">This is a list of fully-qualified paths for the files that were successfully extracted.
+            The list is empty if no files can be extracted.  This argument may be null.  No list is provided if pFilePaths is null.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmMerge2.ModuleFiles">
+            <summary>
+            The get_ModuleFiles function implements the ModuleFiles property of the GetFiles object. This function
+            returns the primary keys in the File table of the currently open module. The primary keys are returned
+            as a collection of strings. The module must be opened by a call to the OpenModule function before calling get_ModuleFiles.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.IMsmStrings">
+            <summary>
+            A collection of strings.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmStrings.Item(System.Int32)">
+            <summary>
+            Gets the string at the specified index.
+            </summary>
+            <param name="index">The one-based index of the string to get.</param>
+        </member>
+        <member name="P:WixToolset.Core.Native.Msm.IMsmStrings.Count">
+            <summary>
+            Gets the count of strings in this collection.
+            </summary>
+            <value>The count of strings in this collection.</value>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.MsmErrorType">
+            <summary>
+            Errors returned by merge operations.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorLanguageUnsupported">
+            <summary>
+            A request was made to open a module with a language not supported by the module.
+            No more general language is supported by the module.
+            Adds msmErrorLanguageUnsupported to the Type property and the requested language
+            to the Language Property (Error Object).  All Error object properties are empty.
+            The OpenModule function returns ERROR_INSTALL_LANGUAGE_UNSUPPORTED (as HRESULT).
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorLanguageFailed">
+            <summary>
+            A request was made to open a module with a supported language but the module has
+            an invalid language transform.  Adds msmErrorLanguageFailed to the Type property
+            and the applied transform's language to the Language Property of the Error object.
+            This may not be the requested language if a more general language was used.
+            All other properties of the Error object are empty.  The OpenModule function
+            returns ERROR_INSTALL_LANGUAGE_UNSUPPORTED (as HRESULT).
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorExclusion">
+            <summary>
+            The module cannot be merged because it excludes, or is excluded by, another module
+            in the database.  Adds msmErrorExclusion to the Type property of the Error object.
+            The ModuleKeys property or DatabaseKeys property contains the primary keys of the
+            excluded module's row in the ModuleExclusion table.  If an existing module excludes
+            the module being merged, the excluded module's ModuleSignature information is added
+            to ModuleKeys.  If the module being merged excludes an existing module, DatabaseKeys
+            contains the excluded module's ModuleSignature information.  All other properties
+            are empty (or -1).
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorTableMerge">
+            <summary>
+            Merge conflict during merge.  The value of the Type property is set to
+            msmErrorTableMerge.  The DatabaseTable property and DatabaseKeys property contain
+            the table name and primary keys of the conflicting row in the database.  The
+            ModuleTable property and ModuleKeys property contain the table name and primary keys
+            of the conflicting row in the module.  The ModuleTable and ModuleKeys entries may be
+            null if the row does not exist in the database.  For example, if the conflict is in a
+            generated FeatureComponents table entry.  On Windows Installer version 2.0, when
+            merging a configurable merge module, configuration may cause these properties to
+            refer to rows that do not exist in the module.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorResequenceMerge">
+            <summary>
+            There was a problem resequencing a sequence table to contain the necessary merged
+            actions.  The Type property is set to msmErrorResequenceMerge. The DatabaseTable
+            and DatabaseKeys properties contain the sequence table name and primary keys
+            (action name) of the conflicting row.  The ModuleTable and ModuleKeys properties
+            contain the sequence table name and primary key (action name) of the conflicting row.
+            On Windows Installer version 2.0, when merging a configurable merge module,
+            configuration may cause these properties to refer to rows that do not exist in the module.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorFileCreate">
+            <summary>
+            Not used.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorDirCreate">
+            <summary>
+            There was a problem creating a directory to extract a file to disk.  The Path property
+            contains the directory that could not be created.  All other properties are empty or -1.
+            Not available with Windows Installer version 1.0.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorFeatureRequired">
+            <summary>
+            A feature name is required to complete the merge, but no feature name was provided.
+            The Type property is set to msmErrorFeatureRequired.  The DatabaseTable and DatabaseKeys
+            contain the table name and primary keys of the conflicting row.  The ModuleTable and
+            ModuleKeys properties contain the table name and primary keys of the row cannot be merged.
+            On Windows Installer version 2.0, when merging a configurable merge module, configuration
+            may cause these properties to refer to rows that do not exist in the module.
+            If the failure is in a generated FeatureComponents table, the DatabaseTable and
+            DatabaseKeys properties are empty and the ModuleTable and ModuleKeys properties refer to
+            the row in the Component table causing the failure.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorBadNullSubstitution">
+            <summary>
+            Available with Window Installer version 2.0. Substitution of a Null value into a
+            non-nullable column.  This enters msmErrorBadNullSubstitution in the Type property and
+            enters "ModuleSubstitution" and the keys from the ModuleSubstitution table for this row
+            into the ModuleTable property and ModuleKeys property.  All other properties of the Error
+            object are set to an empty string or -1.  This error causes the immediate failure of the
+            merge and the MergeEx function to return E_FAIL.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorBadSubstitutionType">
+            <summary>
+            Available with Window Installer version 2.0.  Substitution of Text Format Type or Integer
+            Format Type into a Binary Type data column.  This type of error returns
+            msmErrorBadSubstitutionType in the Type property and enters "ModuleSubstitution" and the
+            keys from the ModuleSubstitution table for this row into the ModuleTable property.
+            All other properties of the Error object are set to an empty string or -1.  This error
+            causes the immediate failure of the merge and the MergeEx function to return E_FAIL.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorMissingConfigItem">
+            <summary>
+            Available with Window Installer Version 2.0.  A row in the ModuleSubstitution table
+            references a configuration item not defined in the ModuleConfiguration table.
+            This type of error returns msmErrorMissingConfigItem in the Type property and enters
+            "ModuleSubstitution" and the keys from the ModuleSubstitution table for this row into
+            the ModuleTable property. All other properties of the Error object are set to an empty
+            string or -1.  This error causes the immediate failure of the merge and the MergeEx
+            function to return E_FAIL.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorBadNullResponse">
+            <summary>
+            Available with Window Installer version 2.0.  The authoring tool has returned a Null
+            value for an item marked with the msmConfigItemNonNullable attribute.  An error of this
+            type returns msmErrorBadNullResponse in the Type property and enters "ModuleSubstitution"
+            and the keys from the ModuleSubstitution table for for the item into the ModuleTable property.
+            All other properties of the Error object are set to an empty string or -1.  This error
+            causes the immediate failure of the merge and the MergeEx function to return E_FAIL.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorDataRequestFailed">
+            <summary>
+            Available with Window Installer version 2.0.  The authoring tool returned a failure code
+            (not S_OK or S_FALSE) when asked for data. An error of this type will return
+            msmErrorDataRequestFailed in the Type property and enters "ModuleSubstitution"
+            and the keys from the ModuleSubstitution table for the item into the ModuleTable property.
+            All other properties of the Error object are set to an empty string or -1.  This error
+            causes the immediate failure of the merge and the MergeEx function to return E_FAIL.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Msm.MsmErrorType.msmErrorPlatformMismatch">
+            <summary>
+            Available with Windows Installer 2.0 and later versions.  Indicates that an attempt was
+            made to merge a 64-bit module into a package that was not a 64-bit package.  An error of
+            this type returns msmErrorPlatformMismatch in the Type property.  All other properties of
+            the error object are set to an empty string or -1. This error causes the immediate failure
+            of the merge and causes the Merge function or MergeEx function to return E_FAIL.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.MsmMerge2">
+            <summary>
+            Merge merge modules into an MSI file.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.IClassFactory">
+            <summary>
+            Defines the standard COM IClassFactory interface.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.IClassFactory.CreateInstance(System.IntPtr,System.Guid)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Msm.MsmInterop">
+            <summary>
+            Contains native methods for merge operations.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Msm.MsmInterop.GetMsmMerge">
+            <summary>
+            Load the merge object directly from a local mergemod.dll without going through COM registration.
+            </summary>
+            <returns>Merge interface.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Ole32.Storage">
+            <summary>
+            Wrapper for the compound storage file APIs.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.#ctor(WixToolset.Core.Native.Ole32.Storage.IStorage)">
+            <summary>
+            Instantiate a new Storage.
+            </summary>
+            <param name="storage">The native storage interface.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.Finalize">
+            <summary>
+            Storage destructor.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Ole32.Storage.IEnumSTATSTG">
+            <summary>
+            The IEnumSTATSTG interface enumerates an array of STATSTG structures.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IEnumSTATSTG.Next(System.UInt32,System.Runtime.InteropServices.ComTypes.STATSTG[],System.UInt32@)">
+            <summary>
+            Gets a specified number of STATSTG structures.
+            </summary>
+            <param name="celt">The number of STATSTG structures requested.</param>
+            <param name="rgelt">An array of STATSTG structures returned.</param>
+            <param name="pceltFetched">The number of STATSTG structures retrieved in the rgelt parameter.</param>
+            <returns>The error code.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IEnumSTATSTG.Skip(System.UInt32)">
+            <summary>
+            Skips a specified number of STATSTG structures in the enumeration sequence.
+            </summary>
+            <param name="celt">The number of STATSTG structures to skip.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IEnumSTATSTG.Reset">
+            <summary>
+            Resets the enumeration sequence to the beginning of the STATSTG structure array.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IEnumSTATSTG.Clone">
+            <summary>
+            Creates a new enumerator that contains the same enumeration state as the current STATSTG structure enumerator.
+            </summary>
+            <returns>The cloned IEnumSTATSTG interface.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Ole32.Storage.IStorage">
+            <summary>
+            The IStorage interface supports the creation and management of structured storage objects.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.CreateStream(System.String,System.UInt32,System.UInt32,System.UInt32,WixToolset.Core.Native.Ole32.Storage.IStream@)">
+            <summary>
+            Creates and opens a stream object with the specified name contained in this storage object.
+            </summary>
+            <param name="pwcsName">The name of the newly created stream.</param>
+            <param name="grfMode">Specifies the access mode to use when opening the newly created stream.</param>
+            <param name="reserved1">Reserved for future use; must be zero.</param>
+            <param name="reserved2">Reserved for future use; must be zero.</param>
+            <param name="ppstm">On return, pointer to the location of the new IStream interface pointer.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.OpenStream(System.String,System.IntPtr,System.UInt32,System.UInt32,WixToolset.Core.Native.Ole32.Storage.IStream@)">
+            <summary>
+            Opens an existing stream object within this storage object using the specified access permissions in grfMode.
+            </summary>
+            <param name="pwcsName">The name of the stream to open.</param>
+            <param name="reserved1">Reserved for future use; must be NULL.</param>
+            <param name="grfMode">Specifies the access mode to be assigned to the open stream.</param>
+            <param name="reserved2">Reserved for future use; must be zero.</param>
+            <param name="ppstm">A pointer to IStream pointer variable that receives the interface pointer to the newly opened stream object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.CreateStorage(System.String,System.UInt32,System.UInt32,System.UInt32,WixToolset.Core.Native.Ole32.Storage.IStorage@)">
+            <summary>
+            Creates and opens a new storage object nested within this storage object with the specified name in the specified access mode.
+            </summary>
+            <param name="pwcsName">The name of the newly created storage object.</param>
+            <param name="grfMode">A value that specifies the access mode to use when opening the newly created storage object.</param>
+            <param name="reserved1">Reserved for future use; must be zero.</param>
+            <param name="reserved2">Reserved for future use; must be zero.</param>
+            <param name="ppstg">A pointer, when successful, to the location of the IStorage pointer to the newly created storage object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.OpenStorage(System.String,WixToolset.Core.Native.Ole32.Storage.IStorage,System.UInt32,System.IntPtr,System.UInt32,WixToolset.Core.Native.Ole32.Storage.IStorage@)">
+            <summary>
+            Opens an existing storage object with the specified name in the specified access mode.
+            </summary>
+            <param name="pwcsName">The name of the storage object to open.</param>
+            <param name="pstgPriority">Must be NULL.</param>
+            <param name="grfMode">Specifies the access mode to use when opening the storage object.</param>
+            <param name="snbExclude">Must be NULL.</param>
+            <param name="reserved">Reserved for future use; must be zero.</param>
+            <param name="ppstg">When successful, pointer to the location of an IStorage pointer to the opened storage object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.CopyTo(System.UInt32,System.IntPtr,System.IntPtr,WixToolset.Core.Native.Ole32.Storage.IStorage)">
+            <summary>
+            Copies the entire contents of an open storage object to another storage object.
+            </summary>
+            <param name="ciidExclude">The number of elements in the array pointed to by rgiidExclude.</param>
+            <param name="rgiidExclude">An array of interface identifiers (IIDs) that either the caller knows about and does not want
+            copied or that the storage object does not support, but whose state the caller will later explicitly copy.</param>
+            <param name="snbExclude">A string name block (refer to SNB) that specifies a block of storage or stream objects that are not to be copied to the destination.</param>
+            <param name="pstgDest">A pointer to the open storage object into which this storage object is to be copied.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.MoveElementTo(System.String,WixToolset.Core.Native.Ole32.Storage.IStorage,System.String,System.UInt32)">
+            <summary>
+            Copies or moves a substorage or stream from this storage object to another storage object.
+            </summary>
+            <param name="pwcsName">The name of the element in this storage object to be moved or copied.</param>
+            <param name="pstgDest">IStorage pointer to the destination storage object.</param>
+            <param name="pwcsNewName">The new name for the element in its new storage object.</param>
+            <param name="grfFlags">Specifies whether the operation should be a move (STGMOVE_MOVE) or a copy (STGMOVE_COPY).</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.Commit(System.UInt32)">
+            <summary>
+            Reflects changes for a transacted storage object to the parent level.
+            </summary>
+            <param name="grfCommitFlags">Controls how the changes are committed to the storage object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.Revert">
+            <summary>
+            Discards all changes that have been made to the storage object since the last commit operation.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.EnumElements(System.UInt32,System.IntPtr,System.UInt32,WixToolset.Core.Native.Ole32.Storage.IEnumSTATSTG@)">
+            <summary>
+            Returns an enumerator object that can be used to enumerate the storage and stream objects contained within this storage object.
+            </summary>
+            <param name="reserved1">Reserved for future use; must be zero.</param>
+            <param name="reserved2">Reserved for future use; must be NULL.</param>
+            <param name="reserved3">Reserved for future use; must be zero.</param>
+            <param name="ppenum">Pointer to IEnumSTATSTG* pointer variable that receives the interface pointer to the new enumerator object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.DestroyElement(System.String)">
+            <summary>
+            Removes the specified storage or stream from this storage object.
+            </summary>
+            <param name="pwcsName">The name of the storage or stream to be removed.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.RenameElement(System.String,System.String)">
+            <summary>
+            Renames the specified storage or stream in this storage object.
+            </summary>
+            <param name="pwcsOldName">The name of the substorage or stream to be changed.</param>
+            <param name="pwcsNewName">The new name for the specified substorage or stream.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.SetElementTimes(System.String,System.Runtime.InteropServices.ComTypes.FILETIME,System.Runtime.InteropServices.ComTypes.FILETIME,System.Runtime.InteropServices.ComTypes.FILETIME)">
+            <summary>
+            Sets the modification, access, and creation times of the indicated storage element, if supported by the underlying file system.
+            </summary>
+            <param name="pwcsName">The name of the storage object element whose times are to be modified.</param>
+            <param name="pctime">Either the new creation time for the element or NULL if the creation time is not to be modified.</param>
+            <param name="patime">Either the new access time for the element or NULL if the access time is not to be modified.</param>
+            <param name="pmtime">Either the new modification time for the element or NULL if the modification time is not to be modified.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.SetClass(System.Guid)">
+            <summary>
+            Assigns the specified CLSID to this storage object.
+            </summary>
+            <param name="clsid">The CLSID that is to be associated with the storage object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.SetStateBits(System.UInt32,System.UInt32)">
+            <summary>
+            Stores up to 32 bits of state information in this storage object.
+            </summary>
+            <param name="grfStateBits">Specifies the new values of the bits to set.</param>
+            <param name="grfMask">A binary mask indicating which bits in grfStateBits are significant in this call.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStorage.Stat(System.Runtime.InteropServices.ComTypes.STATSTG@,System.UInt32)">
+            <summary>
+            Returns the STATSTG structure for this open storage object.
+            </summary>
+            <param name="pstatstg">On return, pointer to a STATSTG structure where this method places information about the open storage object.</param>
+            <param name="grfStatFlag">Specifies that some of the members in the STATSTG structure are not returned, thus saving a memory allocation operation.</param>
+        </member>
+        <member name="T:WixToolset.Core.Native.Ole32.Storage.IStream">
+            <summary>
+            The IStream interface lets you read and write data to stream objects.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.Read(System.Byte[],System.Int32,System.IntPtr)">
+            <summary>
+            Reads a specified number of bytes from the stream object into memory starting at the current seek pointer.
+            </summary>
+            <param name="pv">A pointer to the buffer which the stream data is read into.</param>
+            <param name="cb">The number of bytes of data to read from the stream object.</param>
+            <param name="pcbRead">A pointer to a ULONG variable that receives the actual number of bytes read from the stream object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.Write(System.Byte[],System.Int32,System.IntPtr)">
+            <summary>
+            Writes a specified number of bytes into the stream object starting at the current seek pointer.
+            </summary>
+            <param name="pv">A pointer to the buffer that contains the data that is to be written to the stream.</param>
+            <param name="cb">The number of bytes of data to attempt to write into the stream.</param>
+            <param name="pcbWritten">A pointer to a ULONG variable where this method writes the actual number of bytes written to the stream object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.Seek(System.Int64,System.Int32,System.IntPtr)">
+            <summary>
+            Changes the seek pointer to a new location relative to the beginning of the stream, the end of the stream, or the current seek pointer.
+            </summary>
+            <param name="dlibMove">The displacement to be added to the location indicated by the dwOrigin parameter.</param>
+            <param name="dwOrigin">The origin for the displacement specified in dlibMove.</param>
+            <param name="plibNewPosition">A pointer to the location where this method writes the value of the new seek pointer from the beginning of the stream.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.SetSize(System.Int64)">
+            <summary>
+            Changes the size of the stream object.
+            </summary>
+            <param name="libNewSize">Specifies the new size of the stream as a number of bytes.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.CopyTo(WixToolset.Core.Native.Ole32.Storage.IStream,System.Int64,System.IntPtr,System.IntPtr)">
+            <summary>
+            Copies a specified number of bytes from the current seek pointer in the stream to the current seek pointer in another stream.
+            </summary>
+            <param name="pstm">A pointer to the destination stream.</param>
+            <param name="cb">The number of bytes to copy from the source stream.</param>
+            <param name="pcbRead">A pointer to the location where this method writes the actual number of bytes read from the source.</param>
+            <param name="pcbWritten">A pointer to the location where this method writes the actual number of bytes written to the destination.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.Commit(System.Int32)">
+            <summary>
+            Ensures that any changes made to a stream object open in transacted mode are reflected in the parent storage object.
+            </summary>
+            <param name="grfCommitFlags">Controls how the changes for the stream object are committed.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.Revert">
+            <summary>
+            Discards all changes that have been made to a transacted stream since the last call to IStream::Commit.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.LockRegion(System.Int64,System.Int64,System.Int32)">
+            <summary>
+            Restricts access to a specified range of bytes in the stream.
+            </summary>
+            <param name="libOffset">Integer that specifies the byte offset for the beginning of the range.</param>
+            <param name="cb">Integer that specifies the length of the range, in bytes, to be restricted.</param>
+            <param name="dwLockType">Specifies the restrictions being requested on accessing the range.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.UnlockRegion(System.Int64,System.Int64,System.Int32)">
+            <summary>
+            Removes the access restriction on a range of bytes previously restricted with IStream::LockRegion.
+            </summary>
+            <param name="libOffset">Specifies the byte offset for the beginning of the range.</param>
+            <param name="cb">Specifies, in bytes, the length of the range to be restricted.</param>
+            <param name="dwLockType">Specifies the access restrictions previously placed on the range.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.Stat(System.Runtime.InteropServices.ComTypes.STATSTG@,System.Int32)">
+            <summary>
+            Retrieves the STATSTG structure for this stream.
+            </summary>
+            <param name="pstatstg">Pointer to a STATSTG structure where this method places information about this stream object.</param>
+            <param name="grfStatFlag">Specifies that this method does not return some of the members in the STATSTG structure, thus saving a memory allocation operation.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.IStream.Clone(WixToolset.Core.Native.Ole32.Storage.IStream@)">
+            <summary>
+            Creates a new stream object that references the same bytes as the original stream but provides a separate seek pointer to those bytes.
+            </summary>
+            <param name="ppstm">When successful, pointer to the location of an IStream pointer to the new stream object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.CreateDocFile(System.String,WixToolset.Core.Native.Ole32.StorageMode)">
+            <summary>
+            Creates a new compound file storage object.
+            </summary>
+            <param name="storageFile">The compound file being created.</param>
+            <param name="mode">Specifies the access mode to use when opening the new storage object.</param>
+            <returns>The created Storage object.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.Open(System.String,WixToolset.Core.Native.Ole32.StorageMode)">
+            <summary>
+            Opens an existing root storage object in the file system.
+            </summary>
+            <param name="storageFile">The file that contains the storage object to open.</param>
+            <param name="mode">Specifies the access mode to use to open the storage object.</param>
+            <returns>The created Storage object.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.CopyTo(WixToolset.Core.Native.Ole32.Storage)">
+            <summary>
+            Copies the entire contents of this open storage object into another Storage object.
+            </summary>
+            <param name="destinationStorage">The destination Storage object.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.OpenStorage(System.String)">
+            <summary>
+            Opens an existing Storage object with the specified name according to the specified access mode.
+            </summary>
+            <param name="name">The name of the Storage object.</param>
+            <returns>The opened Storage object.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.Dispose">
+            <summary>
+            Disposes the managed and unmanaged objects in this object.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.Ole32.Storage.NativeMethods">
+            <summary>
+            The native methods.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.NativeMethods.StgCreateDocfile(System.String,System.UInt32,System.UInt32)">
+            <summary>
+            Creates a new compound file storage object.
+            </summary>
+            <param name="pwcsName">The name for the compound file being created.</param>
+            <param name="grfMode">Specifies the access mode to use when opening the new storage object.</param>
+            <param name="reserved">Reserved for future use; must be zero.</param>
+            <returns>A pointer to the location of the IStorage pointer to the new storage object.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.Ole32.Storage.NativeMethods.StgOpenStorage(System.String,System.IntPtr,System.UInt32,System.IntPtr,System.UInt32)">
+            <summary>
+            Opens an existing root storage object in the file system.
+            </summary>
+            <param name="pwcsName">The file that contains the storage object to open.</param>
+            <param name="pstgPriority">Most often NULL.</param>
+            <param name="grfMode">Specifies the access mode to use to open the storage object.</param>
+            <param name="snbExclude">If not NULL, pointer to a block of elements in the storage to be excluded as the storage object is opened.</param>
+            <param name="reserved">Indicates reserved for future use; must be zero.</param>
+            <returns>A pointer to a IStorage* pointer variable that receives the interface pointer to the opened storage.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.Ole32.StorageMode">
+            <summary>
+            Specifies the access mode to use when opening, creating, or deleting a storage object.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.Read">
+            <summary>
+            Indicates that the object is read-only, meaning that modifications cannot be made.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.Write">
+            <summary>
+            Enables you to save changes to the object, but does not permit access to its data.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.ReadWrite">
+            <summary>
+            Enables access and modification of object data.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.ShareDenyNone">
+            <summary>
+            Specifies that subsequent openings of the object are not denied read or write access.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.ShareDenyRead">
+            <summary>
+            Prevents others from subsequently opening the object in Read mode.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.ShareDenyWrite">
+            <summary>
+            Prevents others from subsequently opening the object for Write or ReadWrite access.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.ShareExclusive">
+            <summary>
+            Prevents others from subsequently opening the object in any mode.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.Priority">
+            <summary>
+            Opens the storage object with exclusive access to the most recently committed version.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.Ole32.StorageMode.Create">
+            <summary>
+            Indicates that an existing storage object or stream should be removed before the new object replaces it.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop">
+            <summary>
+            Interop class for the mspatchc.dll.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.PatchAPI.PatchInterop.ParseHexOrDecimal(System.String)">
+            <summary>
+            Parse a number from text in either hex or decimal.
+            </summary>
+            <param name="source">Source value. Treated as hex if it starts 0x (or 0X), decimal otherwise.</param>
+            <returns>Numeric value that source represents.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.PatchAPI.PatchInterop.CreateDelta(System.String,System.String,System.String,System.String,System.String[],System.String[],System.String[],System.String[],System.String[],System.String[],WixToolset.Data.Symbols.PatchSymbolFlags,System.Boolean,System.Boolean@)">
+            <summary>
+            Create a binary delta file.
+            </summary>
+            <param name="deltaFile">Name of the delta file to create.</param>
+            <param name="targetFile">Name of updated file.</param>
+            <param name="targetSymbolPath">Optional paths to updated file's symbols.</param>
+            <param name="targetRetainOffsets">Optional offsets to the delta retain sections in the updated file.</param>
+            <param name="basisFiles">Optional array of target files.</param>
+            <param name="basisSymbolPaths">Optional array of target files' symbol paths (must match basisFiles array).</param>
+            <param name="basisIgnoreLengths">Optional array of target files' delta ignore section lengths (must match basisFiles array)(each entry must match basisIgnoreOffsets entries).</param>
+            <param name="basisIgnoreOffsets">Optional array of target files' delta ignore section offsets (must match basisFiles array)(each entry must match basisIgnoreLengths entries).</param>
+            <param name="basisRetainLengths">Optional array of target files' delta protect section lengths (must match basisFiles array)(each entry must match basisRetainOffsets and targetRetainOffsets entries).</param>
+            <param name="basisRetainOffsets">Optional array of target files' delta protect section offsets (must match basisFiles array)(each entry must match basisRetainLengths and targetRetainOffsets entries).</param>
+            <param name="apiPatchingSymbolFlags">ApiPatchingSymbolFlags value.</param>
+            <param name="optimizePatchSizeForLargeFiles">OptimizePatchSizeForLargeFiles value.</param>
+            <param name="retainRangesIgnored">Flag to indicate retain ranges were ignored due to mismatch.</param>
+            <returns>true if delta file was created, false if whole file should be used instead.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.PatchAPI.PatchInterop.ExtractDeltaHeader(System.String,System.String)">
+            <summary>
+            Extract the delta header.
+            </summary>
+            <param name="delta">Name of delta file.</param>
+            <param name="deltaHeader">Name of file to create with the delta's header.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchOptionFlags(System.Boolean)">
+            <summary>
+            Returns the PatchOptionFlags to use.
+            </summary>
+            <param name="optimizeForLargeFiles">True if optimizing for large files.</param>
+            <returns>PATCH_OPTION_FLAG values</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchProgressCallback">
+            <summary>
+            Delegate type that the PatchAPI calls for progress notification.
+            </summary>
+            <param name="context">.</param>
+            <param name="currentPosition">.</param>
+            <param name="maxPosition">.</param>
+            <returns>True for success</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchSymloadCallback">
+            <summary>
+            Delegate type that the PatchAPI calls for patch symbol load information.
+            </summary>
+            <param name="whichFile">.</param>
+            <param name="symbolFileName">.</param>
+            <param name="symType">.</param>
+            <param name="symbolFileCheckSum">.</param>
+            <param name="symbolFileTimeDate">.</param>
+            <param name="imageFileCheckSum">.</param>
+            <param name="imageFileTimeDate">.</param>
+            <param name="context">.</param>
+            <returns>???</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchIgnoreRange">
+            <summary>
+            Wraps PATCH_IGNORE_RANGE
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchRetainRange">
+            <summary>
+            Wraps PATCH_RETAIN_RANGE
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchOldFileInfo">
+            <summary>
+            Wraps PATCH_OLD_FILE_INFO (except for the OldFile~ portion)
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchOldFileInfoW">
+            <summary>
+            Wraps PATCH_OLD_FILE_INFO_W
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchInterleaveMapRange">
+            <summary>
+            Wraps each PATCH_INTERLEAVE_MAP Range
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchInterleaveMap">
+            <summary>
+            Wraps PATCH_INTERLEAVE_MAP
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchOptionData">
+            <summary>
+            Wraps PATCH_OPTION_DATA
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.PatchAPI.PatchInterop.CreatePatchFileExW(System.UInt32,WixToolset.Core.Native.PatchAPI.PatchInterop.PatchOldFileInfoW[],System.String,System.String,System.UInt32,WixToolset.Core.Native.PatchAPI.PatchInterop.PatchOptionData,WixToolset.Core.Native.PatchAPI.PatchInterop.PatchProgressCallback,System.IntPtr)">
+            <summary>
+            Creates a new delta.
+            </summary>
+            <param name="oldFileCount">Size of oldFileInfoArray.</param>
+            <param name="oldFileInfoArray">Target file information.</param>
+            <param name="newFileName">Name of updated file.</param>
+            <param name="patchFileName">Name of delta to create.</param>
+            <param name="optionFlags">PATCH_OPTION_xxx.</param>
+            <param name="optionData">Optional PATCH_OPTION_DATA structure.</param>
+            <param name="progressCallback">Delegate for progress callbacks.</param>
+            <param name="context">Context for progress callback delegate.</param>
+            <returns>true if successfull, sets Marshal.GetLastWin32Error() if not.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.PatchAPI.PatchInterop.ExtractPatchHeaderToFileW(System.String,System.String)">
+            <summary>
+            Extracts delta header from delta.
+            </summary>
+            <param name="patchFileName">Name of delta file.</param>
+            <param name="patchHeaderFileName">Name of file to create with delta header.</param>
+            <returns>true if successfull, sets Marshal.GetLastWin32Error() if not.</returns>
+        </member>
+        <member name="T:WixToolset.Core.Native.PatchAPI.PatchInterop.PatchAPIMarshaler">
+            <summary>
+            Marshals arguments for the CreatePatch~ APIs
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.ValidationMessage">
+            <summary>
+            Message from ICE
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.ValidationMessage.IceName">
+            <summary>
+            Name of the ICE providing the message.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.ValidationMessage.Type">
+            <summary>
+            Validation type.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.ValidationMessage.Description">
+            <summary>
+            Message text.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.ValidationMessage.HelpUrl">
+            <summary>
+            Optional help URL for the message.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.ValidationMessage.Table">
+            <summary>
+            Optional table causing the message.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.ValidationMessage.Column">
+            <summary>
+            Optional column causing the message.
+            </summary>
+        </member>
+        <member name="P:WixToolset.Core.Native.ValidationMessage.PrimaryKeys">
+            <summary>
+            Optional primary keys causing the message.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.ValidationMessageType">
+            <summary>
+            Validation message type.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.ValidationMessageType.InternalFailure">
+            <summary>
+            Failure message reporting the failure of the ICE custom action.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.ValidationMessageType.Error">
+            <summary>
+            Error message reporting database authoring that case incorrect behavior.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.ValidationMessageType.Warning">
+            <summary>
+            Warning message reporting database authoring that causes incorrect behavior in certain cases.
+            Warnings can also report unexpected side-effects of database authoring.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Core.Native.ValidationMessageType.Info">
+            <summary>
+            Informational message.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Core.Native.WindowsInstallerValidator">
+            <summary>
+            Windows installer validation implementation.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.WindowsInstallerValidator.#ctor(WixToolset.Core.Native.IWindowsInstallerValidatorCallback,System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Creates a new Windows Installer validator.
+            </summary>
+            <param name="callback">Callback interface to handle messages.</param>
+            <param name="databasePath">Database to validate.</param>
+            <param name="cubeFiles">Set of CUBe files to merge.</param>
+            <param name="ices">ICEs to execute.</param>
+            <param name="suppressedIces">Suppressed ICEs.</param>
+        </member>
+        <member name="M:WixToolset.Core.Native.WindowsInstallerValidator.Execute">
+            <summary>
+            Execute the validations.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Core.Native.WindowsInstallerValidator.ValidationUIHandler(System.IntPtr,System.UInt32,System.String)">
+            <summary>
+            The validation external UI handler.
+            </summary>
+            <param name="context">Pointer to an application context.
+            This parameter can be used for error checking.</param>
+            <param name="messageType">Specifies a combination of one message box style,
+            one message box icon type, one default button, and one installation message type.</param>
+            <param name="message">Specifies the message text.</param>
+            <returns>-1 for an error, 0 if no action was taken, 1 if OK, 3 to abort.</returns>
+        </member>
+        <member name="M:WixToolset.Core.Native.WindowsInstallerValidator.ParseValidationMessage(System.String,System.String)">
+            <summary>
+            Parses a message from the Validator.
+            </summary>
+            <param name="message">A <see cref="T:System.String"/> of tab-delmited tokens
+            in the validation message.</param>
+            <param name="currentIce">The name of the action to which the message
+            belongs.</param>
+            <exception cref="T:System.ArgumentNullException">The message cannot be null.
+            </exception>
+            <exception cref="T:WixToolset.Data.WixException">The message does not contain four (4)
+            or more tab-delimited tokens.</exception>
+            <remarks>
+            <para><paramref name="message"/> a tab-delimited set of tokens,
+            formatted according to Windows Installer guidelines for ICE
+            message. The following table lists what each token by index
+            should mean.</para>
+            <para><paramref name="currentIce"/> a name that represents the ICE
+            action that was executed (e.g. 'ICE08').</para>
+            <list type="table">
+            <listheader>
+                <term>Index</term>
+                <description>Description</description>
+            </listheader>
+            <item>
+                <term>0</term>
+                <description>Name of the ICE.</description>
+            </item>
+            <item>
+                <term>1</term>
+                <description>Message type. See the following list.</description>
+            </item>
+            <item>
+                <term>2</term>
+                <description>Detailed description.</description>
+            </item>
+            <item>
+                <term>3</term>
+                <description>Help URL or location.</description>
+            </item>
+            <item>
+                <term>4</term>
+                <description>Table name.</description>
+            </item>
+            <item>
+                <term>5</term>
+                <description>Column name.</description>
+            </item>
+            <item>
+                <term>6</term>
+                <description>This and remaining fields are primary keys
+                to identify a row.</description>
+            </item>
+            </list>
+            <para>The message types are one of the following value.</para>
+            <list type="table">
+            <listheader>
+                <term>Value</term>
+                <description>Message Type</description>
+            </listheader>
+            <item>
+                <term>0</term>
+                <description>Failure message reporting the failure of the
+                ICE custom action.</description>
+            </item>
+            <item>
+                <term>1</term>
+                <description>Error message reporting database authoring that
+                case incorrect behavior.</description>
+            </item>
+            <item>
+                <term>2</term>
+                <description>Warning message reporting database authoring that
+                causes incorrect behavior in certain cases. Warnings can also
+                report unexpected side-effects of database authoring.
+                </description>
+            </item>
+            <item>
+                <term>3</term>
+                <description>Informational message.</description>
+            </item>
+            </list>
+            </remarks>
+        </member>
+    </members>
+</doc>

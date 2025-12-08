@@ -1,0 +1,558 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WixToolset.Converters</name>
+    </assembly>
+    <members>
+        <member name="T:WixToolset.Converters.ConverterExtensionCommandLine">
+            <summary>
+            Parses the "convert" command-line command. See <c>ConvertCommand</c> for
+            the bulk of the command-line processing.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Converters.FixupCommandBase.InspectSubDirectories(System.Func{System.String,System.Boolean,System.Int32},System.String,System.Threading.CancellationToken)">
+            <summary>
+            Inspect sub-directories.
+            </summary>
+            <param name="inspector"></param>
+            <param name="directory">The directory whose sub-directories will be inspected.</param>
+            <param name="cancellationToken"></param>
+            <returns>The number of errors that were found.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.FixupCommandBase.ParseSettingsFiles(System.String,System.String)">
+            <summary>
+            Parse the primary and secondary settings files.
+            </summary>
+            <param name="localSettingsFile1">The primary settings file.</param>
+            <param name="localSettingsFile2">The secondary settings file.</param>
+        </member>
+        <member name="M:WixToolset.Converters.FixupCommandBase.GetFiles(System.String,System.String)">
+            <summary>
+            Get the files that match a search path pattern.
+            </summary>
+            <param name="baseDir">The base directory at which to begin the search.</param>
+            <param name="searchPath">The search path pattern.</param>
+            <returns>The files matching the pattern.</returns>
+        </member>
+        <member name="T:WixToolset.Converters.CustomTableTarget">
+            <summary>
+            How to convert CustomTable elements.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.CustomTableTarget.Unknown">
+            <summary>
+            Ambiguous elements will be left alone.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.CustomTableTarget.Msi">
+            <summary>
+            Use CustomTable, CustomTableRef, and Unreal.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.CustomTableTarget.Bundle">
+            <summary>
+            Use BundleCustomData and BundleCustomDataRef.
+            </summary>
+        </member>
+        <member name="T:WixToolset.Converters.WixConverter">
+            <summary>
+            WiX source code converter.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.#ctor(WixToolset.Extensibility.Services.IMessaging,System.Int32,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String},WixToolset.Converters.CustomTableTarget)">
+            <summary>
+            Instantiate a new Converter class.
+            </summary>
+            <param name="messaging"></param>
+            <param name="indentationAmount">Indentation value to use when validating leading whitespace.</param>
+            <param name="errorsAsWarnings">Test errors to display as warnings.</param>
+            <param name="ignoreErrors">Test errors to ignore.</param>
+            <param name="customTableTarget">How to convert CustomTable elements.</param>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.ConvertFile(System.String,System.Boolean)">
+            <summary>
+            Convert a file.
+            </summary>
+            <param name="sourceFile">The file to convert.</param>
+            <param name="saveConvertedFile">Option to save the converted Messages that are found.</param>
+            <returns>The number of conversions found.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.ConvertDocument(System.Xml.Linq.XDocument,System.String)">
+            <summary>
+            Convert a document.
+            </summary>
+            <param name="document">The document to convert.</param>
+            <param name="sourceFile">The file that the document was loaded from.</param>
+            <returns>The number of conversions found.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.FormatFile(System.String,System.Boolean)">
+            <summary>
+            Format a file.
+            </summary>
+            <param name="sourceFile">The file to format.</param>
+            <param name="saveConvertedFile">Option to save the format Messages that are found.</param>
+            <returns>The number of Messages found.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.FormatDocument(System.Xml.Linq.XDocument,System.String)">
+            <summary>
+            Format a document.
+            </summary>
+            <param name="document">The document to format.</param>
+            <param name="sourceFile">The file that the document was loaded from.</param>
+            <returns>The number of Messages found.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.ConvertElementWithoutNamespace(System.Xml.Linq.XElement)">
+            <summary>
+            Converts a Wix element.
+            </summary>
+            <param name="element">The Wix element to convert.</param>
+            <returns>The converted element.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.ConvertWixLocalizationElementWithoutNamespace(System.Xml.Linq.XElement)">
+            <summary>
+            Converts a WixLocalization element.
+            </summary>
+            <param name="element">The WixLocalization element to convert.</param>
+            <returns>The converted element.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.LeadingWhitespaceValid(System.Int32,System.Int32,System.String)">
+            <summary>
+            Determine if the whitespace preceding a node is appropriate for its depth level.
+            </summary>
+            <param name="indentationAmount">Indentation value to use when validating leading whitespace.</param>
+            <param name="level">The depth level that should match this whitespace.</param>
+            <param name="whitespace">The whitespace to validate.</param>
+            <returns>true if the whitespace is legal; false otherwise.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.FixupWhitespace(System.Int32,System.Int32,System.Xml.Linq.XText)">
+            <summary>
+            Fix the whitespace in a whitespace node.
+            </summary>
+            <param name="indentationAmount">Indentation value to use when validating leading whitespace.</param>
+            <param name="level">The depth level of the desired whitespace.</param>
+            <param name="whitespace">The whitespace node to fix.</param>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.RemoveUnusedNamespaces(System.Xml.Linq.XElement)">
+            <summary>
+            Removes unused namespaces from the element and its children.
+            </summary>
+            <param name="root">Root element to start at.</param>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.OnError(WixToolset.Converters.WixConverter.ConverterTestType,System.Xml.Linq.XObject,System.String,System.Object[])">
+            <summary>
+            Output an error message to the console.
+            </summary>
+            <param name="converterTestType">The type of converter test.</param>
+            <param name="node">The node that caused the error.</param>
+            <param name="message">Detailed error message.</param>
+            <param name="args">Additional formatted string arguments.</param>
+            <returns>Returns true indicating that action should be taken on this error, and false if it should be ignored.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.OnInformation(WixToolset.Converters.WixConverter.ConverterTestType,System.Xml.Linq.XObject,System.String,System.Object[])">
+            <summary>
+            Output an information message to the console.
+            </summary>
+            <param name="converterTestType">The type of converter test.</param>
+            <param name="node">The node that caused the error.</param>
+            <param name="message">Detailed error message.</param>
+            <param name="args">Additional formatted string arguments.</param>
+            <returns>Returns true indicating that action should be taken on this message, and false if it should be ignored.</returns>
+        </member>
+        <member name="M:WixToolset.Converters.WixConverter.GetIdentifierFromName(System.String)">
+            <summary>
+            Return an identifier based on passed file/directory name
+            </summary>
+            <param name="name">File/directory name to generate identifer from</param>
+            <returns>A version of the name that is a legal identifier.</returns>
+            <remarks>This is duplicated from WiX's Common class.</remarks>
+        </member>
+        <member name="T:WixToolset.Converters.WixConverter.ConverterTestType">
+            <summary>
+            Converter test types. These are used to condition error messages down to warnings.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.ConverterTestTypeUnknown">
+            <summary>
+            Internal-only: displayed when a string cannot be converted to an ConverterTestType.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.XmlException">
+            <summary>
+            Displayed when an XML loading exception has occurred.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.WhitespacePrecedingNodeWrong">
+            <summary>
+            Displayed when the whitespace preceding a node is wrong.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.WhitespacePrecedingEndElementWrong">
+            <summary>
+            Displayed when the whitespace preceding an end element is wrong.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.EndIgnoreInConvert">
+            Before this point, ignore errors on convert operation
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.DeclarationPresent">
+            <summary>
+            Displayed when the XML declaration is present in the source file.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.UnauthorizedAccessException">
+            <summary>
+            Displayed when a file cannot be accessed; typically when trying to save back a fixed file.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.BeginIgnoreInFormat">
+            After this point, ignore errors on format operation
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.XmlnsMissing">
+            <summary>
+            Displayed when the xmlns attribute is missing from the document element.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.XmlnsValueWrong">
+            <summary>
+            Displayed when the xmlns attribute on the document element is wrong.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.DeprecatedLocalizationVariablePrefixInTextValue">
+            <summary>
+            Displayed when inner text contains a deprecated $(loc.xxx) reference.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.DeprecatedLocalizationVariablePrefixInAttributeValue">
+            <summary>
+            Displayed when an attribute value contains a deprecated $(loc.xxx) reference.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.AssignAnonymousFileId">
+            <summary>
+            Assign an identifier to a File element when on Id attribute is specified.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.SuppressSignatureVerificationObsolete">
+            <summary>
+            SuppressSignatureVerification attribute is obsolete and corresponding functionality removed.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.WixCABinaryIdRenamed">
+            <summary>
+            WixCA Binary/@Id has been renamed to UtilCA.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.QuietExecCustomActionsRenamed">
+            <summary>
+            QtExec custom actions have been renamed.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.QtExecCmdTimeoutAmbiguous">
+            <summary>
+            QtExecCmdTimeout was previously used for both CAQuietExec and CAQuietExec64. For WixQuietExec, use WixQuietExecCmdTimeout. For WixQuietExec64, use WixQuietExec64CmdTimeout.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.AssignDirectoryNameFromShortName">
+            <summary>
+            Directory/@ShortName may only be specified with Directory/@Name.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.BootstrapperApplicationDataDeprecated">
+            <summary>
+            BootstrapperApplicationData attribute is deprecated and replaced with Unreal for MSI. Use BundleCustomData element for Bundles.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.AssignPermissionExInheritable">
+            <summary>
+            Inheritable is new and is now defaulted to 'yes' which is a change in behavior for all but children of CreateFolder.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.ColumnCategoryCamelCase">
+            <summary>
+            Column element's Category attribute is camel-case.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.ColumnModularizeCamelCase">
+            <summary>
+            Column element's Modularize attribute is camel-case.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.InnerTextDeprecated">
+            <summary>
+            Inner text value should move to an attribute.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.AutoGuidUnnecessary">
+            <summary>
+            Explicit auto-GUID unnecessary.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.FeatureAbsentAttributeReplaced">
+            <summary>
+            The Feature Absent attribute renamed to AllowAbsent.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.FeatureAllowAdvertiseValueDeprecated">
+            <summary>
+            The Feature AllowAdvertise attribute value deprecated.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.PublishConditionOneUnnecessary">
+            <summary>
+            The Condition='1' attribute is unnecessary on Publish elements.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.AssignBootstrapperApplicationDpiAwareness">
+            <summary>
+            DpiAwareness is new and is defaulted to 'perMonitorV2' which is a change in behavior.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.AssignVariableTypeFormatted">
+            <summary>
+            The string variable type was previously treated as formatted.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.CustomActionKeysAreNowRefs">
+            <summary>
+            The CustomAction attributes have been renamed from BinaryKey and FileKey to BinaryRef and FileRef.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.ProductAndPackageRenamed">
+            <summary>
+            The Product and Package elements have been renamed and reorganized.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.ModuleAndPackageRenamed">
+            <summary>
+            The Module and Package elements have been renamed and reorganized.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.DefaultMediaTemplate">
+            <summary>
+            A MediaTemplate with no attributes set is now provided by default.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.UtilRegistryValueSearchBehaviorChange">
+            <summary>
+            util:RegistrySearch has breaking change when value is missing.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.DisplayInternalUiNotConvertable">
+            <summary>
+            DisplayInternalUI can't be converted.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.InstallerVersionBehaviorChange">
+            <summary>
+            InstallerVersion has breaking change when omitted.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.VerbTargetNotConvertable">
+            <summary>
+            Verb/@Target can't be converted.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.BootstrapperApplicationDll">
+            <summary>
+            The bootstrapper application dll is now specified in its own element.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.BootstrapperApplicationDllRequired">
+            <summary>
+            The new bootstrapper application dll element is required.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.BalUseUILanguagesDeprecated">
+            <summary>
+            bal:UseUILanguages is deprecated, 'true' is now the standard behavior.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.BalBootstrapperApplicationRefToElement">
+            <summary>
+            The custom elements for built-in BAs are now required.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.RenameExePackageCommandToArguments">
+            <summary>
+            The ExePackage elements "XxxCommand" attributes have been renamed to "XxxArguments".
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.Win64AttributeRenamed">
+            <summary>
+            The Win64 attribute has been renamed. Use the Bitness attribute instead.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.Win64AttributeRenameCannotBeAutomatic">
+            <summary>
+            Breaking change: The Win64 attribute's value '{0}' cannot be converted automatically to the new Bitness attribute.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.TagElementRenamed">
+            <summary>
+            The Tag element has been renamed. Use the element 'SoftwareTag' name.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.IntegratedDependencyNamespace">
+            <summary>
+            The Dependency namespace has been incorporated into WiX v4 namespace.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.RemoveUnusedNamespaces">
+            <summary>
+            Remove unused namespaces.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.RemotePayloadRenamed">
+            <summary>
+            The Remote element has been renamed. Use the "XxxPackagePayload" element instead.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.NameAttributeMovedToRemotePayload">
+            <summary>
+            The XxxPackage/@Name attribute must be specified on the child XxxPackagePayload element when using a remote payload.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.CompressedAttributeUnnecessaryForRemotePayload">
+            <summary>
+            The XxxPackage/@Compressed attribute should not be specified when using a remote payload.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.DownloadUrlAttributeMovedToRemotePayload">
+            <summary>
+            The XxxPackage/@DownloadUrl attribute must be specified on the child XxxPackagePayload element when using a remote payload.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.BurnHashAlgorithmChanged">
+            <summary>
+            The hash algorithm used for bundles changed from SHA1 to SHA512.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.CustomTableNotAlwaysConvertable">
+            <summary>
+            CustomTable elements can't always be converted.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.CustomTableRef">
+            <summary>
+            CustomTable elements that don't contain the table definition are now CustomTableRef.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.RegistryKeyActionObsolete">
+            <summary>
+            The RegistryKey element's Action attribute is obsolete.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.TagRefElementRenamed">
+            <summary>
+            The TagRef element has been renamed. Use the element 'SoftwareTagRef' name.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.SoftwareTagLicensedObsolete">
+            <summary>
+            The SoftwareTag element's Licensed attribute is obsolete.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.SoftwareTagTypeObsolete">
+            <summary>
+            The SoftwareTag element's Type attribute is obsolete.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.TargetDirDeprecated">
+            <summary>
+            TARGETDIR directory should no longer be explicitly defined.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.DefiningStandardDirectoryDeprecated">
+            <summary>
+            Standard directories should no longer be defined using the Directory element.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.ReferencesReplaced">
+            <summary>
+            Naked UI, custom action, and property references replaced with elements.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.BundlePackageCacheAttributeValueObsolete">
+            <summary>
+            Cache attribute value updated.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.MsuPackageKBObsolete">
+            <summary>
+            The MsuPackage element contains obsolete '{0}' attribute. Windows no longer supports silently removing MSUs so the attribute is unnecessary. The attribute will be removed.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.MsuPackagePermanentObsolete">
+            <summary>
+            The MsuPackage element contains obsolete '{0}' attribute. MSU packages are now always permanent because Windows no longer supports silently removing MSUs. The attribute will be removed.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.MoveNamespacesToRoot">
+            <summary>
+            Namespace should be defined on the root. The '{0}' namespace was move to the root element.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.CustomActionIdsIncludePlatformSuffix">
+            <summary>
+            Custom action ids have changed in WiX v4 extensions. Because WiX v4 has platform-specific custom actions, the platform is applied as a suffix: _X86, _X64, _A64 (Arm64). When manually rescheduling custom actions, you must use the new custom action id, with platform suffix.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.StandardDirectoryRefDeprecated">
+            <summary>
+            The {0} directory should no longer be explicitly referenced. Remove the DirectoryRef element with Id attribute '{0}'.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.EmptyStandardDirectoryRefNotConvertable">
+            <summary>
+            Referencing '{0}' directory directly is no longer supported. The DirectoryRef will not be removed but you will probably need to reference a more specific directory.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.WixMbaPrereqLicenseUrlDeprecated">
+            <summary>
+            The magic WixVariable 'WixMbaPrereqLicenseUrl' has been removed. Add bal:PrereqLicenseUrl="yes" to a prereq package instead.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.WixMbaPrereqPackageIdDeprecated">
+            <summary>
+            The magic WixVariable 'WixMbaPrereqPackageId' has been removed. Add bal:PrereqPackage="yes" to the target package instead.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.TargetDirRefRemoved">
+            <summary>
+            A reference to the TARGETDIR Directory was removed. This can cause unintended side effects. See the conversion FAQ for more information: https://wixtoolset.org/docs/fourthree/faqs/#converting-packages
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.CertificateBinaryKeyIsNowBinaryRef">
+            <summary>
+             The Certificate BinaryKey element has been renamed to BinaryRef.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.RelatedBundleActionLowercase">
+            <summary>
+            The RelatedBundle element's Action attribute value must now be all lowercase. The Action='{0}' will be converted to '{1}'
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.WixUIPrintEulaCustomAction">
+            <summary>
+            The WixUIPrintEula custom action has been replaced with the MSI native MsiPrint control event in WiX v5 and no longer needs to be authored in a custom dialog set.
+            </summary>
+        </member>
+        <member name="F:WixToolset.Converters.WixConverter.ConverterTestType.RelatedBundleIdAttributeRenamed">
+            <summary>
+            The RelatedBundle element's Id attribute has been renamed. Use the Code attribute instead."
+            </summary>
+        </member>
+        <member name="T:WixToolset.Converters.WixToolsetCoreServiceProviderExtensions">
+            <summary>
+            Extension methods for adding Converters services.
+            </summary>
+        </member>
+        <member name="M:WixToolset.Converters.WixToolsetCoreServiceProviderExtensions.AddConverter(WixToolset.Extensibility.Services.IWixToolsetCoreServiceProvider)">
+            <summary>
+            Adds Converters services.
+            </summary>
+            <param name="coreProvider"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
