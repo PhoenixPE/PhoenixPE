@@ -30,18 +30,18 @@
 
 [Main]
 Title=.NET 9
-Description=(v9.0.9) .NET 9 is a cross-platform software development framework for building and running applications.
+Description=(v9.0.11) .NET 9 is a cross-platform software development framework for building and running applications.
 Selected=False
 Level=4
 Author=Homes32
-Version=1.0.5.0
-Date=2025-09-15
+Version=1.0.7.0
+Date=2025-12-05
 Mandatory=False
 
 [Variables]
 %ProgramTitle%=".NET 9 Desktop Runtime"
 %ProgramFolder%="dotnet"
-%ProgramVersion%="9.0.9"
+%ProgramVersion%="9.0.11"
 %DownloadURLx86%=https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%ProgramVersion%/windowsdesktop-runtime-%ProgramVersion%-win-x86.exe
 %DownloadURLx64%=https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/%ProgramVersion%/windowsdesktop-runtime-%ProgramVersion%-win-x64.exe
 
@@ -54,12 +54,12 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\desktop-runtime-%ProgramVersio
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract Files
 Echo,"Extracting files..."
-WixExtract,"%ProgramsCache%\%ProgramFolder%\desktop-runtime-%ProgramVersion%-%SourceArch%.exe","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\dotnet-host-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\dotnet-hostfxr-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\dotnet-runtime-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\windowsdesktop-runtime-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\SourceDir\dotnet\*.*","%TargetPrograms%\%ProgramFolder%"
+WixExtract,"%ProgramsCache%\%ProgramFolder%\desktop-runtime-%ProgramVersion%-%SourceArch%.exe","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\WixAttachedContainer\dotnet-host-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\WixAttachedContainer\dotnet-hostfxr-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\WixAttachedContainer\dotnet-runtime-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\WixAttachedContainer\windowsdesktop-runtime-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+FileCopy,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\SourceDir\dotnet\*.*","%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Configure Registry
@@ -69,19 +69,19 @@ RegLoadHives
 // Add to system PATH
 RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%SysPath%
 StrFormat,CTrim,%SysPath%,";",%SysPath%
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;%PEPrograms%\dotnet\;"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;%PEPrograms%\dotnet\;"
 
 // Add version to reg for other programs to detect
 If,%SourceArch%,Equal,x64,Begin
-  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x64",%ProgramVersion%,1
-  RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64","InstallLocation","%PEPrograms%\dotnet\"
-  RegWrite,HKLM,0x4,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
-  RegWrite,HKLM,0x4,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\dotnet\Setup\InstalledVersions\x64",%ProgramVersion%,1
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64","InstallLocation","%PEPrograms%\dotnet\"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
 End
 Else,Begin
-  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86",%ProgramVersion%,1
-  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
-  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\dotnet\Setup\InstalledVersions\x86",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
 End
 
 RegUnloadHives

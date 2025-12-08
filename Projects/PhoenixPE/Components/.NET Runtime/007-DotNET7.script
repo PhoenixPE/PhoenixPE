@@ -34,8 +34,8 @@ Description=(v7.0.20) .NET 7 is a cross-platform software development framework 
 Selected=False
 Level=4
 Author=Homes32
-Version=1.0.1.0
-Date=2025-06-25
+Version=1.0.3.0
+Date=2025-12-05
 Mandatory=False
 
 [Variables]
@@ -54,12 +54,12 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\desktop-runtime-%ProgramVersio
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract Files
 Echo,"Extracting files..."
-WixExtract,"%ProgramsCache%\%ProgramFolder%\desktop-runtime-%ProgramVersion%-%SourceArch%.exe","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\dotnet-host-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\dotnet-hostfxr-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\dotnet-runtime-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\windowsdesktop-runtime-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\SourceDir\dotnet\*.*","%TargetPrograms%\%ProgramFolder%"
+WixExtract,"%ProgramsCache%\%ProgramFolder%\desktop-runtime-%ProgramVersion%-%SourceArch%.exe","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\WixAttachedContainer\dotnet-host-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\WixAttachedContainer\dotnet-hostfxr-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\WixAttachedContainer\dotnet-runtime-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\WixAttachedContainer\windowsdesktop-runtime-%ProgramVersion%-win-%SourceArch%.msi","%ProjectTemp%\%ProgramFolder%\%ProgramVersion%"
+FileCopy,"%ProjectTemp%\%ProgramFolder%\%ProgramVersion%\SourceDir\dotnet\*.*","%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Configure Registry
@@ -69,19 +69,19 @@ RegLoadHives
 // Add to system PATH
 RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%SysPath%
 StrFormat,CTrim,%SysPath%,";",%SysPath%
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;%PEPrograms%\dotnet\;"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path","%SysPath%;%PEPrograms%\dotnet\;"
 
 // Add version to reg for other programs to detect
 If,%SourceArch%,Equal,x64,Begin
-  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x64",%ProgramVersion%,1
-  RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64","InstallLocation","%PEPrograms%\dotnet\"
-  RegWrite,HKLM,0x4,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
-  RegWrite,HKLM,0x4,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\dotnet\Setup\InstalledVersions\x64",%ProgramVersion%,1
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64","InstallLocation","%PEPrograms%\dotnet\"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
 End
 Else,Begin
-  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86",%ProgramVersion%,1
-  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
-  RegWrite,HKLM,0x4,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\dotnet\Setup\InstalledVersions\x86",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.NETCore.App",%ProgramVersion%,1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.WindowsDesktop.App",%ProgramVersion%,1
 End
 
 RegUnloadHives
@@ -185,7 +185,7 @@ btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True
 btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_Disabled_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 lbl_NetVer="This script will add the .NET 7 Desktop Runtime.",1,1,5,50,518,17,8,Bold
-lbl_RuntimeNotes="The .Net 7 release has reached end of life, and is no longer supported by Microsoft.#$x#$xWe recommend moving to a supported release if possible and only enabling this script if you need to run an older program that has not been upgraded to a supported version of .Net.",1,1,5,70,499,89,8,Normal
+lbl_RuntimeNotes="The .Net 7 release has reached end of life and is no longer supported by Microsoft.#$x#$xWe recommend moving to a supported release if possible and only enabling this script if you need to run an older program that has not been upgraded to a supported version of .Net.",1,1,5,70,499,89,8,Normal
 
 [AuthorEncoded]
 dotnet6.png=1357,1904
