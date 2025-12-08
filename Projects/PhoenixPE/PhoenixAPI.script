@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.13.0.0
-Date=2025-06-10
+Version=1.13.1.0
+Date=2025-12-01
 Level=0
 Selected=None
 
@@ -1147,7 +1147,10 @@ End
 ShellExecute,Hide,"%Tools%\x86\Innounp.exe","-x -b -y -a -d#$q%DestDir%#$q %Password%%CurrentDir%#$q%SetupFile%#$q%ListFile%"
 If,Not,%ExitCode%,Equal,0,Begin
   FileVersion,"%Tools%\x86\Innounp.exe",%InnounpVer%
-  Halt,"InnoExtract Error: Failed to unpack setup file [%SetupFile%]. The command returned: [%ExitCode%]. You are using Innounp.exe version [%InnounpVer%]."
+  If,%ExitCode%,Equal,1,Set,%ExitCodeStr%," - The setup file uses an unsupported version of InnoSetup."
+  Else,If,%ExitCode%,Equal,2,Set,%ExitCodeStr%," - The setup file is corrupt or incompatible with this version of Innounp."
+  Else,Set,%ExitCodeStr%,""
+  Halt,"InnoExtract Error: Failed to unpack setup file [%SetupFile%]. The command returned: [%ExitCode%%ExitCodeStr%]. You are using Innounp.exe version [%InnounpVer%]."
 End
 
 System,EndLocal
@@ -1395,7 +1398,7 @@ GetParam,2,%DestDir%
 
 StrFormat,EndTrim,%DestDir%,"\","%DestDir%"
 
-ShellExecute,Hide,"%Tools%\anycpu\lessmsi\lessmsi.exe","x #$q%SetupFile%#$q #$q%DestDir%\#$q"
+ShellExecute,Hide,"%Tools%\anycpu\lessmsi\lessmsi.exe","xo #$q%SetupFile%#$q #$q%DestDir%\#$q"
 If,Not,%ExitCode%,Equal,0,Begin
   FileVersion,"%Tools%\anycpu\lessmsi\lessmsi.exe",%lessmsiVer%
   Halt,"MSIExtract Error: Failed to unpack .msi file [%SetupFile%]. The command returned: [%ExitCode%]. You are using lessmsi.exe version [%lessmsiVer%]."
@@ -1431,7 +1434,7 @@ System,EndLocal
 //                 WinXShell:
 //                 WinXShell's taskbar does not have "Pin" verbs in it's context menu, instead it behaves like WinXP and uses QuickLaunch shortcuts.
 //
-// Related........: Depends on %ProjectDir%\Components\330-ImDisk.script or 330-AimRamdisk to set the Ramdisk drive letter as %RamDriv% in the PE Env.
+// Related........: Depends on %ProjectDir%\Components\330-ImDisk.script or 330-AimRamdisk to set the Ramdisk drive letter as %RamDrive% in the PE Env.
 // ===============================================================================================================================
 [_PhoenixAPI_PinShortcut]
 System,SetLocal
@@ -2041,22 +2044,24 @@ System,EndLocal
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
-// Related........: Depends on dark.exe for extraction. (https://wixtoolset.org/)
+// Related........: Depends on wix.exe for extraction. (https://wixtoolset.org/)
 // ===============================================================================================================================
 [_PhoenixAPI_WixExtract]
 System,SetLocal
 If,#1,Equal,"",Halt,"WixExtract Syntax Error: You must specify the setup file."
 If,#2,Equal,"",Halt,"WixExtract Syntax Error: You must specify the destination directory."
 
+Set,%WixExe%,"%Tools%\%HostArch%\wix\wix.exe"
+
 GetParam,1,%SetupFile%
 Getparam,2,%DestDir%
 
 StrFormat,EndTrim,%DestDir%,"\","%DestDir%"
 
-ShellExecute,Hide,"%Tools%\anycpu\wix\dark.exe","-x #$q%DestDir%#$q #$q%SetupFile%#$q"
+ShellExecute,Hide,%WixExe%,"burn extract #$q%SetupFile%#$q -o #$q%DestDir%#$q -outba #$q%DestDir%\BootstrapperApp#$q"
 If,Not,%ExitCode%,Equal,0,Begin
-  FileVersion,"%Tools%\anycpu\wix\dark.exe",%DarkVer%
-  Halt,"WixExtract Error: Failed to unpack the setup file [%SetupFile%]. The command returned: [%ExitCode%]. You are using dark.exe version [%DarkVer%]."
+  FileVersion,%WixExe%,%WixVer%
+  Halt,"WixExtract Error: Failed to unpack the setup file [%SetupFile%]. The command returned: [%ExitCode%]. You are using wix.exe version [%WixVer%]."
 End
 
 System,EndLocal
