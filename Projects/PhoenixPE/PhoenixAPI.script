@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.13.1.0
-Date=2025-12-01
+Version=1.13.2.0
+Date=2025-12-14
 Level=0
 Selected=None
 
@@ -205,7 +205,7 @@ Else,If,%Mode%,Equal,HideWait,Set,%ExecMode%,"hiderun.exe "
 Else,If,%Mode%,Equal,HideNoWait,Halt,"AddAutoRun Error: RunOnce does not support [%Mode%]."
 Else,Halt,"AddAutoRun Syntax Error: [%Mode%] is not a valid run mode."
 
-RegWrite,HKLM,0x2,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Run","%Title%","#$q%ExecMode%%ProgramExe%#$q #$q%Parameters%#$q"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Run","%Title%","#$q%ExecMode%%ProgramExe%#$q #$q%Parameters%#$q"
 
 If,%RegHivesLoaded%,Equal,False,RegHiveUnload,Tmp_Default
 
@@ -461,10 +461,10 @@ If,%IsExecutable%,Equal,0,Halt,"Associate Error: [%Program%] is not an executabl
 Else,Begin
   Echo,"Associating file extension [.%FileExt%] with [%Program%]..."
   If,%RegHivesLoaded%,Equal,False,RegHiveLoad,Tmp_Software,%RegSoftware%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.%FileExt%","","%FileExt%file"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\%FileExt%file","","%FileExt% File"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\%FileExt%file\DefaultIcon","","#$q%Program%#$q"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\%FileExt%file\shell\open\command","","#$q%Program%#$q #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.%FileExt%","","%FileExt%file"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\%FileExt%file","","%FileExt% File"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\%FileExt%file\DefaultIcon","","#$q%Program%#$q"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\%FileExt%file\shell\open\command","","#$q%Program%#$q #$q#$p1#$q"
   If,%RegHivesLoaded%,Equal,False,RegHiveUnLoad,Tmp_Software
   Echo,""
 End
@@ -2044,24 +2044,26 @@ System,EndLocal
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
-// Related........: Depends on wix.exe for extraction. (https://wixtoolset.org/)
+// Related........: Depends on dark.exe/wix.exe for extraction. (https://wixtoolset.org/)
 // ===============================================================================================================================
 [_PhoenixAPI_WixExtract]
 System,SetLocal
 If,#1,Equal,"",Halt,"WixExtract Syntax Error: You must specify the setup file."
 If,#2,Equal,"",Halt,"WixExtract Syntax Error: You must specify the destination directory."
 
-Set,%WixExe%,"%Tools%\%HostArch%\wix\wix.exe"
+Set,%WixExe%,"%Tools%\anycpu\wix\dark.exe"
+//Set,%WixExe%,"%Tools%\%HostArch%\wix\wix.exe"
 
 GetParam,1,%SetupFile%
 Getparam,2,%DestDir%
 
 StrFormat,EndTrim,%DestDir%,"\","%DestDir%"
 
-ShellExecute,Hide,%WixExe%,"burn extract #$q%SetupFile%#$q -o #$q%DestDir%#$q -outba #$q%DestDir%\BootstrapperApp#$q"
+ShellExecute,Hide,%WixExe%,"-x #$q%DestDir%#$q #$q%SetupFile%#$q"
+//ShellExecute,Hide,%WixExe%,"burn extract #$q%SetupFile%#$q -o #$q%DestDir%#$q -outba #$q%DestDir%\BootstrapperApp#$q"
 If,Not,%ExitCode%,Equal,0,Begin
   FileVersion,%WixExe%,%WixVer%
-  Halt,"WixExtract Error: Failed to unpack the setup file [%SetupFile%]. The command returned: [%ExitCode%]. You are using wix.exe version [%WixVer%]."
+  Halt,"WixExtract Error: Failed to unpack the setup file [%SetupFile%]. The command returned: [%ExitCode%]. You are using WixToolset version [%WixVer%]."
 End
 
 System,EndLocal
