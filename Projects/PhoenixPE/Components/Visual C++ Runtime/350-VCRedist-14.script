@@ -32,11 +32,11 @@
 Title=Visual C++ 14 Runtime
 Author=Homes32
 Description=Allows you to run programs created with Microsoft Visual C++ 2017/2018/2019/2022/2026.
-Version=2.0.0.0
+Version=2.0.1.0
 Level=4
 Selected=False
 Mandatory=False
-Date=2025-12-01
+Date=2025-12-15
 
 [Variables]
 %ProgramFolder%="MSVC14"
@@ -60,14 +60,14 @@ Echo,"Extracting files..."
 // x86 - Extracted for both x86/x64
 Echo,"Extracting x86 Visual C++ runtime..."
 WixExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFilex86%","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\WixAttachedContainer\packages\vcRuntimeMinimum_x86\vc_runtimeMinimum_x86.msi","%ProjectTemp%\%ProgramFolder%"
-MSIExtract,"%ProjectTemp%\%ProgramFolder%\WixAttachedContainer\packages\vcRuntimeAdditional_x86\vc_runtimeAdditional_x86.msi","%ProjectTemp%\%ProgramFolder%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\packages\vcRuntimeMinimum_x86\vc_runtimeMinimum_x86.msi","%ProjectTemp%\%ProgramFolder%"
+MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\packages\vcRuntimeAdditional_x86\vc_runtimeAdditional_x86.msi","%ProjectTemp%\%ProgramFolder%"
   
 If,%SourceArch%,Equal,x64,Begin
   Echo,"Extracting x64 Visual C++ runtime..."
   WixExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFilex64%","%ProjectTemp%\%ProgramFolder%"
-  MSIExtract,"%ProjectTemp%\%ProgramFolder%\WixAttachedContainer\packages\vcRuntimeMinimum_amd64\vc_runtimeMinimum_x64.msi","%ProjectTemp%\%ProgramFolder%"
-  MSIExtract,"%ProjectTemp%\%ProgramFolder%\WixAttachedContainer\packages\vcRuntimeAdditional_amd64\vc_runtimeAdditional_x64.msi","%ProjectTemp%\%ProgramFolder%"
+  MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\packages\vcRuntimeMinimum_amd64\vc_runtimeMinimum_x64.msi","%ProjectTemp%\%ProgramFolder%"
+  MSIExtract,"%ProjectTemp%\%ProgramFolder%\AttachedContainer\packages\vcRuntimeAdditional_amd64\vc_runtimeAdditional_x64.msi","%ProjectTemp%\%ProgramFolder%"
   FileCopy,"%ProjectTemp%\%ProgramFolder%\SourceDir\System64\*.*","%TargetSystem32%"
   FileCopy,"%ProjectTemp%\%ProgramFolder%\SourceDir\System\*.*","%TargetWindows%\SysWOW64"
 End
