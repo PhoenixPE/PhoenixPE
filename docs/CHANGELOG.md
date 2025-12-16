@@ -2,6 +2,56 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release 2025-12-15
+
+### Added
+- Add support for Explorer shell in Win11 10.0.26200.5074
+- Added Display Settings script which allows setting the default screen resolution and DPI.
+- Added the ability to adjust desktop icon spacing, font size, font weight, and text wrap (Desktop Settings script).
+
+### Changed
+- .Net 8 runtime updated to v8.0.22
+- .Net 9 runtime updated to v9.0.11
+- AIDA64 updated to v8.20.8100
+- AgentRansack updated to v2022 build 3544
+- Arsenal Image Mounter updated. (Driver v1.2.28.93 / GUI v3.12.331.0)
+- BleachBit updated to v5.0.2
+- CPU-Z updated to v.2.17.0
+- DesktopInfo updated to v3.21.0
+- DiskGenius updated to v6.1.1.1725
+- DMDE updated to v4.4.0.828
+- DriverStoreExplorer updated to v0.12.127
+- Everything updated to v1.4.1.1030
+- FastStone Capture updated to v11.2
+- FastStone Image Viewer updated to v8.3
+- FurMark 2 updated to v2.10.2
+- Google Chrome updated to v143.0.7499.110
+- grepWin updated to v2.1.12
+- HWinfo updated to v8.34
+- Innounp updated to v2.66.1
+- Intel RST Driver updated to v20.2.6.1025.2
+- IrfanView updated to v4.73
+- lessmsi tools updated to v2.11
+- Notepad++ updated to v8.8.9
+- PowerShell Core updated to v7.5.4
+- Rufus updated to v4.11
+- RustDesk updated to v1.4.4
+- Simplewall updated to v3.8.7
+- Updated AOEME PA download URL to avoid annoying upsell bundle and prevent extraction failures.
+- WinMerge updated to v2.16.52.2
+- WinSCP updated to v6.5.5
+- XYPlorer updated for 64-bit support. Updated languages.
+- Zulu JRE11 updated to v11.84.17
+- Zulu JRE17 updated to v17.62.17
+- Zulu JRE21 updated to v21.46.19
+
+### Fixed
+- Fixed HWiNFO download fail due to cloudflare redirection. (Issue #157)
+- Fixed extraction for FastStoneViewer setup file.
+- Fixed a bug in Firefox script that prevented tab close warning from showing and default browser check from working.
+
+### Removed
+
 ## Release 2025-09-27
 
 ### Added
@@ -31,6 +81,7 @@ Notable changes to the PhoenixPE project.
 - FurMark 2 updated to v2.9.0.0
 - GPU-Z updated to v2.68.0
 - Google Chrome updated to v140.0.7339.186 (Note. For reasons that are incomprehensible, Chrome started shipping unpressed installers that are now 400 MB instead of 130 MB. )
+- grepWin updated to v2.1.11
 - HWinfo updated to v8.30
 - Innounp updated to v2.65.2
 - MPC-BE updated to v1.8.7.0
@@ -51,7 +102,6 @@ Notable changes to the PhoenixPE project.
 - Zulu JRE11 updated to v11.82.19
 - Zulu JRE17 updated to v17.60.17
 - Zulu JRE21 updated to v21.44.17
-- grepWin updated to v2.1.11
 
 ### Fixed
 - Fixed regression in ProtectPE that caused the expiration date to not be correctly set on initial config. (Back-ported to release 2025-06-14)

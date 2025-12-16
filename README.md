@@ -13,7 +13,7 @@ PhoenixPE is a WinPE Rescue/Recovery Environment based on Win10/Win11. It can be
 * Build from Win10/Win11 sources using either boot.wim or WinRE.wim as a base.
 * Designed from the ground up to be developer/contributor friendly and use clean, well documented code.
 * Easy to understand options and uncluttered user interface.
-* Flexible architecture.
+* Flexible and modular architecture.
 * PEBakery's powerful scripting language allows extensive customization.
 
 ## Features
