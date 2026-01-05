@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2025 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2026 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,9 +32,9 @@
 Title=FastStone Capture
 Author=Homes32
 Level=5
-Version=1.0.5.0
+Version=1.1.0.0
 Description=(v11.2 x86) A powerful, lightweight, yet full-featured screen capture tool that allows you to easily capture and annotate anything on the screen.
-Date=2025-11-29
+Date=2025-12-15
 Selected=False
 Mandatory=False
 
@@ -45,13 +45,14 @@ Mandatory=False
 %DownloadURL%=http://www.faststonesoft.net/DN/FSCapture%ProgramVersion%.zip
 %LangMap%=Bulgarian|20|Chinese (Simplified)|2|Chinese (Traditional)|3|Czech|16|Dutch|5|English|1|French|6|German|7|Hungarian|13|Italian|8|Japanese|21|Korean|15|Polish|10|Portuguese (Brazil)|22|Russian|11|Spanish|12|Swedish|17|Ukrainian|19
 %SkinMap%=Blue|2|Athen|1|Silver|3|Yellow|4
+%SetupFile%="FSCapture-%ProgramVersion%.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
 
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\FSCapture.zip",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
@@ -146,12 +147,16 @@ Set,%ConfigFile%,Nil
 // Related........: 
 // ===============================================================================================================================
 [ExtractProgram]
+System,SetLocal
 Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\FSCapture.zip",#1
-
-// It's annoying when people create zip files containing a directory with an every changing name
-FileCopy,"#1\FSCapture%ProgramVersion%\*.*",#1
-DirDeleteEx,"#1\FSCapture%ProgramVersion%"
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
+FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
+If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [#r]."
+Else,List,Get,#r,1,%ProgramPath%
+StrFormat,DirPath,%ProgramPath%,%ProgramPathFolder%
+StrFormat,EndTrim,%ProgramPathFolder%,"\",%ProgramPathFolder%
+FileCopy,"%ProgramPathFolder%\*.*",#1
+System,EndLocal
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -166,7 +171,7 @@ DirDeleteEx,"#1\FSCapture%ProgramVersion%"
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\FSCapture.zip",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [#LaunchProgram#]
@@ -181,7 +186,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Related........: btn_LaunchProgram
 // ===============================================================================================================================
 [LaunchProgram]
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\FSCapture.zip",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
