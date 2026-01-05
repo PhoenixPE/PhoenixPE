@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2025 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2026 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +35,8 @@ Author=Homes32
 Level=9
 Selected=None
 Mandatory=False
-Version=1.2.0.0
-Date=2021-05-06
+Version=1.3.0.0
+Date=2025-15-17
 
 [Variables]
 %ProgramExe%="ConfigHostBoot.cmd"
@@ -62,28 +62,43 @@ Message,"The operation has been completed."
 [GenerateConfigHostBootCmd]
 Echo,"Creating Config Script..."
 
-StrFormat,LTRIM,%OutputDir%,3,%drfldr%
-StrFormat,LEFT,%OutputDir%,2,%drvlttr%
+If,%cmb_BIOSMode%,Equal,"Auto-Detect",Begin
+  System,GetEnv,"FIRMWARE_TYPE",%BIOSMode%
+  // Sanity Check
+  If,Not,%BIOSMode%,Equal,"Legacy",If,Not,%BIOSMode%,Equal,"UEFI",Begin
+    Exit,"Error: Unknown firmware type: [%BIOSMode%]."
+	Message,"Error: Unknown firmware type: [%BIOSMode%].#$x#$xPlease configure the BIOS mode manually.",Warn
+  End
+End  
+Else,If,%cmb_BIOSMode%,Equal,"Legacy",Set,%BIOSMode%,"Legacy"
+Else,If,%cmb_BIOSMode%,Equal,"UEFI",Set,%BIOSMode%,"UEFI"
+Else,Begin
+    Exit,"Error: Unknown firmware type: [%cmb_BIOSMode%]."
+	Message,"Error: [%cmb_BIOSMode%] is not a valid firmware type.",Warn
+End
+
+StrFormat,LTRIM,%OutputDir%,3,%DriveFolder%
+StrFormat,LEFT,%OutputDir%,2,%DriveLetter%
 
 If,ExistFile,"%ProjectTemp%\%ProgramExe%",FileDelete,"%ProjectTemp%\%ProgramExe%"
 FileCreateBlank,"%ProjectTemp%\%ProgramExe%"
 TXTAddLine,"%ProjectTemp%\%ProgramExe%","",Append
 TXTAddLine,"%ProjectTemp%\%ProgramExe%","@echo Creating Host Boot Menu Option...",Append
 TXTAddLine,"%ProjectTemp%\%ProgramExe%","@cd /d #$q%~dp0#$q",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","@for /f #$qtokens=2 delims={}#$q %%g in ('bcdedit.exe /create /d #$q%txt_MenuName%#$q /Device') do (@set deviceid={%%g})",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","@echo Device ID: %deviceid%",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %deviceid% ramdisksdidevice partition=%drvlttr%",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %deviceid% ramdisksdipath \%drfldr%\Boot\boot.sdi",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","@for /f #$qtokens=2 delims={}#$q %%g in ('bcdedit.exe /create /d #$q%txt_MenuName%#$q /Device') do (@set DeviceID={%%g})",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","@echo Device ID: %DeviceID%",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %DeviceID% ramdisksdidevice partition=%DriveLetter%",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %DeviceID% ramdisksdipath \%DriveFolder%\Boot\boot.sdi",Append
 TXTAddLine,"%ProjectTemp%\%ProgramExe%","@for /f #$qtokens=2 delims={}#$q %%g in ('bcdedit.exe /create /d #$q%txt_MenuName%#$q /application osloader') do (@set guid={%%g})",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","@echo Menu GUID: %guid%",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %guid% device ramdisk=[%drvlttr%]\%drfldr%\sources\boot.wim,%deviceid%",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %guid% osdevice ramdisk=[%drvlttr%]\%drfldr%\sources\boot.wim,%deviceid%",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %guid% systemroot \windows",Append
-If,%cmb_BIOSMode%,Equal,"Legacy",TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %guid% path \Windows\system32\boot\winload.exe",Append
-Else,If,%cmb_BIOSMode%,Equal,"UEFI",TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %guid% path \Windows\system32\boot\winload.efi",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %guid% winpe yes",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %guid% detecthal yes",Append
-TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /displayorder %guid% /addlast",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","@echo Menu GUID: %GUID%",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %GUID% device ramdisk=[%DriveLetter%]\%DriveFolder%\sources\boot.wim,%DeviceID%",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %GUID% osdevice ramdisk=[%DriveLetter%]\%DriveFolder%\sources\boot.wim,%DeviceID%",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %GUID% systemroot \windows",Append
+If,%BIOSMode%,Equal,"Legacy",TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %GUID% path \Windows\system32\boot\winload.exe",Append
+Else,If,%BIOSMode%,Equal,"UEFI",TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %GUID% path \Windows\system32\boot\winload.efi",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %GUID% winpe yes",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set %GUID% detecthal yes",Append
+TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /displayorder %GUID% /addlast",Append
 If,%cb_GraphicalBootMenu%,Equal,False,TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set {bootmgr} displaybootmenu yes",Append
 TXTAddLine,"%ProjectTemp%\%ProgramExe%","bcdedit /set {bootmgr} timeout %num_Timeout%",Append
 TXTAddLine,"%ProjectTemp%\%ProgramExe%","@echo Done.",Append
@@ -103,21 +118,6 @@ TXTAddLine,"%ProjectTemp%\%ProgramExe%","@echo Done.",Append
 Message,"Removing an existing boot menu entry is a multi-step process.#$x#$x1. Click 'Ok' to display the System Configuration dialog.#$x2. Select the 'Boot' tab.#$x3. Select the PhoenixPE boot menu entry from the list.#$x4. Click the 'Delete' button.#$x5. Set Timeout to 0 seconds to prevent the boot menu from displaying on startup.#$x6. Click the 'OK' button.#$x7. If prompted to restart select 'Exit without restart'."
 ShellExecuteEx,Open,"msconfig.exe"
 
-[#ShowBIOSModeInfo#]
-// ===============================================================================================================================
-// Name...........: ShowBIOSModeInfo
-// Description....: 
-// Syntax.........: 
-// Parameters.....: 
-// Return values..: 
-// Author.........: Homes32
-// Remarks........:
-// Related........: btn_BIOSModeInfo
-// ===============================================================================================================================
-[ShowBIOSModeInfo]
-Message,"When you click 'Ok' the System Information dialog will be displayed.#$x#$xYour BIOS Mode will be listed in the System Summary screen."
-ShellExecuteEx,Open,"msinfo32.exe"
-
 [#SetDefaultOptions#]
 // ===============================================================================================================================
 // Name...........: SetDefaultOptions
@@ -130,7 +130,7 @@ ShellExecuteEx,Open,"msinfo32.exe"
 // Related........: btn_SetDefaultOptions
 // ===============================================================================================================================
 [SetDefaultOptions]
-WriteInterface,Value,%ScriptFile%,Interface,cmb_BIOSMode,"Legacy"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_BIOSMode,"Auto-Detect"
 WriteInterface,Value,%ScriptFile%,Interface,num_Timeout,10
 WriteInterface,Value,%ScriptFile%,Interface,cb_GraphicalBootMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_MenuName,"PhoenixPE"
@@ -182,8 +182,7 @@ btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
 bvl_Options=Options,1,12,5,50,188,181,8,Bold
 lbl_BIOSMode="This PC's BIOS mode is:",1,1,15,70,136,16,8,Normal
-cmb_BIOSMode=Legacy,1,4,16,84,136,21,Legacy,UEFI
-btn_BIOSModeInfo=,1,8,161,84,21,21,ShowBIOSModeInfo,Help_16.png,True,"__How can I tell?"
+cmb_BIOSMode=Auto-Detect,1,4,16,84,136,21,Auto-Detect,Legacy,UEFI
 lbl_MenuTimeout="Boot the default OS after:",1,1,15,115,127,16,8,Normal
 num_Timeout=num_Timeout,1,2,15,130,40,22,10,1,60,1
 lbl_Seconds=seconds,1,1,60,136,51,16,8,Normal
