@@ -35,8 +35,8 @@ Author=Homes32
 Level=3
 Selected=True
 Mandatory=False
-Version=1.8.1.0
-Date=2025-10-01
+Version=1.8.2.0
+Date=2026-01-27
 
 [Variables]
 
@@ -123,10 +123,10 @@ End
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\CoreMessagingRegistrar",HKLM,"Tmp_System\ControlSet001\Services\CoreMessagingRegistrar"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\Themes",HKLM,"Tmp_System\ControlSet001\Services\Themes"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\WindowsTrustedRT",HKLM,"Tmp_System\ControlSet001\Services\WindowsTrustedRT"
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\DWM","OneCoreNoBootDWM",0
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\DWM","ColorPrevalence",1
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\Themes"
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\CoreMessagingRegistrar"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\DWM","OneCoreNoBootDWM",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\DWM","ColorPrevalence",1
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\Themes"
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\CoreMessagingRegistrar"
 
 [#Reg-Explorer#]
 // ===============================================================================================================================
@@ -144,13 +144,13 @@ Echo,"Registering Explorer Shell..."
 RegImport,%ProjectTemp%\Explorer-RegDefault.reg
 
 // Shell New Context Menu
-RegWrite,HKLM,0x7,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Discardable\PostSetup\ShellNew","Classes",".library-ms",".txt","Folder"
-RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Discardable\PostSetup\ShellNew","~reserved~",08,00,00,00,00,00,06,00
+RegWrite,HKLM,REG_MULTI_SZ,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Discardable\PostSetup\ShellNew","Classes",".library-ms",".txt","Folder"
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Discardable\PostSetup\ShellNew","~reserved~",08,00,00,00,00,00,06,00
 
 If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\Explorer",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer"
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","shell","explorer.exe"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","shell","explorer.exe"
   // Registry cached version of the Start menu + Windows.CloudStore.dll are required for Pintool
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\CloudStore",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\CloudStore"
   RegImport,%ProjectTemp%\Explorer-RegSoftware.reg
@@ -161,14 +161,14 @@ End
 RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","StartMenuInit",13
 
 // Set the My Computer > Properties context menu to open the classic System Properties dialog
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Properties\command","","#$pWinDir#$p\System32\SystemPropertiesComputerName.exe"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Properties\command","","#$pWinDir#$p\System32\SystemPropertiesComputerName.exe"
 
 //Cleanup Desktop Context Menu
 If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\DesktopBackground\Shell\Display",RegDelete,HKLM,"Tmp_Software\Classes\DesktopBackground\Shell\Display"
 If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\DesktopBackground\Shell\Personalize",RegDelete,HKLM,"Tmp_Software\Classes\DesktopBackground\Shell\Personalize"
 
 // Redirect modern Settings (eg. ms-settings:dateandtime) to Control Panel
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\ms-settings\Shell\Open\Command","","#$pSystemRoot#$p\system32\control.exe"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\ms-settings\Shell\Open\Command","","#$pSystemRoot#$p\system32\control.exe"
 
 // Remove duplicate Removable Drive Icon from Navigation Pane
 If,ExistRegSubKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\DelegateFolders\{F5FB2C77-0E2F-4A16-A381-3E560C68BC83}",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\DelegateFolders\{F5FB2C77-0E2F-4A16-A381-3E560C68BC83}"
@@ -177,7 +177,7 @@ If,%SourceArch%,Equal,x64,Begin
 End
 
 // Remove Quick access from Navigation Pane
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer","HubMode",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer","HubMode",1
 
 // Remove Libraries from this PC
 If,ExistRegSubKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{031e4825-7b94-4dc3-b131-e946b44c8dd5}",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{031e4825-7b94-4dc3-b131-e946b44c8dd5}"
@@ -186,121 +186,121 @@ If,%SourceArch%,Equal,x64,Begin
 End
 
 // Hide Network to Navigation Pane
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}\ShellFolder","Attributes",-1332477852
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}\ShellFolder","Attributes",-1332477852
 
 // Hide 3D-Objects folder
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag","ThisPCPolicy","Hide"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag","ThisPCPolicy","Hide"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag","ThisPCPolicy","Hide"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag","ThisPCPolicy","Hide"
 
 // Hide Contacts folder
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{56784854-C6CB-462B-8169-88E350ACB882}\PropertyBag","ThisPCPolicy","Hide"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{56784854-C6CB-462B-8169-88E350ACB882}\PropertyBag","ThisPCPolicy","Hide"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{56784854-C6CB-462B-8169-88E350ACB882}\PropertyBag","ThisPCPolicy","Hide"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{56784854-C6CB-462B-8169-88E350ACB882}\PropertyBag","ThisPCPolicy","Hide"
 
 // Show Desktop folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag"
 End
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}\PropertyBag"
 End
 
 // Show Documents folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag"
 End
 
 // Show Downloads folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag"
 End
 
 // Show Favorites folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{1777F761-68AD-4D8A-87BD-30B759FA33DD}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{1777F761-68AD-4D8A-87BD-30B759FA33DD}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{1777F761-68AD-4D8A-87BD-30B759FA33DD}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{1777F761-68AD-4D8A-87BD-30B759FA33DD}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{1777F761-68AD-4D8A-87BD-30B759FA33DD}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{1777F761-68AD-4D8A-87BD-30B759FA33DD}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{1777F761-68AD-4D8A-87BD-30B759FA33DD}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{1777F761-68AD-4D8A-87BD-30B759FA33DD}\PropertyBag"
 End
 
 // Show AppDataFavorites folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7CFBEFBC-DE1F-45AA-B843-A542AC536CC9}\PropertyBag"
 End
 
 // Hide Links folder
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{bfb9d5e0-c6a9-404c-b2b2-ae6db6af4968}\PropertyBag","ThisPCPolicy","Hide"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{bfb9d5e0-c6a9-404c-b2b2-ae6db6af4968}\PropertyBag","ThisPCPolicy","Hide"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{bfb9d5e0-c6a9-404c-b2b2-ae6db6af4968}\PropertyBag","ThisPCPolicy","Hide"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{bfb9d5e0-c6a9-404c-b2b2-ae6db6af4968}\PropertyBag","ThisPCPolicy","Hide"
 
 // Show Music folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag"
 End
 
 // Hide OneDrive folder
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{A52BBA46-E9E1-435f-B3D9-28DAA648C0F6}\PropertyBag","ThisPCPolicy","Hide"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{A52BBA46-E9E1-435f-B3D9-28DAA648C0F6}\PropertyBag","ThisPCPolicy","Hide"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{A52BBA46-E9E1-435f-B3D9-28DAA648C0F6}\PropertyBag","ThisPCPolicy","Hide"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{A52BBA46-E9E1-435f-B3D9-28DAA648C0F6}\PropertyBag","ThisPCPolicy","Hide"
 
 // Show Pictures folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag"
 End
 
 // Hide Saved Games folder
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}\PropertyBag","ThisPCPolicy","Hide"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}\PropertyBag","ThisPCPolicy","Hide"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}\PropertyBag","ThisPCPolicy","Hide"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}\PropertyBag","ThisPCPolicy","Hide"
 
 // Hide Searches folder
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d1d3a04-debb-4115-95cf-2f29da2920da}\PropertyBag","ThisPCPolicy","Hide"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d1d3a04-debb-4115-95cf-2f29da2920da}\PropertyBag","ThisPCPolicy","Hide"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d1d3a04-debb-4115-95cf-2f29da2920da}\PropertyBag","ThisPCPolicy","Hide"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d1d3a04-debb-4115-95cf-2f29da2920da}\PropertyBag","ThisPCPolicy","Hide"
 
 // Show Videos folder
 If,ExistRegValue,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag","ThisPCPolicy"
-RegWrite,HKLM,0x0,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag"
 If,%SourceArch%,Equal,x64,Begin
   If,ExistRegValue,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag","ThisPCPolicy",RegDelete,HKLM,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag","ThisPCPolicy"
-  RegWrite,HKLM,0x0,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag"
 End
 
 // Remove "Include in Library" Context Menu
 If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\Library Location",RegDelete,HKLM,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\Library Location"
 
 //Remove Copilot from taskbar (Win11 22621.2361+)
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowCopilotButton",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowCopilotButton",0
 
 // Device Setup Mgr (Eject Device & Printer Support)
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\DsmSvc",HKLM,"Tmp_System\ControlSet001\Services\DsmSvc"
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\DsmSvc"
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\DsmSvc"
 
 // Remove 'Shortcut' from shortcut name and change the icon to be transparent
-RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer","link",00,00,00,00
-RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons",29,"#$pSystemRoot#$p\system32\Transparent.ico"
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer","link",00,00,00,00
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons",29,"#$pSystemRoot#$p\system32\Transparent.ico"
 
 // Register Shell Hardware Detection
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\ShellHWDetection",HKLM,"Tmp_System\ControlSet001\Services\ShellHWDetection"
 
 // Register USB drivers
-RegWrite,HKLM,0x1,"Tmp_Drivers\DriverDatabase\DriverFiles\winusb.sys","","winusb.inf"
+RegWrite,HKLM,REG_SZ,"Tmp_Drivers\DriverDatabase\DriverFiles\winusb.sys","","winusb.inf"
 
 [#Reg-BitLocker#]
 // ===============================================================================================================================
@@ -317,12 +317,12 @@ RegWrite,HKLM,0x1,"Tmp_Drivers\DriverDatabase\DriverFiles\winusb.sys","","winusb
 Echo,"Registering Bitlocker Shell Extensions..."
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\BDESVC",HKLM,"Tmp_System\ControlSet001\Services\BDESVC"
 If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\Drive\shell\unlock-bde","","@#$pSystemRoot#$p\System32\bdeunlock.exe,-100"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\unlock-bde","AppliesTo","System.Volume.BitLockerProtection:=6"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\unlock-bde","DefaultAppliesTo",""
-  RegWrite,HKLM,0x1,"Tmp_software\Classes\Drive\shell\unlock-bde","Icon","bdeunlock.exe"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\unlock-bde","MultiSelectModel","Single"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\Drive\shell\unlock-bde\command","","#$pSystemRoot#$p\System32\bdeunlock.exe #$p1"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\Drive\shell\unlock-bde","","@#$pSystemRoot#$p\System32\bdeunlock.exe,-100"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\unlock-bde","AppliesTo","System.Volume.BitLockerProtection:=6"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\unlock-bde","DefaultAppliesTo",""
+  RegWrite,HKLM,REG_SZ,"Tmp_software\Classes\Drive\shell\unlock-bde","Icon","bdeunlock.exe"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\unlock-bde","MultiSelectModel","Single"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\Drive\shell\unlock-bde\command","","#$pSystemRoot#$p\System32\bdeunlock.exe #$p1"
 End
 
 [#Reg-Search#]
@@ -338,28 +338,28 @@ End
 // ===============================================================================================================================
 [Reg-Search]
 Echo,"Registering Windows Search..."
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchFiles",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchPrograms",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchFiles",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_SearchPrograms",1
 RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows Search",HKLM,"Tmp_Software\Microsoft\Windows Search"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\ContentIndex",HKLM,"Tmp_System\ControlSet001\Control\ContentIndex"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\services\WSearchIdxPi",HKLM,"Tmp_System\ControlSet001\services\WSearchIdxPi"
 
 // Volume Info Cache
 If,ExistRegSubKey,HKLM,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache"
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\C:","DriveType",3
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\C:","VolumeLabel",""
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\D:","DriveType",3
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\D:","VolumeLabel",""
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\E:","DriveType",3
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\E:","VolumeLabel",""
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\F:","DriveType",3
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\F:","VolumeLabel",""
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\G:","DriveType",3
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\G:","VolumeLabel",""
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\H:","DriveType",3
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\H:","VolumeLabel",""
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\I:","DriveType",3
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\I:","VolumeLabel",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\C:","DriveType",3
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\C:","VolumeLabel",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\D:","DriveType",3
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\D:","VolumeLabel",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\E:","DriveType",3
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\E:","VolumeLabel",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\F:","DriveType",3
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\F:","VolumeLabel",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\G:","DriveType",3
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\G:","VolumeLabel",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\H:","DriveType",3
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\H:","VolumeLabel",""
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\I:","DriveType",3
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows Search\VolumeInfoCache\I:","VolumeLabel",""
 
 [#Reg-StateRepository#]
 // ===============================================================================================================================
@@ -396,33 +396,45 @@ RegCopy,HKLM,"Tmp_Install_SYSTEM\ControlSet001\Services\StateRepository",HKLM,"T
 // ===============================================================================================================================
 [Reg-AdditionalFonts]
 Echo,"Registering Additional Fonts..."
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Segoe Fluent Icons (TrueType)","SegoeIcons.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Segoe UI (TrueType)","segoeui.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier 10#$c12#$c15","coure.fon"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","MS Sans Serif 8#$c10#$c12#$c14#$c18#$c24","sserife.fon"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial (TrueType)","arial.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial Black (TrueType)","ariblk.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial Bold (TrueType)","arialbd.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial Bold Italic (TrueType)","arialbi.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial Italic (TrueType)","ariali.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Comic Sans MS (TrueType)","comic.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Comic Sans MS Bold (TrueType)","comicbd.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier New (TrueType)","cour.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier New Bold (TrueType)","courbd.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier New Bold Italic (TrueType)","courbi.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier New Italic (TrueType)","couri.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Lucida Sans Unicode (TrueType)","l_10646.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Times New Roman Bold (TrueType)","timesbd.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Times New Roman Bold Italic (TrueType)","timesbi.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Times New Roman Italic (TrueType)","timesi.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Trebuchet MS (TrueType)","trebuc.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Trebuchet MS Bold (TrueType)","trebucbd.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Trebuchet MS Bold Italic (TrueType)","trebucbi.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Trebuchet MS Italic (TrueType)","trebucit.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Verdana (TrueType)","verdana.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Verdana Bold (TrueType)","verdanab.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Verdana Italic (TrueType)","verdanai.ttf"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Verdana Bold Italic (TrueType)","verdanaz.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Segoe Fluent Icons (TrueType)","SegoeIcons.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Segoe UI (TrueType)","segoeui.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier 10#$c12#$c15","coure.fon"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","MS Sans Serif 8#$c10#$c12#$c14#$c18#$c24","sserife.fon"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial (TrueType)","arial.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial Black (TrueType)","ariblk.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial Bold (TrueType)","arialbd.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial Bold Italic (TrueType)","arialbi.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Arial Italic (TrueType)","ariali.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Calibri (TrueType)","calibri.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Calibri Bold (TrueType)","calibrib.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Calibri Italic (TrueType)","calibrii.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Calibri Light (TrueType)","calibril.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Calibri Light Italic (TrueType)","calibrili.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Calibri Bold Italic (TrueType)","calibriz.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Cambria & Cambria Math (TrueType)","cambria.ttc"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Cambria Bold (TrueType)","cambriab.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Cambria Italic (TrueType)","cambriai.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Cambria Bold Italic (TrueType)","cambriaz.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Comic Sans MS (TrueType)","comic.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Comic Sans MS Bold (TrueType)","comicbd.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier New (TrueType)","cour.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier New Bold (TrueType)","courbd.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier New Bold Italic (TrueType)","courbi.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Courier New Italic (TrueType)","couri.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Lucida Sans Unicode (TrueType)","l_10646.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","MS Serif","serifer.fon"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","MS Sans Serif","sserifer.fon"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Times New Roman Bold (TrueType)","timesbd.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Times New Roman Bold Italic (TrueType)","timesbi.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Times New Roman Italic (TrueType)","timesi.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Trebuchet MS (TrueType)","trebuc.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Trebuchet MS Bold (TrueType)","trebucbd.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Trebuchet MS Bold Italic (TrueType)","trebucbi.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Trebuchet MS Italic (TrueType)","trebucit.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Verdana (TrueType)","verdana.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Verdana Bold (TrueType)","verdanab.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Verdana Italic (TrueType)","verdanai.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Verdana Bold Italic (TrueType)","verdanaz.ttf"
 
 [#Reg-Options#]
 // ===============================================================================================================================
@@ -440,122 +452,122 @@ Echo,"Configuring User Defined Options..."
 
 // Show Computer On Desktop
 If,%cb_ShowComputerOnDesktop%,Equal,True,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",0
 End
 Else,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel","{20D04FE0-3AEA-1069-A2D8-08002B30309D}",1
 End
 
 // DPI Scaling - This should be moved to another script eventually...
-If,%cb_DisableDPIScaling%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","Win8DpiScaling",0
+If,%cb_DisableDPIScaling%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Control Panel\Desktop","Win8DpiScaling",0
 
 // Auto expand to current folder
-If,%cb_ExpandCurDir%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","NavPaneExpandToCurrentFolder",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","NavPaneExpandToCurrentFolder",0
+If,%cb_ExpandCurDir%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","NavPaneExpandToCurrentFolder",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","NavPaneExpandToCurrentFolder",0
 
 // Show Menu bar
 If,%cb_AlwaysShowMenus%,Equal,True,RegWrite,HKLM,0x04,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","AlwaysShowMenus",1
 
 // Expand Ribbon
-If,%cb_ExpandRibbon%,Equal,True,RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Ribbon","QatItems",3c,73,69,71,3a,63,75,73,74,6f,6d,55,49,20,78,6d,6c,6e,73,3a,73,69,71,3d,22,68,74,74,70,3a,2f,2f,73,63,68,65,6d,61,73,2e,6d,69,63,72,6f,73,6f,66,74,2e,63,6f,6d,2f,77,69,6e,64,6f,77,73,2f,32,30,30,39,2f,72,69,62,62,6f,6e,2f,71,61,74,22,3e,3c,73,69,71,3a,72,69,62,62,6f,6e,20,6d,69,6e,69,6d,69,7a,65,64,3d,22,66,61,6c,73,65,22,3e,3c,73,69,71,3a,71,61,74,20,70,6f,73,69,74,69,6f,6e,3d,22,30,22,3e,3c,73,69,71,3a,73,68,61,72,65,64,43,6f,6e,74,72,6f,6c,73,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,36,31,32,38,22,20,76,69,73,69,62,6c,65,3d,22,66,61,6c,73,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,36,31,32,39,22,20,76,69,73,69,62,6c,65,3d,22,66,61,6c,73,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,32,33,35,32,22,20,76,69,73,69,62,6c,65,3d,22,66,61,6c,73,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,32,33,38,34,22,20,76,69,73,69,62,6c,65,3d,22,74,72,75,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,32,33,33,36,22,20,76,69,73,69,62,6c,65,3d,22,74,72,75,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,32,33,35,37,22,20,76,69,73,69,62,6c,65,3d,22,66,61,6c,73,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,2f,73,69,71,3a,73,68,61,72,65,64,43,6f,6e,74,72,6f,6c,73,3e,3c,2f,73,69,71,3a,71,61,74,3e,3c,2f,73,69,71,3a,72,69,62,62,6f,6e,3e,3c,2f,73,69,71,3a,63,75,73,74,6f,6d,55,49,3e
+If,%cb_ExpandRibbon%,Equal,True,RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Ribbon","QatItems",3c,73,69,71,3a,63,75,73,74,6f,6d,55,49,20,78,6d,6c,6e,73,3a,73,69,71,3d,22,68,74,74,70,3a,2f,2f,73,63,68,65,6d,61,73,2e,6d,69,63,72,6f,73,6f,66,74,2e,63,6f,6d,2f,77,69,6e,64,6f,77,73,2f,32,30,30,39,2f,72,69,62,62,6f,6e,2f,71,61,74,22,3e,3c,73,69,71,3a,72,69,62,62,6f,6e,20,6d,69,6e,69,6d,69,7a,65,64,3d,22,66,61,6c,73,65,22,3e,3c,73,69,71,3a,71,61,74,20,70,6f,73,69,74,69,6f,6e,3d,22,30,22,3e,3c,73,69,71,3a,73,68,61,72,65,64,43,6f,6e,74,72,6f,6c,73,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,36,31,32,38,22,20,76,69,73,69,62,6c,65,3d,22,66,61,6c,73,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,36,31,32,39,22,20,76,69,73,69,62,6c,65,3d,22,66,61,6c,73,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,32,33,35,32,22,20,76,69,73,69,62,6c,65,3d,22,66,61,6c,73,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,32,33,38,34,22,20,76,69,73,69,62,6c,65,3d,22,74,72,75,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,32,33,33,36,22,20,76,69,73,69,62,6c,65,3d,22,74,72,75,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,73,69,71,3a,63,6f,6e,74,72,6f,6c,20,69,64,51,3d,22,73,69,71,3a,31,32,33,35,37,22,20,76,69,73,69,62,6c,65,3d,22,66,61,6c,73,65,22,20,61,72,67,75,6d,65,6e,74,3d,22,30,22,20,2f,3e,3c,2f,73,69,71,3a,73,68,61,72,65,64,43,6f,6e,74,72,6f,6c,73,3e,3c,2f,73,69,71,3a,71,61,74,3e,3c,2f,73,69,71,3a,72,69,62,62,6f,6e,3e,3c,2f,73,69,71,3a,63,75,73,74,6f,6d,55,49,3e
 
 // Expand Operation Dialog (FileCopy, Delete, Etc.)
-If,%cb_ExpandOpStatusDlg%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager","EnthusiastMode",1
+If,%cb_ExpandOpStatusDlg%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager","EnthusiastMode",1
 
 // Auto Hide Taskbar
-If,%cb_AutoHideTaskbar%,Equal,True,RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3","Settings",30,00,00,00,fe,ff,ff,ff,03,00,00,00,03,00,00,00,9b,00,00,00,64,00,00,00,00,00,00,00,0c,08,00,00,00,0f,00,00,70,08,00,00,f0,00,00,00,01,00,00,00
+If,%cb_AutoHideTaskbar%,Equal,True,RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3","Settings",30,00,00,00,fe,ff,ff,ff,03,00,00,00,03,00,00,00,9b,00,00,00,64,00,00,00,00,00,00,00,0c,08,00,00,00,0f,00,00,70,08,00,00,f0,00,00,00,01,00,00,00
 
 // Lock the taskbar
-If,%cb_LockTaskbar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSizeMove",0
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSizeMove",1
+If,%cb_LockTaskbar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSizeMove",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSizeMove",1
 
 // Small icons on Desktop
 If,%cb_SmallIconsOnDesktop%,Equal,True,Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\Shell\BagMRU","NodeSlots",02
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\Shell\BagMRU","NodeSlot",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\Shell\Bags\1\Desktop","IconSize",32
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\Shell\Bags\1\Desktop","Mode",1
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\Shell\Bags\1\Desktop","LogicalViewMode",3
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\Shell\BagMRU","NodeSlots",02
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\Shell\BagMRU","NodeSlot",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\Shell\Bags\1\Desktop","IconSize",32
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\Shell\Bags\1\Desktop","Mode",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\Shell\Bags\1\Desktop","LogicalViewMode",3
 End
 
 // Small icons in Menu
-If,%cb_SmallIconsInMenu%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_LargeMFUIcons",0
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_LargeMFUIcons",1
+If,%cb_SmallIconsInMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_LargeMFUIcons",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Start_LargeMFUIcons",1
 
 // Small icons on Taskbar
-If,%cb_SmallIconsOnTaskbar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
+If,%cb_SmallIconsOnTaskbar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarSmallIcons",0
 
 // Taskbar Icons
-If,%rGrp_TaskbarIcons%,Equal,0,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",0
-Else,If,%rGrp_TaskbarIcons%,Equal,1,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",1
-Else,If,%rGrp_TaskbarIcons%,Equal,2,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",2
+If,%rGrp_TaskbarIcons%,Equal,0,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",0
+Else,If,%rGrp_TaskbarIcons%,Equal,1,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",1
+Else,If,%rGrp_TaskbarIcons%,Equal,2,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","TaskbarGlomLevel",2
 Else,Halt,"INTERNAL LOGIC ERROR: No action configured for option [%rGrp_TaskbarIcons%]"
 
 // Hide known file extensions
-If,%cb_HideKnownFileExtensions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","HideFileExt",1
-Else,If,%cb_HideKnownFileExtensions%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","HideFileExt",0
+If,%cb_HideKnownFileExtensions%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","HideFileExt",1
+Else,If,%cb_HideKnownFileExtensions%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","HideFileExt",0
 
 // Hidden Files
-If,%cb_ShowHiddenFiles%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Hidden",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Hidden",0
+If,%cb_ShowHiddenFiles%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Hidden",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","Hidden",0
 
 // Super Hidden Files (Hidden+System)
-If,%cb_HideSystemFiles%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowSuperHidden",0
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowSuperHidden",1
+If,%cb_HideSystemFiles%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowSuperHidden",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowSuperHidden",1
 
 // Default Folder Layout (Currently we are only setting the "Generic" folder view CLSID.)
 If,%cmb_DefaultFolderLayout%,Equal,"Extra Large Icons",Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,01,00,00,00,01,00,00,00,e0,d0,57,00,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,12,00,00,00,43,00,00,00
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,00,01,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,00,00,00,00,00,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,01,00,00,00,01,00,00,00,e0,d0,57,00,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,12,00,00,00,43,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,00,01,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,If,%cmb_DefaultFolderLayout%,Equal,"Large Icons",Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,01,00,00,00,01,00,00,00,e0,d0,57,00,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,13,00,00,00,43,00,00,00
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,60,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,00,00,00,00,00,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,01,00,00,00,01,00,00,00,e0,d0,57,00,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,13,00,00,00,43,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,60,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,If,%cmb_DefaultFolderLayout%,Equal,"Medium Icons",Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,01,00,00,00,01,00,00,00,e0,d0,57,00,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,11,00,00,00,43,00,00,00
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,30,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,00,00,00,00,00,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,01,00,00,00,01,00,00,00,e0,d0,57,00,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,11,00,00,00,43,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,30,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,If,%cmb_DefaultFolderLayout%,Equal,"Small Icons",Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,02,00,00,00,01,00,00,00,c0,00,90,08,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,14,00,00,00,43,00,00,00
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,10,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,00,00,00,00,00,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,02,00,00,00,01,00,00,00,c0,00,90,08,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,14,00,00,00,43,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,10,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,If,%cmb_DefaultFolderLayout%,Equal,"List",Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,03,00,00,00,01,00,00,00,e0,a5,1f,0e,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,15,00,00,00,43,00,00,00
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,10,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,04,00,00,00,00,00,00,00,00,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,03,00,00,00,01,00,00,00,e0,a5,1f,0e,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,15,00,00,00,43,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,03,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,10,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,04,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,If,%cmb_DefaultFolderLayout%,Equal,"Details",Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,04,00,00,00,01,00,00,00,00,77,7e,13,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,16,00,00,00,43,00,00,00
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,04,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,10,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,00,00,00,00,00,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,04,00,00,00,01,00,00,00,00,77,7e,13,73,35,cf,11,ae,69,08,00,2b,2e,12,62,04,00,00,00,16,00,00,00,43,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,04,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,10,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,01,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,If,%cmb_DefaultFolderLayout%,Equal,"Tiles",Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,06,00,00,00,01,00,00,00,e5,25,f1,65,e1,7b,10,48,ba,9d,d2,71,c8,43,2c,e3,04,00,00,00,17,00,00,00,43,00,00,00
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,06,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,30,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,02,00,00,00,00,00,00,00,00,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,06,00,00,00,01,00,00,00,e5,25,f1,65,e1,7b,10,48,ba,9d,d2,71,c8,43,2c,e3,04,00,00,00,17,00,00,00,43,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,06,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,30,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,02,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,If,%cmb_DefaultFolderLayout%,Equal,"Content",Begin
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,08,00,00,00,01,00,00,00,34,c4,c2,30,89,08,8d,4c,98,5d,a9,f7,18,30,b0,a9,04,00,00,00,18,00,00,00,43,00,00,00
-  RegWrite,HKLM,0x3,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,08,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,20,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,05,00,00,00,00,00,00,00,00,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams","Settings",08,00,00,00,08,00,00,00,01,00,00,00,34,c4,c2,30,89,08,8d,4c,98,5d,a9,f7,18,30,b0,a9,04,00,00,00,18,00,00,00,43,00,00,00
+  RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults","{5C4F28B5-F869-4E84-8E60-F11DB97C5CC7}",1c,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,f1,f1,f1,f1,14,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,d0,02,00,00,cc,02,00,00,31,53,50,53,05,d5,cd,d5,9c,2e,1b,10,93,97,08,00,2b,2c,f9,ae,83,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,46,00,4d,00,54,00,49,00,44,00,00,00,08,00,00,00,4e,00,00,00,7b,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,2d,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,30,00,7d,00,00,00,00,00,33,00,00,00,22,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,44,00,69,00,72,00,65,00,63,00,74,00,69,00,6f,00,6e,00,00,00,13,00,00,00,01,00,00,00,5b,00,00,00,0a,00,00,00,00,53,00,6f,00,72,00,74,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,1c,00,00,00,01,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,01,00,00,00,25,00,00,00,14,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,56,00,69,00,65,00,77,00,00,00,0b,00,00,00,00,00,00,00,1b,00,00,00,0a,00,00,00,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,08,00,00,00,23,00,00,00,12,00,00,00,00,49,00,63,00,6f,00,6e,00,53,00,69,00,7a,00,65,00,00,00,13,00,00,00,20,00,00,00,bd,00,00,00,10,00,00,00,00,43,00,6f,00,6c,00,49,00,6e,00,66,00,6f,00,00,00,42,00,00,00,1e,00,00,00,70,00,72,00,6f,00,70,00,34,00,32,00,39,00,34,00,39,00,36,00,37,00,32,00,39,00,35,00,00,00,00,00,78,00,00,00,fd,df,df,fd,10,00,00,00,00,00,00,00,00,00,00,00,04,00,00,00,18,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0a,00,00,00,10,01,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0e,00,00,00,90,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,04,00,00,00,78,00,00,00,30,f1,25,b7,ef,47,1a,10,a5,f1,02,60,8c,9e,eb,ac,0c,00,00,00,50,00,00,00,2f,00,00,00,1e,00,00,00,00,47,00,72,00,6f,00,75,00,70,00,42,00,79,00,4b,00,65,00,79,00,3a,00,50,00,49,00,44,00,00,00,13,00,00,00,00,00,00,00,1f,00,00,00,0e,00,00,00,00,46,00,46,00,6c,00,61,00,67,00,73,00,00,00,13,00,00,00,01,00,20,41,31,00,00,00,20,00,00,00,00,4c,00,6f,00,67,00,69,00,63,00,61,00,6c,00,56,00,69,00,65,00,77,00,4d,00,6f,00,64,00,65,00,00,00,13,00,00,00,05,00,00,00,00,00,00,00,00,00,00,00
 End
 Else,Halt,"INTERNAL LOGIC ERROR: Invalid selection [%cmb_DefaultFolderLayout%]."
 
 // Use Checkboxs to Select Items
-If,%cb_UseCheckboxsToSelectItems%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","AutoCheckSelect",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","AutoCheckSelect",0
+If,%cb_UseCheckboxsToSelectItems%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","AutoCheckSelect",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","AutoCheckSelect",0
 
 // Show Status Bar
-If,%cb_ShowStatusBar%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",0
+If,%cb_ShowStatusBar%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","ShowStatusBar",0
 
 // Launch Folder Windows in a Separate Process
-If,%cb_LaunchFoldersInSeparateProcess%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SeparateProcess",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SeparateProcess",0
+If,%cb_LaunchFoldersInSeparateProcess%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SeparateProcess",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","SeparateProcess",0
 
 // Use Compact View
-If,%cb_UseCompactMode%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","UseCompactMode",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","UseCompactMode",0
+If,%cb_UseCompactMode%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","UseCompactMode",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced","UseCompactMode",0
 
 [#ExtractFiles#]
 // ===============================================================================================================================
@@ -909,18 +921,31 @@ RequireFileEx,AppendList,\Windows\System32\catroot\{F750E6C3-38EE-11D1-85E5-00C0
 RequireFileEx,AppendList,\Windows\Fonts\segoe*.ttf,NOMUI
 
 // Additional Fonts
-RequireFileEx,AppendList,\Windows\Fonts\coure.fon,NOMUI
-RequireFileEx,AppendList,\Windows\Fonts\sserife.fon,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\arial.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\arialbd.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\arialbi.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\ariali.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\calibri.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\calibrib.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\calibrii.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\calibril.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\calibrili.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\calibriz.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\cambria.ttc,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\cambriab.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\cambriai.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\cambriaz.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\comic.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\comicbd.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\cour.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\coure.fon,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\courbd.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\courbi.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\l_10646.ttf,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\serifer.fon,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\sserife.fon,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\sserifer.fon,NOMUI
+RequireFileEx,AppendList,\Windows\Fonts\times.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\timesbd.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\timesbi.ttf,NOMUI
 RequireFileEx,AppendList,\Windows\Fonts\timesi.ttf,NOMUI
