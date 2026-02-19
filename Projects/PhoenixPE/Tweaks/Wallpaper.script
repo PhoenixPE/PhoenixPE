@@ -32,10 +32,10 @@
 Title=Wallpaper
 Author=Homes32
 Description=Personalize your desktop background.
-Version=1.5.0.0
+Version=1.6.0.0
 Selected=True
 Mandatory=False
-Date=2021-04-06
+Date=2026-02-09
 Level=4
 
 [Variables]
@@ -47,10 +47,20 @@ Level=4
 Echo,"Configuring Desktop Wallpaper..."
 RegLoadHives
 
+Run,%ScriptFile%,ColorMeBadd
+
 If,ExistFile,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%",FileDelete,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%"
 If,Not,ExistDir,"%TargetWindows%\Web\Wallpaper\Windows",DirMake,"%TargetWindows%\Web\Wallpaper\Windows"
 
-If,%rbtn_Default%,Equal,True,Begin
+If,%rbtn_None%,Equal,True,Begin
+  Echo,"Using solid color background..."
+  // Note: ColorMeBadd must be run first or the reg key may not exist.
+  RegRead,HKLM,"Tmp_Default\Control Panel\Colors","Background",%RGB%
+  Run,%ScriptFile%,CreatePixelBmp,"#$q%RGB%#$q","%ProjectTemp%\pixel.bmp"
+  Run,%ScriptFile%,SetWallpaper,"%ProjectTemp%\pixel.bmp"
+  WriteInterface,Value,%ScriptFile%,Interface,cmb_Position,"Tile"
+End
+Else,If,%rbtn_Default%,Equal,True,Begin
   Echo,"Using the default wallpaper..."
   ExtractFile,%ScriptFile%,Wallpaper,default.jpg,%ProjectTemp%
   Run,%ScriptFile%,SetWallpaper,%ProjectTemp%\default.jpg
@@ -65,64 +75,54 @@ Else,If,%rbtn_Custom%,Equal,True,Begin
   Run,%ScriptFile%,SetWallpaper,%fb_CustomImage%
 End
 
-If,%rbtn_None%,Equal,False,Begin
-  // Any wallpaper except none.
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Accent","MotionAccentId_v1.00",219
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WallPaper","X:\Windows\Web\Wallpaper\Windows\%WallpaperFileName%",NoWarn
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperSource","X:\Windows\Web\Wallpaper\Windows\%WallpaperFileName%",NoWarn
-  RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE","CustomBackground","X:\Windows\Web\Wallpaper\Windows\%WallpaperFileName%",NoWarn  
-End
-Else,Begin
-  // No wallpaper
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","Wallpaper","",NoWarn
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperSource","",NoWarn
-End
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Accent","MotionAccentId_v1.00",219
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WallPaper","X:\Windows\Web\Wallpaper\Windows\%WallpaperFileName%",NoWarn
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperSource","X:\Windows\Web\Wallpaper\Windows\%WallpaperFileName%",NoWarn
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE","CustomBackground","X:\Windows\Web\Wallpaper\Windows\%WallpaperFileName%",NoWarn  
 
 // Enable Wallpaper Configuration
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization","AllowChangeDesktopBackground",1
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization","AllowPersonalization",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization","AllowChangeDesktopBackground",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization","AllowPersonalization",1
 
 // Wallpaper Position
 Echo,"Configuring wallpaper position [%cmb_Position%]..."
 If,%cmb_Position%,Equal,"Center",Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",0
 End
 Else,If,%cmb_Position%,Equal,"Fill",Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",10
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",10
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",10
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",10
 End
 Else,If,%cmb_Position%,Equal,"Fit",Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",6
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",6
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",6
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",6
 End
 Else,If,%cmb_Position%,Equal,"Stretch",Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",2
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",2
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",2
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",2
 End
 Else,If,%cmb_Position%,Equal,"Span",Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",22
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",22
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",22
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",22
 End
 Else,If,%cmb_Position%,Equal,"Tile",Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","TileWallpaper",1
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",1
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","TileWallpaper",1
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",1
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",0
 End
 Else,Halt,"INTERNAL LOGIC ERROR: No configuration exists for [%cmb_Position%]"
-
-Run,%ScriptFile%,ColorMeBadd
 
 // User Profile Pic
 If,%cb_ChangeUserProfilePic%,Equal,True,Run,%ScriptFile%,SetUserProfilePic
@@ -158,7 +158,7 @@ End
 [#ColorMeBadd#]
 // ===============================================================================================================================
 // Name...........: ColorMeBadd
-// Description....: Set the background color based on the script config. (All For You...)
+// Description....: Set the background color based on the script config.
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
@@ -175,8 +175,34 @@ Else,Begin
   List,Get,%aBGColorMap%,%RGBPos%,%RGB%
 End	
 
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Colors","Background",%RGB%
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","Background",%RGB%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Colors","Background",%RGB%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","Background",%RGB%
+
+[#CreatePixelBmp#]
+// ===============================================================================================================================
+// Name...........: CreatePixelBmp
+// Description....: Create a 1px bitmap image given a RGB color string.
+// Syntax.........: 
+// Parameters.....: #1 - RGBString - RGB Color string (eg. 0 78 152)
+//                  #2 - DestPath - Full path where the bitmap will be saved.
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Win11 22H2? broke setting the background color. Explorer resets the Background key to 0 0 0 on boot.
+//                  We work around the issue by creating a 1px image with the solid color and setting it as the wallpaper.
+// Related........: 
+// ===============================================================================================================================
+[CreatePixelBmp]
+System,SetLocal
+GetParam,1,%RGBString%
+GetParam,2,%DestPath%
+If,%RGBString%,Equal,"",Halt,"Syntax Error: You must specify a RGB color string."
+If,%DestPath%,Equal,"",Halt,"Syntax Error: You must specify the destination path."
+
+ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","%Tools%\a3x\CreatePixelBmp.a3x %RGBString% %DestPath%"
+If,Not,%ExitCode%,Equal,0,Halt,"Error: Failed to create solid color background bitmap. The command returned: [%ExitCode%]."
+If,Not,ExistFile,%DestPath%,Halt,"Error: Failed to create solid color background bitmap."
+
+System,EndLocal
 
 [#ToggleColorPicker#]
 // ===============================================================================================================================
@@ -229,8 +255,8 @@ If,%UserProfilePicExt%,Equal,".accountpicture-ms",Begin
   // Register .accountpicture-ms
   RegCopy,HKLM,"Tmp_Install_Software\Classes\.accountpicture-ms",HKLM,"Tmp_Software\Classes\.accountpicture-ms"
   RegCopy,HKLM,"Tmp_Install_Software\Classes\accountpicturefile",HKLM,"Tmp_Software\Classes\accountpicturefile"
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\PropertySystem\PropertyHandlers\.accountpicture-ms","","{9a02e012-6303-4e1e-b9a1-630f802592c5}"
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\AccountPicture","SourceId","AccountPicture"  
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\PropertySystem\PropertyHandlers\.accountpicture-ms","","{9a02e012-6303-4e1e-b9a1-630f802592c5}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Windows\CurrentVersion\AccountPicture","SourceId","AccountPicture"  
   FileCopy,%fb_UserProfilePic%,"%TargetDir%\Users\Default\AppData\Roaming\Microsoft\Windows\AccountPictures\AccountPicture.accountpicture-ms"
 End
 Else,Begin
