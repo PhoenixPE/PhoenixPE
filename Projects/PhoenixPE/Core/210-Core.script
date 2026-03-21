@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.3.1.0
-Date=2025-04-11
+Version=1.3.2.0
+Date=2026-03-21
 
 [Variables]
 
@@ -233,6 +233,8 @@ System,EndLocal
 Echo,"Supercharging boot.wim...#$x#$xThis can take awhile, please be patient."
 
 RequireFileEx,AppendList,\Windows\BrowserCore
+// Undocked Update Stack (UUS) is required for some Reset/Image Recover/System Restore options in Win11
+If,%SourceVer%,>=,10.0.22000,RequireFileEx,AppendList,\Windows\UUS
 
 // Inf
 RequireDriver,netnwifi.inf
