@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.4.0
-Date=2025-06-10
+Version=1.0.5.0
+Date=2026-02-10
 
 [Variables]
 %ProgramFolder%="Macrium Reflect X"
@@ -140,8 +140,8 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\MacriumReflectBackupX\shell\Restore\c
 // Product Registration
 If,%cmb_RegMethod%,Equal,"Trial License",RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Macrium\Reflect","License",""
 Else,If,%cmb_RegMethod%,Equal,"Import License From Host",Begin
-  If,ExistRegValue,HKLM,"Software\Macrium\Reflect","License",Begin
-    RegRead,HKLM,"Software\Macrium\Reflect","License",%Host_LicKey%
+  If,ExistRegValue,HKCU,"Software\Macrium\Reflect","License",Begin
+    RegRead,HKCU,"Software\Macrium\Reflect","License",%Host_LicKey%
     RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Macrium\Reflect","License",%Host_LicKey%
   End
   Else,Echo,"ERROR: Could not retrieve the license key from the host system. The software will run in Trial mode.",Warn
