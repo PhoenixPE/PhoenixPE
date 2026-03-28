@@ -43,7 +43,7 @@ Date=2026-02-01
 %ProgramVersion%=2.5.4594.1
 %DownloadURL%=https://download.advanced-ip-scanner.com/download/files/Advanced_IP_Scanner_%ProgramVersion%.exe
 %ProgramExe%="advanced_ip_scanner.exe"
-%SetupFile%="AdvancedIPScanner.exe"
+%SetupFile%="AdvancedIPScanner-%ProgramVersion%.exe"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -73,10 +73,10 @@ RegLoadHives
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTRIM,%Lang%,1,%Lang%
 StrFormat,Replace,%Lang%,"-","_",%Lang%
-RegWrite,HKLM,0x1,"Tmp_Default\Software\famatech\advanced_ip_scanner","locale","%Lang%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\famatech\advanced_ip_scanner","locale","%Lang%"
 
 // Disable Update Check
-RegWrite,HKLM,0x1,"Tmp_Default\Software\famatech\advanced_ip_scanner\Settings","check_updates","false"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\famatech\advanced_ip_scanner\Settings","check_updates","false"
 
 RegUnLoadHives
 

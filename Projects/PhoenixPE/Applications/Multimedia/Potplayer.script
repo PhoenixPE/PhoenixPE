@@ -32,9 +32,9 @@
 Title=PotPlayer
 Author=Homes32
 Level=5
-Version=1.1.0.0
+Version=1.1.1.0
 Description=PotPlayer is a freeware multimedia player known for it's wide range of settings and customizations, as well as its lightweight nature and its support for a large variety of media formats.
-Date=2023-01-31
+Date=2026-03-27
 Selected=False
 Mandatory=False
 
@@ -44,8 +44,7 @@ Mandatory=False
 %ProgramExex64%="PotPlayerMini64.exe"
 %DownloadURLx86%=https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup.exe
 %DownloadURLx64%=https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup64.exe
-%SetupFilex86%="PotPlayerSetup86.exe"
-%SetupFilex64%="PotPlayerSetup64.exe"
+%SetupFile%="PotPlayerSetup-%SourceArch%.exe"
 %ConfigFilex86%="PotPlayerMini.ini"
 %ConfigFilex64%="PotPlayerMini64.ini"
 %DropHandlerDllx86%="DTDrop.exe"
@@ -109,31 +108,31 @@ If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\SystemFileAssociations\audio",RegDe
 If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\SystemFileAssociations\video",RegDelete,HKLM,"Tmp_Software\Classes\SystemFileAssociations\video"
 
 // Add to Registered Applications
-RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\PotPlayer\Capabilities","ApplicationDescription","We play everything in the best way possible!"
-RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\PotPlayer\Capabilities","ApplicationIcon","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\PotPlayer\Capabilities","ApplicationName","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Clients\Media\PotPlayer\Capabilities","ApplicationDescription","We play everything in the best way possible!"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Clients\Media\PotPlayer\Capabilities","ApplicationIcon","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q,0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Clients\Media\PotPlayer\Capabilities","ApplicationName","PotPlayer"
 
-RegWrite,HKLM,0x1,"Tmp_Software\DAUM\PotPlayer","ProgramFolder","%PEPrograms%\%ProgramFolder%"
-If,%SourceArch%,Equal,x86,RegWrite,HKLM,0x1,"Tmp_Software\DAUM\PotPlayer64","ProgramPath","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
-Else,RegWrite,HKLM,0x1,"Tmp_Software\DAUM\PotPlayer","ProgramPath","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\DAUM\PotPlayer","ProgramFolder","%PEPrograms%\%ProgramFolder%"
+If,%SourceArch%,Equal,x86,RegWrite,HKLM,REG_SZ,"Tmp_Software\DAUM\PotPlayer64","ProgramPath","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\DAUM\PotPlayer","ProgramPath","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
 
-RegWrite,HKLM,0x1,"Tmp_Software\RegisteredApplications","PotPlayer","Software\Clients\Media\PotPlayer\Capabilities"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\RegisteredApplications","PotPlayer","Software\Clients\Media\PotPlayer\Capabilities"
 
 // Register File Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\potplayer\shell","","Open"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\potplayer\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\potplayer\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\potplayer\shell","","Open"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\potplayer\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\potplayer\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q #$q#$p1#$q"
 
 If,%cb_AudioFileAsso%,Equal,True,Run,%ScriptFile%,Register-AudioAssociations
 If,%cb_VideoFileAsso%,Equal,True,Run,%ScriptFile%,Register-VideoAssociations
 
 // DragDrop Handler
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{0FFE7772-0EE7-40f4-B7D6-3A44BCF0C42A}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{1DEBA2A8-DF1C-40a5-BED4-29F118F80771}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{2985A0EF-30E2-4b31-B3B8-8ABA20E3BF97}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{6712D17C-CEB6-4886-9641-427AF3D488B7}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{7CAD4875-0AB6-4178-9E77-7EFB04692A19}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{D56E1AC5-92D0-4b2a-A8B2-D3E164F540DD}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{0FFE7772-0EE7-40f4-B7D6-3A44BCF0C42A}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{1DEBA2A8-DF1C-40a5-BED4-29F118F80771}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2985A0EF-30E2-4b31-B3B8-8ABA20E3BF97}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{6712D17C-CEB6-4886-9641-427AF3D488B7}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{7CAD4875-0AB6-4178-9E77-7EFB04692A19}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{D56E1AC5-92D0-4b2a-A8B2-D3E164F540DD}\LocalServer32","","%PEPrograms%\%ProgramFolder%\%DropHandlerDll%"
 
 // Shell Context Menu
 If,%cb_ContextMenu%,Equal,True,Begin
@@ -149,15 +148,15 @@ If,%cb_ContextMenu%,Equal,True,Begin
   End
   
   // Register Context Menu 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\PotPlayer.Enqueue","",%AddToPlaylistStr%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\PotPlayer.Enqueue","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\PotPlayer.Enqueue\Command","","%PEPrograms%\%ProgramFolder%\%ProgramExe% #$q%1#$q /Add"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\PotPlayer.Enqueue\DropTarget","Clsid","{6712D17C-CEB6-4886-9641-427AF3D488B7}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\PotPlayer.Enqueue","",%AddToPlaylistStr%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\PotPlayer.Enqueue","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\PotPlayer.Enqueue\Command","","%PEPrograms%\%ProgramFolder%\%ProgramExe% #$q%1#$q /Add"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\PotPlayer.Enqueue\DropTarget","Clsid","{6712D17C-CEB6-4886-9641-427AF3D488B7}"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\PotPlayer.Play","",%PlayWithStr%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\PotPlayer.Play","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\PotPlayer.Play\Command","","%PEPrograms%\%ProgramFolder%\%ProgramExe% #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shell\PotPlayer.Play\DropTarget","Clsid","{7CAD4875-0AB6-4178-9E77-7EFB04692A19}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\PotPlayer.Play","",%PlayWithStr%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\PotPlayer.Play","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\PotPlayer.Play\Command","","%PEPrograms%\%ProgramFolder%\%ProgramExe% #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shell\PotPlayer.Play\DropTarget","Clsid","{7CAD4875-0AB6-4178-9E77-7EFB04692A19}"
 End
 Else,Begin
   // Disable Shell Context Menu
@@ -222,68 +221,68 @@ IniWrite,"%TargetPrograms%\%ProgramFolder%\%ConfigFile%","Settings","CheckAutoUp
 Echo,"Registering PotPlayer as the default audio player..."
 
 // Audio Files
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3ga","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.669","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.a52","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.aac","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ac3","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.adt","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.adts","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIF","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIFC","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIFF","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AU","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.amr","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.aob","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ape","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.caf","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.CDA","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dts","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.flac","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.it","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M4A","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.m4p","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MID","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MKA","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mlp","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MOD","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mp1","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP2","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mp3","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpc","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpga","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.oga","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.oma","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.opus","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.qcp","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ra","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.RMI","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.SND","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.s3m","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.spx","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tta","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.voc","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vqf","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.w64","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wav","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WMA","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wv","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xa","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xm","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3ga","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.669","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.a52","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.aac","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ac3","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.adt","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.adts","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.AIF","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.AIFC","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.AIFF","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.AU","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.amr","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.aob","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ape","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.caf","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.CDA","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.dts","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.flac","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.it","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M4A","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.m4p","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MID","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MKA","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mlp","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MOD","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mp1","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MP2","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mp3","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpc","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpga","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.oga","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.oma","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.opus","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.qcp","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ra","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.RMI","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.SND","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.s3m","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.spx","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tta","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.voc","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vqf","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.w64","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.wav","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.WMA","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.wv","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xa","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xm","","PotPlayer"
 
 // Play Lists
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ASX","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.b4s","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.cue","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ifo","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M3U","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.m3u8","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.pls","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ram","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sdp","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vlc","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WVX","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xspf","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ASX","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.b4s","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.cue","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ifo","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M3U","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.m3u8","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.pls","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ram","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sdp","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vlc","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.WVX","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xspf","","PotPlayer"
 
 [#Register-VideoAssociations#]
 // ===============================================================================================================================
@@ -300,63 +299,63 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xspf","","PotPlayer"
 Echo,"Registering PotPlayer as the default video player..."
 
 // Video Files 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3g2","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3gp","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3gp2","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3GPP","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.amv","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ASF","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.avi","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.bik","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.divx","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.drc","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dv","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.f4v","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.flv","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.gvi","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.gxf","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M1V","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2T","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2TS","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2V","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M4V","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MKV","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MOV","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP2V","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP4","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP4V","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpa","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPE","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPEG","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg1","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg2","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg4","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPG","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPV2","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MTS","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mtv","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mxf","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.nsv","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.nuv","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogg","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogm","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogv","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogx","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rec","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rm","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rmvb","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rpl","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.thp","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tod","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vlt","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wsz","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.TS","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.TTS","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vob","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vro","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.webm","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WMV","","PotPlayer"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xesc","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3g2","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3gp","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3gp2","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3GPP","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.amv","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ASF","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.avi","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bik","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.divx","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.drc","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.dv","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.f4v","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.flv","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.gvi","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.gxf","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M1V","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M2T","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M2TS","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M2V","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M4V","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MKV","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MOV","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MP2V","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MP4","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MP4V","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpa","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MPE","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MPEG","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpeg1","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpeg2","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpeg4","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MPG","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MPV2","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MTS","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mtv","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mxf","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.nsv","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.nuv","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ogg","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ogm","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ogv","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ogx","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rec","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rm","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rmvb","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rpl","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.thp","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tod","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vlt","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.wsz","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.TS","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.TTS","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vob","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vro","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.webm","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.WMV","","PotPlayer"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xesc","","PotPlayer"
 
 [#ExtractProgram#]
 // ===============================================================================================================================
@@ -401,7 +400,6 @@ If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned wa
 //                  %ConfigFile%     - Path to the potplayer .ini settings file.
 //                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
 //                  %ProgramExe%     - The x86 or x64 program file name.
-//                  %SetupFile%      - The x86 or x64 setup file name.
 //                  %DropHandlerDll% - The x86 or x64 Drag-Drop Handler dll file name.
 // Author.........: Homes32
 // Remarks........:
@@ -412,13 +410,11 @@ If,%SourceArch%,Equal,x64,Begin
   Set,%ConfigFile%,%ConfigFilex64%
   Set,%DownloadURL%,%DownloadURLx64%
   Set,%ProgramExe%,%ProgramExex64%
-  Set,%SetupFile%,%SetupFilex64%
   Set,%DropHandlerDll%,%DropHandlerDllx64%
 End  
 Else,Begin
   Set,%ConfigFile%,%ConfigFilex86%
   Set,%DownloadURL%,%DownloadURLx86%
-  Set,%SetupFile%,%SetupFilex86%
   Set,%DropHandlerDll%,%DropHandlerDllx86%
 End
 

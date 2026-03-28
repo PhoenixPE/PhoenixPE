@@ -30,26 +30,26 @@
 
 [Main]
 Title=Google Chrome
-Description=(v143.0.7499.110) Google Chrome is a cross-platform web browser developed by Google.
+Description=(v146.0.7680.165) Google Chrome is a cross-platform web browser developed by Google.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
 Version=1.1.22.0
-Date=2025-12-14
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="Chrome"
 %ProgramExe%="chrome.exe"
-%DownloadURLx86%=https://dl.google.com/release2/chrome/adprpgy6eqxk2k5wzoptkhgncieq_143.0.7499.110/143.0.7499.110_chrome_installer_uncompressed.exe
-%DownloadURLx64%=https://dl.google.com/release2/chrome/mnpsb6lkzuvjrtl77fwf3ttai4_143.0.7499.110/143.0.7499.110_chrome_installer_uncompressed.exe
-%SetupFile%="Chrome_x86.exe"
+%ProgramVer%=146.0.7680.165
+%DownloadURLx86%=https://dl.google.com/release2/chrome/admeqwype7xnx62ccd2ue2mqxjbq_146.0.7680.165/146.0.7680.165_chrome_installer_uncompressed.exe
+%DownloadURLx64%=https://dl.google.com/release2/chrome/ac5kxwl4otjxw4z27mutly4ktmxq_146.0.7680.165/146.0.7680.165_chrome_installer_uncompressed.exe
+%SetupFile%="Chrome-%ProgramVer%-%SourceArch%.exe"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
-If,%SourceArch%,Equal,"x64",Set,%SetupFile%,"Chrome_x64.exe"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
@@ -331,10 +331,7 @@ AddStartupConfig,PostShell,"RegWrite(#$qHKLM\Software\Microsoft\Windows\Shell\As
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-If,%SourceArch%,Equal,"x64",Begin
-  Set,%SetupFile%,"Chrome_x64.exe"
-  Set,%DownlodURL%,%DownloadURLx64%
-End
+If,%SourceArch%,Equal,"x64",Set,%DownlodURL%,%DownloadURLx64%
 Else,Set,%DownlodURL%,%DownloadURLx86%
 WebGet,%DownlodURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."

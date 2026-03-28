@@ -70,16 +70,16 @@ If,%cb_WriteProtectOnStartup%,Equal,True,Begin
   // 2 - Mounts all storage devices except those on a shared bus.
   // 3 - Doesn't mount storage devices.
   // 4 - New for Windows 8. Makes internal disks offline. (All external disks and the boot disk are online.)
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\services\partmgr\Parameters","SanPolicy",3
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\services\partmgr\Parameters","SanPolicy",3
   
   // Prevents Windows from automatically mounting and assigning drive letters to any new basic volumes
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\services\mountmgr","NoAutoMount",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\services\mountmgr","NoAutoMount",1
 
   // Disable TRIM on SSD's
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\FileSystem","DisableDeleteNotification",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\FileSystem","DisableDeleteNotification",1
 
   // Disable Dynamic Disk Support
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\services\volmgrx","Start",4
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\services\volmgrx","Start",4
 
   RegUnloadHives
 End

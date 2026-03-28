@@ -32,9 +32,9 @@
 Title=MPC-BE
 Author=Homes32
 Level=5
-Version=1.1.0.0
-Description=(v1.8.8.0) Media Player Classic - BE is a free and open source audio and video player for Windows.
-Date=2025-12-15
+Version=1.1.1.0
+Description=(v1.8.9.0) Media Player Classic - BE is a free and open source audio and video player for Windows.
+Date=2026-03-27
 Selected=False
 Mandatory=False
 
@@ -42,11 +42,11 @@ Mandatory=False
 %ProgramFolder%="MPC-BE"
 %ProgramExe%="mpc-be.exe"
 %ProgramExe64%="mpc-be64.exe"
-%ProgramReleaseVersion%=1.8.8
-%ProgramFullVersion%=1.8.8
+%ProgramReleaseVersion%=1.8.9
+%ProgramFullVersion%=1.8.9
 %DownloadURLx86%=https://sourceforge.net/projects/mpcbe/files/MPC-BE/Release#$p20builds/%ProgramReleaseVersion%/MPC-BE.%ProgramFullVersion%.x86.7z/download
 %DownloadURLx64%=https://sourceforge.net/projects/mpcbe/files/MPC-BE/Release#$p20builds/%ProgramReleaseVersion%/MPC-BE.%ProgramFullVersion%.x64.7z/download
-%SetupFile%="MPC-BE-%ProgramFullVersion%.zip"
+%SetupFile%="MPC-BE-%ProgramFullVersion%-%SourceArch%.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -121,17 +121,17 @@ If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\SystemFileAssociations\audio",RegDe
 If,ExistRegSubKey,HKLM,"Tmp_Software\Classes\SystemFileAssociations\video",RegDelete,HKLM,"Tmp_Software\Classes\SystemFileAssociations\video"
 
 // Add to Registered Applications
-RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationDescription","One of the most powerful, configurable multimedia players for the Windows operating system."
-RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationIcon","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationName","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationDescription","One of the most powerful, configurable multimedia players for the Windows operating system."
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationIcon","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q,0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Clients\Media\MPC-BE\Capabilities","ApplicationName","MPC-BE"
 
-RegWrite,HKLM,0x1,"Tmp_Software\MPC-BE","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
-RegWrite,HKLM,0x1,"Tmp_Software\RegisteredApplications","MPC-BE","Software\Clients\Media\MPC-BE\Capabilities"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\MPC-BE","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\RegisteredApplications","MPC-BE","Software\Clients\Media\MPC-BE\Capabilities"
 
 // Register File Associations
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\MPC-BE\shell","","Open"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\MPC-BE\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\MPC-BE\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\MPC-BE\shell","","Open"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\MPC-BE\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\MPC-BE\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q #$q#$p1#$q"
 
 If,%cb_AudioFileAsso%,Equal,True,Run,%ScriptFile%,Register-AudioAssociations
 If,%cb_VideoFileAsso%,Equal,True,Run,%ScriptFile%,Register-VideoAssociations
@@ -163,32 +163,32 @@ Echo,"Configuring MPC-BE Settings..."
 // UI Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTRIM,%Lang%,1,%Lang%
-RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\MPC-BE\Settings","Language",%Lang%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\SOFTWARE\MPC-BE\Settings","Language",%Lang%
 
 // DVD Language
 StrFormat,SPLIT,%cmb_DVDLanguage%,"[",2,%DVDLang%
 StrFormat,RTRIM,%DVDLang%,1,%DVDLang%
-RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","MenuLang",%DVDLang%
-RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","SubtitlesLang",%DVDLang%
-RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","AudioLang",%DVDLang%
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","MenuLang",%DVDLang%
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","SubtitlesLang",%DVDLang%
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","AudioLang",%DVDLang%
 
 // Dark Theme
 If,%cb_DarkMode%,Equal,True,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","UseDarkTheme",1
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","DarkMenu",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","UseDarkTheme",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","DarkMenu",1
 End
 Else,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","UseDarkTheme",0
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","DarkMenu",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","UseDarkTheme",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","DarkMenu",0
 End
 
 // Shell Context Menu
 If,%cb_ContextMenu%,Equal,True,Begin
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextFiles",1
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextDir",1
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowFiles",1
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowDir",1
-  RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","MpcPath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextFiles",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextDir",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowFiles",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowDir",1
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","MpcPath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
     
   // Extract the localized strings from the Lang\mpcresources.<lngCD>.dll resources and update
   // HKCU\Software\MPC-BE\ShellEx\Add and HKCU\Software\MPC-BE\ShellEx\Play
@@ -208,23 +208,23 @@ If,%cb_ContextMenu%,Equal,True,Begin
   
   IniRead,"%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini","Strings",33161,%ShellContextMenuAdd%
   IniRead,"%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini","Strings",33162,%ShellContextMenuPlay%
-  RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","Add",%ShellContextMenuAdd%
-  RegWrite,HKLM,0x1,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","Play",%ShellContextMenuPlay%
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","Add",%ShellContextMenuAdd%
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","Play",%ShellContextMenuPlay%
   
   // Register ShellExt  
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\MPCBEShellExt","","{A2CF4243-6525-4764-B3F5-2FCDE2F47989}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\MPCBEShellExt","","{A2CF4243-6525-4764-B3F5-2FCDE2F47989}"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}","","MPCBEContextMenu Class"
-  If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","","%PEPrograms%\%ProgramFolder%\MPCBEShellExt64.dll"
-  Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","","%PEPrograms%\%ProgramFolder%\MPCBEShellExt.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}","","MPCBEContextMenu Class"
+  If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","","%PEPrograms%\%ProgramFolder%\MPCBEShellExt64.dll"
+  Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","","%PEPrograms%\%ProgramFolder%\MPCBEShellExt.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{A2CF4243-6525-4764-B3F5-2FCDE2F47989}\InprocServer32","ThreadingModel","Apartment"
 End
 Else,Begin
   // Disable Shell Context Menu
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextFiles",0
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextDir",0
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowFiles",0
-  RegWrite,HKLM,0x4,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowDir",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextFiles",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\Settings","ShowContextDir",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowFiles",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\SOFTWARE\MPC-BE\ShellExt","ShowDir",0
 End
 
 [#Register-AudioAssociations#]
@@ -242,68 +242,68 @@ End
 Echo,"Registering MPC-BE as the default audio player..."
 
 // Audio Files
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3ga","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.669","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.a52","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.aac","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ac3","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.adt","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.adts","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIF","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIFC","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AIFF","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.AU","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.amr","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.aob","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ape","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.caf","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.CDA","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dts","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.flac","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.it","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M4A","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.m4p","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MID","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MKA","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mlp","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MOD","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mp1","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP2","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mp3","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpc","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpga","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.oga","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.oma","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.opus","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.qcp","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ra","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.RMI","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.SND","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.s3m","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.spx","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tta","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.voc","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vqf","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.w64","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wav","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WMA","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wv","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xa","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xm","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3ga","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.669","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.a52","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.aac","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ac3","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.adt","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.adts","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.AIF","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.AIFC","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.AIFF","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.AU","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.amr","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.aob","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ape","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.caf","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.CDA","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.dts","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.flac","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.it","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M4A","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.m4p","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MID","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MKA","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mlp","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MOD","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mp1","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MP2","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mp3","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpc","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpga","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.oga","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.oma","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.opus","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.qcp","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ra","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.RMI","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.SND","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.s3m","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.spx","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tta","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.voc","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vqf","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.w64","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.wav","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.WMA","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.wv","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xa","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xm","","MPC-BE"
 
 // Play Lists
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ASX","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.b4s","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.cue","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ifo","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M3U","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.m3u8","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.pls","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ram","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.sdp","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vlc","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WVX","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xspf","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ASX","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.b4s","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.cue","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ifo","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M3U","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.m3u8","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.pls","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ram","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.sdp","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vlc","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.WVX","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xspf","","MPC-BE"
 
 [#Register-VideoAssociations#]
 // ===============================================================================================================================
@@ -320,63 +320,63 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xspf","","MPC-BE"
 Echo,"Registering MPC-BE as the default video player..."
 
 // Video Files 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3g2","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3gp","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3gp2","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.3GPP","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.amv","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ASF","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.avi","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.bik","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.divx","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.drc","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dv","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.f4v","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.flv","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.gvi","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.gxf","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M1V","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2T","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2TS","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M2V","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.M4V","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MKV","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MOV","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP2V","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP4","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MP4V","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpa","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPE","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPEG","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg1","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg2","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mpeg4","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPG","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MPV2","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MTS","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mtv","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.mxf","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.nsv","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.nuv","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogg","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogm","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogv","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ogx","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rec","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rm","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rmvb","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rpl","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.thp","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tod","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vlt","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wsz","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.TS","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.TTS","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vob","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vro","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.webm","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.WMV","","MPC-BE"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xesc","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3g2","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3gp","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3gp2","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.3GPP","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.amv","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ASF","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.avi","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bik","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.divx","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.drc","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.dv","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.f4v","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.flv","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.gvi","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.gxf","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M1V","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M2T","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M2TS","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M2V","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.M4V","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MKV","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MOV","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MP2V","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MP4","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MP4V","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpa","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MPE","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MPEG","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpeg1","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpeg2","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mpeg4","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MPG","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MPV2","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MTS","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mtv","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.mxf","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.nsv","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.nuv","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ogg","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ogm","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ogv","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ogx","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rec","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rm","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rmvb","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rpl","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.thp","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tod","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vlt","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.wsz","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.TS","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.TTS","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vob","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vro","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.webm","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.WMV","","MPC-BE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xesc","","MPC-BE"
 
 [#ExtractProgram#]
 // ===============================================================================================================================
