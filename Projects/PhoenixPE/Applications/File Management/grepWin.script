@@ -65,47 +65,47 @@ Echo,"Configuring %ScriptTitle%..."
 RegLoadHives
 
 // Disable Update Check
-RegWrite,HKLM,0x4,"Tmp_Default\Software\grepWin","CheckForUpdates",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\grepWin","CheckForUpdates",0
 
 // Language
 List,Pos,%aLangMap%,%cmb_Language%,%LangPos%
 Math,Add,%Pos%,%LangPos%,1
 List,Get,%aLangMap%,%Pos%,%LanguageFile%
-RegWrite,HKLM,0x1,"Tmp_Default\Software\grepWin","languagefile","%PEPrograms%\%ProgramFolder%\%LanguageFile%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\grepWin","languagefile","%PEPrograms%\%ProgramFolder%\%LanguageFile%"
 
 // Dark Mode
-If,%cb_EnableDarkMode%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\grepWin","DarkMode",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\grepWin","DarkMode",0
+If,%cb_EnableDarkMode%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\grepWin","DarkMode",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\grepWin","DarkMode",0
 
 // AppPath
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\grepWin.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\grepWin.exe","Path","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\grepWin.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\grepWin.exe","Path","%PEPrograms%\%ProgramFolder%"
 
 // Shell Ext.
 If,%cb_ContextMenu%,Equal,True,Begin
   // Always sanity check user input ;)
   If,%txt_ShellContextMenuTxt%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,txt_ShellContextMenuTxt,"Search with grepWin"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\grepWin","MultiSelectModel","Player"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\grepWin","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\grepWin","MultiSelectModel","Player"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q /searchpath:#$q#$pV#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\grepWin","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q /searchpath:#$q#$pV#$q"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q /searchpath:#$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\shell\grepWin","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q /searchpath:#$q#$p1#$q"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\grepWin","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\grepWin","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shell\grepWin","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shell\grepWin","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c-107"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shell\grepWin\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 End
 
 RegUnloadHives

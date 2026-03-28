@@ -33,15 +33,16 @@ Title=7-Zip
 Author=Homes32
 Level=5
 Version=1.2.8.0
-Description=(v25.01) 7-Zip is a free and open-source file archiver capable of reading and writing many archive formats.
-Date=2025-09-17
+Description=(v26.00) 7-Zip is a free and open-source file archiver capable of reading and writing many archive formats.
+Date=2026-03-27
 Selected=True
 Mandatory=False
 
 [Variables]
 %ProgramFolder%="7-Zip"
 %ProgramExe%="7zFM.exe"
-%ProgramVersion%=2501
+%ProgramVersion%=2600
+%SetupFile%="7z-%ProgramVersion%-%SourceArch%.exe"
 %DownloadURL86%=https://www.7-zip.org/a/7z%ProgramVersion%.exe
 %DownloadURL64%=https://www.7-zip.org/a/7z%ProgramVersion%-x64.exe
 
@@ -55,7 +56,7 @@ StrFormat,RTRIM,%7zLang%,1,%7zLang%
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -65,31 +66,31 @@ Echo,"Configuring %ScriptTitle%..."
 RegHiveLoad,Tmp_Software,%RegSoftware%
 RegHiveLoad,Tmp_Default,%RegDefault%
 
-RegWrite,HKLM,0x1,"Tmp_Default\Software\7-Zip","Lang","%7zLang%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\7-Zip","Lang","%7zLang%"
 
-RegWrite,HKLM,0x2,"Tmp_Default\Software\7-Zip","Path","%PEPrograms%\%ProgramFolder%\7-Zip"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Default\Software\7-Zip","Path","%PEPrograms%\%ProgramFolder%\7-Zip"
 
 Run,%ScriptFile%,RegisterFileAssociations
 
 If,%cb_AddShellContextMenu%,Equal,True,Begin
   
   // Register Shell Extension
-  RegWrite,HKLM,0x2,"Tmp_Software\7-Zip","Path","%PEPrograms%\%ProgramFolder%"
-  RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\7zFM.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-  RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\7zFM.exe","Path","%PEPrograms%\%ProgramFolder%"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\7-Zip","Path","%PEPrograms%\%ProgramFolder%"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\7zFM.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\7zFM.exe","Path","%PEPrograms%\%ProgramFolder%"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}","","7-Zip Shell Extension"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32","","%PEPrograms%\%ProgramFolder%\7-zip.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32","ThreadingModel","Apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\DragDropHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shellex\DragDropHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{23170F69-40C1-278A-1000-000100020000}","7-Zip Shell Extension"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}","","7-Zip Shell Extension"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32","","%PEPrograms%\%ProgramFolder%\7-zip.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\DragDropHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\DragDropHandlers\7-Zip","","{23170F69-40C1-278A-1000-000100020000}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{23170F69-40C1-278A-1000-000100020000}","7-Zip Shell Extension"
 
   // Cascade Menu
-  If,%cb_CascadedContextMenu%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\7-Zip\Options","CascadedMenu",1
-  Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\7-Zip\Options","CascadedMenu",0
+  If,%cb_CascadedContextMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\7-Zip\Options","CascadedMenu",1
+  Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\7-Zip\Options","CascadedMenu",0
 
   // Context Menu Items
   // Context menu items are stored as a DWORD. Items can be determined by bitshifting the value.
@@ -104,7 +105,7 @@ If,%cb_AddShellContextMenu%,Equal,True,Begin
   If,%cb_ContextMenuExtractHere%,Equal,True,Math,Add,%ContextMenuItems%,%ContextMenuItems%,2
   If,%cb_ContextMenuExtractToFolder%,Equal,True,Math,Add,%ContextMenuItems%,%ContextMenuItems%,4
   If,%cb_ContextMenuCRC%,Equal,True,Math,Add,%ContextMenuItems%,%ContextMenuItems%,2147483648
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\7-Zip\Options","ContextMenu",%ContextMenuItems%
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\7-Zip\Options","ContextMenu",%ContextMenuItems%
 
 End
 
@@ -132,262 +133,262 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [RegisterFileAssociations]
 
 If,%cb_Ext001%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.001","","7-Zip.001"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.001\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,9"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.001\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.001","","001 Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.001","","7-Zip.001"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.001\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,9"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.001\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.001","","001 Archive"
 End
 
 If,%cb_Ext7z%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.7z","","7-Zip.7z"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.7z\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,0"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.7z\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.7z","","7z Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.7z","","7-Zip.7z"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.7z\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,0"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.7z\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.7z","","7z Archive"
 End
 
 If,%cb_ExtArj%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.arj","","7-Zip.arj"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.arj\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,4"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.arj\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.arj","","arj Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.arj","","7-Zip.arj"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.arj\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,4"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.arj\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.arj","","arj Archive"
 End
 
 If,%cb_ExtBz2%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.bz2","","7-Zip.bz2"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.bz2\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,2"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.bz2\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.bz2","","bz2 Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bz2","","7-Zip.bz2"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.bz2\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,2"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.bz2\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.bz2","","bz2 Archive"
 End
 
 If,%cb_ExtBzip2%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.bzip2","","7-Zip.bzip2"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.bzip2\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,2"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.bzip2\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.bzip2","","bzip2 Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bzip2","","7-Zip.bzip2"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.bzip2\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,2"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.bzip2\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.bzip2","","bzip2 Archive"
 End
 
 If,%cb_ExtCab%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.cab","","7-Zip.cab"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.cab\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,7"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.cab\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.cab","","cab Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.cab","","7-Zip.cab"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.cab\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,7"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.cab\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.cab","","cab Archive"
 End
 
 If,%cb_ExtCpio%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.cpio","","7-Zip.cpio"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.cpio\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,12"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.cpio\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.cpio","","cpio Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.cpio","","7-Zip.cpio"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.cpio\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,12"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.cpio\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.cpio","","cpio Archive"
 End
 
 If,%cb_ExtDeb%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.deb","","7-Zip.deb"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.deb\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,11"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.deb\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.deb","","deb Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.deb","","7-Zip.deb"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.deb\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,11"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.deb\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.deb","","deb Archive"
 End
 
 If,%cb_ExtDmg%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dmg","","7-Zip.dmg"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.dmg\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,17"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.dmg\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.dmg","","dmg Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.dmg","","7-Zip.dmg"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.dmg\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,17"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.dmg\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.dmg","","dmg Archive"
 End
 
 If,%cb_ExtFat%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.fat","","7-Zip.fat"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.fat\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,21"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.fat\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.fat","","fat Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.fat","","7-Zip.fat"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.fat\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,21"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.fat\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.fat","","fat Archive"
 End
 
 If,%cb_ExtGz%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.gz","","7-Zip.gz"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.gz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.gz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.gz","","gz Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.gz","","7-Zip.gz"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.gz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.gz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.gz","","gz Archive"
 End
 
 If,%cb_ExtGzip%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.gzip","","7-Zip.gzip"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.gzip\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.gzip\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.gzip","","gzip Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.gzip","","7-Zip.gzip"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.gzip\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.gzip\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.gzip","","gzip Archive"
 End
 
 If,%cb_ExtHfs%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.hfs","","7-Zip.hfs"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.hfs\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,18"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.hfs\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.hfs","","hfs Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.hfs","","7-Zip.hfs"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.hfs\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,18"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.hfs\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.hfs","","hfs Archive"
 End
 
 If,%cb_ExtIgz%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.igz","","7-Zip.gzip_igz"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.gzip_igz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.gzip_igz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.gzip_igz","","gzip (igz) Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.igz","","7-Zip.gzip_igz"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.gzip_igz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.gzip_igz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.gzip_igz","","gzip (igz) Archive"
 End
 
 If,%cb_ExtIso%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.iso","","7-Zip.iso"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.iso\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,8"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.iso\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.iso","","iso Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.iso","","7-Zip.iso"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.iso\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,8"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.iso\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.iso","","iso Archive"
 End
 
 If,%cb_ExtLha%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.lha","","7-Zip.lha"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.lha\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,6"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.lha\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.lha","","lha Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.lha","","7-Zip.lha"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.lha\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,6"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.lha\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.lha","","lha Archive"
 End
 
 If,%cb_ExtLzh%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.lzh","","7-Zip.lzh"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.lzh\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,6"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.lzh\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.lzh","","lzh Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.lzh","","7-Zip.lzh"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.lzh\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,6"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.lzh\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.lzh","","lzh Archive"
 End
 
 If,%cb_ExtLzma%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.lzma","","7-Zip.lzma"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.lzma\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,16"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.lzma\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.lzma","","lzma Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.lzma","","7-Zip.lzma"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.lzma\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,16"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.lzma\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.lzma","","lzma Archive"
 End
 
 If,%cb_ExtNtfs%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.ntfs","","7-Zip.ntfs"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.ntfs\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,22"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.ntfs\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.ntfs","","ntfs Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.ntfs","","7-Zip.ntfs"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.ntfs\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,22"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.ntfs\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.ntfs","","ntfs Archive"
 End
 
 If,%cb_ExtRar%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rar","","7-Zip.rar"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.rar\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,3"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.rar\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.rar","","rar Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rar","","7-Zip.rar"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.rar\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,3"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.rar\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.rar","","rar Archive"
 End
 
 If,%cb_ExtRpm%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rpm","","7-Zip.rpm"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.rpm\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,10"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.rpm\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.rpm","","rpm Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rpm","","7-Zip.rpm"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.rpm\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,10"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.rpm\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.rpm","","rpm Archive"
 End
 
 If,%cb_ExtSplit%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.split","","7-Zip.split"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.split\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,9"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.split\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.split","","split Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.split","","7-Zip.split"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.split\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,9"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.split\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.split","","split Archive"
 End
 
 If,%cb_ExtSquashfs%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.squashfs","","7-Zip.squashfs"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.squashfs\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,24"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.squashfs\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.squashfs","","squashfs Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.squashfs","","7-Zip.squashfs"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.squashfs\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,24"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.squashfs\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.squashfs","","squashfs Archive"
 End
 
 If,%cb_ExtSwm%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.swm","","7-Zip.swm"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.swm\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,15"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.swm\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.swm","","swm Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.swm","","7-Zip.swm"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.swm\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,15"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.swm\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.swm","","swm Archive"
 End
 
 If,%cb_ExtTar%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tar","","7-Zip.tar"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tar\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,13"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tar\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.tar","","tar Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tar","","7-Zip.tar"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tar\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,13"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tar\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.tar","","tar Archive"
 End
 
 If,%cb_ExtTaz%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.taz","","7-Zip.taz"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.taz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,5"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.taz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.taz","","taz Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.taz","","7-Zip.taz"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.taz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,5"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.taz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.taz","","taz Archive"
 End
 
 If,%cb_ExtTbz%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tbz","","7-Zip.tbz"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tbz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,2"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tbz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.tbz","","tbz Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tbz","","7-Zip.tbz"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tbz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,2"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tbz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.tbz","","tbz Archive"
 End
 
 If,%cb_ExtTbz2%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tbz2","","7-Zip.tbz2"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tbz2\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,2"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tbz2\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.tbz2","","tbz2 Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tbz2","","7-Zip.tbz2"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tbz2\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,2"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tbz2\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.tbz2","","tbz2 Archive"
 End
 
 If,%cb_ExtTgz%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tgz","","7-Zip.tgz"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tgz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tgz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.tgz","","tgz Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tgz","","7-Zip.tgz"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tgz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tgz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.tgz","","tgz Archive"
 End
 
 If,%cb_ExtTpz%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.tpz","","7-Zip.tpz"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tpz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.tpz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.tpz","","tpz Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.tpz","","7-Zip.tpz"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tpz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,14"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.tpz\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.tpz","","tpz Archive"
 End
 
 If,%cb_ExtTxz%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.txz","","7-Zip.txz"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.txz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,23"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.txz\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.txz","","txz Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.txz","","7-Zip.txz"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.txz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,23"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.txz\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.txz","","txz Archive"
 End
 
 If,%cb_ExtVhd%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.vhd","","7-Zip.vhd"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.vhd\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,20"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.vhd\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.vhd","","vhd Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.vhd","","7-Zip.vhd"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.vhd\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,20"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.vhd\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.vhd","","vhd Archive"
 End
 
 If,%cb_ExtWim%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.wim","","7-Zip.wim"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.wim\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,15"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.wim\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.wim","","wim Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.wim","","7-Zip.wim"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.wim\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,15"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.wim\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.wim","","wim Archive"
 End
 
 If,%cb_ExtXar%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xar","","7-Zip.xar"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.xar\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,19"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.xar\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.xar","","xar Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xar","","7-Zip.xar"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.xar\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,19"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.xar\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.xar","","xar Archive"
 End
 
 If,%cb_ExtXz%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.xz","","7-Zip.xz"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.xz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,23"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.xz\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.xz","","xz Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xz","","7-Zip.xz"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.xz\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,23"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.xz\shell\open\Command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.xz","","xz Archive"
 End
 
 If,%cb_ExtZ%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.z","","7-Zip.z"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.z\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,5"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.z\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.z","","z Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.z","","7-Zip.z"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.z\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,5"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.z\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.z","","z Archive"
 End
 
 If,%cb_ExtZip%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.zip","","7-Zip.zip"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.zip\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,1"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\7-Zip.zip\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\7-Zip.zip","","zip Archive"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.zip","","7-Zip.zip"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.zip\DefaultIcon","","%PEPrograms%\%ProgramFolder%\7z.dll,1"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\7-Zip.zip\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\7zFM.exe#$q #$q%1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\7-Zip.zip","","zip Archive"
 End
 
 [#ExtractProgram#]
@@ -403,7 +404,7 @@ End
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe#$q * -xr!uninstall.exe -o#$q#1#$q"
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.exe -o#$q#1#$q"
 If,Not,#r,Equal,0,Halt,"Error: Failed to extract program files."
 
 [#DownloadProgram#]
@@ -421,7 +422,7 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract program files."
 System,SetLocal
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
-WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\Setup-%SourceArch%.exe",NOERR
+WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%.exe",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 System,EndLocal
 
@@ -453,11 +454,9 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // ===============================================================================================================================
 [SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
-  Set,%SetupFile%,Setup-x64.exe
   Set,%DownloadURL%,%DownloadURL64%
 End
 Else,Begin
-  Set,%SetupFile%,Setup-x86.exe
   Set,%DownloadURL%,%DownloadURL86%
 End
 

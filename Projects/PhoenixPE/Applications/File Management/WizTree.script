@@ -30,20 +30,20 @@
 
 [Main]
 Title=WizTree
-Description=(v4.28) WizTree scans your hard drive and shows you which files and folders are using the most disk space.
+Description=(v4.31) WizTree scans your hard drive and shows you which files and folders are using the most disk space.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.16.0
-Date=2025-11-29
+Version=1.1.17.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="WizTree"
 %ProgramExe%="WizTree.exe"
-%ProgramVersion%=4_28
+%ProgramVersion%=4_31
 %DownloadURL%=https://www.diskanalyzer.com/files/wiztree_%ProgramVersion%_portable.zip
-%SetupFile%="WizTree.zip"
+%SetupFile%="WizTree-%ProgramVersion%.zip"
 %ConfigFile%="%TargetPrograms%\%ProgramFolder%\WizTree3.ini"
 
 [Process]
@@ -79,19 +79,19 @@ IniWrite,%ConfigFile%,"frmWizTreeMain","actCheckForUpdates_Checked","FALSE"
 // Shell Ext.
 If,%cb_ContextMenu%,Equal,True,Begin
   RegHiveLoad,Tmp_Software,%RegSoftware%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.MFT","","WizTreeMFT"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WizTreeMFT","","WizTree MFT"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WizTreeMFT\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WizTreeMFT\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\WizTree","","&WizTree"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\WizTree","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\WizTree\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$pW#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\WizTree","","&WizTree"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\WizTree","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\shell\WizTree\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\WizTree","","&WizTree"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\WizTree","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\WizTree\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.MFT","","WizTreeMFT"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WizTreeMFT","","WizTree MFT"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WizTreeMFT\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WizTreeMFT\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\WizTree","","&WizTree"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\WizTree","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\WizTree\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$pW#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\shell\WizTree","","&WizTree"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\shell\WizTree","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\shell\WizTree\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\WizTree","","&WizTree"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\WizTree","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\WizTree\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
   RegHiveUnLoad,Tmp_Software
 End
 

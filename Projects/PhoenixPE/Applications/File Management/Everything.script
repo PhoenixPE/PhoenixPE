@@ -30,21 +30,21 @@
 
 [Main]
 Title=Everything
-Description=(v1.4.1.1030) Everything is a search engine that locates files and folders by name instantly.
+Description=(v1.4.1.1032) Everything is a search engine that locates files and folders by name instantly.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.3.0
-Date=2025-11-29
+Version=1.0.4.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="Everything"
 %ProgramExe%="Everything.exe"
-%ProgramVersion%="1.4.1.1030"
+%ProgramVersion%="1.4.1.1032"
 %DownloadURLx86%=https://www.voidtools.com/Everything-%ProgramVersion%.x86.zip
 %DownloadURLx64%=https://www.voidtools.com/Everything-%ProgramVersion%.x64.zip
-%SetupFile%="Everything_%SourceArch%.zip"
+%SetupFile%="Everything-%ProgramVersion%-%SourceArch%.zip"
 %ConfigFile%="%TargetPrograms%\%ProgramFolder%\Everything.ini"
 %aLangMap%=Afrikaans|1078|Arabic (Yemen)|9217|Bosnian|5146|Chinese (Simplified)|2052|Chinese (Traditional)|1028|Croatian|1050|Czech|1029|Danish|1030|Dutch|1043|English (AU)|3081|English (UK)|2057|English (US)|1033|Estonian|1061|Finnish|1035|French|1036|German|1031|Greek|1032|Hebrew|1037|Hungarian|1038|Italian|1040|Japanese|1041|Korean|1042|Kurdish (Kurdish)|31890|Kurdish (Sorani)|1170|Macedonian|1071|Moldavian|1353Norwegian (Bokmål)|1044|Persian|1065|Polish|1045|Portuguese (Brazil)|1046|Romanian|1048|Russian|1049|Serbian|2074|Slovak|1051|Slovenian|1060|Spanish (Venezuela)|8202|Spanish|1034|Swedish|1053|Thai|1054|Turkish|1055|Uighur|1152|Ukrainian|1058|Uzbek|1091|Vietnamese|1066
 
@@ -86,21 +86,21 @@ If,ExistFile,%fb_ImportCfg%,Begin
 End
 
 // AppPath
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Everything.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Everything.exe","Path","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Everything.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Everything.exe","Path","%PEPrograms%\%ProgramFolder%"
 
 // Shell Ext.
 If,%cb_ContextMenu%,Equal,True,Begin
   // Always sanity check user input ;)
   If,%txt_ShellContextMenuTxt%,Equal,"",WriteInterface,Value,%ScriptFile%,Interface,txt_ShellContextMenuTxt,"Search Everything"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\Everything","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\Everything","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\directory\Background\shell\Everything\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -path #$q#$pV#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\Everything","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\Everything","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\directory\Background\shell\Everything\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -path #$q#$pV#$q"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\Everything","",%txt_ShellContextMenuTxt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\Everything","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shell\Everything\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -path #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shell\Everything","",%txt_ShellContextMenuTxt%
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shell\Everything","Icon","%PEPrograms%\%ProgramFolder%\%ProgramExe%#$c0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shell\Everything\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -path #$q#$p1#$q"
 End
 
 // Autorun (Background Tray/Indexer)

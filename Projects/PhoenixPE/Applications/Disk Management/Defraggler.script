@@ -66,7 +66,7 @@ RegHiveLoad,Tmp_Default,%RegDefault%
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%LCID%
 StrFormat,RTRIM,%LCID%,1,%LCID%
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Defraggler","Language",%LCID%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Defraggler","Language",%LCID%
 
 // Shell Extension
 If,%cb_ShellExt%,Equal,True,Begin
@@ -79,8 +79,8 @@ If,%cb_ShellExt%,Equal,True,Begin
     If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",504,%DefragContextString%
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",505,%AnalyzeContextString%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Defraggler","AnalyzeContextString",%DefragContextString%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Defraggler","DefragContextString",%AnalyzeContextString%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Defraggler","AnalyzeContextString",%DefragContextString%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Defraggler","DefragContextString",%AnalyzeContextString%
   End
   Else,Begin
     // English doesn't have a resource .dll Use the .exe instead
@@ -90,24 +90,24 @@ If,%cb_ShellExt%,Equal,True,Begin
     If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",504,%DefragContextString%
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",505,%AnalyzeContextString%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Defraggler","AnalyzeContextString",%DefragContextString%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Defraggler","DefragContextString",%AnalyzeContextString%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Defraggler","AnalyzeContextString",%DefragContextString%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Defraggler","DefragContextString",%AnalyzeContextString%
   End
   Run,%ScriptFile%,RegisterShellExtension
   // Also required for ShellExt to function
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Defraggler","InstallPath","%PEPrograms%\%ProgramFolder%"
-   RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Defraggler","Executable","%ProgramExe%"
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Defraggler","DisableShellExtension",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Defraggler","InstallPath","%PEPrograms%\%ProgramFolder%"
+   RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Defraggler","Executable","%ProgramExe%"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Defraggler","DisableShellExtension",0
 End
 Else,Begin
   // Disable context menu
   FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\DefragglerShell.dll.new"
   FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\DefragglerShell64.dll.new"
-  RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Defraggler","DisableShellExtension",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Defraggler","DisableShellExtension",1
 End
 
 // Disable Update Check
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Defraggler","UpdateCheck",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Defraggler","UpdateCheck",0
 
 RegHiveUnLoad,Tmp_Default
 
@@ -146,12 +146,12 @@ Else,Begin
 End
 
 RegHiveLoad,Tmp_Software,%RegSoftware%
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{4380C993-0C43-4E02-9A7A-0D40B6EA7590}","","DefragglerShellExtension Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{4380C993-0C43-4E02-9A7A-0D40B6EA7590}\InprocServer32","","%PEPrograms%\%ProgramFolder%\%ShellExtDll%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{4380C993-0C43-4E02-9A7A-0D40B6EA7590}\InprocServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\DefragglerShellExtension","","{4380C993-0C43-4E02-9A7A-0D40B6EA7590}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\DefragglerShellExtension","","{4380C993-0C43-4E02-9A7A-0D40B6EA7590}"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Extensions\Approved\{4380C993-0C43-4E02-9A7A-0D40B6EA7590}","","DefragglerShellExtension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{4380C993-0C43-4E02-9A7A-0D40B6EA7590}","","DefragglerShellExtension Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{4380C993-0C43-4E02-9A7A-0D40B6EA7590}\InprocServer32","","%PEPrograms%\%ProgramFolder%\%ShellExtDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{4380C993-0C43-4E02-9A7A-0D40B6EA7590}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\DefragglerShellExtension","","{4380C993-0C43-4E02-9A7A-0D40B6EA7590}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\DefragglerShellExtension","","{4380C993-0C43-4E02-9A7A-0D40B6EA7590}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Extensions\Approved\{4380C993-0C43-4E02-9A7A-0D40B6EA7590}","","DefragglerShellExtension"
 RegHiveUnLoad,Tmp_Software
 
 [#ExtractProgram#]

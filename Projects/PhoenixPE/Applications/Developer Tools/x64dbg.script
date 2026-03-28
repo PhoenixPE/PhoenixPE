@@ -92,38 +92,38 @@ RegLoadHives
 If,%cb_SetAsDebugger%,Equal,True,Begin
   // Auto Debug
   If,%cb_AutoStartDebugger%,Equal,True,Begin
-    RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",1
-	If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",1
+    RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",1
+	If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",1
   End
   Else,Begin
-    RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",0
-    If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",0
+    RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",0
+    If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",0
   End
   // Set as debugger
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\AeDebug","Debugger","#$q%PEPrograms%\%ProgramFolder%\%SourceArch%\x64dbg.exe#$q -a #$pld -e #$pld"
-  If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Debugger","#$q%PEPrograms%\%ProgramFolder%\x86\x64dbg.exe#$q -a #$pld -e #$pld"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\AeDebug","Debugger","#$q%PEPrograms%\%ProgramFolder%\%SourceArch%\x64dbg.exe#$q -a #$pld -e #$pld"
+  If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Debugger","#$q%PEPrograms%\%ProgramFolder%\x86\x64dbg.exe#$q -a #$pld -e #$pld"
 End
 Else,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\AeDebug","Auto",0
-  If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",0
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\AeDebug","Debugger",""
-  If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Debugger",""
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\AeDebug","Auto",0
+  If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Auto",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\AeDebug","Debugger",""
+  If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug","Debugger",""
 End
 
 If,%cb_RegisterShellExt%,Equal,True,Begin
 // Database Icons
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dd32","","x64dbg_db"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\.dd32\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\x32\x32dbg.exe"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.dd64","","x64dbg_db"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\.dd64\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\x64\x64dbg.exe"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.dd32","","x64dbg_db"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\.dd32\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\x32\x32dbg.exe"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.dd64","","x64dbg_db"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\.dd64\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\x64\x64dbg.exe"
 
 // Context Menu
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\dllfile\shell\Debug with x64dbg","","Debug with x64dbg"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\dllfile\shell\Debug with x64dbg\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q%1#$q"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\dllfile\shell\Debug with x64dbg\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q#$c0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\exefile\shell\Debug with x64dbg","","Debug with x64dbg"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\exefile\shell\Debug with x64dbg\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q%1#$q"
-RegWrite,HKLM,0x2,"Tmp_Software\Classes\exefile\shell\Debug with x64dbg\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q#$c0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\dllfile\shell\Debug with x64dbg","","Debug with x64dbg"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\dllfile\shell\Debug with x64dbg\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q%1#$q"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\dllfile\shell\Debug with x64dbg\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q#$c0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\exefile\shell\Debug with x64dbg","","Debug with x64dbg"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\exefile\shell\Debug with x64dbg\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q%1#$q"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\exefile\shell\Debug with x64dbg\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q#$c0"
 End
 
 RegUnloadHives

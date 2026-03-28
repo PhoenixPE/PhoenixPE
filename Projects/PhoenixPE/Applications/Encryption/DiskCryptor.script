@@ -30,20 +30,20 @@
 
 [Main]
 Title=DiskCryptor
-Description=(v1.3 Beta) DiskCryptor is an open source encryption solution that offers encryption of all disk partitions, including system partitions.
+Description=(v1.4.1 Beta) DiskCryptor is an open source encryption solution that offers encryption of all disk partitions, including system partitions.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.3.0
-Date=2024-08-11
+Version=1.0.4.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="DiskCryptor"
 %ProgramExe%="dcrypt.exe"
-%ProgramVersion%="1.3.0b
-%SetupFile%="Dcrypt.exe"
-%DownloadURL%=https://github.com/DavidXanatos/DiskCryptor/releases/download/v%ProgramVersion%/dcrypt_setup_1.3_signed_beta.exe
+%ProgramVersion%="1.4.1
+%SetupFile%="Dcrypt-%ProgramVersion%.exe"
+%DownloadURL%=https://github.com/DavidXanatos/DiskCryptor/releases/download/v%ProgramVersion%/dcrypt_setup_1.4.1_beta.exe
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -76,8 +76,8 @@ Echo,"Configuring %ScriptTitle%..."
 If,%cb_StartOnLogon%,Equal,True,Begin
   RegLoadHives
   // DiskCryptor uses RunOnce when toggling this option via it's Settings interface, however since our environment is volatile we can use Run instead.
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Run","DiskCryptor","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -h"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\dcrypt\config","Flags",1440
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Run","DiskCryptor","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -h"
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\dcrypt\config","Flags",1440
   RegUnloadHives
 End
 
@@ -106,21 +106,21 @@ Echo,"Registering DiskCryptor..."
 RegHiveLoad,Tmp_System,%RegSystem%
 
 // DiskCryptor Filter Driver
-RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Services\dcrypt","DependOnService","FltMgr"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\dcrypt","DisplayName","DiskCryptor Driver"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\dcrypt","ErrorControl",3
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\dcrypt","Group","Filter"
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\dcrypt","ImagePath","system32\drivers\dcrypt.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\dcrypt","Start",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\dcrypt","Type",1
+RegWrite,HKLM,REG_MULTI_SZ,"Tmp_System\ControlSet001\Services\dcrypt","DependOnService","FltMgr"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\dcrypt","DisplayName","DiskCryptor Driver"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\dcrypt","ErrorControl",3
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\dcrypt","Group","Filter"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\dcrypt","ImagePath","system32\drivers\dcrypt.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\dcrypt","Start",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\dcrypt","Type",1
 
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\dcrypt\config","Flags",1408
-RegWrite,HKLM,0x3,"Tmp_System\ControlSet001\Services\dcrypt\config","Hotkeys",00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\dcrypt\config","sysBuild",848
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\dcrypt\config","Flags",1408
+RegWrite,HKLM,REG_BINARY,"Tmp_System\ControlSet001\Services\dcrypt\config","Hotkeys",00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\dcrypt\config","sysBuild",848
 
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\dcrypt\Instances","DefaultInstance","dcrypt"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\dcrypt\Instances\dcrypt","Altitude","87150"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\dcrypt\Instances\dcrypt","Flags",0
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\dcrypt\Instances","DefaultInstance","dcrypt"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\dcrypt\Instances\dcrypt","Altitude","87150"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\dcrypt\Instances\dcrypt","Flags",0
 
 // Apply Filters
 If,Not,ExistRegValue,HKLM,"Tmp_System\ControlSet001\Control\CrashControl","DumpFilters",RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Control\CrashControl","DumpFilters",""

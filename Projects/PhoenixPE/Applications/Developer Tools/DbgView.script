@@ -78,7 +78,7 @@ RegLoadHives
 If,%cb_AutoRunDbgView%,Equal,True,AddAutoRun,PreShell,NoWait,"Launching %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 
 // Accept EULA
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Sysinternals\DbgView","EulaAccepted",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Sysinternals\DbgView","EulaAccepted",1
 
 // Configure Program Settings
 
@@ -107,16 +107,16 @@ If,%cb_EnableKernelCaptureVerbose%,Equal,True,Begin
 End
 
 // Write Program Settings
-RegWrite,HKLM,0x3,"Tmp_Default\Software\Sysinternals\DbgView","Settings",%ProgramSettings%
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\Sysinternals\DbgView","Settings",%ProgramSettings%
 
 // Enable Boot Logging
 If,%cb_EnableBootLogging%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\Dbgv","Group","System Bus Extender"
-  RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\Dbgv","ImagePath","System32\Drivers\Dbgv.sys"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Dbgv","LogVerbose",838873344
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Dbgv","Start",0
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Dbgv","Tag",1
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Dbgv","Type",1
+  RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\Dbgv","Group","System Bus Extender"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\Dbgv","ImagePath","System32\Drivers\Dbgv.sys"
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Dbgv","LogVerbose",838873344
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Dbgv","Start",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Dbgv","Tag",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Dbgv","Type",1
 End
 Else,If,ExistRegSubKey,HKLM,"Tmp_System\ControlSet001\Services\Dbgv",RegDelete,HKLM,"Tmp_System\ControlSet001\Services\Dbgv"
 

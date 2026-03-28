@@ -117,28 +117,28 @@ End
 RegHiveLoad,Tmp_Software,%RegSoftware%
 
 // Register Shell Extension
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}","","wcshellext extension"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt\%ShellExtDll%"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}\InprocServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
-RegWrite,HKLM,0x1,"Tmp_Software\\Microsoft\Windows\CurrentVersion\Extensions\Approved\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}","","wcshellext extension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}","","wcshellext extension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt\%ShellExtDll%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\wcshellext","","{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\\Microsoft\Windows\CurrentVersion\Extensions\Approved\{CF51E6C5-3C66-4B42-95DC-05D55D0E7D1F}","","wcshellext extension"
 
 // Configure Shell Extension
-RegWrite,HKLM,0x4,"Tmp_Software\WinContig","ShowMenuIcons",1
-RegWrite,HKLM,0x4,"Tmp_Software\WinContig","ShowCascadingMenu",1
-RegWrite,HKLM,0x4,"Tmp_Software\WinContig","ShowAnalyzeItem",1
-RegWrite,HKLM,0x4,"Tmp_Software\WinContig","ShowDefragItem",1
-RegWrite,HKLM,0x1,"Tmp_Software\WinContig","ExeFullPath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\WinContig","ShowMenuIcons",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\WinContig","ShowCascadingMenu",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\WinContig","ShowAnalyzeItem",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\WinContig","ShowDefragItem",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WinContig","ExeFullPath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 
 // Configure ShellExt with the correct language strings
 FileCopy,"%TargetPrograms%\%ProgramFolder%\Lang\WinContig_%lng%.lng","%ProjectTemp%\%ProgramFolder%\WinContig_%lng%.lng"
 TXTAddLine,"%ProjectTemp%\%ProgramFolder%\WinContig_%lng%.lng","[WinContig]",Prepend
 IniRead,"%ProjectTemp%\%ProgramFolder%\WinContig_%lng%.lng","WinContig",109,%AnalyzeMenuText%,"Default=Analyze with WinContig"
 IniRead,"%ProjectTemp%\%ProgramFolder%\WinContig_%lng%.lng","WinContig",116,%DefragMenuText%,"Default=Defragment with WinContig"
-RegWrite,HKLM,0x1,"Tmp_Software\WinContig","AnalyzeMenuText",%AnalyzeMenuText%
-RegWrite,HKLM,0x1,"Tmp_Software\WinContig","DefragMenuText",%DefragMenuText%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WinContig","AnalyzeMenuText",%AnalyzeMenuText%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WinContig","DefragMenuText",%DefragMenuText%
 
 RegHiveUnLoad,Tmp_Software
 

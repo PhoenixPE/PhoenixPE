@@ -32,21 +32,20 @@
 Title=WinRAR
 Author=Homes32
 Level=5
-Version=1.0.3.0
-Description=(v7.13) WinRAR is a powerful archive extractor, and can open many popular file formats.
-Date=2025-09-17
+Version=1.0.4.0
+Description=(v7.20) WinRAR is a powerful archive extractor, and can open many popular file formats.
+Date=2026-03-27
 Selected=False
 Mandatory=False
 
 [Variables]
 %ProgramFolder%="WinRAR"
 %ProgramExe%="WinRAR.exe"
-%ProgramVersion%=713
+%ProgramVersion%=720
 // %LangCode% is set by [DownloadProgram]
 %DownloadURLx86%=https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-%ProgramVersion%%LangCode%.exe
 %DownloadURLx64%=https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x64-%ProgramVersion%%LangCode%.exe
-%SetupFilex86%="WinRAR-x86.exe"
-%SetupFilex64%="WinRAR-x64.exe"
+%SetupFile%="WinRAR-%ProgramVersion%-%SourceArch%.exe"
 %aLangMap%=Arabic|ar|Armenian|am|Azerbaijani|az|Bulgarian|bg|Catalan|ca|Chinese (Traditional)|tc|Chinese (Simplified)sc|Croatian|cro|Czech|cz|Danish|dk|Dutch|nl|English||Euskera|eu|Finnish|fi|French|fr|Galician|gl|German|d|Greek|el|Hebrew|he|Hungarian|hu|Indonesian|id|Italian|it|Japanese|jp|Korean|kr|Lithuanian|lt|Mongolian|mn|Norwegian|no|Polish|pl|Portuguese (Brazilian)|br|Portuguese (Portugal)|pt|Romanian|ro|Russian|ru|Serbian (Cyrilli)|srbcyr|Slovak|sk|Slovenian|slv|Spanish|es|Swedish|sw|Thai|th|Turkish|tr|Ukrainian|uk|Vietnamese|vn
 
 [Process]
@@ -292,18 +291,15 @@ DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 // Parameters.....: 
 // Return values..: Sets the following local variables:
 //                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
-//                  %SetupFile%      - The x86 or x64 downloaded setup file name.
 // Author.........: Homes32
 // Remarks........:
 // Related........: 
 // ===============================================================================================================================
 [SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
-  Set,%SetupFile%,%SetupFilex64%
   Set,%DownloadURL%,%DownloadURLx64%
 End
 Else,Begin
-  Set,%SetupFile%,%SetupFilex86%
   Set,%DownloadURL%,%DownloadURLx86%
 End
 

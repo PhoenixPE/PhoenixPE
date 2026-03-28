@@ -66,29 +66,29 @@ RegHiveLoad,Tmp_Software,%RegSoftware%
 RegHiveLoad,Tmp_System,%RegSystem%
 
 // Register Backup File Ext.
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.adi","","AOMEI Backupper Backup File"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.afi","","AOMEI Backupper Backup File"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AOMEI Backupper Backup File","","AOMEI Backupper Backup File"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.adi","","AOMEI Backupper Backup File"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.afi","","AOMEI Backupper Backup File"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AOMEI Backupper Backup File","","AOMEI Backupper Backup File"
 
 // Register Drivers
 RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Class\{71A27CDD-812A-11D0-BEC7-08002BE2092F}","UpperFilters",Append,"ambakdrv"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ambakdrv","DisplayName","ambakdrv"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ambakdrv","ErrorControl",0
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\ambakdrv","ImagePath","system32\drivers\ambakdrv.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ambakdrv","Start",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ambakdrv","Type",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\ambakdrv","DisplayName","ambakdrv"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ambakdrv","ErrorControl",0
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\ambakdrv","ImagePath","system32\drivers\ambakdrv.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ambakdrv","Start",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ambakdrv","Type",1
 
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ammntdrv","DisplayName","ammntdrv"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ammntdrv","ErrorControl",0
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\ammntdrv","ImagePath","system32\drivers\ammntdrv.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ammntdrv","Start",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ammntdrv","Type",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\ammntdrv","DisplayName","ammntdrv"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ammntdrv","ErrorControl",0
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\ammntdrv","ImagePath","system32\drivers\ammntdrv.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ammntdrv","Start",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ammntdrv","Type",1
 
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\amwrtdrv","DisplayName","amwrtdrv"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\amwrtdrv","ErrorControl",0
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\amwrtdrv","ImagePath","system32\drivers\amwrtdrv.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\amwrtdrv","Start",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\amwrtdrv","Type",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\amwrtdrv","DisplayName","amwrtdrv"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\amwrtdrv","ErrorControl",0
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\amwrtdrv","ImagePath","system32\drivers\amwrtdrv.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\amwrtdrv","Start",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\amwrtdrv","Type",1
 
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
@@ -104,15 +104,15 @@ IniWrite,"%TargetPrograms%\%ProgramFolder%\other.ini","UserExperience","Experien
 If,%HostArch%,Equal,x86,Set,%WOW6432Node%,""
 Else,Set,%WOW6432Node%,"WOW6432Node\"
 
-If,%cmb_RegEdition%,Equal,"Standard",RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",08,77,2f,f2,ca,c7,37,a1,1e,e2,3e,e2,ef,7b,18,b5,1d,d3,4d,d2,1c,9b,19,92,31,93,64,f6,5a,f0,61,92,2c,85,3f,80,56,eb,1b,ee,2a,97,9e,a4,89,a9,b5,51,b2,88,c8,df,d1,df,64,a9,21,d1,a1,b5,85,b9,71,d4,5c,41,8a,26,8e,45,01,2b,16,6a,b6,62,c6,6d,46,6e,15,5b
+If,%cmb_RegEdition%,Equal,"Standard",RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",08,77,2f,f2,ca,c7,37,a1,1e,e2,3e,e2,ef,7b,18,b5,1d,d3,4d,d2,1c,9b,19,92,31,93,64,f6,5a,f0,61,92,2c,85,3f,80,56,eb,1b,ee,2a,97,9e,a4,89,a9,b5,51,b2,88,c8,df,d1,df,64,a9,21,d1,a1,b5,85,b9,71,d4,5c,41,8a,26,8e,45,01,2b,16,6a,b6,62,c6,6d,46,6e,15,5b
 Else,If,%cmb_RegEdition%,Equal,"Import License From Host",Begin
   RegRead,HKLM,"Software\%WOW6432Node%Microsoft\Windows\CurrentVersion","ProgramData",%Host_LicKey%
   If,%Host_LicKey%,Equal,"",Halt,"ERROR: Could not retrieve license key from host system."
-  Else,RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",%Host_LicKey%
+  Else,RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",%Host_LicKey%
 End
 Else,Begin
   If,%txt_LicKey%,Equal,"",Halt,"ERROR: You must enter a license key."
-  Else,RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",%txt_LicKey%
+  Else,RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion","ProgramData",%txt_LicKey%
 End
 
 IniWrite,"%TargetPrograms%\%ProgramFolder%\Version.ini","VersionInfo","versionCode",2

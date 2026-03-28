@@ -67,34 +67,34 @@ RegLoadHives
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTRIM,%Lang%,1,%Lang%
-RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","Language",%Lang%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","Language",%Lang%
 
 // ShellExt
-RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","","%PEPrograms%\%ProgramFolder%"
 If,%cb_RegisterShellExt%,Equal,True,Begin
   Run,%ScriptFile%,RegisterShellExtension
-  RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","ShellExt","1"
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","ShellExt","1"
 End
  
 // FileExt
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO","","UltraISO File"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\shell\open","","Open with &UltraISO"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\UltraISO","","UltraISO File"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\UltraISO\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q,0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\UltraISO\shell\open","","Open with &UltraISO"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\UltraISO\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 StrFormat,REPLACE,%txt_RegisterFileExt%,#$s,"",%txt_RegisterFileExt%
 ForEach,%Ext%,%txt_RegisterFileExt%,Delim=#$c,Begin
   StrFormat,StartTrim,%Ext%,".",%FileExt%
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.%FileExt%","","UltraISO"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.%FileExt%","","UltraISO"
 End
 
 // License
 If,%cmb_SoftwareLicense%,Equal,"Use Host License",Begin
   If,ExistRegValue,HKCU,"Software\EasyBoot Systems\UltraISO\5.0","Registration",Begin
     RegRead,HKCU,"Software\EasyBoot Systems\UltraISO\5.0","UserName",%RegUserName%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","UserName",%RegUserName%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","UserName",%RegUserName%
     RegRead,HKCU,"Software\EasyBoot Systems\UltraISO\5.0","Registration",%RegRegistration%
-	RegWrite,HKLM,0x1,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","Registration",%RegRegistration%
+	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\EasyBoot Systems\UltraISO\5.0","Registration",%RegRegistration%
   End
   Else,Echo,"Warning: The software license was not found in the Host registry. UltraISO will run in Evaluation Mode.",Warn
 End
@@ -131,49 +131,49 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 If,%SourceArch%,Equal,x86,Set,%ShellExtDll%,"%PEPrograms%\%ProgramFolder%\isoshell.dll"
 Else,Set,%ShellExtDll%,"%PEPrograms%\%ProgramFolder%\isoshl64.dll"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}","","UIContextMenu Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\InprocServer32","",%ShellExtDll%
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\InprocServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\ProgID","","ISOShell.UIContextMenu.1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\VersionIndependentProgID","","ISOShell.UIContextMenu"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}","","UIContextMenu Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\InprocServer32","",%ShellExtDll%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\ProgID","","ISOShell.UIContextMenu.1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{AD392E40-428C-459F-961E-9B147782D099}\VersionIndependentProgID","","ISOShell.UIContextMenu"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\UltraISO","","{AD392E40-428C-459F-961E-9B147782D099}"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}","","IUIContextMenu"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","Version","1.0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}","","IUIContextMenu"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","Version","1.0"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu","","UIContextMenu Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu\CLSID","","{AD392E40-428C-459F-961E-9B147782D099}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu\CurVer","","ISOShell.UIContextMenu.1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ISOShell.UIContextMenu","","UIContextMenu Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ISOShell.UIContextMenu\CLSID","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ISOShell.UIContextMenu\CurVer","","ISOShell.UIContextMenu.1"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu.1","","UIContextMenu Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\ISOShell.UIContextMenu.1\CLSID","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ISOShell.UIContextMenu.1","","UIContextMenu Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\ISOShell.UIContextMenu.1\CLSID","","{AD392E40-428C-459F-961E-9B147782D099}"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0","","ISOShell 1.0 Type Library"
-If,%SourceArch%,Equal,x86,RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\0\win32","",%ShellExtDll%
-Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\0\win64","",%ShellExtDll%
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\FLAGS","","0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%\"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0","","ISOShell 1.0 Type Library"
+If,%SourceArch%,Equal,x86,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\0\win32","",%ShellExtDll%
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\0\win64","",%ShellExtDll%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\FLAGS","","0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1CD46142-F3D3-4E46-87BA-7CC019142F9D}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%\"
 
 // We did the UltraISO Class in the File Assoco Config so we just need the ContextMenuHandler
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\UltraISO\shellex\ContextMenuHandlers\ISOShell","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\UltraISO\shellex\ContextMenuHandlers\ISOShell","","{AD392E40-428C-459F-961E-9B147782D099}"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}","","IUIContextMenu"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","Version","1.0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}","","IUIContextMenu"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","","{1CD46142-F3D3-4E46-87BA-7CC019142F9D}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\Interface\{9653DE66-C5E0-4AEE-ADE5-0197BA68CE2B}\TypeLib","Version","1.0"
 
 // .bin
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage","","BIN File"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shell\Convert to ISO\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -bin2iso #$q#$p1#$q"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\binimage\shellex\ContextMenuHandlers\ISOShell","","{AD392E40-428C-459F-961E-9B147782D099}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\binimage","","BIN File"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\binimage\DefaultIcon","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q,0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\binimage\shell\Convert to ISO\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -bin2iso #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\binimage\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\binimage\shellex\ContextMenuHandlers\ISOShell","","{AD392E40-428C-459F-961E-9B147782D099}"
 
 [#ExtractProgram#]
 // ===============================================================================================================================

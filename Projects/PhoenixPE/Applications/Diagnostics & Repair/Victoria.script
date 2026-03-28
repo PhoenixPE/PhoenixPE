@@ -68,10 +68,10 @@ IniWrite,"%TargetPrograms%\%ProgramFolder%\Victoria.ini","Setup","AutoInstallDri
 // Install porttalk driver for direct disk access. x86 sources only!
 If,%cb_InstallPorttalk%,Equal,True,Begin
   FileCopy,"%TargetPrograms%\%ProgramFolder%\porttalk.sys","%TargetSystem32%\Drivers"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\PortTalk","Type",00000001
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\PortTalk","ErrorControl",00000001
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\PortTalk","Start",00000002
-  RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\PortTalk","DisplayName","PortTalk"
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\PortTalk","Type",00000001
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\PortTalk","ErrorControl",00000001
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\PortTalk","Start",00000002
+  RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\PortTalk","DisplayName","PortTalk"
 End
 Else,Begin
   FileDeleteEx,"%TargetSystem32%\Drivers\porttalk.sys"

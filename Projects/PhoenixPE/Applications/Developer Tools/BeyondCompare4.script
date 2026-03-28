@@ -41,8 +41,8 @@ Date=2024-11-23
 [Variables]
 %ProgramFolder%="Beyond Compare 4"
 %ProgramExe%="BCompare.exe"
-%SetupFile%="BCompare-Setup.exe"
 %ProgramVer%="4.4.7.28397"
+%SetupFile%="BCompare-%ProgramVer%.exe"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -122,40 +122,40 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 Echo,"Registering %ScriptTitle%..."
 
 // Log Event Handler
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\EventLog\Application\Beyond Compare 4","EventMessageFile","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\EventLog\Application\Beyond Compare 4","EventMessageFile","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\EventLog\Application\Beyond Compare 4","TypesSupported",7
 
 // AppPath
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\BCompare.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\BCompare.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
 RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\BCompare.exe","UseURL",1
 
 // File Extensions
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.bcpkg","","BeyondCompare.SettingsPackage"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\BeyondCompare.SettingsPackage","","BeyondCompare.SettingsPackage"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bcpkg","","BeyondCompare.SettingsPackage"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.SettingsPackage","","BeyondCompare.SettingsPackage"
 RegWrite,HKLM,0x4,"Tmp_Software\Classes\BeyondCompare.SettingsPackage","EditFlags",32
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\BeyondCompare.SettingsPackage\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\BeyondCompare.SettingsPackage\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.SettingsPackage\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.SettingsPackage\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.bcss","","BeyondCompare.Snapshot"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\BeyondCompare.Snapshot","","Beyond Compare Snapshot"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\BeyondCompare.Snapshot\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\BeyondCompare.Snapshot\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bcss","","BeyondCompare.Snapshot"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.Snapshot","","Beyond Compare Snapshot"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.Snapshot\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.Snapshot\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
 // Misc
-RegWrite,HKLM,0x1,"Tmp_Software\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Software\Scooter Software\Beyond Compare","Version","%ProgramVer%"
-RegWrite,HKLM,0x1,"Tmp_Software\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Software\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
 
-RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare","Version","%ProgramVer%"
-RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
 
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Scooter Software\Beyond Compare","Version","%ProgramVer%"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
 
 [#RegisterShellExtension#]
 // ===============================================================================================================================
@@ -172,31 +172,31 @@ RegWrite,HKLM,0x1,"Tmp_Default\Software\Scooter Software\Beyond Compare 4","Vers
 Echo,"Registering Shell Extension..."
 
 If,%SourceArch%,Equal,"x64",Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}","","CirrusShellEx"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","","%PEPrograms%\%ProgramFolder%\BCShellEx64.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","ThreadingModel","Apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\folder\ShellEx\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\lnkfile\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}","","CirrusShellEx"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","","%PEPrograms%\%ProgramFolder%\BCShellEx64.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\folder\ShellEx\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\lnkfile\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}","","CirrusShellEx"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","","%PEPrograms%\%ProgramFolder%\BCShellEx.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}","","CirrusShellEx"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","","%PEPrograms%\%ProgramFolder%\BCShellEx.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","ThreadingModel","Apartment"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{57FA2D12-D22D-490A-805A-5CB48E84F12A}","Beyond Compare 4 Shell Extension"
-  RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{57FA2D12-D22D-490A-805A-5CB48E84F12A}","Beyond Compare 4 Shell Extension"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{57FA2D12-D22D-490A-805A-5CB48E84F12A}","Beyond Compare 4 Shell Extension"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{57FA2D12-D22D-490A-805A-5CB48E84F12A}","Beyond Compare 4 Shell Extension"
 End
 Else,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}","","CirrusShellEx"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","","%PEPrograms%\%ProgramFolder%\BCShellEx.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","ThreadingModel","Apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\folder\ShellEx\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\lnkfile\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}","","CirrusShellEx"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","","%PEPrograms%\%ProgramFolder%\BCShellEx.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{57FA2D12-D22D-490A-805A-5CB48E84F12A}\InProcServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\folder\ShellEx\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\lnkfile\shellex\ContextMenuHandlers\CirrusShellEx","","{57FA2D12-D22D-490A-805A-5CB48E84F12A}"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{57FA2D12-D22D-490A-805A-5CB48E84F12A}","Beyond Compare 4 Shell Extension"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{57FA2D12-D22D-490A-805A-5CB48E84F12A}","Beyond Compare 4 Shell Extension"
 End
 
 [#ExtractProgram#]

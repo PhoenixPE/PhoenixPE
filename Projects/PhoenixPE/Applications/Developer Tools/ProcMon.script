@@ -77,14 +77,14 @@ If,%cb_EnableBootLogging%,Equal,True,Begin
   GetBinaryResource,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%","BINRES","RCDRIVERNT","%TargetSystem32%\drivers\Procmon.sys",NOERR
   If,Not,#r,Equal,0,Halt,"ERROR: Unable to extract procmon driver. [#r]"
   
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Procmon","SupportedFeatures",3
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Procmon","Start",0
-  RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\Procmon","Group","FSFilter Activity Monitor"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Procmon","Type",1
-  RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\Procmon","ImagePath","System32\Drivers\Procmon.sys"
-  RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\Procmon\Instances","DefaultInstance","Process Monitor Instance"
-  RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\Procmon\Instances\Process Monitor Instance","Altitude",385200
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\Procmon\Instances\Process Monitor Instance","Flags",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Procmon","SupportedFeatures",3
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Procmon","Start",0
+  RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\Procmon","Group","FSFilter Activity Monitor"
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Procmon","Type",1
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\Procmon","ImagePath","System32\Drivers\Procmon.sys"
+  RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\Procmon\Instances","DefaultInstance","Process Monitor Instance"
+  RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\Procmon\Instances\Process Monitor Instance","Altitude",385200
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Procmon\Instances\Process Monitor Instance","Flags",0
 End
 Else,Begin
   Echo,"Boot Logging: DISABLED"
@@ -92,8 +92,8 @@ Else,Begin
 End
 
 // Dark Theme
-If,%cb_DarkTheme%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Default\Software\Sysinternals\Process Monitor","Theme","DarkTheme"
-Else,RegWrite,HKLM,0x1,"Tmp_Default\Software\Sysinternals\Process Monitor","Theme",""
+If,%cb_DarkTheme%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Sysinternals\Process Monitor","Theme","DarkTheme"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Sysinternals\Process Monitor","Theme",""
 
 // Import custom config
 If,%cb_CustomConfigFile%,Equal,True,Begin
@@ -109,7 +109,7 @@ End
 If,%cb_AutoRunProcMon%,Equal,True,AddAutoRun,PreShell,NoWait,"Launching %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%",%ProcMonCmdLineArgs%
 
 // Accept EULA
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Sysinternals\Process Monitor","EulaAccepted",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Sysinternals\Process Monitor","EulaAccepted",1
 
 RegUnLoadHives
 
