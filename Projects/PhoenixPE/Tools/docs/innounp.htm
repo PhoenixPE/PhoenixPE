@@ -1,142 +1,15 @@
 <html>
 <head>
 <title>innounp, the Inno Setup Unpacker</title>
-<style>
-body { font-family: Verdana, Myriad Web, Syntax, sans-serif; font-size: 90%; }
-h1{
-font-family:Georgia, Minion Web, Palatino, Book Antiqua, Utopia, Times New Roman, serif;
-font-size-adjust:.4;
-font-size:2.0em;
-font-weight:600;
-font-style:normal;
-text-decoration:none;
-word-spacing:normal;
-letter-spacing:normal;
-text-transform:none;
-}
-
-h2{
-font-family:Georgia, Minion Web, Palatino, Book Antiqua, Utopia, Times New Roman, serif;
-font-size-adjust:.4;
-font-size:1.75em;
-font-weight:500;
-font-style:normal;
-text-decoration:none;
-word-spacing:normal;
-letter-spacing:normal;
-text-transform:none;
-}
-
-h3{
-font-family:Georgia, Minion Web, Palatino, Book Antiqua, Utopia, Times New Roman, serif;
-font-size-adjust:.4;
-font-size:1.58em;
-font-weight:600;
-font-style:italic;
-text-decoration:none;
-word-spacing:normal;
-letter-spacing:normal;
-text-transform:none;
-}
-
-h4{
-font-family:Georgia, Minion Web, Palatino, Book Antiqua, Utopia, Times New Roman, serif;
-font-size-adjust:.4;
-font-size:1.33em;
-font-weight:600;
-font-style:normal;
-text-decoration:none;
-word-spacing:normal;
-letter-spacing:normal;
-text-transform:none;
-}
-
-h5, dt{
-font-family:Georgia, Minion Web, Palatino, Book Antiqua, Utopia, Times New Roman, serif;
-font-size-adjust:.4;
-font-size:1.17em;
-font-weight:600;
-font-style:italic;
-text-decoration:none;
-word-spacing:normal;
-letter-spacing:normal;
-text-transform:none;
-}
-
-h6{
-font-family:Georgia, Minion Web, Palatino, Book Antiqua, Utopia, Times New Roman, serif;
-font-size-adjust:.4;
-font-size:1em;
-font-weight:700;
-font-style:normal;
-text-decoration:none;
-word-spacing:normal;
-letter-spacing:.1em;
-font-variant:small-caps
-}
-
-h1, h2, h3, h4, h5, h6, dt, th, thead, tfoot{
-color:#C00;
-}
-
-body{
-line-height:1.58em;
-margin-top:1.58em;
-margin-left:5%;
-margin-right:5%;
-margin-bottom:1.58em;
-padding-top:0;
-padding-left:0;
-padding-right:0;
-padding-bottom:0;
-border-top:0;
-border-left:0;
-border-bottom:0;
-border-right:0;
-width:auto;
-}
-
-pre { line-height: 1.2em; font-size: 110%; }
-tt { font-size: 110%; }
-
-.boxed { border: 1px solid black; background-color: #eeeeee; color: blue; }
-
-.quicklink :link, .quicklink :visited {
-  text-decoration: none;
-  background-color: #eeeeee;
-  border-top: 1px dashed #222222;
-  border-bottom: 1px dashed #222222;
-  color: blue;
-}
-.quicklink :hover {
-  text-decoration: none;
-  border-top: 1px dashed #222222;
-  border-bottom: 1px dashed #222222;
-  background-color: #aadddd;
-}
-
-.nav :link, .nav :visited { text-decoration: none; }
-.nav :visited { color: blue; }
-.nav :hover { text-decoration: underline; color: red; }
-
-:link { color: blue; }
-:hover { color: red; }
-
-</style>
+<link rel=stylesheet type="text/css" href="innounp.css">
 </head>
 
 <body>
-<!--<div style="float: right; width: 16em; text-align: center; margin-left: 2em;"><span class=quicklink>
-<a href="http://innounp.sourceforge.net/get-latest-innounp.php">
-<span class=boxed>&darr;</span> Download latest version</a></span><br>
-<small>if the above link does not work, please go to the
-<a href="http://sourceforge.net/project/showfiles.php?group_id=102423">download page</a></small></div>-->
-
 <h3>innounp, the Inno Setup Unpacker</h3>
-<h4>Version 2.66.1 - Unicode </h4>
+<h4>Version 2.67.5 - Unicode </h4>
 <p><b>based on <a href="https://sourceforge.net/projects/innounp/" target="_blank"><i>innounp</i> version 0.50</a> by 
   <a href="https://sourceforge.net/u/ariman_ua/profile/" target="_blank">ariman</a></b><br>
-  Supports Inno Setup versions 2.0.7 through 6.6.1</p>
+  Supports Inno Setup versions 2.0.7 through 6.7.1</p>
 <p><a href="http://www.jrsoftware.org/isinfo.php">Inno Setup</a> is a popular program
   for making software installations. Unfortunately, there is no official unpacker - the
   only method of getting the files out of the self-extracting executable
@@ -197,6 +70,8 @@ Options:
   -y     assume Yes on all queries (e.g. overwrite files) 
   -o     no colored console output  
   -h     do not display headline with program info  
+  -w     generate install script without UTF-8 conversion (use default encoding)
+  -r     use Windows regional settings for separators and date/time format
   -u     use UTF-8 for console output instead of ANSI (Codepage 850)
 Exit codes: 0 no errors
             1 version not supported
@@ -226,14 +101,50 @@ Exit codes: 0 no errors
   which is the code made by the RemObjects Pascal Script compiler.</p>
 
 <h2><a name="History"></a>What's new / History</h2>
-<p style="margin-bottom:-15px;"><b>2.66.0</b> <small>(2025-11-13)</small></p>
+<p style="margin-bottom:-15px;"><b>2.67.5</b> <small>(2026-03-04)</small></p>
 <ul>
-  <li>Added support for IS up to 6.6.1</li>
-  <li>File date/time format changed (ISO 8601)</li>
+  <li>Added: Number of supported languages on info page</li>
+  <li>Fixed; Check for invalid codepages</li>
+  <li>Fixed: Use of special codepages in non-Unicode versions</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.67.4</b> <small>(2026-02-19)</small></p>
+<ul>
+  <li>Improved display of required Windows version (MinVersion)</li>
+  <li>Optional formatting of numbers and date/time with regional settings</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.67.3</b> <small>(2026-02-01)</small></p>
+<ul>
+  <li>Added to install rebuilt script: more settings from the setup section</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.67.2</b> <small>(2026-01-17)</small></p>
+<ul>
+  <li>Added: support of <i>Dark Mode</i> for <i>WizardStyle</i> in install script</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.67.1</b> <small>(2026-01-14)</small></p>
+<ul>
+  <li>Added: <i>WizardStyle</i> in install script</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.67.0</b> <small>(2026-01-10)</small></p>
+<ul>
+  <li>Added: support for IS up to 6.7.1</li>
+  <li>Added: option <i>-w</i> to disable UTF-8 encoding of the script</li>
+  <li>Fixed: UTF-8 encoding of the setup filename in the comment at the beginning of the script</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.66.2</b> <small>(2026-01-03)</small></p>
+<ul>
+  <li>Fixed: conversion of special characters to UTF-8 (e.g. 3 byte Chinese)</li>
+  <li>Added: information about <i>inno unpacker</i> in rebuilt script</li>
+  <li>Added: character conversion using associated code pages for custom messages 
+    in the rebuilt script extracted from setup files that do not support Unicode</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.66.1</b> <small>(2025-11-21)</small></p>
+<ul>
+  <li>Added: support for IS up to 6.6.1</li>
+  <li>Changed: file date/time format to ISO 8601</li>
 </ul>
 <p style="margin-bottom:-15px;"><b>2.66.0</b> <small>(2025-11-13)</small></p>
 <ul>
-  <li>Added support for IS up to 6.6.0</li>
+  <li>Added: support for IS up to 6.6.0</li>
 </ul>
 <p style="margin-bottom:-15px;"><b>2.65.4</b> <small>(2025-11-09)</small></p>
 <ul>
@@ -638,16 +549,16 @@ Exit codes: 0 no errors
 
 
 <h2><a name="Copyrights"></a>Copyrights and licensing</h2>
-<p>&copy; 2004-2019 QuickeneR, 2009-2020 Ariman, 2020 - 2025 J. Rathlev<br>
+<p>&copy; 2004-2019 QuickeneR, 2009-2020 Ariman, 2020 - 2026 J. Rathlev<br>
   This program is licensed under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">
   GNU General Public License (GPL)</a>. A copy of the license is included with the source files.<br>
   If you distribute innounp on the WWW, please put a link to its home page,
   <a href="http://innounp.sourceforge.net" target="_blank">http://innounp.sourceforge.net</a></p>
 <p>Converted to Delphi 10 (Unicode), J. Rathlev 2022 - <i>Versions 1.xx / 2.xx</i>&nbsp; 
   (<a href="https://www.rathlev-home.de/index-e.html?tools/prog-e.html#unpack" target="_blank">Web site</a>)</p>
-<p>Over 90% of code is ripped from Inno Setup which is Copyright &copy; 1997-2025 Jordan
+<p>Over 90% of code is ripped from Inno Setup which is Copyright &copy; 1997-2026 Jordan
   Russell. All rights reserved.<br>
-  Portions &copy; 2000-2025 Martijn Laan. All rights reserved.<br>
+  Portions &copy; 2000-2026 Martijn Laan. All rights reserved.<br>
   See <a href="http://www.jrsoftware.org">http://www.jrsoftware.org</a> for details.</p>
 <p>Contains zlib code, &copy; 1995-2005 Jean-loup Gailly and Mark Adler.</p>
 <p>Contains bzip2 code, &copy; 1996-2009 Julian R Seward. All rights reserved.</p>
