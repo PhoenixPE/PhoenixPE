@@ -6,7 +6,7 @@
 // Additional 3rd party tools, encoded files, and programs used by the project are the property
 // of their respective authors and may be subject to their own license agreement.
 //
-// Copyright (c) 2014-2025 Jonathan Holmgren (Homes32)
+// Copyright (c) 2014-2026 Jonathan Holmgren (Homes32)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.13.2.0
-Date=2025-12-14
+Version=1.13.4.0
+Date=2026-03-15
 Level=0
 Selected=None
 
@@ -1505,24 +1505,25 @@ System,EndLocal
 //                  Both the DRIVERS hive and SYSTEM\Drivers store are processed.
 // Syntax.........: RegCopyDriver,<filename.inf>
 // Parameters.....: InfFile - The name of the driver's .inf file
-// Return values..: 
+// Return values..: #r - Success - 0
+//                     - Errors  - 1 
 // Author.........: Homes32
-// Remarks........: This function uses a modified version of ChrisR's RegAddDriver.cmd as PEBakery does not have a good way
-//                  to enum/query registry keys yet...
-//                  Registry hives Tmp_Install_Drivers, Tmp_Install_System, Tmp_Drivers, Tmp_System must be loaded before calling.
-// Related........: Depends on %Tools%\RegCopyDriver.cmd
+// Remarks........: Registry hives Tmp_Install_Drivers, Tmp_Install_System, Tmp_Drivers, Tmp_System must be loaded before calling. 
+// Related........: Depends on %Tools%\A3x\PhoenixAPI-RegCopyDriver.a3x
 // ===============================================================================================================================
 [_PhoenixAPI_RegCopyDriver]
 System,SetLocal
 Set,%Debug%,False
+Set,%DebugArg%,""
 
 If,#1,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to register."
 GetParam,1,%InfFile%
 
 Echo,"Processing [%InfFile%] registration..."
-If,%Debug%,Equal,True,TXTReplace,"%Tools%\RegCopyDriver.cmd",":::",""
+If,%Debug%,Equal,True,Set,%DebugArg%," --debug"
 
-ShellExecute,Hide,"cmd.exe","/D /C RegCopyDriver.cmd #$q%InfFile%#$q",%Tools%
+ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","#$q%Tools%\a3x\PhoenixAPI-RegCopyDriver.a3x#$q #$q%InfFile%#$q%DebugArg%",%Tools%
+Return,#r
 
 System,EndLocal
 
@@ -1602,7 +1603,7 @@ If,%argc%,>,0,Begin
 End
 
 If,%ForceUnmount%,Equal,True,Begin
-  If,ExistFile,"%Tools%\x86\HiveUnload.exe",ShellExecute,Hide,"%Tools%\x86\HiveUnload.exe","/%HKEY% /Target:%UnloadTarget%"
+  If,ExistFile,"%Tools%\%HostArch%\HiveUnload.exe",ShellExecute,Hide,"%Tools%\%HostArch%\HiveUnload.exe","--rootKey=%HKEY% --target=%UnloadTarget%"
   If,%ExitCode%,Equal,0,Echo,"HiveUnload: All registry hives unloaded successfully."
   Else,If,%ExitCode%,Equal,1,Echo,"HiveUnload: Warning: Not all registry hives could be unloaded! Please verify that regedit is not running and try again.",Warn
   Else,If,%ExitCode%,Equal,2,Echo,"HiveUnload: No loaded registry hives were found."
@@ -1637,10 +1638,8 @@ System,EndLocal
 //                  NOREG - (Optional) Don't copy registry (driver database)
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: This function uses a modified version of ChrisR's RegAddDriver.cmd as PEBakery does not have a good way
-//                  to enum/query registry keys yet...
-//                  Registry hives Tmp_Install_Drivers, Tmp_Install_System, Tmp_Drivers, Tmp_System must be loaded before calling.
-// Related........: Depends on %Tools%\RegCopyDriver.cmd
+// Remarks........: Registry hives Tmp_Install_Drivers, Tmp_Install_System, Tmp_Drivers, Tmp_System must be loaded before calling.
+// Related........: Depends on %Tools%\A3x\PhoenixAPI-RegCopyDriver.a3x
 // ===============================================================================================================================
 [_PhoenixAPI_RequireDriver]
 System,SetLocal
