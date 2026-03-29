@@ -30,27 +30,34 @@
 
 [Main]
 Title=Ventoy
-Description=(v1.1.07) Ventoy is an open source tool used to create bootable USB devices capable of launching multiple ISO/WIM/IMG/VHD(x)/EFI files.
+Description=(v1.1.10) Ventoy is an open source tool used to create bootable USB devices capable of launching multiple ISO/WIM/IMG/VHD(x)/EFI files.
 Author=Homes32
 Level=8
 Selected=None
 Mandatory=False
-Version=1.1.22.0
+Version=1.1.23.0
 Date=2025-09-15
 
 [Variables]
 %ProgramFolder%="%Workbench%\Ventoy"
 %ProgramExe%="Ventoy2Disk.exe"
-%ProgramVer%="1.1.07"
-%DownloadURL%=https://github.com/ventoy/Ventoy/releases/download/v%ProgramVer%/ventoy-%ProgramVer%-windows.zip
-%SetupFile%="Ventoy.zip"
+%ProgramVersion%="1.1.10"
+%DownloadURL%=https://github.com/ventoy/Ventoy/releases/download/v%ProgramVersion%/ventoy-%ProgramVersion%-windows.zip
+%SetupFile%="Ventoy-%ProgramVersion%.zip"
 
 [Process]
 Echo,"Launching %ScriptTitle%..."
 
 If,Not,ExistFile,"%ProgramFolder%\%ProgramExe%",Begin
   Run,%ScriptFile%,DownloadProgram
-  // Extract to workbench (instead of temp) to allow the user can customize the boot menu, plugins, etc.
+  // Extract to workbench (instead of temp) to allow the user to customize the boot menu, plugins, etc.
+  Run,%ScriptFile%,ExtractProgram,%ProgramFolder%
+End
+
+// Update workbench if needed
+FileVersion,"%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
+If,%ProgramExeVer%,<,%ProgramVersion%,Begin
+  Run,%ScriptFile%,DownloadProgram
   Run,%ScriptFile%,ExtractProgram,%ProgramFolder%
 End
 
@@ -70,7 +77,7 @@ ShellExecuteEx,Open,"%ProgramFolder%\%ProgramExe%","",%ProgramFolder%
 [ExtractProgram]
 Echo,"Extracting files..."
 Decompress,"%ProjectTemp%\Ventoy\%SetupFile%","%ProjectTemp%\Ventoy"
-FileCopy,"%ProjectTemp%\Ventoy\ventoy-%ProgramVer%\*.*",#1
+FileCopy,"%ProjectTemp%\Ventoy\ventoy-%ProgramVersion%\*.*",#1
 
 [#DownloadProgram#]
 // ===============================================================================================================================

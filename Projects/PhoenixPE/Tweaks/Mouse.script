@@ -57,85 +57,85 @@ AddInterface,%ScriptFile%,Interface-MouseKeys,""
 RegLoadHives
 
 If,%cb_TurnOnMouseKeys%,Equal,True,Run,%ScriptFile%,ConfigureMouseKeys
-Else,RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Accessibility\MouseKeys","Flags",2
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Accessibility\MouseKeys","Flags",2
 
 // Swap Mouse Buttons
-If,%cb_SwapMouseButtons%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","SwapMouseButtons",1
-Else,RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","SwapMouseButtons",0
+If,%cb_SwapMouseButtons%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","SwapMouseButtons",1
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","SwapMouseButtons",0
 
 // Double-Click Speed (Slow=900, Fast=200, Step=70)
 List,Pos,%aDoubleClickSpeedMap%,%cmb_DblClickSpeed%,%DblClickSpeedPos%
 Math,Add,%DblClickSpeedValuePos%,%DblClickSpeedPos%,1
 List,Get,%aDoubleClickSpeedMap%,%DblClickSpeedValuePos%,%DblClickSpeed%
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","DoubleClickSpeed",%DblClickSpeed%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","DoubleClickSpeed",%DblClickSpeed%
 
 // ClickLock
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cb_TurnOnClickLock%,Equal,True,BitSet,%PrefMask%,2,7,8
 Else,BitClear,%PrefMask%,2,7,8
-RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
 
 // ClickLock Duration (Min=200, Max=2200, Step=200)
 List,Pos,%aClickLockMap%,%cmb_ClickLockDuration%,%ClickLockDurationPos%
 Math,Add,%ClickLockDurationValuePos%,%ClickLockDurationPos%,1
 List,Get,%aClickLockMap%,%ClickLockDurationValuePos%,%ClickLockDuration%
-RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","ClickLockTime",%ClickLockDuration%
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Control Panel\Desktop","ClickLockTime",%ClickLockDuration%
 
 // Pointer Shadow
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cb_EnablePointerShadow%,Equal,True,BitSet,%PrefMask%,2,5,8
 Else,BitClear,%PrefMask%,2,5,8
-RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
 
 // Pointer Speed (Slow-1, Fast=20, Step=2)
 List,Pos,%aMouseSensitivityMap%,%cmb_PointerSpeed%,%MouseSensitivityPos%
 Math,Add,%MouseSensitivityValuePos%,%MouseSensitivityPos%,1
 List,Get,%aMouseSensitivityMap%,%MouseSensitivityValuePos%,%MouseSensitivity%
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseSensitivity",%MouseSensitivity%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseSensitivity",%MouseSensitivity%
 
 // Enhanced Pointer Precision (MouseSpeed Min=0, Max=2 - Multiplier for MouseThreshold1 & MouseThreshold2. MouseThreshold1 and MouseThreshold2 correlate to acceleration. )
 If,%cb_EnhancedPointerPrecision%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseSpeed",1
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseThreshold1",6
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseThreshold2",10
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseSpeed",1
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseThreshold1",6
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseThreshold2",10
 End
 Else,Begin
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseSpeed",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseThreshold1",0
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseThreshold2",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseSpeed",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseThreshold1",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseThreshold2",0
 End
 
 // SnapToDefaultBtn
-If,%cb_AutoMoveToDefaultBtn%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","SnapToDefaultButton",1
-Else,RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","SnapToDefaultButton",0
+If,%cb_AutoMoveToDefaultBtn%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","SnapToDefaultButton",1
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","SnapToDefaultButton",0
 
 // Display Pointer Trails (Min=2, Max=7, Step=1)
 If,%cb_DisplayPointerTrails%,Equal,True,Begin
   List,Pos,%aMouseTrailsMap%,%cmb_TailLength%,%TailLengthPos%
   Math,Add,%TailLengthValuePos%,%TailLengthPos%,1
   List,Get,%aMouseTrailsMap%,%TailLengthValuePos%,%TailLength%
-  RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseTrails",%TailLength%
+  RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseTrails",%TailLength%
 End
-Else,RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Mouse","MouseTrails",0
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseTrails",0
 
 // Hide Pointer While Typing
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cb_HidePointerWhileTyping%,Equal,True,BitSet,%PrefMask%,3,0,8
 Else,BitClear,%PrefMask%,3,0,8
-RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
 
 // Show Location when press CTRL
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cb_ShowPointerLocCtl%,Equal,True,BitSet,%PrefMask%,2,6,8
 Else,BitClear,%PrefMask%,2,6,8
-RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
 
 // Vertical Scrolling (Screen=-1, Line Min=1, Line Max=100, Step=1)
-If,%rbtn_VerticalScrollLines%,Equal,True,RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WheelScrollLines",%num_VerticalScrollLines%
-Else,RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WheelScrollLines","-1"
+If,%rbtn_VerticalScrollLines%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WheelScrollLines",%num_VerticalScrollLines%
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WheelScrollLines","-1"
 
 // Horizontal Scrolling (Min=1, Max=100, Step=1)
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WheelScrollChars",%num_HorzScrollChars%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WheelScrollChars",%num_HorzScrollChars%
 
 RegUnloadHives
 
@@ -187,9 +187,9 @@ List,Pos,%aMKAccelerationMap%,%cmb_Acceleration%,%AccelerationPos%
 Math,Add,%AccelerationValuePos%,%AccelerationPos%,1
 List,Get,%aMKAccelerationMap%,%AccelerationValuePos%,%Acceleration%
 
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Accessibility\MouseKeys","Flags",%Flags%
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Accessibility\MouseKeys","MaximumSpeed",%MaximumSpeed%
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Accessibility\MouseKeys","TimeToMaximumSpeed",%Acceleration%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Accessibility\MouseKeys","Flags",%Flags%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Accessibility\MouseKeys","MaximumSpeed",%MaximumSpeed%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Accessibility\MouseKeys","TimeToMaximumSpeed",%Acceleration%
 
 [#SwitchToMainInterface#]
 // ===============================================================================================================================

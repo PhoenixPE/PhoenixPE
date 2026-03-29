@@ -41,7 +41,7 @@ Date=2019-12-29
 [Variables]
 %ProgramFolder%="HotSwap!"
 %ProgramExe%="HotSwap!.exe"
-%ProgramVersion%=6.3.0.0
+%ProgramVersion%="6.3.0.0"
 %DownloadURL%=http://mt-naka.com/hotswap/file/HotSwap!#$p20%ProgramVersion%.ZIP
 
 [Process]
@@ -63,13 +63,13 @@ Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
 // Settings
 
 RegHiveLoad,Tmp_Default,%RegDefault%
-RegWrite,HKLM,0x4,"Tmp_Default\Software\HotSwap!","AutoRun",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HotSwap!","AutoRun",1
 // Fixed + Harddrives
-RegWrite,HKLM,0x4,"Tmp_Default\Software\HotSwap!","DFlags",268435463
-RegWrite,HKLM,0x4,"Tmp_Default\Software\HotSwap!","DisplayPDO",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\HotSwap!","Offline",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\HotSwap!","SpinDown",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\HotSwap!","LangID",%Lang%
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HotSwap!","DFlags",268435463
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HotSwap!","DisplayPDO",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HotSwap!","Offline",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HotSwap!","SpinDown",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HotSwap!","LangID",%Lang%
 RegHiveUnLoad,Tmp_Default
 
 If,%cb_AutoStart%,Equal,True,AddAutoRun,PostShell,NoWait,"HotSwap!","%PEPrograms%\%ProgramFolder%\%ProgramExe%"

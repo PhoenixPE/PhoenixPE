@@ -30,19 +30,19 @@
 
 [Main]
 Title=Driver Store Explorer
-Description=(v0.12.127) Driver Store Explorer [RAPR] makes it easier to deal with Windows driver store. Supported operations include list/add/install/delete third-party driver packages.
+Description=(v0.12.152) Driver Store Explorer [RAPR] makes it easier to deal with Windows driver store. Supported operations include list/add/install/delete third-party driver packages.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.10.0
-Date=2025-11-30
+Version=1.0.11.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="Driver Store Explorer"
 %ProgramExe%="rapr.exe"
-%ProgramVersion%="0.12.127"
-%SetupFile%="DriverStoreExplorer.zip"
+%ProgramVersion%="0.12.152"
+%SetupFile%="DriverStoreExplorer-%ProgramVersion%.zip"
 %DownloadURL%=https://github.com/lostindark/DriverStoreExplorer/releases/download/v%ProgramVersion%/DriverStoreExplorer.v%ProgramVersion%.zip
 %ConfigFile%="%TargetPrograms%\%ProgramFolder%\rapr.user.config"
 
@@ -57,8 +57,6 @@ If,%cb_RunFromRam%,Equal,True,RunFromRam
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
-FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramVer%
-Echo,"Program Version: %ProgramVer%"
 
 RequireFile,\Windows\SysWOW64\DismApi.dll
 

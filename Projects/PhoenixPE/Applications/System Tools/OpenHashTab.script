@@ -40,8 +40,8 @@ Date=2025-07-19
 
 [Variables]
 %ProgramFolder%="OpenHashTab"
-%SetupFile%="OpenHashTab_Setup_%SourceArch%.msi"
-%ProgramVersion%=3.1.1
+%ProgramVersion%="3.1.1"
+%SetupFile%="OpenHashTab-%ProgramVersion%-%SourceArch%.msi"
 %DownloadURL%=https://github.com/namazso/OpenHashTab/releases/download/%ProgramVersion%/OpenHashTab_Machine_%SourceArch%.msi
 %ShellExtx86%="%PEPrograms%\%ProgramFolder%\OpenHashTab32.dll"
 %ShellExtx64%="%PEPrograms%\%ProgramFolder%\OpenHashTab64.dll"
@@ -67,25 +67,25 @@ Run,%ScriptFile%,RegisterShellExtension
 // Settings
 
 RegHiveLoad,Tmp_Default,%RegDefault%
-If,%cb_LowercaseHashes%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab\Settings","DisplayUppercase",0
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","DisplayUppercase",1
+If,%cb_LowercaseHashes%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab\Settings","DisplayUppercase",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","DisplayUppercase",1
 
-If,%cb_CRC32%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","CRC32",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","CRC32",0
-If,%cb_CRC64%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","CRC64",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","CRC64",0
-If,%cb_MD5%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","MD5",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","MD5",0
-If,%cb_SHA-1%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-1",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-1",0
-If,%cb_SHA-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-256",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-256",0
-If,%cb_SHA-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-512",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA-512",0
-If,%cb_SHA3-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA3-256",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA3-256",0
-If,%cb_SHA3-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA3-512",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\OpenHashTab","SHA3-512",0
+If,%cb_CRC32%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","CRC32",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","CRC32",0
+If,%cb_CRC64%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","CRC64",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","CRC64",0
+If,%cb_MD5%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","MD5",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","MD5",0
+If,%cb_SHA-1%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA-1",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA-1",0
+If,%cb_SHA-256%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA-256",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA-256",0
+If,%cb_SHA-512%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA-512",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA-512",0
+If,%cb_SHA3-256%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA3-256",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA3-256",0
+If,%cb_SHA3-512%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA3-512",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\OpenHashTab","SHA3-512",0
 RegHiveUnLoad,Tmp_Default
 
 [#RegisterShellExtension#]

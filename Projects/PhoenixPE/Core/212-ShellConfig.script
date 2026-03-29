@@ -88,19 +88,19 @@ RegHiveUnload,Tmp_Install_System
 // ===============================================================================================================================
 [Personalize]
 // UserPreferencesMask defaults are not present in the DEFAULT hive, but we need it to be available for scripts that need to tweak it (IME, Mouse, etc).
-If,Not,ExistRegValue,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask","9E#$c3E#$c07#$c80#$c12#$c00#$c00#$c00"
-RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","AutoColorization",1
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","DesktopDPIOverride",-2
-RegWrite,HKLM,0x4,"Tmp_Default\Control Panel\Desktop","LogPixels",96
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","Win8DpiScaling",1
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","Wallpaper","X:\Windows\Web\Wallpaper\Windows\img0.jpg"
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",10
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperSource","X:\Windows\Web\Wallpaper\Windows\img0.jpg"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",10
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization","AllowChangeDesktopBackground",1
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization","AllowPersonalization",1
+If,Not,ExistRegValue,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask","9E#$c3E#$c07#$c80#$c12#$c00#$c00#$c00"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Control Panel\Desktop","AutoColorization",1
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","DesktopDPIOverride",-2
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Control Panel\Desktop","LogPixels",96
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","Win8DpiScaling",1
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","Wallpaper","X:\Windows\Web\Wallpaper\Windows\img0.jpg"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","TileWallpaper",0
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WallpaperStyle",10
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperSource","X:\Windows\Web\Wallpaper\Windows\img0.jpg"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","TileWallpaper",0
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\Internet Explorer\Desktop\General","WallpaperStyle",10
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization","AllowChangeDesktopBackground",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization","AllowPersonalization",1
 
 [#Config-SoftwareHive#]
 // ===============================================================================================================================
@@ -115,55 +115,55 @@ RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Personalization
 // ===============================================================================================================================
 [Config-SoftwareHive]
 // Register the Segoe UI font to avoid the annoying cursive font in PE
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Segoe UI (TrueType)","segoeui.ttf"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Fonts","Segoe UI (TrueType)","segoeui.ttf"
 
 // WinPE software registry is required for the recovery environment Image Recovery. More precisely Microsoft-WinPE-WSH, Register WSHOM
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE","Version",%SourceVer%
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE","InstRoot","X:\"
-RegWrite,HKLM,0x2,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE","CustomBackground","X:\Windows\Web\Wallpaper\Windows\img0.jpg"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE\OC\Microsoft-WinPE-HTA","1. Fix path of MSHTA.EXE","reg add HKEY_CLASSES_ROOT\htafile\Shell\Open\Command /t REG_EXPAND_SZ /f /ve /d #$q#$pSystemRoot#$p\System32\mshta.exe \#$q#$p1\#$q #$p*#$q"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE\OC\Microsoft-WinPE-WMI","1. Register CIMWIM32","#$psystemroot#$p\system32\wbem\cimwin32.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE\OC\Microsoft-WinPE-WSH","1. Register WSHOM","#$psystemroot#$p\system32\wshom.ocx"
-RegWrite,HKLM,0x7,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE\UGC","Microsoft-Windows-TCPIP","netiougc.exe -online"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE","Version",%SourceVer%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE","InstRoot","X:\"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE","CustomBackground","X:\Windows\Web\Wallpaper\Windows\img0.jpg"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE\OC\Microsoft-WinPE-HTA","1. Fix path of MSHTA.EXE","reg add HKEY_CLASSES_ROOT\htafile\Shell\Open\Command /t REG_EXPAND_SZ /f /ve /d #$q#$pSystemRoot#$p\System32\mshta.exe \#$q#$p1\#$q #$p*#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE\OC\Microsoft-WinPE-WMI","1. Register CIMWIM32","#$psystemroot#$p\system32\wbem\cimwin32.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE\OC\Microsoft-WinPE-WSH","1. Register WSHOM","#$psystemroot#$p\system32\wshom.ocx"
+RegWrite,HKLM,REG_MULTI_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\WinPE\UGC","Microsoft-Windows-TCPIP","netiougc.exe -online"
 
 // Set our user profile path
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-5-18","ProfileImagePath","X:\Users\Default"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-5-18","ProfileImagePath","X:\Users\Default"
 
 // Manage Computer on My Computer context menu
-RegWrite,HKLM,0x2,"Tmp_software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Manage\command","","#$pSystemRoot#$p\System32\mmc.exe /b compmgmt.msc",NoWarn
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_software\Classes\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Manage\command","","#$pSystemRoot#$p\System32\mmc.exe /b compmgmt.msc",NoWarn
 
 // Add C:\Windows\System32\DriverStore\FileRepository to Installation Sources. This will allow our PE look for drivers on the C: drive of the Host computer.
-RegWrite,HKLM,0x7,"Tmp_Software\Microsoft\Windows\CurrentVersion\Setup","Installation Sources","C:\Windows\System32\DriverStore\FileRepository"
+RegWrite,HKLM,REG_MULTI_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Setup","Installation Sources","C:\Windows\System32\DriverStore\FileRepository"
 
 // Enable SIHost
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","EnableSIHostIntegration",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","EnableSIHostIntegration",1
 
 // Disable First Logon Animation
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","EnableFirstLogonAnimation",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","EnableFirstLogonAnimation",0
 
 // Disable Webservices for unknown file types
-RegWrite,HKLM,0x4,"Tmp_software\Microsoft\Windows\CurrentVersion\Policies\Explorer","NoInternetOpenWith",1
+RegWrite,HKLM,REG_DWORD,"Tmp_software\Microsoft\Windows\CurrentVersion\Policies\Explorer","NoInternetOpenWith",1
 
 // Computer Name
 System,ERROROFF,3
-RegWrite,HKLM,0x1,"Tmp_software\Microsoft\Windows NT\CurrentVersion","RegisteredOwner",""
-RegWrite,HKLM,0x1,"Tmp_software\Microsoft\Windows NT\CurrentVersion","RegisteredOrganization",%ProjectTitle%
-RegWrite,HKLM,0x4,"Tmp_software\Microsoft\Windows NT\CurrentVersion\WinPE","SkipWaitForNetwork",0
-RegWrite,HKLM,0x4,"Tmp_software\Microsoft\Windows NT\CurrentVersion\WinPE","SetComputerName",0
+RegWrite,HKLM,REG_SZ,"Tmp_software\Microsoft\Windows NT\CurrentVersion","RegisteredOwner",""
+RegWrite,HKLM,REG_SZ,"Tmp_software\Microsoft\Windows NT\CurrentVersion","RegisteredOrganization",%ProjectTitle%
+RegWrite,HKLM,REG_DWORD,"Tmp_software\Microsoft\Windows NT\CurrentVersion\WinPE","SkipWaitForNetwork",0
+RegWrite,HKLM,REG_DWORD,"Tmp_software\Microsoft\Windows NT\CurrentVersion\WinPE","SetComputerName",0
 
 // OEM Info
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Manufacturer","PhoenixPE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Manufacturer","PhoenixPE"
 StrFormat,Date,%Date%,"yyyy.mm.dd"
 StrFormat,Date,%Time%,"hhnn"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Model","PhoenixPE (Build %Date%.%Time%)"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportURL","https://github.com/PhoenixPE/PhoenixPE"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Model","PhoenixPE (Build %Date%.%Time%)"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportURL","https://github.com/PhoenixPE/PhoenixPE"
 ExtractFile,"%ProjectDir%\script.project","AuthorEncoded","PhoenixPE.png",%ProjectTemp%
 ConvertImage,"%ProjectTemp%\PhoenixPE.png","%TargetSystem32%\oobe\Logo\Logo.bmp",120x120
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","X:\Windows\System32\oobe\Logo\Logo.bmp"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","X:\Windows\System32\oobe\Logo\Logo.bmp"
 
 // Open with Notepad context Menu option for all files
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\Open with Notepad","Icon","Notepad.exe"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\Open with Notepad\Command",,"Notepad.exe #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\Open with Notepad","Icon","Notepad.exe"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\Open with Notepad\Command",,"Notepad.exe #$q#$p1#$q"
 
 [#Config-SystemHive#]
 // ===============================================================================================================================
@@ -183,72 +183,72 @@ ExtractAllFiles,%ScriptFile%,Reg,%ProjectTemp%
 RegImport,"%ProjectTemp%\ProductOptions.reg"
 
 // Environment
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","AppData","#$pSystemDrive#$p\Users\Default\AppData\Roaming"
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","AppData","#$pSystemDrive#$p\Users\Default\AppData\Roaming"
 
 // AllowStart ProfSvc and lanmanworkstation
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\ProfSvc"
-RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\lanmanworkstation"
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\ProfSvc"
+RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\lanmanworkstation"
 
 // Turn off ejected USB devices
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\usbhub\HubG","DisableOnSoftRemove",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\usbhub\HubG","DisableOnSoftRemove",1
 
 // Turn off WMI Telemetry
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\WMI\Autologger\AutoLogger-Diagtrack-Listener","Start",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\WMI\Autologger\AutoLogger-Diagtrack-Listener","Start",0
 
 // Disable Telemetry Service
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\diagnosticshub.standardcollector.service","Start",4
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\DiagTrack","Start",4
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\diagnosticshub.standardcollector.service","Start",4
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\DiagTrack","Start",4
 
 // EnableWheelDetection
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\i8042prt\Parameters","EnableWheelDetection",2
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\i8042prt\Parameters","EnableWheelDetection",2
 
 // Disable Hibernate
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power","HibernateEnabled",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power","CustomizeDuringSetup",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power","HibernateEnabled",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power","CustomizeDuringSetup",0
 
 // Disable Fast Startup
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Session Manager\Power","HiberbootEnabled",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Session Manager\Power","HiberbootEnabled",0
 
 // Do not update the last-access timestamp for NTFS and ReFS
 // This makes listing the file system faster for a volume with a very large number of directories.
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\FileSystem","NtfsDisableLastAccessUpdate",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\FileSystem","RefsDisableLastAccessUpdate",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\FileSystem","NtfsDisableLastAccessUpdate",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\FileSystem","RefsDisableLastAccessUpdate",1
 
 // Allow ReFS Format
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\MiniNT","AllowRefsFormatOverNonmirrorVolume",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\MiniNT","AllowRefsFormatOverNonmirrorVolume",1
 
 // If you need to support ancient insecure samba servers change this value to a 2
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Lsa","LmCompatibilityLevel",3
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Lsa","LmCompatibilityLevel",3
 
 // Disable Pagefile
 //If,ExistRegValue,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Memory Management","ExistingPageFiles",RegDelete,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Memory Management","ExistingPageFiles"
-//RegWrite,HKLM,0x7,"Tmp_System\ControlSet001\Control\Session Manager\Memory Management","PagingFiles",""
-//RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Session Manager\Memory Management","SwapfileControl",0
+//RegWrite,HKLM,REG_MULTI_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Memory Management","PagingFiles",""
+//RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Session Manager\Memory Management","SwapfileControl",0
 
 // To Allow network users to access the PE without specifying password and display 'Share with' in the Context Menu change this value to 0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Lsa","LimitBlankPasswordUse",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Lsa","LimitBlankPasswordUse",1
 
 // Default ComputerName
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\ComputerName\ComputerName","ComputerName",%ProjectTitle%,NoWarn
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\ComputerName\ActiveComputerName","ComputerName",%ProjectTitle%,NoWarn
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\services\Tcpip\Parameters","NV Hostname",%ProjectTitle%,NoWarn
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\services\Tcpip\Parameters","Hostname",%ProjectTitle%,NoWarn
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\Session Manager\Environment","ComputerName",%ProjectTitle%,NoWarn
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Control\ComputerName\ComputerName","ComputerName",%ProjectTitle%,NoWarn
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Control\ComputerName\ActiveComputerName","ComputerName",%ProjectTitle%,NoWarn
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\services\Tcpip\Parameters","NV Hostname",%ProjectTitle%,NoWarn
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\services\Tcpip\Parameters","Hostname",%ProjectTitle%,NoWarn
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","ComputerName",%ProjectTitle%,NoWarn
 
 // Create and Disable Remote Desktop service to avoid event log errors
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TermService",HKLM,"Tmp_System\ControlSet001\Services\TermService"
-If,ExistRegSubKey,HKLM,"Tmp_System\ControlSet001\Services\TermService",RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\TermService","Start",4
+If,ExistRegSubKey,HKLM,"Tmp_System\ControlSet001\Services\TermService",RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\TermService","Start",4
 
 // Start Services in Redstone 5+
 If,%SourceVer%,Bigger,"10.0.17700.0",Begin
   // Fix Base Filtering Engine startup (Firewalls) 
-  RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\BFE","ImagePath","#$psystemroot#$p\system32\svchost.exe -k LocalServiceNoNetworkFirewall -p"
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\BFE","SvcHostSplitDisable",1
-  RegWrite,HKLM,0x3,"Tmp_System\ControlSet001\Services\BFE\Security","Security",01,00,14,80,90,00,00,00,9c,00,00,00,14,00,00,00,30,00,00,00,02,00,1c,00,01,00,00,00,02,80,14,00,ff,00,0f,00,01,01,00,00,00,00,00,01,00,00,00,00,02,00,60,00,04,00,00,00,00,00,14,00,85,00,02,00,01,01,00,00,00,00,00,05,0b,00,00,00,00,00,14,00,9f,00,0e,00,01,01,00,00,00,00,00,05,12,00,00,00,00,00,18,00,9d,00,0e,00,01,02,00,00,00,00,00,05,20,00,00,00,20,02,00,00,00,00,18,00,85,00,00,00,01,02,00,00,00,00,00,05,20,00,00,00,21,02,00,00,01,01,00,00,00,00,00,05,12,00,00,00,01,01,00,00,00,00,00,05,12,00,00,00
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\BFE","ImagePath","#$psystemroot#$p\system32\svchost.exe -k LocalServiceNoNetworkFirewall -p"
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\BFE","SvcHostSplitDisable",1
+  RegWrite,HKLM,REG_BINARY,"Tmp_System\ControlSet001\Services\BFE\Security","Security",01,00,14,80,90,00,00,00,9c,00,00,00,14,00,00,00,30,00,00,00,02,00,1c,00,01,00,00,00,02,80,14,00,ff,00,0f,00,01,01,00,00,00,00,00,01,00,00,00,00,02,00,60,00,04,00,00,00,00,00,14,00,85,00,02,00,01,01,00,00,00,00,00,05,0b,00,00,00,00,00,14,00,9f,00,0e,00,01,01,00,00,00,00,00,05,12,00,00,00,00,00,18,00,9d,00,0e,00,01,02,00,00,00,00,00,05,20,00,00,00,20,02,00,00,00,00,18,00,85,00,00,00,01,02,00,00,00,00,00,05,20,00,00,00,21,02,00,00,01,01,00,00,00,00,00,05,12,00,00,00,01,01,00,00,00,00,00,05,12,00,00,00
   // LanmanWorkstation, DNSCache, and NlaSvc do not start alone with Windows 10 1809
-  RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\LanmanWorkstation"
-  RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\DNSCache"
-  RegWrite,HKLM,0x0,"Tmp_System\Setup\AllowStart\NlaSvc"
+  RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\LanmanWorkstation"
+  RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\DNSCache"
+  RegWrite,HKLM,REG_NONE,"Tmp_System\Setup\AllowStart\NlaSvc"
 End
 
 [#Config-FBWF#]
@@ -281,13 +281,13 @@ If,%SourceVer%,<=,10.0.22000.0,Begin
   
   If,%cmb_FBWFSize%,Equal,4096,Begin
     Echo,"Configuring FBWF for [4094 MB]..."
-    RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",4094
+    RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",4094
     Return
   End
 End
 
 Echo,"Configuring FBWF for [%cmb_FBWFSize% MB]..."
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",%cmb_FBWFSize%
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\FBWF","WinPECacheThreshold",%cmb_FBWFSize%
 
 [#Config-NumlockStatus#]
 // ===============================================================================================================================
@@ -316,7 +316,7 @@ If,%cmb_NumlockStatus%,Equal,"ON",Set,%NumlockStatus%,2
 Else,If,%cmb_NumlockStatus%,Equal,"OFF",Set,%NumlockStatus%,0
 Else,If,%cmb_NumlockStatus%,Equal,"BIOS",Set,%NumlockStatus%,2147483648
 Else,Halt,"INTERNAL LOGIC ERROR: [%cmb_NumlockStatus%] is not a valid numlock status."
-RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Keyboard","InitialKeyboardIndicators",%NumlockStatus%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Keyboard","InitialKeyboardIndicators",%NumlockStatus%
 
 [#RunOnceEx#]
 // ===============================================================================================================================
@@ -331,11 +331,11 @@ RegWrite,HKLM,0x1,"Tmp_Default\Control Panel\Keyboard","InitialKeyboardIndicator
 // Related........:
 // ===============================================================================================================================
 [RunOnceEx]
-// AddAutoRun RunOnceEx - entries made directly - RegWrite,HKLM,0x1,Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx\000,MyApps,#$q%PathtoMyApps%#$q %Parameter%
+// AddAutoRun RunOnceEx - entries made directly - RegWrite,HKLM,REG_SZ,Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx\000,MyApps,#$q%PathtoMyApps%#$q %Parameter%
 // AddAutoRun,RunOnceEx,x:\windows\system32\rundll32.exe,"iernonce.dll,RunOnceExProcess",1
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx","Title","RunOnceEx"
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx","Flags",16
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx","Title","RunOnceEx"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx","Flags",16
 
 [#Fix-20H2-WinRE-SxS#]
 // ===============================================================================================================================
@@ -357,37 +357,37 @@ RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\RunOnceEx","Fla
 [Fix-20H2-WinRE-SxS]
 If,ExistDir,"%TargetWindows%\WinSxS\x86_microsoft.windows.common-controls_*_6.0.19041.1_*",Begin
   // Fix 10.0.19541.508 Full Software Registry (@="6.0.19041.488" vs WinSxS\x86_microsoft.windows.common-controls_*_6.0.19041.1_none_*)
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","","5.82.19041.1"
-  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","5.82.19041.1",01
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","","5.82.19041.1"
+  RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","5.82.19041.1",01
   If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","5.82.19041.488",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\5.82","5.82.19041.488"
   
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","","6.0.19041.1"
-  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","6.0.19041.1",01
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","","6.0.19041.1"
+  RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","6.0.19041.1",01
   If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","6.0.19041.488",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\x86_microsoft.windows.common-controls_6595b64144ccf1df_none_aaab8e0a9f4bd480\6.0","6.0.19041.488"
 End
 
 If,ExistDir,"%TargetWindows%\WinSxS\amd64_microsoft.windows.common-controls_*_6.0.19041.1_*",Begin
   // Fix 10.0.19541.508 Full Software Registry (@="6.0.19041.488" vs WinSxS\amd64_microsoft.windows.common-controls_*_6.0.19041.1_none_*)
-  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","5.82.19041.1",01
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","","5.82.19041.1"
+  RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","5.82.19041.1",01
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","","5.82.19041.1"
   If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","5.82.19041.488",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\5.82","5.82.19041.488"
   
-  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","6.0.19041.1",01
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","","6.0.19041.1"
+  RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","6.0.19041.1",01
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","","6.0.19041.1"
   If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","6.0.19041.488",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.common-controls_6595b64144ccf1df_none_62fe57338acfab7a\6.0","6.0.19041.488"
 End
 
 If,ExistDir,"%TargetWindows%\WinSxS\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.0.19041.1_*",Begin
   // Fix GdiPlus Full Software Registry (@="1.0.19041.264" vs amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_* @="1.0.19041.1)
-  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","1.0.19041.1",01
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","","1.0.19041.1"
+  RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","1.0.19041.1",01
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","","1.0.19041.1"
   If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","1.0.19041.264",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.0","1.0.19041.264"
 End
 
 If,ExistDir,"%TargetWindows%\WinSxS\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.19041.1_*",Begin
   // Fix GdiPlus Full Software Registry (@="1.1.19041.264" vs amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_* @="1.1.19041.1)
-  RegWrite,HKLM,0x3,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","1.1.19041.1",01
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","","1.1.19041.1"
+  RegWrite,HKLM,REG_BINARY,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","1.1.19041.1",01
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","","1.1.19041.1"
   If,ExistRegKey,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","1.1.19041.264",RegDelete,HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\SideBySide\Winners\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_none_6e8eef9408f10c66\1.1","1.1.19041.264"
 End
 

@@ -51,23 +51,23 @@ Math,Mul,%DiskAC%,%num_HDDPluggedIn%,60
 RegHiveLoad,Tmp_System,%RegSystem%
 
 // Monitor Timeout
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\7516b95f-f776-4464-8c53-06167f40cc99\3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e","ACSettingIndex",%MonitorAC%
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\7516b95f-f776-4464-8c53-06167f40cc99\3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e","DCSettingIndex",%MonitorDC%
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\7516b95f-f776-4464-8c53-06167f40cc99\3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e","ACSettingIndex",%MonitorAC%
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\7516b95f-f776-4464-8c53-06167f40cc99\3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e","DCSettingIndex",%MonitorDC%
 
 // Disk Timeout
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\0012ee47-9041-4b5d-9b77-535fba8b1442\6738e2c4-e8a5-4a42-b16a-e040e769756e","ACSettingIndex",%DiskAC%
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\0012ee47-9041-4b5d-9b77-535fba8b1442\6738e2c4-e8a5-4a42-b16a-e040e769756e","DCSettingIndex",%DiskDC%
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\0012ee47-9041-4b5d-9b77-535fba8b1442\6738e2c4-e8a5-4a42-b16a-e040e769756e","ACSettingIndex",%DiskAC%
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\0012ee47-9041-4b5d-9b77-535fba8b1442\6738e2c4-e8a5-4a42-b16a-e040e769756e","DCSettingIndex",%DiskDC%
 
 // Disable USB Selective suspend on battery
-If,%cb_USBsuspendOnBattery%,Equal,True,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226","DCSettingIndex",0
-Else,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226","DCSettingIndex",1
+If,%cb_USBsuspendOnBattery%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226","DCSettingIndex",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226","DCSettingIndex",1
 
 // Disable USB Selective suspend plugged in
-If,%cb_USBsuspendPluggedIn%,Equal,True,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226","ACSettingIndex",0
-Else,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226","ACSettingIndex",1
+If,%cb_USBsuspendPluggedIn%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226","ACSettingIndex",0
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\2a737441-1930-4402-8d77-b2bebba308a3\48e6b7a6-50f5-4782-a5d4-53bb8f07e226","ACSettingIndex",1
 
 // Sleep Button Turns Off Screen
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\4f971e89-eebd-4455-a8de-9e59040e7347\96996bc0-ad50-47ec-923b-6f41874dd9eb","ACSettingIndex",4
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Power\User\PowerSchemes\381b4222-f694-41f0-9685-ff5bb260df2e\4f971e89-eebd-4455-a8de-9e59040e7347\96996bc0-ad50-47ec-923b-6f41874dd9eb","ACSettingIndex",4
 
 RegHiveUnload,Tmp_System
 

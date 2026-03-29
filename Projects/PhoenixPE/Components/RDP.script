@@ -63,21 +63,21 @@ If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Terminal Server Client",HKLM,"Tmp_Software\Microsoft\Terminal Server Client"
 
   // Register .rdp file extension
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\.rdp","","RDP.File"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File","","Remote Desktop Connection"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File","AppUserModelId,Microsoft.Windows.RemoteDesktop"
-  RegWrite,HKLM,0x4,"Tmp_Software\Classes\RDP.File","EditFlags",1048576
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File","FriendlyTypeName","@#$psystemroot#$p\system32\mstsc.exe,-4004"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File\DefaultIcon","","#$psystemroot#$p\system32\mstsc.exe"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell","","Connect"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Connect","","Connect"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File\shell\Connect","MUIVerb","@#$psystemroot#$p\system32\mstsc.exe,-4002"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Connect\command","","mstsc.exe #$q#$p1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Edit","","Edit"
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File\shell\Edit","MUIVerb","@#$psystemroot#$p\system32\mstsc.exe,-4003"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Edit\command","","mstsc.exe -edit #$q#$p1#$q"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\RDP.File\shell\Open","Extended",""
-  RegWrite,HKLM,0x2,"Tmp_Software\Classes\RDP.File\shell\Open\command","","#$q#$psystemroot#$p\system32\mstsc.exe#$q #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.rdp","","RDP.File"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\RDP.File","","Remote Desktop Connection"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\RDP.File","AppUserModelId,Microsoft.Windows.RemoteDesktop"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\RDP.File","EditFlags",1048576
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\RDP.File","FriendlyTypeName","@#$psystemroot#$p\system32\mstsc.exe,-4004"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\RDP.File\DefaultIcon","","#$psystemroot#$p\system32\mstsc.exe"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\RDP.File\shell","","Connect"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\RDP.File\shell\Connect","","Connect"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\RDP.File\shell\Connect","MUIVerb","@#$psystemroot#$p\system32\mstsc.exe,-4002"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\RDP.File\shell\Connect\command","","mstsc.exe #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\RDP.File\shell\Edit","","Edit"
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\RDP.File\shell\Edit","MUIVerb","@#$psystemroot#$p\system32\mstsc.exe,-4003"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\RDP.File\shell\Edit\command","","mstsc.exe -edit #$q#$p1#$q"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\RDP.File\shell\Open","Extended",""
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\RDP.File\shell\Open\command","","#$q#$psystemroot#$p\system32\mstsc.exe#$q #$q#$p1#$q"
 End
 
 // Patch CredDialogController
@@ -122,7 +122,7 @@ If,%cb_Server_ForceNLA%,Equal,True,Begin
   If,ExistRegMulti,HKLM,"Tmp_System\ControlSet001\Control\Lsa\OSConfig","Security Packages",RegMulti,HKLM,"Tmp_System\ControlSet001\Control\Lsa\OSConfig","Security Packages",APPEND,"tspkg"
   Else,RegWrite,HKLM,REG_MULTI_SZ,"Tmp_System\ControlSet001\Control\Lsa\OSConfig","Security Packages","tspkg"
   
-  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server\WinStations\RDP-Tcp","UserAuthentication",0
+  RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Terminal Server\WinStations\RDP-Tcp","UserAuthentication",0
 End
 
 RegUnloadHives
@@ -212,8 +212,8 @@ RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TermService",HKLM,"Tmp_S
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\UmRdpService",HKLM,"Tmp_System\ControlSet001\Services\UmRdpService"
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Control\Terminal Server",HKLM,"Tmp_System\ControlSet001\Control\Terminal Server"
 
-RegWrite,HKLM,0x4,"Tmp_Software\Policies\Microsoft\Windows NT\Terminal Services","fEnableWddmDriver",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\Terminal Server","fDenyTSConnections",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Microsoft\Windows NT\Terminal Services","fEnableWddmDriver",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\Terminal Server","fDenyTSConnections",0
 
 Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
 RequireFileEx,AppendList,\Windows\System32\SessEnv.dll

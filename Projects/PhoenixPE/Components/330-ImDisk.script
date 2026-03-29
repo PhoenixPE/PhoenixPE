@@ -67,7 +67,7 @@ If,%cb_CreateRamdisk%,Equal,True,Begin
 End
 
 // Add the RamDrive to ENV so our shell loader knows where to create a symlink for pinning from removable media
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\Session Manager\Environment","RamDrive",%cmb_DriveLetter%
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","RamDrive",%cmb_DriveLetter%
 
 // Shortcuts
 If,%cb_DesktopShc%,Equal,True,AddShortcut,Desktop,"",%txt_ShortcutName%,"#$pWinDir#$p\System32\imdisk.cpl","","#$pWinDir#$p\System32","#$pWinDir#$p\System32\imdisk.cpl",-1,"","","Configure Imdisk"
@@ -90,15 +90,15 @@ RegHiveUnLoad,Tmp_Default
 // Related........:
 // ===============================================================================================================================
 [Reg-ShellContextMenu]
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\ImDiskMountFile","","Mount as ImDisk Virtual Disk"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\ImDiskMountFile","Icon","imdisk.cpl,1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shell\ImDiskMountFile\command","","rundll32.exe imdisk.cpl,RunDLL_MountFile #$pL"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\ImDiskSaveImage","","Save disk contents as image file"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\ImDiskSaveImage","Icon","imdisk.cpl,2"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\ImDiskSaveImage\command","","rundll32.exe imdisk.cpl,RunDLL_SaveImageFile #$pL"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\ImDiskUnmount","","Unmount ImDisk Virtual Disk"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\ImDiskUnmount","Icon","imdisk.cpl,3"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\ImDiskUnmount\command","","rundll32.exe imdisk.cpl,RunDLL_RemoveDevice #$pL"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\ImDiskMountFile","","Mount as ImDisk Virtual Disk"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\ImDiskMountFile","Icon","imdisk.cpl,1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shell\ImDiskMountFile\command","","rundll32.exe imdisk.cpl,RunDLL_MountFile #$pL"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\ImDiskSaveImage","","Save disk contents as image file"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\ImDiskSaveImage","Icon","imdisk.cpl,2"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\ImDiskSaveImage\command","","rundll32.exe imdisk.cpl,RunDLL_SaveImageFile #$pL"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\ImDiskUnmount","","Unmount ImDisk Virtual Disk"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\ImDiskUnmount","Icon","imdisk.cpl,3"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shell\ImDiskUnmount\command","","rundll32.exe imdisk.cpl,RunDLL_RemoveDevice #$pL"
 
 [#Reg-RegisterSvc#]
 // ===============================================================================================================================
@@ -112,27 +112,27 @@ RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shell\ImDiskUnmount\command","","r
 // Related........:
 // ===============================================================================================================================
 [Reg-RegisterSvc]
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ImDisk","Type",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ImDisk","Start",2
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ImDisk","ErrorControl",0
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ImDisk","ImagePath","System32\DRIVERS\imdisk.sys"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ImDisk","DisplayName","ImDisk Virtual Disk Driver"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ImDisk","Description","Disk emulation driver"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ImDisk","Type",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ImDisk","Start",2
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ImDisk","ErrorControl",0
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\ImDisk","ImagePath","System32\DRIVERS\imdisk.sys"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\ImDisk","DisplayName","ImDisk Virtual Disk Driver"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\ImDisk","Description","Disk emulation driver"
 
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\AWEAlloc","Type",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\AWEAlloc","Start",2
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\AWEAlloc","ErrorControl",0
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\AWEAlloc","ImagePath","System32\DRIVERS\awealloc.sys"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\AWEAlloc","DisplayName","AWE Memory Allocation Driver"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\AWEAlloc","Description","Driver for physical memory allocation through AWE"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\AWEAlloc","Type",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\AWEAlloc","Start",2
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\AWEAlloc","ErrorControl",0
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\AWEAlloc","ImagePath","System32\DRIVERS\awealloc.sys"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\AWEAlloc","DisplayName","AWE Memory Allocation Driver"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\AWEAlloc","Description","Driver for physical memory allocation through AWE"
 
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ImDskSvc","Type",16
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ImDskSvc","Start",3
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\ImDskSvc","ErrorControl",0
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\ImDskSvc","ImagePath","#$pSystemRoot#$p\system32\imdsksvc.exe"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ImDskSvc","DisplayName","ImDisk Virtual Disk Driver Helper"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ImDskSvc","ObjectName","LocalSystem"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\ImDskSvc","Description","Helper service for ImDisk Virtual Disk Driver."
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ImDskSvc","Type",16
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ImDskSvc","Start",3
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\ImDskSvc","ErrorControl",0
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\ImDskSvc","ImagePath","#$pSystemRoot#$p\system32\imdsksvc.exe"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\ImDskSvc","DisplayName","ImDisk Virtual Disk Driver Helper"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\ImDskSvc","ObjectName","LocalSystem"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\ImDskSvc","Description","Helper service for ImDisk Virtual Disk Driver."
 
 [#ToggleRamdiskMode#]
 // ===============================================================================================================================

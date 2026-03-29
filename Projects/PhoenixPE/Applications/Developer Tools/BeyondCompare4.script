@@ -41,8 +41,8 @@ Date=2024-11-23
 [Variables]
 %ProgramFolder%="Beyond Compare 4"
 %ProgramExe%="BCompare.exe"
-%ProgramVer%="4.4.7.28397"
-%SetupFile%="BCompare-%ProgramVer%.exe"
+%ProgramVersion%="4.4.7.28397"
+%SetupFile%="BCompare-%ProgramVersion%.exe"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -123,16 +123,16 @@ Echo,"Registering %ScriptTitle%..."
 
 // Log Event Handler
 RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\EventLog\Application\Beyond Compare 4","EventMessageFile","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\EventLog\Application\Beyond Compare 4","TypesSupported",7
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\EventLog\Application\Beyond Compare 4","TypesSupported",7
 
 // AppPath
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\BCompare.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\BCompare.exe","UseURL",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\BCompare.exe","UseURL",1
 
 // File Extensions
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.bcpkg","","BeyondCompare.SettingsPackage"
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.SettingsPackage","","BeyondCompare.SettingsPackage"
-RegWrite,HKLM,0x4,"Tmp_Software\Classes\BeyondCompare.SettingsPackage","EditFlags",32
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Classes\BeyondCompare.SettingsPackage","EditFlags",32
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.SettingsPackage\DefaultIcon","","%PEPrograms%\%ProgramFolder%\%ProgramExe%,0"
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.SettingsPackage\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q #$q#$p1#$q"
 
@@ -143,19 +143,19 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\BeyondCompare.Snapshot\shell\open\com
 
 // Misc
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare","Version","%ProgramVersion%"
 RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Scooter Software\Beyond Compare 4","Version","%ProgramVersion%"
 
 RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare","Version","%ProgramVersion%"
 RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Scooter Software\Beyond Compare 4","Version","%ProgramVersion%"
 
 RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare","Version","%ProgramVersion%"
 RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare 4","ExePath","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare 4","Version","%ProgramVer%"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Scooter Software\Beyond Compare 4","Version","%ProgramVersion%"
 
 [#RegisterShellExtension#]
 // ===============================================================================================================================
@@ -234,7 +234,7 @@ StrFormat,RTRIM,%Lang%,1,%Lang%
 If,%Lang%,Equal,"en",Set,%Lang%,""
 Else,Set,%Lang%,"-%Lang%"
 
-Set,%DownloadURL%,"https://www.scootersoftware.com/files/BCompare%Lang%-%ProgramVer%.exe"
+Set,%DownloadURL%,"https://www.scootersoftware.com/files/BCompare%Lang%-%ProgramVersion%.exe"
 
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR

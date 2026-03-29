@@ -67,17 +67,17 @@ RegLoadHives
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\seclogon",HKLM,"Tmp_System\ControlSet001\Services\seclogon"
 
 // Set the Group Policy Service and the Trusted Installer Service to Manual Start
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\gpsvc","Start",3
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\TrustedInstaller","Start",3
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\gpsvc","Start",3
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\TrustedInstaller","Start",3
 
 // TextInputManagementService is required in 20H2+
 If,%SourceVer%,Bigger,10.0.22620.0,RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\TextInputManagementService",HKLM,"Tmp_System\ControlSet001\Services\TextInputManagementService"
 
 // Turn off UAC Notifications
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Policies\System","EnableLUA",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\Policies\System","EnableLUA",0
 
 // Don't delay before switching sessions
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows\CurrentVersion\Policies\System","DelayedDesktopSwitchTimeout",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows\CurrentVersion\Policies\System","DelayedDesktopSwitchTimeout",0
 
 If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
   RegCopy,HKLM,"Tmp_Install_Software\Microsoft\Windows\CurrentVersion\Authentication",HKLM,"Tmp_Software\Microsoft\Windows\CurrentVersion\Authentication"
@@ -85,10 +85,10 @@ If,Not,%RegistrySoftwareSource%,Equal,"Install.wim",Begin
 End
 
 // Disable Guest login
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList","Guest",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList","Guest",0
 
 // Disable Metro UI
-RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","EnableSIHostIntegration",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","EnableSIHostIntegration",0
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Misc Settings
@@ -114,13 +114,13 @@ End
 // Auto Login
 If,%cb_AutoAdminLogin%,Equal,True,Begin
   // Setup Admin autologin
-  RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","AutoAdminLogon",1
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","DefaultUserName","Administrator"
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","DefaultPassword",""
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","AutoAdminLogon",1
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","DefaultUserName","Administrator"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","DefaultPassword",""
   // Process PhoenixPE.au3 on user login. We need to do this here otherwise autorun entries will be processed under the system account
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","Userinit","userinit.exe,AutoIt3.exe PhoenixPE.au3"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","Userinit","userinit.exe,AutoIt3.exe PhoenixPE.au3"
   // Set a flag for our PhoenixPE config script to see if we want to auto switch to admin (can't use AutoAdminLogon because Winlogon.exe deletes it on boot)
-  RegWrite,HKLM,0x4,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","AutoSwitchToAdmin",1
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon","AutoSwitchToAdmin",1
 End
 
 RegUnloadHives

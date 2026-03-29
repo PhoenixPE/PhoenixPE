@@ -30,19 +30,19 @@
 
 [Main]
 Title=Zulu JRE 17
-Description=(v17.62.17) Azul Zulu OpenJDK Java 17 (LTS) Runtime Environment
+Description=(v17.64.17) Azul Zulu OpenJDK Java 17 (LTS) Runtime Environment
 Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.0.10.0
-Date=2025-11-30
+Version=1.0.11.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="Zulu17"
-%ZuluVersionx86%="17.62.17"
-%ZuluVersionx64%="17.62.17"
-%JREVersion%="17.0.17"
+%ZuluVersionx86%="17.64.17"
+%ZuluVersionx64%="17.64.17"
+%JREVersion%="17.0.18"
 %DownloadURLx86%=https://cdn.azul.com/zulu/bin/zulu%ZuluVersionx86%-ca-jre%JREVersion%-win_i686.zip
 %DownloadURLx64%=https://cdn.azul.com/zulu/bin/zulu%ZuluVersionx64%-ca-jre%JREVersion%-win_x64.zip
 %SetupFile%="zulu-17-%SourceArch%.zip"
@@ -66,24 +66,24 @@ Echo,"Configuring %ScriptTitle%..."
 RegLoadHives
 
 // Register .jar extension
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.jar","","Zulu.jarfile"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.jar","Content Type","application/jar"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Zulu.jarfile","","Zulu jar file"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Zulu.jarfile\shell\open","","Open"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Zulu.jarfile\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\bin\javaw.exe#$q -jar #$q#$p1#$q #$p*"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.jar","","Zulu.jarfile"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.jar","Content Type","application/jar"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Zulu.jarfile","","Zulu jar file"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Zulu.jarfile\shell\open","","Open"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Zulu.jarfile\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\bin\javaw.exe#$q -jar #$q#$p1#$q #$p*"
 
 If,%SourceArch%,Equal,x86,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","CurrentVersion","%ZuluVersionx86%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","InstallationPath","%PEPrograms%\%ProgramFolder%\"
-  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","MajorVersion",17
-  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","MinorVersion",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","CurrentVersion","%ZuluVersionx86%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","InstallationPath","%PEPrograms%\%ProgramFolder%\"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","MajorVersion",17
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Azul Systems\Zulu\Zulu 32-bit\zulu-17-jre","MinorVersion",0
 End
 Else,Begin
   // x64
-  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","CurrentVersion","%ZuluVersionx64%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","InstallationPath","%PEPrograms%\%ProgramFolder%\"
-  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","MajorVersion",17
-  RegWrite,HKLM,0x4,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","MinorVersion",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","CurrentVersion","%ZuluVersionx64%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","InstallationPath","%PEPrograms%\%ProgramFolder%\"
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","MajorVersion",17
+  RegWrite,HKLM,REG_DWORD,"Tmp_Software\Azul Systems\Zulu\zulu-17-jre","MinorVersion",0
 End
 
 // Add Java to system Path
@@ -91,21 +91,21 @@ If,%cb_AddJavaToPath%,Equal,True,Begin
   RegRead,HKLM,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
   StrFormat,Replace,%PathVar%,"%PEPrograms%\%ProgramFolder%;","",%PathVar%
   Set,%PathVar%,"%PEPrograms%\%ProgramFolder%;%PathVar%"
-  RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
+  RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","Path",%PathVar%
 End
 
 // JAVA_HOME EnvVar
-If,%cb_AddJavaHomeVar%,Equal,True,RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Control\Session Manager\Environment","JAVA_HOME","%PEPrograms%\%ProgramFolder%\"
+If,%cb_AddJavaHomeVar%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Control\Session Manager\Environment","JAVA_HOME","%PEPrograms%\%ProgramFolder%\"
 
 // Create Oracle Keys
 If,%cb_CreateOracleJavaSoftKeys%,Equal,True,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment","CurrentVersion","%JREVersion%"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","JavaHome","%PEPrograms%\%ProgramFolder%\"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","MicroVersion","0"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","RuntimeLib","%PEPrograms%\%ProgramFolder%\bin\server\jvm.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","JavaHome","%PEPrograms%\%ProgramFolder%\"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","MicroVersion","0"
-  RegWrite,HKLM,0x1,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","RuntimeLib","%PEPrograms%\%ProgramFolder%\bin\server\jvm.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\JavaSoft\Java Runtime Environment","CurrentVersion","%JREVersion%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","JavaHome","%PEPrograms%\%ProgramFolder%\"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","MicroVersion","0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\JavaSoft\Java Runtime Environment\1.17","RuntimeLib","%PEPrograms%\%ProgramFolder%\bin\server\jvm.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","JavaHome","%PEPrograms%\%ProgramFolder%\"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","MicroVersion","0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\JavaSoft\Java Runtime Environment\%JREVersion%","RuntimeLib","%PEPrograms%\%ProgramFolder%\bin\server\jvm.dll"
 End
 
 RegUnloadHives

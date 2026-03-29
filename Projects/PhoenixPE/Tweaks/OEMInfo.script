@@ -63,23 +63,23 @@ StrFormat,Replace,%Model%,"{TimeStamp}",%TimeStamp%,%Model%
 
 RegLoadHives
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Manufacturer",%txt_Manufacturer%
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Model",%Model%
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportHours",%txt_SupportHrs%
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportPhone",%txt_SupportPh%
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportURL",%txt_SupportURL%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Manufacturer",%txt_Manufacturer%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Model",%Model%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportHours",%txt_SupportHrs%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportPhone",%txt_SupportPh%
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","SupportURL",%txt_SupportURL%
 
 If,Not,%fb_Logo%,Equal,"",Begin
   If,ExistFile,%fb_Logo%,Begin
     ConvertImage,%fb_Logo%,"%TargetSystem32%\OEMLogo.bmp",120x120
-    RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","%SystemRoot%\System32\OEMLogo.bmp"
+    RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo","%SystemRoot%\System32\OEMLogo.bmp"
   End
   Else,Begin
     Echo,"ERROR: The specified image [%fb_Logo%] does not exist.",WARN
-    RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo",""
+    RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo",""
   End
 End
-Else,RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo",""
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\OEMInformation","Logo",""
 
 RegUnloadHives
 

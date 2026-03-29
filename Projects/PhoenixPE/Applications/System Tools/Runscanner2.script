@@ -63,14 +63,14 @@ ExtractFile,%ScriptFile%,Res,RunScannerRes_%Lang%.dll,"%TargetPrograms%\%Program
 
 RegHiveLoad,Tmp_Software,%RegSoftware%
 
-RegWrite,HKLM,0x1,"Tmp_Software\Paraglider\Runscanner\Regedit.exe","HKCU","Software\Microsoft\Windows\CurrentVersion\Applets\Regedit"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Paraglider\Runscanner\Regedit.exe","HKCU","Software\Microsoft\Windows\CurrentVersion\Applets\Regedit"
   
 // Register our path so other applications can call runscanner by name
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Runscanner.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Runscanner.exe","Path","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Runscanner.exe","","%PEPrograms%\%ProgramFolder%\%ProgramExe%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\Runscanner.exe","Path","%PEPrograms%\%ProgramFolder%"
 
 // Shell Extension
-If,%cb_RegisterShellExt%,Equal,True,RegWrite,HKLM,0x2,"Tmp_Software\Classes\exefile\shell\%txt_ShellContextMenuTxt%\command","","#$q%PEPrograms%\%ProgramFolder%\Runscanner.exe#$q %txt_ShellExtParams% #$q#$p1#$q"
+If,%cb_RegisterShellExt%,Equal,True,RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\exefile\shell\%txt_ShellContextMenuTxt%\command","","#$q%PEPrograms%\%ProgramFolder%\Runscanner.exe#$q %txt_ShellExtParams% #$q#$p1#$q"
 
 RegHiveUnLoad,Tmp_Software
 

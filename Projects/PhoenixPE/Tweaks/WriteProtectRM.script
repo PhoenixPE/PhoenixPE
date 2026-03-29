@@ -54,8 +54,8 @@ ExtractAllFiles,%ScriptFile%,%SourceArch%,"%TargetPrograms%\%ProgramFolder%"
 RegLoadHives
 
 // Write Protect on startup
-If,%cb_WriteProtectOnStartup%,Equal,True,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\StorageDevicePolicies","WriteProtect",1
-Else,RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Control\StorageDevicePolicies","WriteProtect",0
+If,%cb_WriteProtectOnStartup%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\StorageDevicePolicies","WriteProtect",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Control\StorageDevicePolicies","WriteProtect",0
   
 // AutoRun Protect.exe
 If,%cb_AutoRunWProtectTool%,Equal,True,AddAutoRun,PostShell,NoWait,"Launching %ScriptTitle%...","%PEPrograms%\%ProgramFolder%\%ProgramExe%"

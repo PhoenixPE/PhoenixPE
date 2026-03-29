@@ -111,12 +111,12 @@ Echo,"Registering mtpHelper..."
 If,%SourceVer%,BiggerEqual,10.0.22000.0,ExtractFile,%ScriptFile%,mtpHelper_Win11,"mtpHelper_%SourceArch%.sys","%TargetSystem32%\Drivers"
 Else,ExtractFile,%ScriptFile%,mtpHelper_Win10,"mtpHelper_%SourceArch%.sys","%TargetSystem32%\Drivers"
 
-RegWrite,HKLM,0x2,"Tmp_System\ControlSet001\Services\mtpHelper","ImagePath","System32\Drivers\mtpHelper_%SourceArch%.sys"
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\mtpHelper","Start",1
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\mtpHelper","ErrorControl",0
-RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\mtpHelper","Type",1
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\mtpHelper","DisplayName","mtpHelper"
-RegWrite,HKLM,0x1,"Tmp_System\ControlSet001\Services\mtpHelper","Description","mtpHelper allows the Media Transfer Protocol to startup in WinPE."
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\mtpHelper","ImagePath","System32\Drivers\mtpHelper_%SourceArch%.sys"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\mtpHelper","Start",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\mtpHelper","ErrorControl",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\mtpHelper","Type",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\mtpHelper","DisplayName","mtpHelper"
+RegWrite,HKLM,REG_SZ,"Tmp_System\ControlSet001\Services\mtpHelper","Description","mtpHelper allows the Media Transfer Protocol to startup in WinPE."
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================

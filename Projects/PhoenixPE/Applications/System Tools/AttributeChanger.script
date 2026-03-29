@@ -40,8 +40,8 @@ Date=2025-09-21
 
 [Variables]
 %ProgramFolder%="Attribute Changer"
-%SetupFile%="attribChg.exe"
 %ProgramVersion%="11_40b"
+%SetupFile%="attribChg-%ProgramVersion%.exe"
 %DownloadURL%=https://www.petges.lu/pubfiles/ac-%ProgramVersion%.exe
 %aLangMap-Strings%=Brazilian|1|Czech|2|Danish|3|French|4|German|5|Hungarian|6|Italian|7|Korean|8|Dutch|9|Polish|10|Spanish|11|Swedish|12|Turkish|13
 %aLangMap-Docs%=Brazilian|1|Czech|2|Danish|3|English|4|French|5|German|6|Hungarian|7|Italian|8|Korean|9|Dutch|10|Polish|11|Spanish|12|Swedish|13|Turkish|14
@@ -98,20 +98,20 @@ End
 Else,Echo,"INTERNAL LOGIC ERROR: The specified language does not exist in [#$paLangMap-Docs#$p]. Help files will not be included.",WARN
 
 // ConfirmChanges
-If,%cb_ConfirmChanges%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherConfirm",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherConfirm",0
+If,%cb_ConfirmChanges%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherConfirm",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherConfirm",0
 
 // AlwaysShowReport
-If,%cb_AlwaysShowReport%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherReport",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherReport",0
+If,%cb_AlwaysShowReport%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherReport",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherReport",0
 
 // EnableUseSavedMenu
-If,%cb_EnableUseSavedMenu%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherSaved",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherSaved",0
+If,%cb_EnableUseSavedMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherSaved",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherSaved",0
 
 // EnableUseCurrentMenu
-If,%cb_EnableUseCurrentMenu%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherCurrent",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherCurrent",0
+If,%cb_EnableUseCurrentMenu%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherCurrent",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Attribute Changer\Global Settings","OtherCurrent",0
 
 RegHiveUnLoad,Tmp_Default
 
@@ -135,25 +135,25 @@ Run,%ScriptFile%,RegisterShellExtension
 
 Echo,"Registering Shell Extension..."
 RegHiveLoad,Tmp_Software,%RegSoftware%
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\acshell.ACShell","","Attribute Changer Shell Extension"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\acshell.ACShell\CLSID","","{D3F9A525-8824-497A-BE36-B23E22F141FC}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AllFileSystemObjects\ShellEx\ContextMenuHandlers\ACShell","","{D3F9A525-8824-497A-BE36-B23E22F141FC}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}","","Attribute Changer Shell Extension"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","","%PEPrograms%\%ProgramFolder%\acshell.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\ProgID","","acshell.ACShell"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shellex\ContextMenuHandlers\ACShell","","{D3F9A525-8824-497A-BE36-B23E22F141FC}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\acshell.ACShell","","Attribute Changer Shell Extension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\acshell.ACShell\CLSID","","{D3F9A525-8824-497A-BE36-B23E22F141FC}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AllFileSystemObjects\ShellEx\ContextMenuHandlers\ACShell","","{D3F9A525-8824-497A-BE36-B23E22F141FC}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}","","Attribute Changer Shell Extension"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","","%PEPrograms%\%ProgramFolder%\acshell.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\ProgID","","acshell.ACShell"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\ContextMenuHandlers\ACShell","","{D3F9A525-8824-497A-BE36-B23E22F141FC}"
 If,%SourceArch%,Equal,x64,Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\acshell32.ACShell","","Attribute Changer Shell Extension"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\acshell32.ACShell\CLSID","","{D3F9A525-8824-497A-BE36-B23E22F141FC}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}","","Attribute Changer Shell Extension"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","","%PEPrograms%\%ProgramFolder%\acshell32.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","ThreadingModel","Apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\WOW6432Node\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\ProgID","","acshell32.ACShell"
-  RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}","","Attribute Changer Shell Extension"
-  RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","","%PEPrograms%\%ProgramFolder%\acshell32.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","ThreadingModel","Apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\WOW6432Node\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\ProgID","","acshell32.ACShell"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\acshell32.ACShell","","Attribute Changer Shell Extension"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\acshell32.ACShell\CLSID","","{D3F9A525-8824-497A-BE36-B23E22F141FC}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}","","Attribute Changer Shell Extension"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","","%PEPrograms%\%ProgramFolder%\acshell32.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\WOW6432Node\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\ProgID","","acshell32.ACShell"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}","","Attribute Changer Shell Extension"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","","%PEPrograms%\%ProgramFolder%\acshell32.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\WOW6432Node\Classes\CLSID\{D3F9A525-8824-497A-BE36-B23E22F141FC}\ProgID","","acshell32.ACShell"
 End
 RegHiveUnLoad,Tmp_Software
 

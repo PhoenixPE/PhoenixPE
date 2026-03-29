@@ -101,25 +101,25 @@ Echo,"Configuring the Language Toolbar..."
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cmb_LangBarPos%,Equal,"Hidden",ApplyBitMask,%PrefMask%,6,0x000000,8
 Else,ApplyBitMask,%PrefMask%,6,0x000001,8
-RegWrite,HKLM,0x3,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
 
 // Toolbar Position
-If,%cmb_LangBarPos%,Equal,"Docked in the TaskBar",RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",4
-Else,If,%cmb_LangBarPos%,Equal,"Floating On Desktop",RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",0
-Else,If,%cmb_LangBarPos%,Equal,"Hidden",RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",3
+If,%cmb_LangBarPos%,Equal,"Docked in the TaskBar",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",4
+Else,If,%cmb_LangBarPos%,Equal,"Floating On Desktop",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",0
+Else,If,%cmb_LangBarPos%,Equal,"Hidden",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",3
 Else,Halt,"INTERNAL LOGIC ERROR: No configuration defined for language bar position [%cmb_LangBarPos%]"
 
 // Show the Language bar as transparent when inactive
-If,%cb_LangBarTransparent%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","Transparency",64
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","Transparency",255
+If,%cb_LangBarTransparent%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","Transparency",64
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","Transparency",255
 
 // Show additional Language bar icons in the taskbar
-If,%cb_LangBarShowAdditionalIcons%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ExtraIconsOnMinimized",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","ExtraIconsOnMinimized",0
+If,%cb_LangBarShowAdditionalIcons%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","ExtraIconsOnMinimized",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","ExtraIconsOnMinimized",0
 
 // Show text labels on the Language bar
-If,%cb_LangBarShowTxtLbls%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","Label",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\LangBar","Label",0
+If,%cb_LangBarShowTxtLbls%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","Label",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","Label",0
 
 [#Process-Common#]
 // ===============================================================================================================================
@@ -300,13 +300,13 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
 End
 
 // Set keyboard to ja-JP - User
-RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000411
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000411,00000411
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{03B5835F-F03C-411B-9CE2-AA23E1171E36}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{A76C93D9-5523-4E90-AAFA-4DB112F9AC76}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000411
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Keyboard Layout\Preload",1,00000411
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000411,00000411
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{03B5835F-F03C-411B-9CE2-AA23E1171E36}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{A76C93D9-5523-4E90-AAFA-4DB112F9AC76}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000411\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000411
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
 
 [#Process-ko-KR#]
 // ===============================================================================================================================
@@ -367,24 +367,24 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
 End
 
 // Set keyboard to ko-KR - User
-RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000412
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",0x04120412
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000412
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Keyboard Layout\Preload",1,00000412
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",0x04120412
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000412
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
 
 // Set keyboard to ko-KR - System
-RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",1,00000412
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",0x04120412
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\Keyboard Layout\Preload",1,00000412
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{A028AE76-01B1-46C2-99C4-ACD9858AE02F}"
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000412\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",0x04120412
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000412,00000412
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\TIP\{A028AE76-01B1-46C2-99C4-ACD9858AE02F}\LanguageProfile\0x00000412\{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}","Enable",1
 
 [#Process-zh-CN#]
 // ===============================================================================================================================
@@ -441,44 +441,44 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
   RegCopy,HKLM,"Tmp_Install_Software\WOW6432Node\Microsoft\IMETC",HKLM,"Tmp_Software\WOW6432Node\Microsoft\IMETC"
 End
 
-RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",2,00000409
-RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000804
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",134481924
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000804,00000804
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",67699721
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID,{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000804
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}\LanguageProfile\0x00000804\{FA550B04-5AD7-411F-A5AC-CA038EC515D7}","Enable",1
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Keyboard Layout\Preload",1,00000804
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",134481924
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000804,00000804
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",67699721
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID,{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000804
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}\LanguageProfile\0x00000804\{FA550B04-5AD7-411F-A5AC-CA038EC515D7}","Enable",1
 // Not working IME, set enable=0 to hide
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{037B2C25-480C-4D7F-B027-D6CA6B69788A}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{D38EFF65-AA46-4FD5-91A7-67845FB02F5B}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{037B2C25-480C-4D7F-B027-D6CA6B69788A}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{D38EFF65-AA46-4FD5-91A7-67845FB02F5B}","Enable",0
 //-
-RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",2,00000409
-RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",1,00000804
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",134481924
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000804,00000804
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}\LanguageProfile\0x00000804\{FA550B04-5AD7-411F-A5AC-CA038EC515D7}","Enable",1
+RegWrite,HKLM,REG_SZ,"Tmp_System\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,REG_SZ,"Tmp_System\Keyboard Layout\Preload",1,00000804
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}"
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{FA550B04-5AD7-411F-A5AC-CA038EC515D7}"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000804\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",134481924
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000804,00000804
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\TIP\{81D4E9C9-1D3B-41BC-9E6C-4B40BF79E35E}\LanguageProfile\0x00000804\{FA550B04-5AD7-411F-A5AC-CA038EC515D7}","Enable",1
 
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","Default Mode",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","EnableUMode",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","EnableVMode",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","Default Mode",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","EnableUMode",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\InputMethod\Settings\CHS","EnableVMode",1
 
 [#Process-zh-TW#]
 // ===============================================================================================================================
@@ -548,52 +548,52 @@ If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
 End
 
 // Keyboard
-RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",1,00000404
-RegWrite,HKLM,0x1,"Tmp_Default\Keyboard Layout\Preload",2,00000409
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67372036
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000404,00000404
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID",{"00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",67699721
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000404
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Keyboard Layout\Preload",1,00000404
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67372036
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\HiddenDummyLayouts",00000404,00000404
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",0
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","CLSID",{"00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","KeyboardLayout",67699721
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\AssemblyItem\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}\00000000","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\CTF\SortOrder\Language",00000000,00000404
 //- Default input Mode, eng="0x00000001" cht="0x00000000"
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Microsoft\IME\15.0\IMETC","Default Input Mode","0x00000001"
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Microsoft\IME\15.0\IMETC","Default Input Mode","0x00000001"
 //-
 // Bopomofo, Quick, Cangjie IME, these three IMEs can work
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",1
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",1
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",1
 //-
 // Not working IME, set enable=0 to hide
 // "Hong Kong Cantonese","old Quick","old Cangjie","Chinese Traditional DaYi","Chinese Traditional Array" IME
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0AEC109C-7E96-11D4-B2EF-0080C882687E}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0B883BA0-C1C7-11D4-87F9-0080C882687E}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{F3BA907A-6C7E-11D4-97FA-0080C882687E}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{037B2C25-480C-4D7F-B027-D6CA6B69788A}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{D38EFF65-AA46-4FD5-91A7-67845FB02F5B}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0AEC109C-7E96-11D4-B2EF-0080C882687E}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0B883BA0-C1C7-11D4-87F9-0080C882687E}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{F3BA907A-6C7E-11D4-97FA-0080C882687E}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{037B2C25-480C-4D7F-B027-D6CA6B69788A}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\TIP\{E429B25A-E5D3-4D1F-9BE3-0C608477E3A1}\LanguageProfile\0x00000404\{D38EFF65-AA46-4FD5-91A7-67845FB02F5B}","Enable",0
 //-
-RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",1,00000404
-RegWrite,HKLM,0x1,"Tmp_System\Keyboard Layout\Preload",2,00000409
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67372036
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
-RegWrite,HKLM,0x1,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000404,00000404
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",1
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",1
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",1
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0B883BA0-C1C7-11D4-87F9-0080C882687E}","Enable",0
-RegWrite,HKLM,0x4,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{F3BA907A-6C7E-11D4-97FA-0080C882687E}","Enable",0
+RegWrite,HKLM,REG_SZ,"Tmp_System\Keyboard Layout\Preload",1,00000404
+RegWrite,HKLM,REG_SZ,"Tmp_System\Keyboard Layout\Preload",2,00000409
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{B115690A-EA02-48D5-A231-E3578D2FDF80}"
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{B2F9C502-1742-11D4-9790-0080C882687E}"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000404\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67372036
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Default","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","Profile","{00000000-0000-0000-0000-000000000000}"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\Assemblies\0x00000409\{34745C63-B2F0-4784-8B67-5E12C8701A31}","KeyboardLayout",67699721
+RegWrite,HKLM,REG_SZ,"Tmp_System\Software\Microsoft\CTF\HiddenDummyLayouts",00000404,00000404
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{B2F9C502-1742-11D4-9790-0080C882687E}","Enable",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{6024B45F-5C54-11D4-B921-0080C882687E}","Enable",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\TIP\{531fdebf-9b4c-4a43-a2aa-960e8fcdc732}\LanguageProfile\0x00000404\{4BDF9F03-C7D3-11D4-B2AB-0080C882687E}","Enable",1
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{0B883BA0-C1C7-11D4-87F9-0080C882687E}","Enable",0
+RegWrite,HKLM,REG_DWORD,"Tmp_System\Software\Microsoft\CTF\TIP\{B115690A-EA02-48D5-A231-E3578D2FDF80}\LanguageProfile\0x00000404\{F3BA907A-6C7E-11D4-97FA-0080C882687E}","Enable",0
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================

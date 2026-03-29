@@ -59,10 +59,10 @@ RegCopyDriver,displayoverride.inf
 Echo,"Registering Monitor driver..."
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\monitor",HKLM,"Tmp_System\ControlSet001\Services\monitor"
 RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DeviceIds\Monitor",HKLM,"Tmp_Drivers\DriverDatabase\DeviceIds\Monitor"
-RegWrite,HKLM,0x3,"Tmp_Drivers\DriverDatabase\DeviceIds\*PNP09FF","monitor.inf",01,ff,00,00
-If,Not,ExistRegValue,HKLM,"Tmp_Drivers\DriverDatabase\DeviceIds\{4d36e96e-e325-11ce-bfc1-08002be10318}","c_monitor.inf",RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DeviceIds\{4d36e96e-e325-11ce-bfc1-08002be10318}","c_monitor.inf"
-If,Not,ExistRegValue,HKLM,"Tmp_Drivers\DriverDatabase\DeviceIds\{4d36e96e-e325-11ce-bfc1-08002be10318}","monitor.inf",RegWrite,HKLM,0x0,"Tmp_Drivers\DriverDatabase\DeviceIds\{4d36e96e-e325-11ce-bfc1-08002be10318}","monitor.inf"
-RegWrite,HKLM,0x1,"Tmp_Drivers\DriverDatabase\DriverFiles\monitor.sys","","monitor.inf"
+RegWrite,HKLM,REG_BINARY,"Tmp_Drivers\DriverDatabase\DeviceIds\*PNP09FF","monitor.inf",01,ff,00,00
+If,Not,ExistRegValue,HKLM,"Tmp_Drivers\DriverDatabase\DeviceIds\{4d36e96e-e325-11ce-bfc1-08002be10318}","c_monitor.inf",RegWrite,HKLM,REG_NONE,"Tmp_Drivers\DriverDatabase\DeviceIds\{4d36e96e-e325-11ce-bfc1-08002be10318}","c_monitor.inf"
+If,Not,ExistRegValue,HKLM,"Tmp_Drivers\DriverDatabase\DeviceIds\{4d36e96e-e325-11ce-bfc1-08002be10318}","monitor.inf",RegWrite,HKLM,REG_NONE,"Tmp_Drivers\DriverDatabase\DeviceIds\{4d36e96e-e325-11ce-bfc1-08002be10318}","monitor.inf"
+RegWrite,HKLM,REG_SZ,"Tmp_Drivers\DriverDatabase\DriverFiles\monitor.sys","","monitor.inf"
 RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverInfFiles\c_monitor.inf",HKLM,"Tmp_Drivers\DriverDatabase\DriverInfFiles\c_monitor.inf"
 RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverInfFiles\monitor.inf",HKLM,"Tmp_Drivers\DriverDatabase\DriverInfFiles\monitor.inf"
 RegCopy,HKLM,"Tmp_Install_Drivers\DriverDatabase\DriverPackages\c_monitor.inf*",HKLM,"Tmp_Drivers\DriverDatabase\DriverPackages",WILDCARD
@@ -121,4 +121,3 @@ lines=3
 [AuthorEncoded]
 GEFORCE4.png=9862,13248
 Logo=GEFORCE4.png
-

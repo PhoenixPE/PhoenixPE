@@ -30,19 +30,20 @@
 
 [Main]
 Title=Speccy
-Description=(v1.32.x) A fast, lightweight, system information tool.
+Description=(v1.33.x) A fast, lightweight, system information tool.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2020-02-16
+Version=1.0.1.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="Speccy"
 %ProgramExe%="speccy.exe"
-%DownloadURL%=https://download.ccleaner.com/spsetup132.exe
-%SetupFile%="spsetup.exe"
+%ProgramVersion%="133"
+%DownloadURL%=https://download.ccleaner.com/spsetup%ProgramVersion%.exe
+%SetupFile%="speccy-%ProgramVersion%.exe"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -66,9 +67,9 @@ RegHiveLoad,Tmp_Default,%RegDefault%
 // Language
 StrFormat,SPLIT,%cmb_Language%,"[",2,%LCID%
 StrFormat,RTRIM,%LCID%,1,%LCID%
-RegWrite,HKLM,0x1,"Tmp_Default\Software\Piriform\Recuva","Language",%LCID%
+RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","Language",%LCID%
 
-RegWrite,HKLM,0x4,"Tmp_Default\Software\Piriform\Recuva","UpdateCheck",0
+RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Piriform\Recuva","UpdateCheck",0
 
 RegHiveUnLoad,Tmp_Default
 

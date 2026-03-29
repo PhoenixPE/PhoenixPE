@@ -40,8 +40,8 @@ Date=2020-04-28
 
 [Variables]
 %ProgramFolder%="HashTab"
-%SetupExe%="HashTab_v6.0.0.34_Setup.exe"
-%ProgramVersion%=6.0.0.34
+%ProgramVersion%="6.0.0.34"
+%SetupFile%="HashTab-%ProgramVersion%.exe"
 // Download URL is currently broken as the original implebits site has shutdown. Falling back to extract from script.
 // In early 2022 the author has stated Hashtab will no longer be developed, but he will release the source on github. Unfortunately this has not happened yet.
 %DownloadURL%=http://implbits.com/products/hashtab/HashTab_v%ProgramVersion%_Setup.exe
@@ -54,11 +54,11 @@ RunFromRam
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 
-//If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",ExtractFile,%ScriptFile%,"Setup",%SetupExe%,"%ProgramsCache%\%ProgramFolder%"
+//If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",ExtractFile,%ScriptFile%,"Setup",%SetupFile%,"%ProgramsCache%\%ProgramFolder%"
 DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
-7z,"x -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q -xr!$PLUGINSDIR -xr!uninst.exe.nsis -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Extract [%SetupExe%] failed: The code returned was [#r]."
+7z,"x -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -xr!$PLUGINSDIR -xr!uninst.exe.nsis -o#$q%TargetPrograms%\%ProgramFolder%#$q"
+If,Not,#r,Equal,0,Halt,"Extract [%SetupFile%] failed: The code returned was [#r]."
 If,%SourceArch%,Equal,x64,FileRename,"%TargetPrograms%\%ProgramFolder%\$R0","%TargetPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
 Else,FileDelete,"%TargetPrograms%\%ProgramFolder%\$R0"
 
@@ -71,66 +71,66 @@ Run,%ScriptFile%,RegisterShellExtension
 // Settings
 
 RegHiveLoad,Tmp_Default,%RegDefault%
-If,%cb_LowercaseHashes%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Settings","UseLowercase",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Settings","UseLowercase",0
-If,%cb_Adler32%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Adler32","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Adler32","Enabled",0
-If,%cb_BLAKE2sp%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\BLAKE2sp","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\BLAKE2sp","Enabled",0
-If,%cb_BTIH%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\BTIH","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\BTIH","Enabled",0
-If,%cb_CRC32%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\CRC32","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\CRC32","Enabled",0
-If,%cb_CRC64%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\CRC64","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\CRC64","Enabled",0
-If,%cb_ED2K%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\ED2K","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\ED2K","Enabled",0
-If,%cb_GOST%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\GOST","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\GOST","Enabled",0
-If,%cb_Keccak-224%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-224","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-224","Enabled",0
-If,%cb_Keccak-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-256","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-256","Enabled",0
-If,%cb_Keccak-384%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-384","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-384","Enabled",0
-If,%cb_Keccak-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-512","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Keccak-512","Enabled",0
-If,%cb_MD2%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD2","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD2","Enabled",0
-If,%cb_MD4%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD4","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD4","Enabled",0
-If,%cb_MD5%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD5","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\MD5","Enabled",0
-If,%cb_RIPEMD-128%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-128","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-128","Enabled",0
-If,%cb_RIPEMD-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-256","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-256","Enabled",0
-If,%cb_RIPEMD-320%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-320","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-320","Enabled",0
-If,%cb_SHA-1%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-1","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-1","Enabled",0
-If,%cb_SHA-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-256","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-256","Enabled",0
-If,%cb_SHA-256-Base64%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-256 Base64","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-256 Base64","Enabled",0
-If,%cb_SHA-384%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-384","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-384","Enabled",0
-If,%cb_SHA-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-512","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA-512","Enabled",0
-If,%cb_SHA3-224%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-224","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-224","Enabled",0
-If,%cb_SHA3-256%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-256","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-256","Enabled",0
-If,%cb_SHA3-384%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-384","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-384","Enabled",0
-If,%cb_SHA3-512%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-512","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\SHA3-512","Enabled",0
-If,%cb_Tiger%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Tiger","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Tiger","Enabled",0
-If,%cb_TTH%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\TTH","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\TTH","Enabled",0
-If,%cb_Whirlpool%,Equal,True,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Whirlpool","Enabled",1
-Else,RegWrite,HKLM,0x4,"Tmp_Default\Software\HashTab\Algorithms\Whirlpool","Enabled",0
+If,%cb_LowercaseHashes%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Settings","UseLowercase",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Settings","UseLowercase",0
+If,%cb_Adler32%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Adler32","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Adler32","Enabled",0
+If,%cb_BLAKE2sp%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\BLAKE2sp","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\BLAKE2sp","Enabled",0
+If,%cb_BTIH%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\BTIH","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\BTIH","Enabled",0
+If,%cb_CRC32%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\CRC32","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\CRC32","Enabled",0
+If,%cb_CRC64%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\CRC64","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\CRC64","Enabled",0
+If,%cb_ED2K%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\ED2K","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\ED2K","Enabled",0
+If,%cb_GOST%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\GOST","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\GOST","Enabled",0
+If,%cb_Keccak-224%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Keccak-224","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Keccak-224","Enabled",0
+If,%cb_Keccak-256%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Keccak-256","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Keccak-256","Enabled",0
+If,%cb_Keccak-384%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Keccak-384","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Keccak-384","Enabled",0
+If,%cb_Keccak-512%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Keccak-512","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Keccak-512","Enabled",0
+If,%cb_MD2%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\MD2","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\MD2","Enabled",0
+If,%cb_MD4%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\MD4","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\MD4","Enabled",0
+If,%cb_MD5%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\MD5","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\MD5","Enabled",0
+If,%cb_RIPEMD-128%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-128","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-128","Enabled",0
+If,%cb_RIPEMD-256%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-256","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-256","Enabled",0
+If,%cb_RIPEMD-320%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-320","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\RIPEMD-320","Enabled",0
+If,%cb_SHA-1%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-1","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-1","Enabled",0
+If,%cb_SHA-256%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-256","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-256","Enabled",0
+If,%cb_SHA-256-Base64%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-256 Base64","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-256 Base64","Enabled",0
+If,%cb_SHA-384%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-384","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-384","Enabled",0
+If,%cb_SHA-512%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-512","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA-512","Enabled",0
+If,%cb_SHA3-224%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA3-224","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA3-224","Enabled",0
+If,%cb_SHA3-256%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA3-256","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA3-256","Enabled",0
+If,%cb_SHA3-384%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA3-384","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA3-384","Enabled",0
+If,%cb_SHA3-512%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA3-512","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\SHA3-512","Enabled",0
+If,%cb_Tiger%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Tiger","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Tiger","Enabled",0
+If,%cb_TTH%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\TTH","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\TTH","Enabled",0
+If,%cb_Whirlpool%,Equal,True,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Whirlpool","Enabled",1
+Else,RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\HashTab\Algorithms\Whirlpool","Enabled",0
 RegHiveUnLoad,Tmp_Default
 
 [#RegisterShellExtension#]
@@ -148,98 +148,98 @@ RegHiveUnLoad,Tmp_Default
 Echo,"Registering Property Sheet Handlers..."
 
 RegHiveLoad,Tmp_Software,%RegSoftware%
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\*\shellex\PropertySheetHandlers\HashTab","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}","","HashTab"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\HashTab.DLL","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\PropertySheetHandlers\HashTab","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppID\{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}","","HashTab"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppID\HashTab.DLL","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","","HashPage Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
-Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\ProgID","","HashTab.HashPage.1"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\Programmable"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\VersionIndependentProgID","","HashTab.HashPage"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","","HashPage Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\ProgID","","HashTab.HashPage.1"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\Programmable"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\VersionIndependentProgID","","HashTab.HashPage"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","","DropTargetImpl Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
-Else,RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","ThreadingModel","Apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\ProgID","","HashTab.DropTargetImpl.1"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\Programmable"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\VersionIndependentProgID","","HashTab.DropTargetImpl"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","","DropTargetImpl Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
+Else,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","ThreadingModel","Apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\ProgID","","HashTab.DropTargetImpl.1"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\Programmable"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\VersionIndependentProgID","","HashTab.DropTargetImpl"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}","","IDropTargetImpl"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","Version","1.0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}","","IDropTargetImpl"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","Version","1.0"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}","","IHashPage"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","Version","1.0"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}","","IHashPage"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","Version","1.0"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl","","DropTargetImpl Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl\CLSID","","{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl\CurVer","","HashTab.DropTargetImpl.1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl.1","","DropTargetImpl Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.DropTargetImpl.1\CLSID","","{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage","","HashPage Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage\CLSID","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage\CurVer","","HashTab.HashPage.1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage.1","","HashPage Class"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\HashTab.HashPage.1\CLSID","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.DropTargetImpl","","DropTargetImpl Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.DropTargetImpl\CLSID","","{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.DropTargetImpl\CurVer","","HashTab.DropTargetImpl.1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.DropTargetImpl.1","","DropTargetImpl Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.DropTargetImpl.1\CLSID","","{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.HashPage","","HashPage Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.HashPage\CLSID","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.HashPage\CurVer","","HashTab.HashPage.1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.HashPage.1","","HashPage Class"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\HashTab.HashPage.1\CLSID","","{8A56567E-A333-4843-B6E1-C3A262E41D8C}"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0","","HashTab 1.0 Type Library"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
-If,%SourceArch%,Equal,x64,RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\FLAGS","",0
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0","","HashTab 1.0 Type Library"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
+If,%SourceArch%,Equal,x64,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\FLAGS","",0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{8A56567E-A333-4843-B6E1-C3A262E41D8C}","HashTab Property Page"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{B1883831-F0D8-4453-8245-EEAAD866DD6E}","HashTab Context Menu"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{8A56567E-A333-4843-B6E1-C3A262E41D8C}","HashTab Property Page"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved","{B1883831-F0D8-4453-8245-EEAAD866DD6E}","HashTab Context Menu"
 
 // WOW64
 If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\AppID\{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}","","HashTab"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\AppID\HashTab.DLL","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\AppID\{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}","","HashTab"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\AppID\HashTab.DLL","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","","HashPage Class"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","ThreadingModel","Apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\ProgID","","HashTab.HashPage.1"
-  RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\Programmable"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\VersionIndependentProgID","","HashTab.HashPage"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","","HashPage Class"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\ProgID","","HashTab.HashPage.1"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\Programmable"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{8A56567E-A333-4843-B6E1-C3A262E41D8C}\VersionIndependentProgID","","HashTab.HashPage"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","","DropTargetImpl Class"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","ThreadingModel","Apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\ProgID","","HashTab.DropTargetImpl.1"
-  RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\Programmable"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\VersionIndependentProgID","","HashTab.DropTargetImpl"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","","DropTargetImpl Class"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}","AppID","{0A3C1C8E-5829-4CFD-B1CC-475DB010B883}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\InprocServer32","ThreadingModel","Apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\ProgID","","HashTab.DropTargetImpl.1"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\Programmable"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{E7435935-AAEF-4CE2-AD7C-66D46C192A0F}\VersionIndependentProgID","","HashTab.DropTargetImpl"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}","","IDropTargetImpl"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","Version","1.0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}","","IDropTargetImpl"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{1BC2DEA9-DCDB-4961-8BDB-107767D135A9}\TypeLib","Version","1.0"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}","","IHashPage"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","Version","1.0"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}","","IHashPage"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","","{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{B3D7DD5D-510B-477C-9521-2BCBCC91762C}\TypeLib","Version","1.0"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0","","HashTab 1.0 Type Library"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\FLAGS","",0
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0","","HashTab 1.0 Type Library"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\HashTab32-%ProgramVersion%.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\FLAGS","",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{1F9B20F0-0AA5-4EEB-B5ED-FADA0C41D073}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
 End
 
 RegHiveUnLoad,Tmp_Software
@@ -257,7 +257,7 @@ RegHiveUnLoad,Tmp_Software
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [#ClearDownloadCache#]

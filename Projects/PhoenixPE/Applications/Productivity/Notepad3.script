@@ -35,17 +35,17 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.10.0
-Date=2025-09-21
+Version=1.1.11.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="Notepad3"
 %ProgramExe%="Notepad3.exe"
-%ProgramVersion%=6.25.822.1
+%ProgramVersion%="6.25.822.1"
 %DownloadURLx86%=https://github.com/rizonesoft/Notepad3/releases/download/RELEASE_%ProgramVersion%/Notepad3_%ProgramVersion%_x86_Portable.zip
 %DownloadURLx64%=https://github.com/rizonesoft/Notepad3/releases/download/RELEASE_%ProgramVersion%/Notepad3_%ProgramVersion%_x64_Portable.zip
-%SetupFile%="Notepad3_%SourceArch%.zip"
-%ConfigFile%="%ProgramsCache%\%ProgramFolder%\Notepad3.ini"
+%SetupFile%="Notepad3-%ProgramVersion%-%SourceArch%.zip"
+%ConfigFile%="%TargetPrograms%\%ProgramFolder%\Notepad3.ini"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -72,7 +72,7 @@ IniWrite,%ConfigFile%,"Settings2","PreferredLanguageLocaleName",%Lang%
 
 If,%cb_ReplaceNotepad%,Equal,True,Begin
   RegHiveLoad,Tmp_Software,%RegSoftware%
-  RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\notepad.exe","Debugger","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -notepadStyleCmdline -z"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\notepad.exe","Debugger","#$q%PEPrograms%\%ProgramFolder%\%ProgramExe%#$q -notepadStyleCmdline -z"
   RegHiveUnLoad,Tmp_Software
 End
 
