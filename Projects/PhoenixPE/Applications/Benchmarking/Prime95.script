@@ -44,8 +44,7 @@ Date=2024-06-02
 %ConfigFile%="prime.txt"
 %DownloadURLx86%=https://www.mersenne.org/download/software/v30/30.19/p95v3019b20.win32.zip
 %DownloadURLx64%=https://www.mersenne.org/download/software/v30/30.19/p95v3019b20.win64.zip
-%SetupFilex86%="prime95_x86.zip"
-%SetupFilex64%="prime95_x64.zip"
+%SetupFile%="prime95-%SourceArch%.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -115,7 +114,6 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Parameters.....: 
 // Return values..: Sets the following local variables:
 //                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
-//                  %SetupFile%      - The x86 or x64 name of the setup file.
 // Author.........: Homes32
 // Remarks........:
 // Related........: 
@@ -123,11 +121,9 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 [SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
   Set,%DownloadURL%,%DownloadURLx64%
-  Set,%SetupFile%,%SetupFilex64%
 End  
 Else,Begin
   Set,%DownloadURL%,%DownloadURLx86%
-  Set,%SetupFile%,%SetupFilex86%
 End
 
 [#LaunchProgram#]

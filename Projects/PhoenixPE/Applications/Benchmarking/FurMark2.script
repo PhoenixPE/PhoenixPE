@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.5.0
-Date=2025-12-14
+Version=1.0.6.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="FurMark2"
@@ -44,8 +44,7 @@ Date=2025-12-14
 %ProgramVersion%="2.10.2"
 %DownloadURLx86%=https://geeks3d.com/dl/get/832
 %DownloadURLx64%=https://geeks3d.com/dl/get/830
-%SetupFilex86%="FurMark_%ProgramVersion%_x86.zip"
-%SetupFilex64%="FurMark_%ProgramVersion%_x64.zip"
+%SetupFile%="FurMark-%ProgramVersion%-%SourceArch%.zip"
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -128,8 +127,6 @@ If,Not,#r,Equal,0,Halt,"Failed to download [%SetupFile%]. The code returned was 
 // Parameters.....: 
 // Return values..: Sets the following local variables:
 //                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
-//                  %ProgramExe%     - The x86 or x64 program exe.
-//                  %DownloadHash%   - The has of the downloaded x86 or x64 zip file.
 // Author.........: Homes32
 // Remarks........:
 // Related........: 
@@ -137,11 +134,9 @@ If,Not,#r,Equal,0,Halt,"Failed to download [%SetupFile%]. The code returned was 
 [SetProgramArch]
 If,%SourceArch%,Equal,x64,Begin
   Set,%DownloadURL%,%DownloadURLx64%
-  Set,%SetupFile%,%SetupFilex64%
 End  
 Else,Begin
   Set,%DownloadURL%,%DownloadURLx86%
-  Set,%SetupFile%,%SetupFilex86%
 End
 
 [#LaunchProgram#]
