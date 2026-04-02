@@ -30,20 +30,20 @@
 
 [Main]
 Title=AgentRansack
-Description=(v2022 Build 3544) Agent Ransack is a free file search tool for finding files on your PC or network drives.
+Description=(v2022 Build 3560) Agent Ransack is a free file search tool for finding files on your PC or network drives.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.19.0
-Date=2025-12-14
+Version=1.0.20.0
+Date=2026-03-27
 
 [Variables]
 %ProgramFolder%="AgentRansack"
 %ProgramExe%="AgentRansack.exe"
-%ProgramVersion%=3544
-%DownloadURLx86%=https://download.mythicsoft.com/flp/%ProgramVersion%/agentransack_in_%ProgramVersion%.exe
-%DownloadURLx64%=https://download.mythicsoft.com/flp/%ProgramVersion%/agentransack_inx64_%ProgramVersion%.exe
+%ProgramVersion%="3560"
+%SetupFile%="AgentRansack-%ProgramVersion%.exe"
+%DownloadURL%=https://download.mythicsoft.com/flp/%ProgramVersion%/fdw_mxj9ech.XJB7zwt/agentransack_%SourceArch%_msi_%ProgramVersion%.zip
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -56,9 +56,8 @@ StrFormat,RTRIM,%Lang%,1,%Lang%
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\AgentRansack-%SourceArch%.exe",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\*.*","%TargetPrograms%\%ProgramFolder%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
@@ -111,114 +110,114 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 Echo,"Registering Shell Extensions..."
 
 RegHiveLoad,Tmp_Software,%RegSoftware%
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\FLProShellExt.DLL","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}","","FLProShellExt"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}","","CFLLRegistrar Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\InprocServer32","ThreadingModel","apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\ProgID","","FLLShellExt.FLLRegistrar.1"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\Programmable"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\VersionIndependentProgID","","FLLShellExt.FLLRegistrar"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}","","CFLLContextMenu Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\InprocServer32","ThreadingModel","apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\ProgID","","FLLShellExt.FLLContextMenu.1"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\Programmable"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\VersionIndependentProgID","","FLLShellExt.FLLContextMenu"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}","","F3SearchKeyboardHook Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\Implemented Categories\{59FB2056-D625-48D0-A944-1A85B5AB2640}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\InprocServer32","ThreadingModel","apartment"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\ProgID","","FLLShellExt.FLLSearchF3.1"
-RegWrite,HKLM,0x0,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\Programmable"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\VersionIndependentProgID","","FLLShellExt.FLLSearchF3"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu","","CFLLContextMenu Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu\CLSID","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu\CurVer","","FLLShellExt.FLLContextMenu.1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu.1","","CFLLContextMenu Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu.1\CLSID","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar","","CFLLRegistrar Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar\CLSID","","{01CC9197-BD31-4ed2-AA83-76D20EA47059}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar\CurVer","","FLLShellExt.FLLRegistrar.1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar.1","","CFLLRegistrar Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar.1\CLSID","","{01CC9197-BD31-4ed2-AA83-76D20EA47059}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3","","F3SearchKeyboardHook Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3\CLSID","","{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3\CurVer","","FLLShellExt.FLLSearchF3.1"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3.1","","F3SearchKeyboardHook Object"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3.1\CLSID","","{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}","","IFLLRegistrar"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\ProxyStubClsid","","{00020424-0000-0000-C000-000000000046}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\TypeLib","Version",1.0
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0","","FLLShellExt 1.0 Type Library"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\FLAGS","",0
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppID\FLProShellExt.DLL","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppID\{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}","","FLProShellExt"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}","","CFLLRegistrar Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\InprocServer32","ThreadingModel","apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\ProgID","","FLLShellExt.FLLRegistrar.1"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\Programmable"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{01CC9197-BD31-4ed2-AA83-76D20EA47059}\VersionIndependentProgID","","FLLShellExt.FLLRegistrar"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}","","CFLLContextMenu Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\InprocServer32","ThreadingModel","apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\ProgID","","FLLShellExt.FLLContextMenu.1"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\Programmable"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\VersionIndependentProgID","","FLLShellExt.FLLContextMenu"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}","","F3SearchKeyboardHook Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\Implemented Categories\{59FB2056-D625-48D0-A944-1A85B5AB2640}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\InprocServer32","ThreadingModel","apartment"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\ProgID","","FLLShellExt.FLLSearchF3.1"
+RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\Programmable"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\VersionIndependentProgID","","FLLShellExt.FLLSearchF3"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu","","CFLLContextMenu Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu\CLSID","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu\CurVer","","FLLShellExt.FLLContextMenu.1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu.1","","CFLLContextMenu Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLContextMenu.1\CLSID","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar","","CFLLRegistrar Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar\CLSID","","{01CC9197-BD31-4ed2-AA83-76D20EA47059}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar\CurVer","","FLLShellExt.FLLRegistrar.1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar.1","","CFLLRegistrar Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLRegistrar.1\CLSID","","{01CC9197-BD31-4ed2-AA83-76D20EA47059}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3","","F3SearchKeyboardHook Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3\CLSID","","{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3\CurVer","","FLLShellExt.FLLSearchF3.1"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3.1","","F3SearchKeyboardHook Object"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\FLLShellExt.FLLSearchF3.1\CLSID","","{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}","","IFLLRegistrar"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\ProxyStubClsid","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\TypeLib","Version",1.0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0","","FLLShellExt 1.0 Type Library"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\FLAGS","",0
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
 
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\.srf","","AgentRansack.Criteria.Doc"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\AgentRansack.Criteria.Doc\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q #$q#$p1#$q"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\Background\shellex\ContextMenuHandlers\AgentRansack","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\AgentRansack","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Drive\shellex\ContextMenuHandlers\AgentRansack","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
-RegWrite,HKLM,0x1,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\AgentRansack","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.srf","","AgentRansack.Criteria.Doc"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AgentRansack.Criteria.Doc\shell\open\command","","#$q%PEPrograms%\%ProgramFolder%\%ProgramEXE%#$q #$q#$p1#$q"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\Background\shellex\ContextMenuHandlers\AgentRansack","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Directory\shellex\ContextMenuHandlers\AgentRansack","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Drive\shellex\ContextMenuHandlers\AgentRansack","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\AgentRansack","","{2AE9D6D8-E348-4853-B266-C78844D31B97}"
 
-RegWrite,HKLM,0x4,"Tmp_Software\Mythicsoft\AgentRansack","installed",1
-RegWrite,HKLM,0x1,"Tmp_Software\Mythicsoft\AgentRansack","",""
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\AgentRansack.exe","","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
-RegWrite,HKLM,0x1,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\AgentRansack.exe","Path","%PEPrograms%\%ProgramFolder%\"
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Mythicsoft\AgentRansack","installed",1
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Mythicsoft\AgentRansack","",""
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\AgentRansack.exe","","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
+RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\App Paths\AgentRansack.exe","Path","%PEPrograms%\%ProgramFolder%\"
 
 If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
   // 32bit Shell Extensions
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\FLProShellExtx86.DLL","AppID","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\AppID\{CC081E50-ACF4-470E-B5EF-27197D18F74D}","","FLProShellExtx86"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0","","FLLShellExtx86 1.0 Type Library"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\ShellExtx86.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\FLAGS","",0
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppID\FLProShellExtx86.DLL","AppID","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\AppID\{CC081E50-ACF4-470E-B5EF-27197D18F74D}","","FLProShellExtx86"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0","","FLLShellExtx86 1.0 Type Library"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\ShellExtx86.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\FLAGS","",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
 
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}","","CFLLContextMenu Object"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}","AppID","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExtx86.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\InprocServer32","ThreadingModel","apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\ProgID","","FLLShellExt.FLLContextMenu.1"
-  RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\Programmable"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\TypeLib","","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\VersionIndependentProgID","","FLLShellExt.FLLContextMenu"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}","","F3SearchKeyboardHook Object"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}","AppID","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
-  RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\Implemented Categories\{59FB2056-D625-48D0-A944-1A85B5AB2640}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExtx86.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\InprocServer32","ThreadingModel","apartment"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\ProgID","","FLLShellExt.FLLSearchF3.1"
-  RegWrite,HKLM,0x0,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\Programmable"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\TypeLib","","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\VersionIndependentProgID","","FLLShellExt.FLLSearchF3"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}","","IFLLRegistrar"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\TypeLib","Version",1.0
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\AppID\FLProShellExt.DLL","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\AppID\FLProShellExtx86.DLL","AppID","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\AppID\{CC081E50-ACF4-470E-B5EF-27197D18F74D}","","FLProShellExtx86"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\AppID\{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}","","FLProShellExt"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0","","FLLShellExtx86 1.0 Type Library"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\ShellExtx86.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\FLAGS","",0
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0","","FLLShellExt 1.0 Type Library"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\FLAGS","",0
-  RegWrite,HKLM,0x1,"Tmp_Software\Classes\Wow6432Node\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\AgentRansack.exe","","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
-  RegWrite,HKLM,0x1,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\AgentRansack.exe","Path","%PEPrograms%\%ProgramFolder%\"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}","","CFLLContextMenu Object"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}","AppID","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExtx86.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\InprocServer32","ThreadingModel","apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\ProgID","","FLLShellExt.FLLContextMenu.1"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\Programmable"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\TypeLib","","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{2AE9D6D8-E348-4853-B266-C78844D31B97}\VersionIndependentProgID","","FLLShellExt.FLLContextMenu"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}","","F3SearchKeyboardHook Object"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}","AppID","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\Implemented Categories\{59FB2056-D625-48D0-A944-1A85B5AB2640}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\InprocServer32","","%PEPrograms%\%ProgramFolder%\ShellExtx86.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\InprocServer32","ThreadingModel","apartment"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\ProgID","","FLLShellExt.FLLSearchF3.1"
+  RegWrite,HKLM,REG_NONE,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\Programmable"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\TypeLib","","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\CLSID\{B23EDAE2-2A36-4c87-AEFD-B6801B6C6584}\VersionIndependentProgID","","FLLShellExt.FLLSearchF3"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}","","IFLLRegistrar"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\ProxyStubClsid32","","{00020424-0000-0000-C000-000000000046}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\TypeLib","","{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\Interface\{9FF61237-864A-423A-96A8-A5A28ADE02F6}\TypeLib","Version",1.0
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\AppID\FLProShellExt.DLL","AppID","{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\AppID\FLProShellExtx86.DLL","AppID","{CC081E50-ACF4-470E-B5EF-27197D18F74D}"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\AppID\{CC081E50-ACF4-470E-B5EF-27197D18F74D}","","FLProShellExtx86"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\AppID\{D21C0FC9-8BDD-4c69-A853-D67975E1A16A}","","FLProShellExt"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0","","FLLShellExtx86 1.0 Type Library"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\0\win32","","%PEPrograms%\%ProgramFolder%\ShellExtx86.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\FLAGS","",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\TypeLib\{CC081E50-ACF4-470E-B5EF-27197D18F74D}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0","","FLLShellExt 1.0 Type Library"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\0\win64","","%PEPrograms%\%ProgramFolder%\ShellExt.dll"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\FLAGS","",0
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Wow6432Node\TypeLib\{D21C0FC9-8BDD-4C69-A853-D67975E1A16A}\1.0\HELPDIR","","%PEPrograms%\%ProgramFolder%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\AgentRansack.exe","","%PEPrograms%\%ProgramFolder%\%ProgramEXE%"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\AgentRansack.exe","Path","%PEPrograms%\%ProgramFolder%\"
 End
 
 RegHiveUnLoad,Tmp_Software
@@ -235,8 +234,17 @@ RegHiveUnLoad,Tmp_Software
 // Related........: 
 // ===============================================================================================================================
 [ExtractProgram]
+System,SetLocal
 Echo,"Extracting files..."
-InnoExtract,"%ProgramsCache%\%ProgramFolder%\AgentRansack-%SourceArch%.exe",#1
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",%ProjectTemp%
+MSIExtract,"%ProjectTemp%\AgentRansack_%SourceArch%_%ProgramVersion%.msi","%ProjectTemp%\%ProgramFolder%"
+FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
+If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [#r]."
+Else,List,Get,#r,1,%ProgramPath%
+StrFormat,DirPath,%ProgramPath%,%ProgramPathFolder%
+StrFormat,EndTrim,%ProgramPathFolder%,"\",%ProgramPathFolder%
+FileCopy,"%ProgramPathFolder%\*.*",#1
+System,EndLocal
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -251,8 +259,7 @@ InnoExtract,"%ProgramsCache%\%ProgramFolder%\AgentRansack-%SourceArch%.exe",#1
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading AgentRansack..."
-If,%SourceArch%,Equal,x64,WebGet,%DownloadURLx64%,"%ProgramsCache%\%ProgramFolder%\AgentRansack-%SourceArch%.exe",NOERR
-Else,WebGet,%DownloadURLx86%,"%ProgramsCache%\%ProgramFolder%\AgentRansack-%SourceArch%.exe",NOERR
+WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 
 [#LaunchProgram#]
@@ -267,10 +274,17 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // Related........: btn_LaunchProgram
 // ===============================================================================================================================
 [LaunchProgram]
+System,SetLocal
 Echo,"Launching AgentRansack..."
-If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\AgentRansack-%SourceArch%.exe",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
-ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\{app}\%ProgramExe%"
+If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%-Run"
+FileSearch,"%ProjectTemp%\%ProgramFolder%-Run",%ProgramExe%
+If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [#r]."
+Else,List,Get,#r,1,%ProgramPath%
+StrFormat,DirPath,%ProgramPath%,%ProgramPathFolder%
+StrFormat,EndTrim,%ProgramPathFolder%,"\",%ProgramPathFolder%
+ShellExecuteEx,Open,"%ProgramPathFolder%\%ProgramExe%"
+System,EndLocal
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

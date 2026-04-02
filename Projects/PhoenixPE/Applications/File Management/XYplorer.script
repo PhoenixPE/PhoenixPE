@@ -59,7 +59,7 @@ If,%cb_RunFromRam%,Equal,True,RunFromRam
 
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 // XYplorer doesn't like partial config files and will ignore and use default settings if we try to use a
 // .ini file with just our settings. to make it happy we extract a default .ini file then write our values.
@@ -220,7 +220,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // ===============================================================================================================================
 [LaunchProgram]
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
 
 [#BrowseIncludeDir#]

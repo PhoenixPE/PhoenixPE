@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=True
 Mandatory=False
-Version=1.5.6.0
-Date=2026-03-27
+Version=1.5.7.0
+Date=2026-04-01
 
 [Variables]
 %ProgramFolder%="Notepad++"
@@ -104,7 +104,8 @@ Echo,"Configuring %ScriptTitle%..."
 // use doLocalConf if notepadd++ is running from cd/usb. if using Run From Ram we will need to copy config.xml to %AppData% 
 If,%cb_RunFromRam%,Equal,True,Begin
  Set,%config.xml%,"%TargetAppData%\%ProgramFolder%\config.xml"
- FileCopy,"%TargetPrograms%\%ProgramFolder%\config.xml",%config.xml%
+ // Notepad++ stopped shipping config.xml in the installer with v8.9.3, so extract our bare bones config so we can use XMLUpdate.
+ ExtractFile,%ScriptFile%,Config,config.xml,"%TargetAppData%\%ProgramFolder%"
 End
 Else,Begin
   // Note: Local config causes errors if not run on writable media
@@ -155,7 +156,7 @@ If,%cb_EnableDarkMode%,Equal,True,Begin
     XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='DarkMode']/@enableMenubar","yes"
     XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='DarkMode']/@enableScrollbarHack","yes"
   End
-  
+
   XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='stylerTheme']/@path","X:\Users\Default\AppData\Roaming\Notepad++\themes\DarkModeDefault.xml",NOERR
   If,#r,Equal,-99999999,Begin
     // Node <GUIConfig name='DarkMode'> does not exist, we need to create it
@@ -183,7 +184,7 @@ Else,Begin
     XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='DarkMode']/@enableMenubar","no"
     XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='DarkMode']/@enableScrollbarHack","no"
   End
-  
+
   XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='stylerTheme']/@path","X:\Users\Default\AppData\Roaming\Notepad++\stylers.xml",NOERR
   If,#r,Equal,-99999999,Begin
     // Node <GUIConfig name='DarkMode'> does not exist, we need to create it
@@ -457,6 +458,7 @@ Notepad++_80.png=9609,12916
 Logo=Notepad++_80.png
 
 [EncodedFolders]
+Config
 x64
 x86
 
@@ -616,3 +618,10 @@ lines=0
 [EncodedFile-InterfaceEncoded-Advanced_Exit_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACc0lEQVQ4y3XTX2jWZRQH8M/z+pttvIVuY5lMzDRppugioj9Q4EUlUZpFF1JCFBaV1BK68aJuQrqJrMibdhEGXrXKxDBqw4vSiNxGk7G37SJRKtvbmvNtre3V00WPISPP1cPzPefw/X7POVw5duArHML9V0oqIgKklFpxJ/oiYjql1IbFWIQ1EfFFSukqbMVARFSgyMVL8Ty2Y39K6QTuwBwuYG1K6R5sxOP4JqX0RkRUUkRIKT2AfRhDM5owg4WZaeR3DRNYjd0RcaDICcdwAPfhHBKGMZjxTtycsRbsz94QEbIPd+NH9ONVtF+Gtee//tz44UtYwiasRUfW/QO6ImL8crezqXszk9M4jmqBF3AdZjP1wfnFmel4SmkQG9CGR/FHQi8WdbQ2L9y18d4Vt1+/st5wsT586lTlrU09n/XMY/EKnsTvaMRUwo7b2lrWf7jtqeda25cvuHqu7q+GwvRENU4Mfv3M5iO93fMkrMMQBlArIuL9vs0PflIuGhZc88gWf38/oOmW9WYPHkrLyi2vd61u/+DtsZ+X4GmsyTKPRkQ3FFuWNqeuVes2zJwcMnX4c81PbFP79jvTx48p1WpLPjpTfQ03ZPMmUcatKaUjEXFGROhetWL45NbHYubseFR7DsbsxGSM7nw5Dt/UcaGhlIYz3Ureiy/xE56NiH9XeWj2z30rRyvvFHv2pPO9fZo+7TQ5MuLjqeqvcxfjHH7Bu3kCL6EvH5oUEbYvb03LSsXuztS4a3GpaKmXnD86O92/9/TZcj2iEb0R0ZXNfAgjETH6X4NL8eKN1zaWS6W2uYjJN8d+uws7s+aeiHjv/875HzeNCzhN2c5EAAAAAElFTkSuQmCCeJwTcUwpS8xLTk2Jd63ILIk3NNMryEtnGAUjBRxkwi/faXT+FiMDAK67CoVdXuX/AQAAAAIAAAAsAAAAwQIAAAAAAAABAAAAAAAAAAAAAAA
+
+[Config]
+config.xml=1075,756
+
+[EncodedFile-Config-config.xml]
+lines=0
+0=/Td6WFoAAATm1rRGBMCsA7MIIQEWAAAAAAAAAJ3IXdHgBDIBpF0AHg/LhxHYzmaRD4Meyv17M9R/6bfaKDF2JWYgTSoJbWr3KXA4QROPGwN+z2M4oWilF5ud7uNaC7pzt5kIQxPV5N0KAUDQVET5ZN5jrmvA6/4LiN/NgXCvqRe0joGBJE5RhGncv7vnAsXhDdo662oFjahyjj6vEPktXFePsAImqFUmY7R6FrPdK2knY0tMIY6D+p0ninTAdyRZjv2rEgZgXe93cMNxflRuzuh9uwd/WOkEcKSp9Mnce4afEUN+F/mXI/WDT1/lVWXQffeiwp0t0QPqJ0cv8LW68CyFiH8HglJFBCvcHztA38wC49xj6ShJ0xosMMyt0ZphDHJf66W1AKwcHIXRgDY7+TkF5ZotoBDW21zD1VD2DqudASYnM/KIeJZppmEbYiaySMvWHel9x6yvkLCyLWAld2WWxm+cyKgL2g+1llenTTI4wvPJA2NsMNLT5S6KZW7ntbBUQ1U3QusG2u+e3upxHvF156jx1lmgeWkCcPDm2vchH8kdVY9Y07oGC/jum24ZabdSm4QAKG0S/s9Gu5iL43Kt7nhEjhEVc+o8AMMjShd/CcJSAAHIA7MIAAAYgpp4scRn+wIAAAAABFlaeJzjSs7PS8tM16vIzWEYBSMPGLNA6DeM2OXbso4tZGIDALD1B4N48pYVAQAAAAIAAAAmAAAA7AEAAAAAAAABAAAAAAAAAAAAAAA

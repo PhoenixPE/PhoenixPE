@@ -54,7 +54,7 @@ Else,Set,%ProgramExe%,"LinuxReader.exe"
 // Extract
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\LinuxReader.exe",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%TargetPrograms%\%ProgramFolder%
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 FileVersion,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%",%ProgramExeVer%
 Echo,"Program version: v%ProgramExeVer%"
 
@@ -188,7 +188,7 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 // ===============================================================================================================================
 [LaunchProgram]
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\LinuxReader.exe",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,%ProjectTemp%\%ProgramFolder%
+Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 
 If,%HostArch%,Equal,x64,Set,%ProgramExe%,"LinuxReader64.exe"
 Else,Set,%ProgramExe%,"LinuxReader.exe"
