@@ -2,6 +2,72 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release 2026-03-30
+
+### Added
+- .Net 10 runtime
+- Added a toggle for FastBoot detection in Pre-Shell script.
+- KeePass Password Safe
+- Zulu JRE25
+
+### Changed
+- Bump max supported Win 11 source to Win 11 25H2.
+- .Net 8 runtime updated to v8.0.25
+- .Net 9 runtime updated to v9.0.14
+- 7-Zip script and tools updated to v26.00
+- AIDA64 updated to v8.25.8200
+- AgentRansack updated to v2022 build 3560
+- ChoEazyCopy updated to v2.0.0.4
+- CPU-Z updated to v.2.19.0
+- DiskCyptor updated to v1.4.1 beta
+- DiskGenius updated to v6.1.1.1742
+- DMDE updated to v4.4.4.842
+- DriverStoreExplorer updated to v0.12.152
+- Everything updated to v1.4.1.1032
+- Explorer++ updated to v1.4.0
+- Google Chrome updated to v146.0.7680.165
+- GPU-Z updated to v2.69.0
+- HDClone updated to X.7.FE
+- Host Boot test now automatically detects BIOS type (Legacy/UEFI).
+- HWinfo updated to v8.44
+- Include Undocked Update Service (UUS) in boot.wim builds as it is needed for Recovery options such as System Restore and Reset.
+- Innounp updated to v2.67.5
+- Intel MEI Driver updated to v2601.9.16.0
+- Intel RST Driver updated to v20.2.6.1025.3
+- LibreOffice updated to v26.2.1 - Note: As of v26.x LibreOffice only provides x64 binaries. 
+- MPC-BE updated to v1.8.9.0
+- Notepad++ updated to v8.9.3
+- NVDA updated to v2025.3.3
+- PassRest updated to v5.1.0 (Issue #171)
+- PhoenixAPI `RegCopyDriver` back-end (RegCopyDrive.cmd) re-written in Autoit3 (35% speed increase).
+- PhoenixAPI `RegHiveUnload,Force` back-end (HiveUnload) re-written in PureBasic.
+- PhoenixPE tray menu separated into its own include to allow easier customization by advanced developers.
+- PowerShell Core updated to v7.6.0
+- Removed unnecessary .msi files from Advanced IP Scanner program dir.
+- RustDesk updated to v1.4.6
+- Speccy updated to v1.33
+- SumatraPDF updated to v3.6.0
+- Updated MPC-BE to provide a more robust extraction of the setup file.
+- Ventoy updated to v1.1.10
+- WinMerge updated to v2.16.54.2
+- WinNTSetup updated to v5.4.2.0
+- WinRAR updated to v7.20
+- WizTree updated to v4.31
+- Zulu JRE11 updated to v11.86.21
+- Zulu JRE17 updated to v17.64.17
+- Zulu JRE21 updated to v21.48.17
+
+### Fixed
+- Fixed a bug in ProtectPE that prevented automatic shutdown when the number of invalid password attempts was exceeded.
+- Fixed startup splash screen display when no wallpaper image is configured. (Issue #182)
+- Fixed wallpaper could not be set to a solid background color.
+- Fixed some spelling errors in DaRT Launcher.
+- Fixed some issues with x86 builds using StartIsBack (Issue #154)
+- Fixed host license copy in Macrium Reflect X. (Issue #181)
+- Fixed a bug with Notepad3 that caused the user defined language to not be configured.
+
+### Removed
+
 ## Release 2025-12-15
 
 ### Added
@@ -19,7 +85,7 @@ Notable changes to the PhoenixPE project.
 - CPU-Z updated to v.2.17.0
 - DesktopInfo updated to v3.21.0
 - DiskGenius updated to v6.1.1.1725
-- DMDE updated to v4.4.0.828
+- DMDE updated to v4.4.0.828
 - DriverStoreExplorer updated to v0.12.127
 - Everything updated to v1.4.1.1030
 - FastStone Capture updated to v11.2
@@ -38,6 +104,7 @@ Notable changes to the PhoenixPE project.
 - RustDesk updated to v1.4.4
 - Simplewall updated to v3.8.7
 - Updated AOEME PA download URL to avoid annoying upsell bundle and prevent extraction failures.
+- Visual C++ Runtime updated to download redist. from Microsoft servers.
 - WinMerge updated to v2.16.52.2
 - WinSCP updated to v6.5.5
 - XYPlorer updated for 64-bit support. Updated languages.
@@ -51,6 +118,7 @@ Notable changes to the PhoenixPE project.
 - Fixed a bug in Firefox script that prevented tab close warning from showing and default browser check from working.
 
 ### Removed
+None.
 
 ## Release 2025-09-27
 
