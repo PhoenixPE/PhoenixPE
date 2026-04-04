@@ -2,10 +2,20 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release 2026-03-30
+## Release UNRELEASED
 
 ### Added
 - .Net 10 runtime
+
+### Changed
+
+### Fixed
+
+### Removed
+
+## Release 2026-03-30
+
+### Added
 - Added a toggle for FastBoot detection in Pre-Shell script.
 - KeePass Password Safe
 - Zulu JRE25
@@ -67,6 +77,8 @@ Notable changes to the PhoenixPE project.
 - Fixed a bug with Notepad3 that caused the user defined language to not be configured.
 
 ### Removed
+
+None.
 
 ## Release 2025-12-15
 
