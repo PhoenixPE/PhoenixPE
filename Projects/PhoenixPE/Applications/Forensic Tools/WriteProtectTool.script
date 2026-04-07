@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.2.0.0
-Date=2025-06-09
+Version=1.3.0.0
+Date=2026-04-07
 
 [Variables]
 %ProgramFolder%="WinFE"
@@ -101,13 +101,38 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Parameters.....: #1 DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
-// Remarks........:
+// Remarks........: This package is annoying. Sometimes the archive is flat, sometimes it contains a sub folder (ie. IntelWinFE),
+//                  Sometimes it is even double the size because it contains an archive of itself? WTF.
+//                  What we need to find is: <SomewhereInTheArchive>\%SourceArch%\%ProgramExe%
+//                                         ex. IntelWinFE\x64\Protect.exe  - or - x64\Protect.exe
 // Related........: 
 // ===============================================================================================================================
 [ExtractProgram]
+System,SetLocal
 Echo,"Extracting program files..."
-7z,"e -y -r #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q IntelWinFE\%SourceArch%\%ProgramExe% -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
+
+FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
+Set,%aResults%,#r
+If,%aResults%,Equal,"",Halt,"Failed to find [%ProgramExe%]."
+
+List,Count,%aResults%,%NumResults%
+
+ForRange,%i%,%NumResults%,0,-1,Begin
+  List,Get,%aResults%,%i%,%String%
+  StrFormat,Pos,%String%,"\%SourceArch%\",%Pos%
+  If,%Pos%,Equal,0,Continue
+  Else,Begin
+    List,Get,%aResults%,%i%,%ProgramPath%
+    StrFormat,EndTrim,#1,"\",%Target%
+    FileCopy,%ProgramPath%,"%Target%\%ProgramExe%"
+    Return
+  End
+End
+
+Halt,"Failed to find the [%SourceArch%] sub directory in [%SetupFile%]."
+
+System,EndLocal
 
 [#DownloadProgram#]
 // ===============================================================================================================================
