@@ -2,14 +2,18 @@
 
 Notable changes to the PhoenixPE project.
 
-## Release UNRELEASED
+## Release 2026-04-16
 
-### Added
-- .Net 10 runtime
+## Added
+
+None.
 
 ### Changed
+- Improved WriteProtectTool extraction to be more resilient.  
 
 ### Fixed
+- Fixed ATI extraction due to .msi name change.
+- Fixed regression in PhoenixPE.Tray.au3 that caused an undefined function error.
 
 ### Removed
 
