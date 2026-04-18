@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.1.1.0
-Date=2025-03-09
+Version=1.2.0.0
+Date=2026-04-18
 
 [Variables]
 %ProgramFolder%="WindowsPowerShell"
@@ -50,7 +50,110 @@ RunFromRam
 ///////////////////////////////////////////////////////////////////////////////////
 // Extract
 
-RequireFile,\Windows\System32\WindowsPowerShell
+Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+
+RequireFileEx,AppendList,\Windows\System32\WindowsPowerShell
+If,ExistFile,"%TargetSystem32%\wow64.dll",RequireFileEx,AppendList,\Windows\SysWOW64\WindowsPowerShell
+
+// Module Support files
+RequireFileEx,AppendList,\Windows\System32\wbem
+RequireFileEx,AppendList,\Windows\System32\Winrm
+RequireFileEx,AppendList,\Windows\System32\amsi.dll
+RequireFileEx,AppendList,\Windows\System32\Appxsip.dll
+RequireFileEx,AppendList,\Windows\System32\clbcatq.dll
+RequireFileEx,AppendList,\Windows\System32\mi.dll
+RequireFileEx,AppendList,\Windows\System32\Microsoft.Management.Infrastructure.Native.Unmanaged.dll
+RequireFileEx,AppendList,\Windows\System32\mispace.dll
+RequireFileEx,AppendList,\Windows\System32\miutils.dll
+RequireFileEx,AppendList,\Windows\System32\mscoree.dll
+RequireFileEx,AppendList,\Windows\System32\NgcRecovery.dll
+RequireFileEx,AppendList,\Windows\System32\OpcServices.dll
+RequireFileEx,AppendList,\Windows\System32\propsys.dll
+RequireFileEx,AppendList,\Windows\System32\PSModuleDiscoveryProvider.dll
+RequireFileEx,AppendList,\Windows\System32\psmodulediscoveryprovider.mof
+RequireFileEx,AppendList,\Windows\System32\Pwrshplugin.dll
+RequireFileEx,AppendList,\Windows\System32\storagewmi.dll
+RequireFileEx,AppendList,\Windows\System32\TaskFlowDataEngine.dll
+RequireFileEx,AppendList,\Windows\System32\tbs.dll
+RequireFileEx,AppendList,\Windows\System32\TpmCoreProvisioning.dll
+RequireFileEx,AppendList,\Windows\System32\UIAutomationCore.dll
+RequireFileEx,AppendList,\Windows\System32\Wecapi.dll
+RequireFileEx,AppendList,\Windows\System32\Wecsvc.dll
+RequireFileEx,AppendList,\Windows\System32\Wecutil.exe
+RequireFileEx,AppendList,\Windows\System32\Wevtfwd.dll
+RequireFileEx,AppendList,\Windows\System32\Windows.ApplicationModel.dll
+RequireFileEx,AppendList,\Windows\System32\Winrm.cmd
+RequireFileEx,AppendList,\Windows\System32\Winrm.vbs
+RequireFileEx,AppendList,\Windows\System32\Winrs.exe
+RequireFileEx,AppendList,\Windows\System32\Winrscmd.dll
+RequireFileEx,AppendList,\Windows\System32\Winrshost.exe
+RequireFileEx,AppendList,\Windows\System32\Winrsmgr.dll
+RequireFileEx,AppendList,\Windows\System32\Winrssrv.dll
+RequireFileEx,AppendList,\Windows\System32\WinTypes.dll
+RequireFileEx,AppendList,\Windows\System32\wmitomi.dll
+RequireFileEx,AppendList,\Windows\System32\Wsmanconfig_schema.Xml
+RequireFileEx,AppendList,\Windows\System32\Wsmanhttpconfig.exe
+RequireFileEx,AppendList,\Windows\System32\Wsmanmigrationplugin.dll
+RequireFileEx,AppendList,\Windows\System32\Wsmauto.dll
+RequireFileEx,AppendList,\Windows\System32\Wsmplpxy.dll
+RequireFileEx,AppendList,\Windows\System32\Wsmprovhost.exe
+RequireFileEx,AppendList,\Windows\System32\Wsmpty.xsl
+RequireFileEx,AppendList,\Windows\System32\Wsmres.dll
+RequireFileEx,AppendList,\Windows\System32\Wsmsvc.dll
+RequireFileEx,AppendList,\Windows\System32\Wsmtxt.xsl
+RequireFileEx,AppendList,\Windows\System32\Wsmwmipl.dll
+RequireFileEx,AppendList,\Windows\System32\wuaueng.dll
+
+If,ExistFile,"%TargetSystem32%\wow64.dll",Begin
+  RequireFileEx,AppendList,\Windows\SysWOW64\wbem
+  RequireFileEx,AppendList,\Windows\SysWOW64\winrm
+  RequireFileEx,AppendList,\Windows\SysWOW64\amsi.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Appxsip.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\clbcatq.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\mi.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Microsoft.Management.Infrastructure.Native.Unmanaged.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\mispace.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\miutils.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\mscoree.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\NgcRecovery.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\OpcServices.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\propsys.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\PSModuleDiscoveryProvider.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Pwrshplugin.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\storagewmi.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\tbs.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\TpmCoreProvisioning.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\UIAutomationCore.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wecapi.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wecsvc.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wecsvc.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wecutil.exe
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wevtfwd.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Windows.ApplicationModel.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Winrm.cmd
+  RequireFileEx,AppendList,\Windows\SysWOW64\Winrm.vbs
+  RequireFileEx,AppendList,\Windows\SysWOW64\Winrs.exe
+  RequireFileEx,AppendList,\Windows\SysWOW64\Winrscmd.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Winrshost.exe
+  RequireFileEx,AppendList,\Windows\SysWOW64\Winrsmgr.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Winrssrv.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\WinTypes.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\wmitomi.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmanconfig_schema.Xml
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmanhttpconfig.exe
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmanmigrationplugin.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmauto.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmplpxy.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmprovhost.exe
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmpty.xsl
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmres.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmsvc.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmtxt.xsl
+  RequireFileEx,AppendList,\Windows\SysWOW64\Wsmwmipl.dll
+  RequireFileEx,AppendList,\Windows\SysWOW64\wuaueng.dll
+End
+
+RequireFileEx,ExtractList
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
