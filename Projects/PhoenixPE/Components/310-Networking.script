@@ -36,15 +36,15 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.8.0.0
-Date=2025-04-27
+Version=1.8.1.0
+Date=2026-04-18
 
 [Variables]
 %SID-Netprofm%="S-1-5-80-3635958274-2059881490-2225992882-984577281-633327304"
 %SID-NlaSvc%="S-1-5-80-3141615172-2057878085-1754447212-2405740020-3916490453"
 %SID-WwanSvc%="S-1-5-80-3981856537-581775623-1136376035-2066872258-409572886"
-%SID-UnknownAccount1%="S-1-5-32-556"
-%SID-UnknownAccount2%="S-1-5-92-1467204242-1103346305-4253404563-2848856930-0"
+%SID-NetworkConfigurationOperatorsGroup%="S-1-5-32-556"
+%SID-UnknownAccount%="S-1-5-92-1467204242-1103346305-4253404563-2848856930-0"
 
 [Process]
 Echo,"Configuring Network Support..."
@@ -96,7 +96,7 @@ RegUnloadHives
 // ===============================================================================================================================
 [ExtractFiles]
 
-Echo,"Building a list of required files...#$x#$xThis can take awhile, please be patient."
+Echo,"Building a list of required files..."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Network List Service
@@ -162,9 +162,8 @@ End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Drivers (This section could use some cleanup.)
-RequireFileEx,AppendList,\Windows\INF\netlldp.inf
+
 RequireFileEx,AppendList,\Windows\INF\ndiscap.inf
-RequireFileEx,AppendList,\Windows\INF\netnwifi.inf
 
 RequireFileEx,AppendList,\Windows\System32\drivers\http.sys
 RequireFileEx,AppendList,\Windows\System32\drivers\ipfltdrv.sys
@@ -182,8 +181,6 @@ RequireFileEx,AppendList,\Windows\System32\drivers\vwififlt.sys
 RequireFileEx,AppendList,\Windows\System32\drivers\WdiWiFi.sys
 RequireFileEx,AppendList,\Windows\System32\drivers\wfplwfs.sys
 
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netlldp.inf*
-RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netnwifi.inf*
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netvwifibus.inf*
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netvwififlt.inf*
 RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\netvwifimp.inf*
@@ -443,6 +440,12 @@ RequireFileEx,AppendList,\Windows\SystemResources\Windows.UI.Cred\pris\Windows.U
 // Extract
 RequireFileEx,ExtractList
 
+// Drivers
+RequireDriver,netnwifi.inf
+RequireDriver,netlldp.inf
+RequireDriver,ndiscap.inf
+
+
 [#Config-Network#]
 // ===============================================================================================================================
 // Name...........: Config-Network
@@ -501,12 +504,12 @@ If,%cb_EnableNetworkListService%,Equal,True,Begin
   ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:%SID-WwanSvc%;p:full;s:y#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$x#$xThe command returned: %ExitCode%"
 
-  // Unknown account S-1-5-32-556
-  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:%SID-UnknownAccount1%;p:full#$q"
+  // Network Configuration Operators Group
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:%SID-NetworkConfigurationOperatorsGroup%;p:full#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$x#$xThe command returned: %ExitCode%"
 
   // Unknown account: S-1-5-92-1467204242-1103346305-4253404563-2848856930-0
-  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:%SID-UnknownAccount2%;p:full#$q"
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:%SID-UnknownAccount%;p:full#$q"
   If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant permissions on: #$xHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$x#$xThe command returned: %ExitCode%"
 
   ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$qHKLM\Tmp_software\Microsoft\Windows NT\CurrentVersion\NetworkList\Permissions#$q -ot reg -actn ace -ace #$qn:Everyone;p:full;s:y#$q"
