@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.14.0.0
-Date=2026-05-15
+Version=1.15.0.0
+Date=2026-05-20
 Level=0
 Selected=None
 
@@ -1836,10 +1836,25 @@ System,EndLocal
 // Name...........: SetRegACL
 // Description....: Take ownership and grant full control for "Everyone" on a registry key using Helge Klein's SetAcl.exe
 // Syntax.........: SetRegACL,<%RegKey%>
-// Parameters.....: #1 %RegKey% - Registry key to modify. The hive must already be mounted.
+// Parameters.....: #1 %RegKey% - Registry key(s) to modify. The hive must already be mounted.
+//                    Multiple RegKeys can be specified in a pipe separated list. This significantly speeds up processing.
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: Depends on SetAcl.exe in %Tools% <https://helgeklein.com/setacl/>
+// Remarks........: Depends on SetAcl.exe in %Tools% <https://helgeklein.com/setacl/> (Distributed with permission)
+//                  Depends on %Tools%\a3x\PhoenixAPI-SetRegACL.a3x
+//
+//                  Usage: PhoenixAPI-SetRegACL.a3x <PathToSetACL.exe> <hive1[|hive2|hive3...]>
+//                    PathToSetACL.exe - Full path to SetACL.exe
+//                    Hive - A single hive or a pipe (|) separated list of hives to process.
+//         
+//                    Exit codes: 0 - Success
+//                                1 - Syntax Error
+//                                1 - Hive Validation Error (ie. Hives not mounted)
+//                                3 - SetACL Error
+//
+//                  SetACL must be run in two passes instead of combining multiple -actn args. This is because the kernel doesn't 
+//                  always recognize the change in key ownership until the next time the application is launched. This results 
+//                  in a failure to properly set the new ACE.
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_SetRegACL]
@@ -1847,13 +1862,25 @@ System,SetLocal
 If,#1,Equal,"",Halt,"SetRegACL Syntax Error: You must specify the Registry Key to modify."
 GetParam,1,%RegKey%
 
-Echo,"Taking ownership of [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
-ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -rec yes -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -silent"
-If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of [%RegKey%]. The command returned: [%ExitCode%]."
+StrFormat,EndTrim,%RegKey%,"|",%RegKey%
+List,Count,%RegKey%,%RegKeyCount%
 
-Echo,"Granting full access to [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
-ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -rec yes -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -silent"
-If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on [%RegKey%]. The command returned: [%ExitCode%]."
+If,%RegKeyCount%,Bigger,1,Begin
+  // Multiple Keys - Run in Parallel
+  Echo,"Taking ownership and granting full access to registry keys...#$X#$XThis can take awhile, please be patient."
+  ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","#$q%Tools%\a3x\PhoenixAPI-SetRegACL.a3x#$q #$q%Tools%\%HostArch%\SetACL.exe#$q #$q%RegKey%#$q"
+  If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not take ownership or grant full permissions on registry keys. The command returned: [%ExitCode%]. See build log for details."
+End
+Else,Begin
+  // Single Key
+  Echo,"Taking ownership of [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -actn setowner -ownr #$qn:S-1-1-0;s:y#$q -rec yes -silent"
+  If,Not,%ExitCode%,Equal,0,Halt,"SetRegACL Error: Could not take ownership of [%RegKey%]. The command returned: [%ExitCode%]."
+
+  Echo,"Granting full access to [%RegKey%] ...#$X#$XThis can take awhile, please be patient."
+  ShellExecute,Hide,%Tools%\%HostArch%\SetAcl.exe,"-on #$q%RegKey%#$q -ot reg -actn ace -ace #$qn:S-1-1-0;p:full;s:y#$q -rec yes -silent"
+  If,Not,%ExitCode%,Equal,0,Halt,"Error: Could not grant full permission on [%RegKey%]. The command returned: [%ExitCode%]."
+End
 
 System,EndLocal
 

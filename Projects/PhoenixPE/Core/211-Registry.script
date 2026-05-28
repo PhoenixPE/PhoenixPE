@@ -178,21 +178,24 @@ WimExtract,%SourceInstallWim%,%SourceInstallWimImage%,\Windows\System32\config\S
 // Related........: [BuildRegistryCache]
 // ===============================================================================================================================
 [TakeOwnership-Hives]
+System,SetLocal
 
-SetRegACL,"HKLM\Tmp_Default"
-SetRegACL,"HKLM\Tmp_Drivers"
-SetRegACL,"HKLM\Tmp_Software"
-SetRegACL,"HKLM\Tmp_System"
+List,Append,%HiveList%,"HKLM\Tmp_Default"
+List,Append,%HiveList%,"HKLM\Tmp_Drivers"
+List,Append,%HiveList%,"HKLM\Tmp_Software"
+List,Append,%HiveList%,"HKLM\Tmp_System"
 
-SetRegACL,"HKLM\Tmp_Install_Default"
-SetRegACL,"HKLM\Tmp_Install_Drivers"
-If,%cb_TakeFullOwnershipRegSoftware%,Equal,True,SetRegACL,"HKLM\Tmp_Install_Software"
+List,Append,%HiveList%,"HKLM\Tmp_Install_Default"
+List,Append,%HiveList%,"HKLM\Tmp_Install_Drivers"
+If,%cb_TakeFullOwnershipRegSoftware%,Equal,True,List,Append,%HiveList%,"HKLM\Tmp_Install_Software"
 Else,Begin
-  SetRegACL,"HKLM\Tmp_Install_Software\Classes\AppID"
-  SetRegACL,"HKLM\Tmp_Install_Software\Microsoft\Windows\CurrentVersion\AppModel"
-  SetRegACL,"HKLM\Tmp_Install_Software\Microsoft\Windows\CurrentVersion\MMDevices"
+  List,Append,%HiveList%,"HKLM\Tmp_Install_Software\Classes\AppID"
+  List,Append,%HiveList%,"HKLM\Tmp_Install_Software\Microsoft\Windows\CurrentVersion\AppModel"
+  List,Append,%HiveList%,"HKLM\Tmp_Install_Software\Microsoft\Windows\CurrentVersion\MMDevices"
 End
-SetRegACL,"HKLM\Tmp_Install_System"
+List,Append,%HiveList%,"HKLM\Tmp_Install_System"
+
+SetRegACL,%HiveList%
 
 [#Config-BaseWim-SoftwareHive#]
 // ===============================================================================================================================
