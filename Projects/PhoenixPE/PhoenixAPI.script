@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.13.4.0
-Date=2026-03-15
+Version=1.14.0.0
+Date=2026-05-15
 Level=0
 Selected=None
 
@@ -641,8 +641,8 @@ System,EndLocal
 //                  #3 Resize - (Optional) Resize the image.
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: Depends on ImageConvert.exe in %Tools%.
-//                  ImageConvert.exe <input_image> <output_image> [--resize:WxH]
+// Remarks........: Depends on ImageConvert.a3x in %Tools%.
+//                  ImageConvert.a3x <input_image> <output_image> [--resize:WxH] --silent
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_ConvertImage]
@@ -657,7 +657,7 @@ Getparam,3,%ResizeTo%
 StrFormat,Ext,%TargetImage%,%NewImageExt%
 Echo,"Converting [%SourceImage%] to a [%NewImageExt%] image..."
 If,Not,%ResizeTo%,Equal,"",Set,%ResizeParam%," --resize:%ResizeTo%"
-ShellExecute,Hide,"%Tools%\%HostArch%\ImageConvert.exe","#$q%SourceImage%#$q #$q%TargetImage%#$q --silent%ResizeParam%"
+ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","%Tools%\a3x\PhoenixAPI-ImageConvert.a3x #$q%SourceImage%#$q #$q%TargetImage%#$q%ResizeParam%"
 If,Not,%ExitCode%,Equal,0,Halt,"Error: Image conversion failed. [%ExitCode%]"
 
 System,EndLocal
