@@ -395,8 +395,8 @@ End
 // ===============================================================================================================================
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
-// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestPath>
-// Parameters.....: 
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -404,8 +404,8 @@ End
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.exe -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract program files."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.exe -o#$q%^SIPARAM_1%#$q"
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract program files."
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -423,7 +423,7 @@ System,SetLocal
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 System,EndLocal
 
 [#ClearDownloadCache#]

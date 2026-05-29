@@ -139,7 +139,7 @@ Else,XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='TabBar']/@h
 // Dark Mode
 If,%cb_EnableDarkMode%,Equal,True,Begin
   XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='DarkMode']/@enable","yes",NOERR
-  If,#r,Equal,-99999999,Begin
+  If,%^RET%,Equal,-99999999,Begin
     // Node <GUIConfig name='DarkMode'> does not exist, we need to create it
 	// and add the required attributes
 	XMLAdd,SubNode,%config.xml%,"NotepadPlus/GUIConfigs","elem","GUIConfig",""
@@ -158,7 +158,7 @@ If,%cb_EnableDarkMode%,Equal,True,Begin
   End
 
   XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='stylerTheme']/@path","X:\Users\Default\AppData\Roaming\Notepad++\themes\DarkModeDefault.xml",NOERR
-  If,#r,Equal,-99999999,Begin
+  If,%^RET%,Equal,-99999999,Begin
     // Node <GUIConfig name='DarkMode'> does not exist, we need to create it
     XMLAdd,SubNode,%config.xml%,"NotepadPlus/GUIConfigs","elem","GUIConfig",""
 	XMLAdd,Insert,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[not(@name)]","attr","name","stylerTheme"
@@ -167,7 +167,7 @@ If,%cb_EnableDarkMode%,Equal,True,Begin
 End
 Else,Begin
   XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='DarkMode']/@enable","no",NOERR
-  If,#r,Equal,-99999999,Begin
+  If,%^RET%,Equal,-99999999,Begin
     // Node <GUIConfig name='DarkMode'> does not exist, we need to create it
 	// and add the required attributes
 	XMLAdd,SubNode,%config.xml%,"NotepadPlus/GUIConfigs","elem","GUIConfig",""
@@ -186,7 +186,7 @@ Else,Begin
   End
   
   XMLUpdate,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[@name='stylerTheme']/@path","X:\Users\Default\AppData\Roaming\Notepad++\stylers.xml",NOERR
-  If,#r,Equal,-99999999,Begin
+  If,%^RET%,Equal,-99999999,Begin
     // Node <GUIConfig name='DarkMode'> does not exist, we need to create it
     XMLAdd,SubNode,%config.xml%,"NotepadPlus/GUIConfigs","elem","GUIConfig",""
 	XMLAdd,Insert,%config.xml%,"NotepadPlus/GUIConfigs/GUIConfig[not(@name)]","attr","name","stylerTheme"
@@ -254,12 +254,12 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\*\shellex\ContextMenuHandlers\Notepad
 If,%SourceArch%,Equal,x64,Begin
   Echo,"Downloading Notepad++ x64..."
   WebGet,%DownloadURLx64%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 End
 Else,Begin
   Echo,"Downloading Notepad++ x86..."
   WebGet,%DownloadURLx86%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 End
 
 [#LaunchProgram#]

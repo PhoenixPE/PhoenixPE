@@ -83,7 +83,7 @@ If,%cb_PinToStartMenu2%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Pro
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -96,12 +96,12 @@ Decompress,"%ProgramsCache%\%ProgramFolder%\TestDisk-%SourceArch%.zip","%Project
 
 // TestDisk uses an annoying folder structure that changes with each version.
 FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
-If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%] in the setup file: The code returned was [#r]."
-Else,List,Get,#r,1,%ProgramExePath%
+If,%^RET%,Equal,"",Halt,"Failed to find [%ProgramExe%] in the setup file: The code returned was [%^RET%]."
+Else,List,Get,%^RET%,1,%ProgramExePath%
 
 StrFormat,DirPath,%ProgramExePath%,%ProgramExeDir%
 StrFormat,EndTrim,%ProgramExeDir%,"\",%ProgramExeDir%
-FileCopy,"%ProgramExeDir%\*.*",#1
+FileCopy,"%ProgramExeDir%\*.*",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -118,7 +118,7 @@ FileCopy,"%ProgramExeDir%\*.*",#1
 Echo,"Downloading TestDisk & PhotoRec..."
 If,%SourceArch%,Equal,x64,WebGet,%DownloadURLx64%,"%ProgramsCache%\%ProgramFolder%\TestDisk-%SourceArch%.zip",NOERR
 Else,WebGet,%DownloadURLx86%,"%ProgramsCache%\%ProgramFolder%\TestDisk-%SourceArch%.zip",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

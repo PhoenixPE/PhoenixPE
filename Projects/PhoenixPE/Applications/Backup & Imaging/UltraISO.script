@@ -180,7 +180,7 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\binimage\shellex\ContextMenuHandlers\
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram
-// Parameters.....: #1 - Destination Directory
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -202,8 +202,8 @@ Else,Begin
   FileRename,"%ProjectTemp%\%ProgramFolder%\{App}\isoshl64,1.dll","%ProjectTemp%\%ProgramFolder%\{App}\isoshl64.dll"
 End
 
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{App}\*.*",#1
-FileCopy,"%ProjectTemp%\%ProgramFolder%\{cf32}\EZB Systems\lame_enc.dll",#1
+FileCopy,"%ProjectTemp%\%ProgramFolder%\{App}\*.*",%^SIPARAM_1%
+FileCopy,"%ProjectTemp%\%ProgramFolder%\{cf32}\EZB Systems\lame_enc.dll",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -219,7 +219,7 @@ FileCopy,"%ProjectTemp%\%ProgramFolder%\{cf32}\EZB Systems\lame_enc.dll",#1
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.ezbsystems.com/ultraiso/download.htm,NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [%^RET%]."
 
 [#ToggleLicenseReg#]
 // ===============================================================================================================================

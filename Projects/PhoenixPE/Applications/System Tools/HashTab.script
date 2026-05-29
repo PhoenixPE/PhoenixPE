@@ -58,7 +58,7 @@ RunFromRam
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",ExtractFile,%ScriptFile%,"Setup",%SetupFile%,"%ProgramsCache%\%ProgramFolder%"
 DirDeleteEx,"%TargetPrograms%\%ProgramFolder%"
 7z,"x -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -xr!$PLUGINSDIR -xr!uninst.exe.nsis -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Extract [%SetupFile%] failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,0,Halt,"Extract [%SetupFile%] failed: The code returned was [%^RET%]."
 If,%SourceArch%,Equal,x64,FileRename,"%TargetPrograms%\%ProgramFolder%\$R0","%TargetPrograms%\%ProgramFolder%\HashTab64-%ProgramVersion%.dll"
 Else,FileDelete,"%TargetPrograms%\%ProgramFolder%\$R0"
 
@@ -258,7 +258,7 @@ RegHiveUnLoad,Tmp_Software
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

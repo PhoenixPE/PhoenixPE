@@ -156,7 +156,7 @@ RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_Software\Classes\TypeLib\{06029E17-28B5-456A-B8
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -167,7 +167,7 @@ Echo,"Extracting files..."
 Run,%ScriptFile%,SetProgramArch
 If,ExistDir,"%ProjectTemp%\%ProgramFolder%",DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
 Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\WinMerge\*.*",#1
+FileCopy,"%ProjectTemp%\%ProgramFolder%\WinMerge\*.*",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -184,7 +184,7 @@ FileCopy,"%ProjectTemp%\%ProgramFolder%\WinMerge\*.*",#1
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

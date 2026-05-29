@@ -86,7 +86,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -97,8 +97,8 @@ System,SetLocal
 Echo,"Extracting files..."
 If,%SourceArch%,Equal,x64,Set,%Arch%,"64bit"
 Else,Set,%Arch%,"32bit"
-7z,"e -r -y #$q%ProgramsCache%\%ProgramFolder%\HotSwap.zip#$q %Arch%\* -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [HotSwap.zip]. The error code returned was [#r]."
+7z,"e -r -y #$q%ProgramsCache%\%ProgramFolder%\HotSwap.zip#$q %Arch%\* -o#$q%^SIPARAM_1%#$q"
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [HotSwap.zip]. The error code returned was [%^RET%]."
 System,EndLocal
 
 [#DownloadProgram#]
@@ -115,7 +115,7 @@ System,EndLocal
 [DownloadProgram]
 Echo,"Downloading HotSwap!..."
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\HotSwap.zip",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

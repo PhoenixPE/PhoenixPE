@@ -101,7 +101,7 @@ Echo,"Configuring the Language Toolbar..."
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cmb_LangBarPos%,Equal,"Hidden",ApplyBitMask,%PrefMask%,6,0x000000,8
 Else,ApplyBitMask,%PrefMask%,6,0x000001,8
-RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%^RET%
 
 // Toolbar Position
 If,%cmb_LangBarPos%,Equal,"Docked in the TaskBar",RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Microsoft\CTF\LangBar","ShowStatus",4
@@ -230,7 +230,7 @@ If,ExistFile,"%TargetSystem32%\InputService.dll",Begin
   FileVersion,"%TargetSystem32%\InputService.dll",%InputServiceVersion%
   If,%InputServiceVersion%,Bigger,10.0.18300,Begin
     Binmay,"-u #$q%TargetSystem32%\InputService.dll#$q -s u:MiniNT -r u:ZiniNT"
-    If,Not,#r,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\InputService.dll] failed. IME may not be available. The error returned was [#r].",WARN
+    If,Not,%^RET%,Equal,0,Echo,"ERROR: Patching [%TargetSystem32%\InputService.dll] failed. IME may not be available. The error returned was [%^RET%].",WARN
   End
 End
 

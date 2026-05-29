@@ -75,7 +75,7 @@ Echo,"Configuring %ScriptTitle%..."
 If,%cb_EnableBootLogging%,Equal,True,Begin
   Echo,"Boot Logging: ENABLED"
   GetBinaryResource,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%","BINRES","RCDRIVERNT","%TargetSystem32%\drivers\Procmon.sys",NOERR
-  If,Not,#r,Equal,0,Halt,"ERROR: Unable to extract procmon driver. [#r]"
+  If,Not,%^RET%,Equal,0,Halt,"ERROR: Unable to extract procmon driver. [%^RET%]"
   
   RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Procmon","SupportedFeatures",3
   RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\Procmon","Start",0
@@ -136,11 +136,11 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 Echo,"Downloading %ScriptTitle% Help files..."
 WebGet,%DownloadURLCHM%,"%ProgramsCache%\%ProgramFolder%\Procmon.chm",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
   
 [#SetProgramArch#]
 // ===============================================================================================================================

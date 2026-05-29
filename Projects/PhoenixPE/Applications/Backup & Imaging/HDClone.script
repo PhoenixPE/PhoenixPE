@@ -61,7 +61,7 @@ If,%cb_SupplyProgramFiles%,Equal,True,Begin
   If,Not,%fb_HDDCloneFiles%,Equal,"",If,ExistFile,%fb_HDDCloneFiles%,Begin
     Echo,"Extracting program files from [%fb_HDDCloneFiles%]..."
     7z,"x -r -y #$q%fb_HDDCloneFiles%#$q -xr!$* -xr!uninst.exe -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-    If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code returned was [#r]."
+    If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code returned was [%^RET%]."
   End
   Else,Halt,"ERROR: The specified program files do not exist! [%fb_IncludeSettingsDir%]"
 End
@@ -94,8 +94,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
-// Syntax.........: Run,%ScriptFile%,ExtractProgram
-// Parameters.....: #1 - Destination Directory
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -103,8 +103,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting Program Files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -xr!$* -xr!uninst.exe -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code returned was [#r]."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -xr!$* -xr!uninst.exe -o#$q%^SIPARAM_1%#$q"
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code returned was [%^RET%]."
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -122,7 +122,7 @@ Echo,"Downloading %ScriptTitle%..."
 StrFormat,Split,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTrim,%Lang%,1,%Lang%
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NoErr
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [%^RET%]."
 
 [#SetProgramArch#]
 // ===============================================================================================================================

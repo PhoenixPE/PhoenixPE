@@ -65,7 +65,7 @@ Echo,"Program version: v%ProgramExeVer%"
 
 // Kernel Mode Driver
 GetBinaryResource,"%TargetPrograms%\%ProgramFolder%\%ProgramExe%","BINRES","RCDBGSYS","%TargetSystem32%\drivers\Dbgv.sys",NOERR
-If,Not,#r,Equal,0,Halt,"ERROR: Unable to extract DbgView driver. [#r]"
+If,Not,%^RET%,Equal,0,Halt,"ERROR: Unable to extract DbgView driver. [%^RET%]"
   
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
@@ -85,25 +85,25 @@ RegWrite,HKLM,REG_DWORD,"Tmp_Default\Software\Sysinternals\DbgView","EulaAccepte
 If,%cb_EnableWin32Capture%,Equal,False,Begin
   // Default = Enabled
   BitClear,%ProgramSettings%,39,0,8
-  Set,%ProgramSettings%,#r
+  Set,%ProgramSettings%,%^RET%
 End
 
 If,%cb_EnableGlobalWin32Capture%,Equal,True,Begin
   // Default = Disabled
   BitSet,%ProgramSettings%,419,0,8
-  Set,%ProgramSettings%,#r
+  Set,%ProgramSettings%,%^RET%
 End
 
 If,%cb_EnableKernelCapture%,Equal,True,Begin
   // Default = Disabled
   BitSet,%ProgramSettings%,42,0,8
-  Set,%ProgramSettings%,#r
+  Set,%ProgramSettings%,%^RET%
 End
 
 If,%cb_EnableKernelCaptureVerbose%,Equal,True,Begin
   // Default = Disabled
   BitSet,%ProgramSettings%,545,0,8
-  Set,%ProgramSettings%,#r
+  Set,%ProgramSettings%,%^RET%
 End
 
 // Write Program Settings
@@ -145,11 +145,11 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%ProgramExe%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 Echo,"Downloading %ScriptTitle% Help files..."
 WebGet,%DownloadURLCHM%,"%ProgramsCache%\%ProgramFolder%\DbgView.chm",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
   
 [#SetProgramArch#]
 // ===============================================================================================================================

@@ -88,7 +88,7 @@ Else,Set,%DismForceUnsigned%,""
 StrFormat,EndTrim,%DriversSrc%,"\",%DriversSrc%
 
 DISM,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%DriversSrc%#$q /recurse /LogPath:#$q%DismLog%#$q%DismForceUnsigned%"
-If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
+If,Not,%^RET%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%^RET%]. Check the log for details."
 // Dism doesn't always unload hives correctly. Force unload just to make sure.
 RegUnloadHives,Force,"Target=%TargetSystem32%\config"
 

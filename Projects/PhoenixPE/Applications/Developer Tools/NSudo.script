@@ -59,7 +59,7 @@ If,%SourceArch%,Equal,x64,Set,%ExtractFile%,"#$qNSudo Launcher\x64\NSudoLG.exe#$
 Else,Set,%ExtractFile%,"#$qNSudo Launcher\Win32\NSudoLG.exe#$q"
 
 7z,"e -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q %ExtractFile% -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
@@ -102,7 +102,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

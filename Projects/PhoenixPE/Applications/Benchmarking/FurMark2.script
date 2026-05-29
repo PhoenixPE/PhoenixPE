@@ -85,7 +85,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -96,11 +96,11 @@ System,SetLocal
 Echo,"Extracting files..."
 Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
 FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
-If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [#r]."
-Else,List,Get,#r,1,%ProgramPath%
+If,%^RET%,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [%^RET%]."
+Else,List,Get,%^RET%,1,%ProgramPath%
 StrFormat,DirPath,%ProgramPath%,%ProgramPathFolder%
 StrFormat,EndTrim,%ProgramPathFolder%,"\",%ProgramPathFolder%
-FileCopy,"%ProgramPathFolder%\*.*",#1
+FileCopy,"%ProgramPathFolder%\*.*",%^SIPARAM_1%
 System,EndLocal
 
 [#DownloadProgram#]
@@ -118,7 +118,7 @@ System,EndLocal
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
 WebGetEx,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","Referer=https://geeks3d.com/furmark/downloads/",NOERR
-If,Not,#r,Equal,0,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+If,Not,%^RET%,Equal,0,Halt,"Failed to download [%SetupFile%]. The code returned was [%^RET%]."
 
 [#SetProgramArch#]
 // ===============================================================================================================================

@@ -88,7 +88,7 @@ If,%cb_ShellExt%,Equal,True,Begin
   // HKCU\Software\Piriform\Recuva\ShellStringRecoverRecycleBin and HKCU\Software\Piriform\Recuva\ShellStringScanFolder
   If,Not,%LCID%,Equal,1033,Begin
     ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\lang-%LCID%.dll#$q 563 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
-    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+    If,Not,%^RET%,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",563,%ShellContextMenuTxt%
 	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","ShellStringRecoverRecycleBin",%ShellContextMenuTxt%
 	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","ShellStringScanFolder",%ShellContextMenuTxt%
@@ -96,7 +96,7 @@ If,%cb_ShellExt%,Equal,True,Begin
   Else,Begin
     // English doesn't have a resource .dll Use the .exe instead
     ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 563 #$q%ProjectTemp%\%ProgramFolder%\Lang.ini#$q"
-    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+    If,Not,%^RET%,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	IniRead,"%ProjectTemp%\%ProgramFolder%\Lang.ini","Strings",563,%ShellContextMenuTxt%
 	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","ShellStringRecoverRecycleBin",%ShellContextMenuTxt%
 	RegWrite,HKLM,REG_SZ,"Tmp_Default\Software\Piriform\Recuva","ShellStringScanFolder",%ShellContextMenuTxt%
@@ -172,7 +172,7 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\Re
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -180,8 +180,8 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\Folder\shellex\ContextMenuHandlers\Re
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -xr!$* -xr!uninst.exe -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code returned was [#r]."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -xr!$* -xr!uninst.exe -o#$q%^SIPARAM_1%#$q"
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code returned was [%^RET%]."
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -197,7 +197,7 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]. The error code r
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

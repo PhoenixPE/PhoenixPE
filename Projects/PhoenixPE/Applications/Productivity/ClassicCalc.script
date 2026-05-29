@@ -96,7 +96,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -105,8 +105,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting files..."
 Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
-If,%SourceArch%,Equal,x64,FileCopyEx,"%ProjectTemp%\%ProgramFolder%\Calc 64-bit\Calc1.exe",#1
-Else,FileCopyEx,"%ProjectTemp%\%ProgramFolder%\Calc 32-bit\Calc1.exe",#1
+If,%SourceArch%,Equal,x64,FileCopyEx,"%ProjectTemp%\%ProgramFolder%\Calc 64-bit\Calc1.exe",%^SIPARAM_1%
+Else,FileCopyEx,"%ProjectTemp%\%ProgramFolder%\Calc 32-bit\Calc1.exe",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -123,7 +123,7 @@ Else,FileCopyEx,"%ProjectTemp%\%ProgramFolder%\Calc 32-bit\Calc1.exe",#1
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
 WebGetEx,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",SHA256=%DownloadHash%,"UserAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299",NOERR
-If,Not,#r,Equal,0,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+If,Not,%^RET%,Equal,0,Halt,"Failed to download [%SetupFile%]. The code returned was [%^RET%]."
 
 [#SetProgramArch#]
 // ===============================================================================================================================

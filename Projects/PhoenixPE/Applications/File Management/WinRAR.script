@@ -242,8 +242,8 @@ If,%cb_ExtZst%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.zst","","W
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.* -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract program files."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -xr!uninstall.* -o#$q%^SIPARAM_1%#$q"
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract program files."
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -267,7 +267,7 @@ List,Get,%aLangMap%,%LangCodePos%,%LangCode%
 Run,%ScriptFile%,SetProgramArch
 
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%","Referer=https://www.win-rar.com/download.html",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

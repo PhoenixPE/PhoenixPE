@@ -102,7 +102,7 @@ Else,Set,%DismForceUnsigned%,""
 
 // Inject Drivers
 DISM,"/image:#$q%MountDir%#$q /Add-Driver /Driver:#$q%fb_DriversSrc%#$q /recurse /LogPath:#$q%DismLog%#$q%DismForceUnsigned%"
-If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
+If,Not,%^RET%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%^RET%]. Check the log for details."
 
 // Dism doesn't always unload hives correctly. Force unload just to make sure WimUnmout doesn't freak out.
 RegUnloadHives,Force,"Target=%MountDir%\Windows\System32\config"

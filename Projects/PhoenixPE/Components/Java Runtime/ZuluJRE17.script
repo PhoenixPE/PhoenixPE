@@ -115,7 +115,7 @@ RegUnloadHives
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -126,7 +126,7 @@ Echo,"Extracting files..."
 If,%SourceArch%,Equal,x86,Set,%ZipFolder%,%ZipFolder86%
 Else,Set,%ZipFolder%,%ZipFolder64%
 Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",%ProjectTemp%
-FileCopy,"%ProjectTemp%\%ZipFolder%\*.*",#1
+FileCopy,"%ProjectTemp%\%ZipFolder%\*.*",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -144,7 +144,7 @@ Echo,"Downloading %ScriptTitle%..."
 If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
 Else,Set,%DownloadURL%,%DownloadURLx86%
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

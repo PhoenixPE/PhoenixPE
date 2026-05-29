@@ -194,16 +194,16 @@ If,%cb_ContextMenu%,Equal,True,Begin
   // HKCU\Software\MPC-BE\ShellEx\Add and HKCU\Software\MPC-BE\ShellEx\Play
   If,Not,%Lang%,Equal,"en",Begin
     ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\mpcresources.%Lang%.dll#$q 33161 #$q%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini#$q"
-    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+    If,Not,%^RET%,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\Lang\mpcresources.%Lang%.dll#$q 33162 #$q%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini#$q"
-    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+    If,Not,%^RET%,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
   End
   Else,Begin
     // English doesn't have a resource .dll Use the .exe instead
     ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 33161 #$q%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini#$q"
-    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+    If,Not,%^RET%,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
 	ShellExecute,Hide,"%Tools%\%HostArch%\GetStringResource.exe","#$q%TargetPrograms%\%ProgramFolder%\%ProgramExe%#$q 33162 #$q%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini#$q"
-    If,Not,#r,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
+    If,Not,%^RET%,Equal,0,Echo,"WARNING: Localized string could not be extracted.",WARN
   End
   
   IniRead,"%ProjectTemp%\%ProgramFolder%\MPC-BE-Lang.ini","Strings",33161,%ShellContextMenuAdd%
@@ -383,7 +383,7 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Classes\.xesc","","MPC-BE"
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -394,11 +394,11 @@ System,SetLocal
 Echo,"Extracting program files..."
 Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
 FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
-If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [#r]."
-Else,List,Get,#r,1,%ProgramPath%
+If,%^RET%,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [%^RET%]."
+Else,List,Get,%^RET%,1,%ProgramPath%
 StrFormat,DirPath,%ProgramPath%,%ProgramPathFolder%
 StrFormat,EndTrim,%ProgramPathFolder%,"\",%ProgramPathFolder%
-FileCopy,"%ProgramPathFolder%\*.*",#1
+FileCopy,"%ProgramPathFolder%\*.*",%^SIPARAM_1%
 System,EndLocal
 
 [#DownloadProgram#]
@@ -406,7 +406,7 @@ System,EndLocal
 // Name...........: DownloadProgram
 // Description....: Download the program files from the author's website.
 // Syntax.........: Run,%ScriptFile%,DownloadProgram
-// Parameters.....: #1 - Arch to download (x86/x64)
+// Parameters.....:
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -417,7 +417,7 @@ Echo,"Downloading %ScriptTitle%..."
 If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
 Else,Set,%DownloadURL%,%DownloadURLx86%
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

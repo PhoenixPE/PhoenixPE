@@ -123,7 +123,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -134,7 +134,7 @@ Echo,"Extracting files..."
 // MSIExtract does not overwrite files, so we want to make sure we start with a clean dir...
 DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
 MSIExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\SourceDir\PFiles\grepWin\*.*",#1
+FileCopy,"%ProjectTemp%\%ProgramFolder%\SourceDir\PFiles\grepWin\*.*",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -154,7 +154,7 @@ If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
 Else,Set,%DownloadURL%,%DownloadURLx86%
 
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

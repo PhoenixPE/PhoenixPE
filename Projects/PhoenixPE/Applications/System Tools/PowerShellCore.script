@@ -99,12 +99,12 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 If,%SourceArch%,Equal,x64,Begin
   Echo,"Downloading %ScriptTitle% x64..."
   WebGet,%DownloadURLx64%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 End
 Else,Begin
   Echo,"Downloading %ScriptTitle% x86..."
   WebGet,%DownloadURLx86%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 End
 
 [#ClearDownloadCache#]

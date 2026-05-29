@@ -98,7 +98,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -111,8 +111,8 @@ Echo,"Extracting files..."
 // .lng file has Read-Only filesystem attribs so we run into issues if we try to copy over it
 FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\simplewall.lng"
 
-If,%SourceArch%,Equal,x64,FileCopy,"%ProjectTemp%\%ProgramFolder%\simplewall\64\*.*","#1"
-Else,FileCopy,"%ProjectTemp%\%ProgramFolder%\simplewall\32\*.*","#1"
+If,%SourceArch%,Equal,x64,FileCopy,"%ProjectTemp%\%ProgramFolder%\simplewall\64\*.*",%^SIPARAM_1%
+Else,FileCopy,"%ProjectTemp%\%ProgramFolder%\simplewall\32\*.*",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -128,7 +128,7 @@ Else,FileCopy,"%ProjectTemp%\%ProgramFolder%\simplewall\32\*.*","#1"
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#DownloadUpdates#]
 // ===============================================================================================================================
@@ -144,12 +144,12 @@ If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
 [DownloadUpdates]
 Echo,"Downloading the latest rules and translations..."
 WebGet,"%DownloadProfilesURL%","%TargetPrograms%\%ProgramFolder%",NOERR
-If,Not,#r,Equal,200,Echo,"Download profile_internal.sp failed: The code returned was [#r].",Warn
+If,Not,%^RET%,Equal,200,Echo,"Download profile_internal.sp failed: The code returned was [%^RET%].",Warn
 
 // .lng file has Read-Only filesystem attribs so we run into issues if we try to copy over it
 FileDeleteEx,"%TargetPrograms%\%ProgramFolder%\simplewall.lng"
 WebGet,"%DownloadLangURL%","%TargetPrograms%\%ProgramFolder%",NOERR
-If,Not,#r,Equal,200,Echo,"Download simplewall.lng failed: The code returned was [#r].",Warn
+If,Not,%^RET%,Equal,200,Echo,"Download simplewall.lng failed: The code returned was [%^RET%].",Warn
 
 [#LaunchProgram#]
 // ===============================================================================================================================

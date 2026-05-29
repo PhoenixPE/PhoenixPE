@@ -136,8 +136,8 @@ RegHiveUnLoad,Tmp_System
 // ===============================================================================================================================
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
-// Syntax.........: Run,%ScriptFile%,ExtractProgram
-// Parameters.....: #1 - Destination Directory
+// Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -147,7 +147,7 @@ RegHiveUnLoad,Tmp_System
 Echo,"Extracting Program Files..."
 // Make sure we have a clean extract folder, as we will be renaming some files later
 DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
-InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -163,7 +163,7 @@ InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

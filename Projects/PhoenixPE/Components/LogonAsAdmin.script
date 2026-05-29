@@ -152,7 +152,7 @@ If,%cb_StartMenuShc%,Equal,True,AddShortcut,StartMenu,%txt_StartMenuFolder%,%txt
 If,ExistFile,"%TargetSystem32%\lsm.dll",Begin
   Echo,"Patching Local Session Manager..."
   Binmay,"-u #$q%TargetSystem32%\lsm.dll#$q -s 83F90D770AB8B03000000FA3C872 -r 83F90D770AB8B03000000FA3C8EB"
-  If,Not,#r,Equal,0,Halt,"ERROR: Patching [%TargetSystem32%\lsm.dll] failed. The error returned was [#r]."
+  If,Not,%^RET%,Equal,0,Halt,"ERROR: Patching [%TargetSystem32%\lsm.dll] failed. The error returned was [%^RET%]."
 End
 
 [#ExtractProgram#]
@@ -160,7 +160,7 @@ End
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:

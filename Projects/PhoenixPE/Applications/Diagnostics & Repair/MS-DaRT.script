@@ -74,7 +74,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -97,14 +97,14 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%DaRT-MSI%",Begin
   // Doesn't matter which Arch we extract for the .msi. Both versions contain x86 and x64 tools.
   Echo,"Extracting the Microsoft Desktop Optimization Pack ISO file..."
   7z,"e -y #$q%fb_SrcFile%#$q #$qDaRT\DaRT 10\Installers\%Lang%\%SourceArch%\%DaRT-MSI%#$q -o#$q%ProgramsCache%\%ProgramFolder%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%DaRT-MSI%]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%DaRT-MSI%]."
 End
 Else,Echo,"Extracting from cache..."
 
 // Extract the DaRT Tools CAB file
 Echo,"Unpacking the DaRT tools archive from setup..."
 7z,"e -y #$q%ProgramsCache%\%ProgramFolder%\%DaRT-MSI%#$q Tools%SourceArch%.cab -o#$q%ProjectTemp%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [Tools%SourceArch%.cab] from [%DaRT-MSI%]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [Tools%SourceArch%.cab] from [%DaRT-MSI%]."
 
 // Extract the DaRT Tools from the CAB file
 Echo,"Extracting the DaRT tools..."

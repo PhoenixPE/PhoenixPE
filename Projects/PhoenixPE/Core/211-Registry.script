@@ -342,16 +342,16 @@ If,Not,%DriveLetter%,Equal,"X:\",Begin
   Echo,"Configuring [X:\] as the system drive letter..."
   // Software Hive
   ShellExecute,Hide,"%Tools%\x86\RegFind.exe","-p HKEY_LOCAL_MACHINE\Tmp_Software -y C:\ -r X:\"
-  If,Not,#r,Equal,0,Halt,"RegFind failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,0,Halt,"RegFind failed: The code returned was [%^RET%]."
   // System Hive
   ShellExecute,Hide,"%Tools%\x86\RegFind.exe","-p HKEY_LOCAL_MACHINE\Tmp_System -y C:\ -r X:\"
-  If,Not,#r,Equal,0,Halt,"RegFind failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,0,Halt,"RegFind failed: The code returned was [%^RET%]."
   // Install Software Hive
   ShellExecute,Hide,"%Tools%\x86\RegFind.exe","-p HKEY_LOCAL_MACHINE\Tmp_Install_Software -y C:\ -r X:\"
-  If,Not,#r,Equal,0,Halt,"RegFind failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,0,Halt,"RegFind failed: The code returned was [%^RET%]."
   // Install System Hive
   ShellExecute,Hide,"%Tools%\x86\RegFind.exe","-p HKEY_LOCAL_MACHINE\Tmp_Install_System -y C:\ -r X:\"
-  If,Not,#r,Equal,0,Halt,"RegFind failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,0,Halt,"RegFind failed: The code returned was [%^RET%]."
 End
 
 [#Cleanup-TransactionLogs#]

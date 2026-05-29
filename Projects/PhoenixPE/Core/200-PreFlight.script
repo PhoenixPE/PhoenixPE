@@ -94,7 +94,7 @@ End
 // Check Output drive type
 StrFormat,Left,%OutputDir%,3,%DriveLetter%
 DriveGetType,%DriveLetter%
-Set,%DriveType%,#r
+Set,%DriveType%,%^RET%
 If,%DriveType%,Equal,"",Begin
   // Try to catch any invalid paths/drive letters
   Message,"Error: Could not determine the drive type for [%DriveLetter%]. Make sure your path exists.",Error
@@ -232,15 +232,15 @@ If,Not,ExistFile,"%Tools%\%HostArch%\Oscdimg\oscdimg.exe",Run,%ScriptFile%,GetWa
 // Name...........: ErrMissingTool
 // Description....: Present an error message and halt the build if a required .exe is missing from the %Tools% folder.
 // Syntax.........: Run,%ScriptFile%,<ToolName>
-// Parameters.....: #1 - Tool Name
+// Parameters.....: ToolName - The name of the missing tool
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: INTERNAL FUNCTION
 // Related........: [CheckTools]
 // ===============================================================================================================================
 [ErrMissingTool]
-Message,"The build cannot continue because the required application [ #1 ] is missing.#$x#$xPlease re-download the project.#$x#$x If the issue persists you may need to add an exception for the [%Tools%] folder in your anti-virus software in order to prevent false-positives from recurring.",ERROR
-Halt,"The build cannot continue because [ #1 ] is missing."
+Message,"The build cannot continue because the required application [ %^SIPARAM_1% ] is missing.#$x#$xPlease re-download the project.#$x#$x If the issue persists you may need to add an exception for the [%Tools%] folder in your anti-virus software in order to prevent false-positives from recurring.",ERROR
+Halt,"The build cannot continue because [ %^SIPARAM_1% ] is missing."
 
 [#GetWaikTools#]
 // ===============================================================================================================================

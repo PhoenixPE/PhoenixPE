@@ -61,7 +61,7 @@ StrFormat,PATH,%DismLog%,%DismLogPath%
 If,Not,ExistDir,%DismLogPath%,DirMake,%DismLogPath%
 
 DISM,"/image:#$q%TargetDir%#$q /Add-Driver /Driver:#$q%ProjectTemp%\%ProgramFolder%#$q /recurse /LogPath:#$q%DismLog%#$q"
-If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
+If,Not,%^RET%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%^RET%]. Check the log for details."
 // Dism doesn't always unload hives correctly. Force unload just to make sure.
 RegUnloadHives,Force,"Target=%TargetSystem32%\config"
 
@@ -79,7 +79,7 @@ RegUnloadHives,Force,"Target=%TargetSystem32%\config"
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","Referer=https://www.intel.com/",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

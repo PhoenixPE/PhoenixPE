@@ -60,7 +60,7 @@ If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 Echo,"Extracting files..."
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
 7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q * -xr!UpdateCheck.exe -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"ERROR: Failed to extract [%SetupExe%]. The error code returned was [#r]."
+If,Not,%^RET%,Equal,0,Halt,"ERROR: Failed to extract [%SetupExe%]. The error code returned was [%^RET%]."
 
 If,%SourceArch%,Equal,x64,Set,%COMDLL%,%COMDLL-x64%
 Else,Set,%COMDLL%,%COMDLL-x86%
@@ -272,7 +272,7 @@ RegHiveUnload,Tmp_Software
 [DownloadProgram]
 Echo,"Downloading the latest version of %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

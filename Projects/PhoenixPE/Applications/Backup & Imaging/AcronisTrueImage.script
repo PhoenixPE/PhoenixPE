@@ -153,36 +153,36 @@ Echo,"Adding iSCSI Support..."
 If,%SourceArch%,Equal,x64,Begin
   // System32
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\iSCSI\iscsicli.exe Files64\iSCSI\iscsicpl.cpl Files64\iSCSI\iscsidip.dll Files64\iSCSI\iscsidsc.dll Files64\iSCSI\iscsiexe.exe Files64\iSCSI\iscsilog.dll Files64\iSCSI\iscsipp.dll Files64\iSCSI\iscsium.dll Files64\iSCSI\iscsiwip.dll Files64\iSCSI\iscsiwmi.dll Files64\iSCSI\iscsixip.dll -o#$q%TargetSystem32%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // Drivers
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\iSCSI\iscsiprt.sys Files64\iSCSI\msiscsi.sys -o#$q%TargetSystem32%\Drivers\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // INF
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\iSCSI\iscsi.inf -o#$q%TargetWindows%\INF\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // Windows\iSCSI
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\iSCSI\iscsi.cat Files64\iSCSI\iscsi.inf Files64\iSCSI\iscsidsc.mof Files64\iSCSI\iscsievt.mof Files64\iSCSI\iscsihba.mof Files64\iSCSI\iscsilog.dll Files64\iSCSI\iscsiprf.mof Files64\iSCSI\iscsiprt.sys Files64\iSCSI\iscsirem.mof Files64\iSCSI\mpdev.inf Files64\iSCSI\mpdev.sys Files64\iSCSI\mpio.cat Files64\iSCSI\mpio.inf Files64\iSCSI\mpio.sys Files64\iSCSI\mpspfltr.sys Files64\iSCSI\msiscdsm.inf Files64\iSCSI\msiscdsm.sys Files64\iSCSI\msiscsi.sys -o#$q%TargetWindows%\iSCSI\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
 End
 Else,Begin
   // System32
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\iSCSI\iscsicli.exe Files32\iSCSI\iscsicpl.cpl Files32\iSCSI\iscsidip.dll Files32\iSCSI\iscsidsc.dll Files32\iSCSI\iscsiexe.exe Files32\iSCSI\iscsilog.dll Files32\iSCSI\iscsipp.dll Files32\iSCSI\iscsium.dll Files32\iSCSI\iscsiwip.dll Files32\iSCSI\iscsiwmi.dll Files32\iSCSI\iscsixip.dll -o#$q%TargetSystem32%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // Drivers
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\iSCSI\iscsiprt.sys Files32\iSCSI\msiscsi.sys -o#$q%TargetSystem32%\Drivers\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // INF
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\iSCSI\iscsi.inf -o#$q%TargetWindows%\INF\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // Windows\iSCSI
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\iSCSI\iscsi.cat Files32\iSCSI\iscsi.inf Files32\iSCSI\iscsidsc.mof Files32\iSCSI\iscsievt.mof Files32\iSCSI\iscsihba.mof Files32\iSCSI\iscsilog.dll Files32\iSCSI\iscsiprf.mof Files32\iSCSI\iscsiprt.sys Files32\iSCSI\iscsirem.mof Files32\iSCSI\mpdev.inf Files32\iSCSI\mpdev.sys Files32\iSCSI\mpio.cat Files32\iSCSI\mpio.inf Files32\iSCSI\mpio.sys Files32\iSCSI\mpspfltr.sys Files32\iSCSI\msiscdsm.inf Files32\iSCSI\msiscdsm.sys Files32\iSCSI\msiscsi.sys -o#$q%TargetWindows%\iSCSI\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
 End
   
 // iScsiPrt Service
@@ -253,47 +253,47 @@ Echo,"Extracting Program Files..."
 If,%SourceArch%,Equal,x64,Begin
   // x64 Program Files
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\auto_reactivate64.bin Files\bootwiz64.efi -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."  
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."  
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\* -x!Files64\Drivers\ -x!Files64\IScsi\ -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // VC Runtime
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\Drivers\Microsoft.VC120.CRT\* -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // Drivers
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\Drivers\snapapi.dll Files64\Drivers\volume_tracker_driver_api.dll -o#$q%TargetSystem32%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files64\Drivers\* -x!Files64\Drivers\Microsoft.VC120.CRT\ -x!Files64\Drivers\snapapi.dll -x!Files64\Drivers\volume_tracker_driver_api.dll -o#$q%TargetSystem32%\Drivers\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\Drivers\snapapint64.bin -o#$q%TargetSystem32%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   If,ExistFile,"%TargetSystem32%\snapapint64.dll",FileDeleteEx,"%TargetSystem32%\snapapint64.dll"
   FileRename,"%TargetSystem32%\snapapint64.bin","%TargetSystem32%\snapapint64.dll"
 End
 Else,Begin
   // x86 Program Files
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\* -x!Files32\Drivers\ -x!Files32\IScsi\ -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // VC Runtime
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\Drivers\Microsoft.VC120.CRT\* -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   
   // Drivers
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\Drivers\snapapi.dll Files32\Drivers\volume_tracker_driver_api.dll -o#$q%TargetSystem32%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files32\Drivers\* -x!Files32\Drivers\Microsoft.VC120.CRT\ -x!Files32\Drivers\snapapi.dll -x!Files32\Drivers\volume_tracker_driver_api.dll -o#$q%TargetSystem32%\Drivers\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\Drivers\snapapint.bin -o#$q%TargetSystem32%\#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
   If,ExistFile,"%TargetSystem32%\snapapint.dll",FileDeleteEx,"%TargetSystem32%\snapapint.dll"
   FileRename,"%TargetSystem32%\snapapint.bin","%TargetSystem32%\snapapint.dll"
 End
 
 // x86/x64 Common Files
 7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\WinPE.zip#$q Files\auto_reactivate.bin Files\bootmenu.bin Files\bootwiz.bin Files\bootwiz32.efi -o#$q%TargetPrograms%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WinPE.zip]."
 FileCopy,"%TargetPrograms%\%ProgramFolder%\bootmenu.bin","%TargetPrograms%\%ProgramFolder%\gen_bootmenu.bin"
 
 [#DownloadProgram#]
@@ -311,14 +311,14 @@ FileCopy,"%TargetPrograms%\%ProgramFolder%\bootmenu.bin","%TargetPrograms%\%Prog
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,"%DownloadURL%","%ProjectTemp%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [%^RET%]."
 
 Set,%MsiFile%,"AcronisTrueImage.msi"
 
 // Extract the .msi installer
 Echo,"Extracting installer..."
 7z,"e -y #$q%ProjectTemp%\%ProgramFolder%\%SetupFile%#$q %MsiFile% -o#$q%ProjectTemp%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Failed to extract .msi from [%SetupFile%]: The code returned was [#r]."
+If,Not,%^RET%,Equal,0,Halt,"Failed to extract .msi from [%SetupFile%]: The code returned was [%^RET%]."
 
 // Extract compressed WinPE.zip from .msi installer
 Echo,"Extracting WinPE.zip from installer..."
@@ -327,12 +327,12 @@ MSIExtract,"%ProjectTemp%\%ProgramFolder%\%MsiFile%","%ProjectTemp%\%ProgramFold
 // Find the full path to WinPE_resources.dll
 Echo,"Decompressing WinPE Resources..."
 FileSearch,"%ProjectTemp%\%ProgramFolder%","WinPE_resources.dll"
-If,#r,Equal,"",Halt,"Failed to find [WinPE_resources.dll]: The code returned was [#r]."
-Else,List,Get,#r,1,%WinPEResPath%
+If,%^RET%,Equal,"",Halt,"Failed to find [WinPE_resources.dll]: The code returned was [%^RET%]."
+Else,List,Get,%^RET%,1,%WinPEResPath%
 
 // Unpack compressed WinPE.zip from WinPE_resources.dll
 7z,"e -y #$q%WinPEResPath%#$q WinPE.zip -o#$q%ProgramsCache%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Failed to extract WinPE.zip from [%WinPEResPath%]: The code returned was [#r]."
+If,Not,%^RET%,Equal,0,Halt,"Failed to extract WinPE.zip from [%WinPEResPath%]: The code returned was [%^RET%]."
 
 // Cleanup
 Set,%WinPEResPath%,Nil

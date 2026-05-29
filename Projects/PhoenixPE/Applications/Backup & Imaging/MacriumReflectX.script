@@ -166,7 +166,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: PeAgent.exe does a bunch of annoying crap we don't need, such as running wpeinit, trying to start network adapters
@@ -182,15 +182,15 @@ StrFormat,EndTrim,%ExtractDir%,"\",%ExtractDir%
 
 // Extract .cab files from setup
 7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q Reflect.cab WaikFiles.cab -o#$q%ProjectTemp%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 // Extract .cab files - Reflect from WaikFiles is only x86 at the time this script was written so we use Reflect.cab.
 7z,"e -y -r- #$q%ProjectTemp%\%ProgramFolder%\Reflect.cab#$q ReflectBin.exe -o#$q%ProjectTemp%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [Reflect.cab]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [Reflect.cab]."
 FileCopy,"%ProjectTemp%\%ProgramFolder%\ReflectBin.exe","%ExtractDir%\Reflect.exe"
 
 7z,"e -y -r- #$q%ProjectTemp%\%ProgramFolder%\WaikFiles.cab#$q WaikFiles.exe -o#$q%ProjectTemp%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WaikFiles.cab]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WaikFiles.cab]."
 
 If,%SourceArch%,Equal,x64,Begin
   GetBinaryResource,"%ProjectTemp%\%ProgramFolder%\WAIKFiles.exe","DAT","##151","%ExtractDir%\PeAgent.exe"
@@ -261,7 +261,7 @@ If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
 Else,Set,%DownloadURL%,%DownloadURLx86%
 
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

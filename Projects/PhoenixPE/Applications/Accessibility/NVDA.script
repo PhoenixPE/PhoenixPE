@@ -125,7 +125,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -135,7 +135,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 Echo,"Extracting files..."
 7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q * -o#$q%ProjectTemp%\%ProgramFolder%#$q"
 FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\$PLUGINSDIR\app\uninstall.exe"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\$PLUGINSDIR\app\*.*",#1
+FileCopy,"%ProjectTemp%\%ProgramFolder%\$PLUGINSDIR\app\*.*",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -151,7 +151,7 @@ FileCopy,"%ProjectTemp%\%ProgramFolder%\$PLUGINSDIR\app\*.*",#1
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
  [#LaunchProgram#]
 // ===============================================================================================================================

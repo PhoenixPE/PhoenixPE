@@ -73,7 +73,7 @@ RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","DoubleClickSpeed",%DblCl
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cb_TurnOnClickLock%,Equal,True,BitSet,%PrefMask%,2,7,8
 Else,BitClear,%PrefMask%,2,7,8
-RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%^RET%
 
 // ClickLock Duration (Min=200, Max=2200, Step=200)
 List,Pos,%aClickLockMap%,%cmb_ClickLockDuration%,%ClickLockDurationPos%
@@ -85,7 +85,7 @@ RegWrite,HKLM,REG_DWORD,"Tmp_Default\Control Panel\Desktop","ClickLockTime",%Cli
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cb_EnablePointerShadow%,Equal,True,BitSet,%PrefMask%,2,5,8
 Else,BitClear,%PrefMask%,2,5,8
-RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%^RET%
 
 // Pointer Speed (Slow-1, Fast=20, Step=2)
 List,Pos,%aMouseSensitivityMap%,%cmb_PointerSpeed%,%MouseSensitivityPos%
@@ -122,13 +122,13 @@ Else,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Mouse","MouseTrails",0
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cb_HidePointerWhileTyping%,Equal,True,BitSet,%PrefMask%,3,0,8
 Else,BitClear,%PrefMask%,3,0,8
-RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%^RET%
 
 // Show Location when press CTRL
 RegRead,HKLM,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%PrefMask%
 If,%cb_ShowPointerLocCtl%,Equal,True,BitSet,%PrefMask%,2,6,8
 Else,BitClear,%PrefMask%,2,6,8
-RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",#r
+RegWrite,HKLM,REG_BINARY,"Tmp_Default\Control Panel\Desktop","UserPreferencesMask",%^RET%
 
 // Vertical Scrolling (Screen=-1, Line Min=1, Line Max=100, Step=1)
 If,%rbtn_VerticalScrollLines%,Equal,True,RegWrite,HKLM,REG_SZ,"Tmp_Default\Control Panel\Desktop","WheelScrollLines",%num_VerticalScrollLines%

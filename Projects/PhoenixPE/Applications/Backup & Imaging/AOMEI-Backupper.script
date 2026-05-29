@@ -142,11 +142,11 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 Echo,"Extracting Program Files..."
 If,%SourceArch%,Equal,x64,Begin
   Innounp,"-x -b -a -d#$q%TargetPrograms%\%ProgramFolder%#$q -c#$q{app}\Winpe64\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q {app}\Winpe64\*.*"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 End
 Else,Begin
   Innounp,"-x -b -a -d#$q%TargetPrograms%\%ProgramFolder%#$q -c#$q{app}\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
   DirDeleteEx,"%TargetPrograms%\%ProgramFolder%\drivers"
   DirDeleteEx,"%TargetPrograms%\%ProgramFolder%\Winpe64"
 End
@@ -158,7 +158,7 @@ End
 Else,Begin
   Innounp,"-x -b -a -d#$q%TargetSystem32%\drivers#$q -c#$q{app}\driver\i386\#$q #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q {app}\driver\i386\*.sys"
 End
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -174,7 +174,7 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [%^RET%]."
 
 [#ToggleRegKey#]
 // ===============================================================================================================================

@@ -105,7 +105,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -116,19 +116,19 @@ Echo,"Extracting files..."
 
 // Extract .cab files from setup
 7z,"e -y -r- #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q Reflect.cab LibFiles.cab WaikFiles.cab -o#$q%ProjectTemp%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 // Extract .cab files
 Set,%IncludeFiles%,"AESDLL.dll LE5.dll *.rtf PrimoBurner64.dll psmounterex.sys PSVolAcc.sys ReflectTheme.dll"
 7z,"e -y -r- #$q%ProjectTemp%\%ProgramFolder%\LibFiles.cab#$q %IncludeFiles% -o#$q%ProjectTemp%\%ProgramFolder%\files#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [LibFiles.cab]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [LibFiles.cab]."
 
 Set,%IncludeFiles%,"ReflectBin.exe oledlg.dll"
 7z,"e -y -r- #$q%ProjectTemp%\%ProgramFolder%\Reflect.cab#$q %IncludeFiles% -o#$q%ProjectTemp%\%ProgramFolder%\files#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [Reflect.cab]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [Reflect.cab]."
 
 7z,"e -y -r- #$q%ProjectTemp%\%ProgramFolder%\WaikFiles.cab#$q WaikFiles.exe -o#$q%ProjectTemp%\%ProgramFolder%\#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [WaikFiles.cab]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [WaikFiles.cab]."
 
 ; Extract Redeploy
 If,%SourceArch%,Equal,x64,Begin,
@@ -142,7 +142,7 @@ End
 
 If,ExistFile,"%ProjectTemp%\%ProgramFolder%\files\Reflect.exe",FileDeleteEx,"%ProjectTemp%\%ProgramFolder%\files\Reflect.exe"
 FileRename,"%ProjectTemp%\%ProgramFolder%\files\ReflectBin.exe","%ProjectTemp%\%ProgramFolder%\files\Reflect.exe"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\files\*.*",#1
+FileCopy,"%ProjectTemp%\%ProgramFolder%\files\*.*",%^SIPARAM_1%
 
 [#ToggleRegKey#]
 // ===============================================================================================================================
@@ -177,7 +177,7 @@ If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
 Else,Set,%DownloadURL%,%DownloadURLx86%
 
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

@@ -186,7 +186,7 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows\CurrentVersion\Shell Extens
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: TeraCopy an run in installed mode (settings in AppData) or portable mode (settings in program folder).
@@ -198,12 +198,12 @@ Echo,"Extracting files..."
 
 DirMake,"%ProjectTemp%\%ProgramFolder%"
 ShellExecute,Hide,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","/extract %ProjectTemp%\%ProgramFolder%"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 // Teracopy uses an annoying folder structure that changes with each version.
 FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
-If,#r,Equal,"",Halt,"Failed to find [%ProgramExe%] in the setup file: The code returned was [#r]."
-Else,List,Get,#r,1,%ProgramExePath%
+If,%^RET%,Equal,"",Halt,"Failed to find [%ProgramExe%] in the setup file: The code returned was [%^RET%]."
+Else,List,Get,%^RET%,1,%ProgramExePath%
 
 StrFormat,DirPath,%ProgramExePath%,%ProgramExeDir%
 StrFormat,EndTrim,%ProgramExeDir%,"\",%ProgramExeDir%
@@ -217,7 +217,7 @@ FileCopy,"%ProgramExeDir%\AppDataFolder\%ProgramFolder%\*.*",%ProgramExeDir%
 DirDeleteEx,"%ProgramExeDir%\AppDataFolder"
 PathMove,"%ProgramExeDir%\%ProgramFolder%\Scripts\","%ProgramExeDir%\App\Scripts\"
 
-FileCopy,"%ProgramExeDir%\*.*",#1
+FileCopy,"%ProgramExeDir%\*.*",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -233,7 +233,7 @@ FileCopy,"%ProgramExeDir%\*.*",#1
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

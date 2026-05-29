@@ -172,7 +172,7 @@ WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
 Echo,"Enabling feature: .NET Framework 3..."
 If,Not,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
   DISM,"/image:#$q%MountDir%#$q /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:#$q%SourceDir%\sources\sxs#$q /LogPath:#$q%DismLog%#$q"
-  If,Not,#r,Equal,0,Run,%ScriptFile%,AbortFeature
+  If,Not,%^RET%,Equal,0,Run,%ScriptFile%,AbortFeature
 End
 Else,Message,".NET Framework 3 is already enabled!",Warning
   
@@ -217,7 +217,7 @@ WimMount,%SourceInstallWim%,%SourceInstallWimImage%,%MountDir%,READWRITE
 Echo,"Disabling feature: .NET Framework 3..."
 If,ExistFile,"%MountDir%\Windows\Microsoft.NET\Framework\v2.0.50727\InstallUtil.exe",Begin
   DISM,"/image:#$q%MountDir%#$q /Disable-Feature /FeatureName:NetFx3 /LogPath:#$q%DismLog%#$q"
-  If,Not,#r,Equal,0,Run,%ScriptFile%,AbortFeature
+  If,Not,%^RET%,Equal,0,Run,%ScriptFile%,AbortFeature
 End
 Else,Message,".NET Framework 3 is already disabled!",Warning
   
@@ -239,9 +239,9 @@ WimUnmount,%MountDir%,COMMIT
 // Related........: EnableFx3, DisableFx3
 // ===============================================================================================================================
 [AbortFeature]
-Echo,"Aborting operation...#$xDism.exe terminated with error code: [#r]. Check the log for details."
+Echo,"Aborting operation...#$xDism.exe terminated with error code: [%^RET%]. Check the log for details."
 WimUnmount,%MountDir%,DISCARD
-Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
+Halt,"Error: Dism.exe terminated with error code: [%^RET%]. Check the log for details."
 
 [#ViewDismLog#]
 // ===============================================================================================================================

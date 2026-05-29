@@ -135,24 +135,24 @@ RegUnLoadHives
 // Name...........: SetWallpaper
 // Description....: Set an image as the desktop wallpaper.
 // Syntax.........: SetWallpaper,<Image>
-// Parameters.....: #1 <Image> - The full path to the image file.
+// Parameters.....: Image - The full path to the image file.
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: The image will be converted to the .jpg format if required
+// Remarks........: The image will be automatically converted to the .jpg format if required
 // Related........: 
 // ===============================================================================================================================
 [SetWallpaper]
-If,Not,ExistFile,#1,Halt,"ERROR: The specified image [#1] does not exist."
-StrFormat,EXT,#1,%WallpaperExt%
+If,Not,ExistFile,%^SIPARAM_1%,Halt,"ERROR: The specified image [%^SIPARAM_1%] does not exist."
+StrFormat,EXT,%^SIPARAM_1%,%WallpaperExt%
 If,%WallpaperExt%,Equal,"",Halt,"ERROR: Unknown file extension."
   
 If,%WallpaperExt%,Equal,".jpg",Begin
   // Image is already a .jpg just copy it 
-  FileCopy,#1,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%"
+  FileCopy,%^SIPARAM_1%,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%"
 End
 Else,Begin
   // Image is not a .jpg so we need to convert it
-  ConvertImage,#1,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%"
+  ConvertImage,%^SIPARAM_1%,"%TargetWindows%\Web\Wallpaper\Windows\%WallpaperFileName%"
 End
 
 [#ColorMeBadd#]
@@ -182,9 +182,9 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 // ===============================================================================================================================
 // Name...........: CreatePixelBmp
 // Description....: Create a 1px bitmap image given a RGB color string.
-// Syntax.........: 
-// Parameters.....: #1 - RGBString - RGB Color string (eg. 0 78 152)
-//                  #2 - DestPath - Full path where the bitmap will be saved.
+// Syntax.........: Run,%ScriptFile%,CreatePixelBmp,<RGBString>,<DestPath>
+// Parameters.....: RGBString - RGB Color string (eg. 0 78 152)
+//                  DestPath - Full path where the bitmap will be saved.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Win11 22H2? broke setting the background color. Explorer resets the Background key to 0 0 0 on boot.

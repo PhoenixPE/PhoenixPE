@@ -90,7 +90,7 @@ If,Not,%cmb_Language%,Equal,"English",Begin
   If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%LangZip%",Begin
     Echo,"Downloading [%cmb_Language%] language file..."
     WebGet,https://www.xyplorer.com/languages/%LangZip%,"%ProgramsCache%\%ProgramFolder%\%LangZip%",NOERR
-    If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+    If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
   End
 
   Decompress,"%ProgramsCache%\%ProgramFolder%\%LangZip%","%TargetPrograms%\%ProgramFolder%\Data"
@@ -177,7 +177,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -185,7 +185,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -205,7 +205,7 @@ If,%SourceArch%,Equal,x64,Set,%DownloadURL%,%DownloadURLx64%
 Else,Set,%DownloadURL%,%DownloadURLx86%
 
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

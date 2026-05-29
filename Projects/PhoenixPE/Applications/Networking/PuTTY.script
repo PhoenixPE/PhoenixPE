@@ -114,8 +114,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: DownloadProgram
 // Description....: Download the program files from the author's website.
 // Syntax.........: Run,%ScriptFile%,DownloadProgram,<URL>,<Dest>
-// Parameters.....: #1 - URL to download
-//                  #2 - Destination File
+// Parameters.....: URL - URL to download
+//                  Dest - Destination File
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -123,8 +123,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-WebGet,#1,#2,NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+WebGet,%^SIPARAM_1%,%^SIPARAM_2%,NOERR
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

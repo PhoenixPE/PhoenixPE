@@ -92,7 +92,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -107,12 +107,12 @@ StrFormat,Pos,".7z|.rar|.zip",%Ext%,%IsArchive%
 
 If,%IsArchive%,Bigger,0,Begin
   // Unpack user supplied archive
-  Decompress,%SetupFile%,#1
+  Decompress,%SetupFile%,%^SIPARAM_1%
 End
 Else,If,%Ext%,Equal,".exe",Begin
   // Unpack InnoSetup
   InnoExtract,%SetupFile%,"%ProjectTemp%\%ProgramFolder%"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{App}\*.*",#1
+  FileCopy,"%ProjectTemp%\%ProgramFolder%\{App}\*.*",%^SIPARAM_1%
 End
 Else,Begin
   StrFormat,FileName,%SetupFile%,%FileName%

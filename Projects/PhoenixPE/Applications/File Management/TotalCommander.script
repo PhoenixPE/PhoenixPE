@@ -240,7 +240,7 @@ End
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -249,17 +249,17 @@ End
 [ExtractProgram]
 Echo,"Extracting files..."
 7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q INSTALL.CAB -o#$q%ProjectTemp%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
-Decompress,"%ProjectTemp%\%ProgramFolder%\INSTALL.CAB",#1
+Decompress,"%ProjectTemp%\%ProgramFolder%\INSTALL.CAB",%^SIPARAM_1%
 
-FileCopy,"#1\e\TOTALCMD.CHM",#1
-FileCopy,"#1\e\KEYBOARD.TXT",#1
+FileCopy,"%^SIPARAM_1%\e\TOTALCMD.CHM",%^SIPARAM_1%
+FileCopy,"%^SIPARAM_1%\e\KEYBOARD.TXT",%^SIPARAM_1%
 
-DirDeleteEx,"#1\d"
-DirDeleteEx,"#1\e"
-FileDeleteEx,"#1\TCUNIN??.EXE"
-FileDeleteEx,"#1\*.WUL"
+DirDeleteEx,"%^SIPARAM_1%\d"
+DirDeleteEx,"%^SIPARAM_1%\e"
+FileDeleteEx,"%^SIPARAM_1%\TCUNIN??.EXE"
+FileDeleteEx,"%^SIPARAM_1%\*.WUL"
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -276,7 +276,7 @@ FileDeleteEx,"#1\*.WUL"
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","Referer=https://www.ghisler.com/",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#SetProgramArch#]
 // ===============================================================================================================================

@@ -206,7 +206,7 @@ If,Not,%TimeZone%,Equal,Default,Set,%DismArg%,"%DismArg% /Set-TimeZone:#$q%TimeZ
 If,Not,%DismArg%,Equal,"",Begin
   Echo,"Configuring International Settings..."
   DISM,"/image:#$q%TargetDir%#$q %DismArg% /LogPath:#$q%DismLog%#$q"
-  If,Not,#r,Equal,0,Halt,"Error: Dism.exe terminated with error code: [#r]. Check the log for details."
+  If,Not,%^RET%,Equal,0,Halt,"Error: Dism.exe terminated with error code: [%^RET%]. Check the log for details."
 End
 
 // Create an empty User Profile registry key for the International Control Panel

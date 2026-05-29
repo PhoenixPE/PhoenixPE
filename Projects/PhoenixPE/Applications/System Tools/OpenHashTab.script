@@ -169,7 +169,7 @@ RegHiveUnLoad,Tmp_Software
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -177,10 +177,10 @@ RegHiveUnLoad,Tmp_Software
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -o#$q#1#$q"
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -o#$q%^SIPARAM_1%#$q"
 
 // Debug symbols take up alot of space...
-FileDelete,"#1\*.pdb"
+FileDelete,"%^SIPARAM_1%\*.pdb"
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -196,7 +196,7 @@ FileDelete,"#1\*.pdb"
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

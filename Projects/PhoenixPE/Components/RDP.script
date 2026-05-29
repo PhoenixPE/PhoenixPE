@@ -277,7 +277,7 @@ RequireDriver,tsgenericusbdriver.inf
 If,ExistFile,"%TargetSystem32%\Windows.UI.CredDialogController.dll",Begin
   Echo,"Patching Windows.UI.CredDialogController.dll..."
   Binmay,"-u #$q%TargetSystem32%\Windows.UI.CredDialogController.dll#$q -s u:MiniNT -r u:ZiniNT"
-  If,Not,#r,Equal,0,Halt,"ERROR: Patching [%TargetSystem32%\Windows.UI.CredDialogController.dll] failed. The error returned was [#r]."
+  If,Not,%^RET%,Equal,0,Halt,"ERROR: Patching [%TargetSystem32%\Windows.UI.CredDialogController.dll] failed. The error returned was [%^RET%]."
 End
 
 [#SetDefaultOptions#]

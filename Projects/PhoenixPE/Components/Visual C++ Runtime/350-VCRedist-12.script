@@ -94,12 +94,12 @@ Echo,"Downloading %ProgramTitle%..."
 If,%SourceArch%,Equal,x64,Begin
   Echo,"Downloading the MS Visual C++ x64 Runtime..."
   WebGet,%DownloadURLx64%,"%ProgramsCache%\%ProgramFolder%\%SetupFilex64%",NOERR
-  If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 End
 
 Echo,"Downloading the MS Visual C++ x86 Runtime..."
 WebGet,%DownloadURLx86%,"%ProgramsCache%\%ProgramFolder%\%SetupFilex86%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

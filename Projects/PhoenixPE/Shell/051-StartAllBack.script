@@ -55,7 +55,7 @@ If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 Echo,"Extracting files..."
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",Run,%ScriptFile%,DownloadProgram
 7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupExe%#$q * -o#$q%TargetPrograms%\%ProgramFolder%#$q"
-If,Not,#r,Equal,0,Halt,"ERROR: Failed to extract [%SetupExe%]. The error code returned was [#r]."
+If,Not,%^RET%,Equal,0,Halt,"ERROR: Failed to extract [%SetupExe%]. The error code returned was [%^RET%]."
 
 FileVersion,"%TargetPrograms%\%ProgramFolder%\StartAllBackX64.dll",%ExeVer%
 Echo,"StartAllBack v%ExeVer%"
@@ -441,7 +441,7 @@ RegRead,HKLM,"Tmp_Default\Software\StartIsBack\Taskbaz","Settings",%TaskbazSetti
 If,%cb_TaskbarAutoHide%,Equal,True,BitSet,%TaskbazSettings%,9,0,8
 Else,BitClear,%TaskbazSettings%,9,0,8
 
-Set,%NewTaskbazSettings%,#r
+Set,%NewTaskbazSettings%,%^RET%
 RegWrite,HKLM,REG_BINARY,"Tmp_Default\Software\StartIsBack\Taskbaz","Settings",%NewTaskbazSettings%
 
 // Segments (? TaskbarOneSegment)
@@ -575,7 +575,7 @@ RegHiveUnload,Tmp_Software
 [DownloadProgram]
 Echo,"Downloading the latest version of %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupExe%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#ClearDownloadCache#]
 // ===============================================================================================================================

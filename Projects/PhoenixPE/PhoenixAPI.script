@@ -94,8 +94,8 @@ XMLUpdate=Run,%API%,_PhoenixAPI_XMLUpdate
 // Name...........: 7z
 // Description....: Execute 7zip with the provided arguments.
 // Syntax.........: 7z,<Args>[,<WorkDir>]
-// Parameters.....: #1 Args - The arguments to pass to the 7z executable.
-//                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+// Parameters.....: Args - The arguments to pass to the 7z executable.
+//                  WorkDir - The full path to the working directory. Default is the exe path.
 // Return values..: ExitCode provided by the 7zip application
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
@@ -103,7 +103,7 @@ XMLUpdate=Run,%API%,_PhoenixAPI_XMLUpdate
 // ===============================================================================================================================
 [_PhoenixAPI_7z]
 System,SetLocal
-If,#1,Equal,"",Halt,"7zip Error: You must provide required 7z.exe arguments."
+If,%^SIPARAM_1%,Equal,"",Halt,"7zip Error: You must provide required 7z.exe arguments."
 
 GetParam,1,%Args%
 Getparam,2,%WorkDir%
@@ -118,19 +118,19 @@ System,EndLocal
 // Name...........: AddAutoRun
 // Description....: Run a program when the PE Environment starts
 // Syntax.........: AddAutoRun,<RunGroup>,<Mode>,<Title>,<ProgramExe>,[Parameters]
-// Parameters.....: #1 RunGroup
-//                     PreShell - Run before the shell (ie. Explorer) is loaded.
-//                     PostShell - Run after the shell is loaded.
-//                     RunOnce - Run during startup via HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
-//                     AfterNetwork - Run after network connectivity has been established by PENetwork.
-//                  #2 Mode
-//                     NoWait     - Do not wait for the program to terminate.
-//                     Wait       - Wait for the program to terminate before moving on.
-//                     HideNoWait - Run the program hidden and do not wait for it to terminate.
-//                     HideWait   - Run the program hidden and wait for it to terminate.
-//                  #3 Title - Title that may be shown in a progress window while the program is running.
-//                  #4 ProgramExe - The full path to the program to be executed.
-//                  #5 Parameters - (Optional) Parameters that will be passed to the program.
+// Parameters.....: RunGroup - One of the following:
+//                   PreShell - Run before the shell (ie. Explorer) is loaded.
+//                   PostShell - Run after the shell is loaded.
+//                   RunOnce - Run during startup via HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+//                   AfterNetwork - Run after network connectivity has been established by PENetwork.
+//                  Mode - One of the following:
+//                   NoWait     - Do not wait for the program to terminate.
+//                   Wait       - Wait for the program to terminate before moving on.
+//                   HideNoWait - Run the program hidden and do not wait for it to terminate.
+//                   HideWait   - Run the program hidden and wait for it to terminate.
+//                  Title - Title that may be shown in a progress window while the program is running.
+//                  ProgramExe - The full path to the program to be executed.
+//                  Parameters - (Optional) Parameters that will be passed to the program.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: RunProgram($sProgramExe, $sArgs = "", $sWorkDir = @ScriptDir, $iShowFlag = @SW_SHOWNORMAL)
@@ -139,10 +139,10 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_AddAutoRun]
 System,SetLocal
-If,#1,Equal,"",Halt,"AddAutoRun Syntax Error: Run group was not specified."
-If,#2,Equal,"",Halt,"AddAutoRun Syntax Error: Run mode was not specified."
-// #3 Title is required but may be empty.
-If,#4,Equal,"",Halt,"AddAutoRun Syntax Error: Program Executable was not specified."
+If,%^SIPARAM_1%,Equal,"",Halt,"AddAutoRun Syntax Error: Run group was not specified."
+If,%^SIPARAM_2%,Equal,"",Halt,"AddAutoRun Syntax Error: Run mode was not specified."
+// %^SIPARAM_3% Title is required but may be empty.
+If,%^SIPARAM_4%,Equal,"",Halt,"AddAutoRun Syntax Error: Program Executable was not specified."
 
 GetParam,1,%RunGroup%
 GetParam,2,%Mode%
@@ -240,8 +240,8 @@ TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","START #$q%Title%#$q %ExecMode
 // Name...........: AddPostProcess
 // Description....: Define a section to process during Build Post-Process
 // Syntax.........: AddPostProcess,<Script>,<Section>
-// Parameters.....: #1 Script - The full path to the script containing the section to process.
-//                  #2 Section - The name of the section to process.
+// Parameters.....: Script - The full path to the script containing the section to process.
+//                  Section - The name of the section to process.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: This command adds EXEC entries to %ProjectTemp%\PostProcessCommands.script
@@ -253,8 +253,8 @@ TxtAddLine,"%TargetSystem32%\RunAfterNetwork.cmd","START #$q%Title%#$q %ExecMode
 // ===============================================================================================================================
 [_PhoenixAPI_AddPostProcess]
 System,SetLocal
-If,#1,Equal,"",Halt,"AddPostProcess Error: You must specify the script parameter."
-If,#2,Equal,"",Halt,"AddPostProcess Error: You must specify the section to execute."
+If,%^SIPARAM_1%,Equal,"",Halt,"AddPostProcess Error: You must specify the script parameter."
+If,%^SIPARAM_2%,Equal,"",Halt,"AddPostProcess Error: You must specify the section to execute."
 
 GetParam,1,%Script%
 Getparam,2,%Section%
@@ -268,23 +268,23 @@ System,EndLocal
 // Name...........: AddShortcut
 // Description....: Create Shortcuts for programs in PE.
 // Syntax.........: AddShortcut,<Type>,<StartMenuFolder>,<Title>,<PathProgramExe>,[Parameters],[WorkDir],[IconPath],[IconIndex],[State],[Hotkey],[Tooltip]
-// Parameters.....: #1 Type
-//                       Desktop - The shortcut will be created on the desktop.
-//                       StartMenu - The shortcut will be created in the start menu.
-//                       QuickLaunch - The shortcut will be created in the QuickLaunch folder. (used by WinXShell)                  
-//                  #2 StartMenuFolder - The name of the start menu folder where the shortcut will be created.
-//                  #3 Title - The name of the shortcut. 
-//                  #4 ProgramExe - The full path to the program to be executed.
-//                  #5 Parameters - Parameters that will be passed to the program.
-//                  #6 WorkDir - The work directory for the program.
-//                  #7 IconPath - The full path to file containing the icon.
-//                  #8 IconIndex - For files containing multiple icons this is Index of the icon to use.
-//                  #9 WindowState - One of the following:
-//                       Normal - Start the program normally.
-//                       Minimized - Start the program minimized to the taskbar.
-//                       Maximized - Start the program maximized.
-//                  #10 Hotkey - Keyboard sequence used to active the shortcut.
-//                  #11 Tooltip - Tooltip Text
+// Parameters.....: Type - One of the following:
+//                    Desktop - The shortcut will be created on the desktop.
+//                    StartMenu - The shortcut will be created in the start menu.
+//                    QuickLaunch - The shortcut will be created in the QuickLaunch folder. (used by WinXShell)                  
+//                  StartMenuFolder - The name of the start menu folder where the shortcut will be created.
+//                  Title - The name of the shortcut. 
+//                  ProgramExe - The full path to the program to be executed.
+//                  Parameters - Parameters that will be passed to the program.
+//                  WorkDir - The work directory for the program.
+//                  IconPath - The full path to file containing the icon.
+//                  IconIndex - For files containing multiple icons this is Index of the icon to use.
+//                  WindowState - One of the following:
+//                    Normal - Start the program normally.
+//                    Minimized - Start the program minimized to the taskbar.
+//                    Maximized - Start the program maximized.
+//                  Hotkey - Keyboard sequence used to active the shortcut.
+//                  Tooltip - Tooltip Text
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: MakeShortcut($sFile, $sLnk, $sWorkDir = @ScriptDir, $sArgs = "", $sDesc = "", $sIcon = "", $sHotkey = "", $iIconNumber = 0, $iState = @SW_SHOWNORMAL)
@@ -292,9 +292,9 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_AddShortcut]
 System,SetLocal
-If,#1,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut type was not specified."
-If,#3,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut title was not specified."
-If,#4,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut's ProgramExe was not specified."
+If,%^SIPARAM_1%,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut type was not specified."
+If,%^SIPARAM_3%,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut title was not specified."
+If,%^SIPARAM_4%,Equal,"",Halt,"AddShortcut Syntax Error: The shortcut's ProgramExe was not specified."
 GetParam,1,%Type%
 GetParam,2,%Folder%
 GetParam,3,%Title%
@@ -340,12 +340,12 @@ System,EndLocal
 // Name...........: AddStartupConfig
 // Description....: Add a free-form line of code to the startup config (PhoenixPE.au3).
 // Syntax.........: AddStartupConfig,<RunGroup>,<Code>,<Position>
-// Parameters.....: #1 RunGroup
-//                     PreShell - Run before the shell (ie. Explorer) is loaded.
-//                     PostShell - Run after the shell is loaded.
-//                     Network - Run during network initialization.
-//                  #2 Code - Free-form line of AutoIt3 code to be inserted. Be sure to escape quotes, etc. Use #$x to insert multiple lines in one statement.
-//                  #3 Position - (Optional) Define where in the RunGroup the code will be inserted. Valid options are:
+// Parameters.....: RunGroup - One of the following:
+//                    PreShell - Run before the shell (ie. Explorer) is loaded.
+//                    PostShell - Run after the shell is loaded.
+//                    Network - Run during network initialization.
+//                  Code - Free-form line of AutoIt3 code to be inserted. Be sure to escape quotes, etc. Use #$x to insert multiple lines in one statement.
+//                  Position - (Optional) Define where in the RunGroup the code will be inserted. Valid options are:
 //                     Append  - (Default) Place the code at the end of the run group.
 //                     Prepend - Place the code at the start of the run group.
 // Return values..: 
@@ -359,9 +359,9 @@ GetParam,1,%RunGroup%
 GetParam,2,%Code%
 GetParam,3,%Position%
 
-If,#1,Equal,"",Halt,"AddStartupConfig Syntax Error: Run group was not specified."
-If,#2,Equal,"",Halt,"AddStartupConfig Syntax Error: Code was not specified."
-If,#3,Equal,"",Set,%Position%,"Append"
+If,%^SIPARAM_1%,Equal,"",Halt,"AddStartupConfig Syntax Error: Run group was not specified."
+If,%^SIPARAM_2%,Equal,"",Halt,"AddStartupConfig Syntax Error: Code was not specified."
+If,%^SIPARAM_3%,Equal,"",Set,%Position%,"Append"
 
 If,%Position%,Equal,"Append",Begin
   If,%RunGroup%,Equal,"Preshell",TXTReplace,"%TargetSystem32%\PhoenixPE.au3","EndFunc   ;==>PreShellConfig","    %Code%#$x#$xEndFunc   ;==>PreShellConfig"
@@ -384,13 +384,13 @@ System,EndLocal
 // Name...........: ApplyBitMask
 // Description....: Apply a bitmask to a hex value in a binary string.
 // Syntax.........: ApplyBitMask,<BitArray>,<BitGroup>,<BitMask>[,BitSize]
-// Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
-//                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
-//                                supplied by <BitArray>. Example: In order to apply a mask to the value 'DB' in
-//                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
-//                  #3 BitMask - The hexadecimal bitmask to apply to the specified <BitGroup>. Ex. 0x000020
-//                  #4 BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
-// Return values..: #r - Returns <BitArray> with the specified bitmask applied.
+// Parameters.....: BitArray - A comma separated string of bits in hex format.
+//                  BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
+//                             supplied by <BitArray>. Example: In order to apply a mask to the value 'DB' in
+//                             <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
+//                  BitMask - The hexadecimal bitmask to apply to the specified <BitGroup>. Ex. 0x000020
+//                  BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
+// Return values..: %^RET% - Returns <BitArray> with the specified bitmask applied.
 // Author.........: Homes32
 // Remarks........:
 // Related........:
@@ -428,8 +428,8 @@ System,EndLocal
 // Name...........: Associate
 // Description....: Associate a file extension with a program.
 // Syntax.........: Associate,<FileExtension>,<ProgramExe>[,<Icon>]
-// Parameters.....: #1 FileExtension - The file extension to associate.
-//                  #2 ProgramExe - The full path to the executable to which the file extension will be associated with.
+// Parameters.....: FileExtension - The file extension to associate.
+//                  ProgramExe - The full path to the executable to which the file extension will be associated with.
 //
 //                  Example: Associate,.ini,"C:\Windows\System32\notepad.exe"
 //
@@ -440,8 +440,8 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_Associate]
 System,SetLocal
-If,#1,Equal,"",Halt,"Associate Syntax Error: You must specify the file extension to associate."
-If,#2,Equal,"",Halt,"Associate Syntax Error: You must specify the program to associate with the file extension."
+If,%^SIPARAM_1%,Equal,"",Halt,"Associate Syntax Error: You must specify the file extension to associate."
+If,%^SIPARAM_2%,Equal,"",Halt,"Associate Syntax Error: You must specify the program to associate with the file extension."
 
 GetParam,1,%FileExt%
 Getparam,2,%Program%
@@ -476,8 +476,8 @@ System,EndLocal
 // Name...........: Binmay
 // Description....: Binary Search and Replace Tool 
 // Syntax.........: Binmay,<Args>[,<WorkDir>]
-// Parameters.....: #1 Args - The arguments to pass to the Binmay executable.
-//                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+// Parameters.....: Args - The arguments to pass to the Binmay executable.
+//                  WorkDir - The full path to the working directory. Default is the exe path.
 // Return values..: ExitCode provided by the Binmay application
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
@@ -485,7 +485,7 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_Binmay]
 System,SetLocal
-If,#1,Equal,"",Halt,"Binmay Syntax Error: You must provide the Binmay.exe arguments."
+If,%^SIPARAM_1%,Equal,"",Halt,"Binmay Syntax Error: You must provide the Binmay.exe arguments."
 
 GetParam,1,%Args%
 Getparam,2,%WorkDir%
@@ -500,13 +500,13 @@ System,EndLocal
 // Name...........: BitClear
 // Description....: Clear a specific bit in a binary string.
 // Syntax.........: BitClear,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
-// Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
-//                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
-//                                supplied by <BitArray>. Example: In order to clear a bit in the value 'DB' in
-//                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
-//                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
-//                  #4 BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
-// Return values..: #r - Returns <BitArray> with the specified bit cleared.
+// Parameters.....: BitArray - A comma separated string of bits in hex format.
+//                  BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
+//                             supplied by <BitArray>. Example: In order to clear a bit in the value 'DB' in
+//                             <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
+//                  BitPosition - The binary position to modify. (0-based Right to Left)
+//                  BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
+// Return values..: %^RET% - Returns <BitArray> with the specified bit cleared.
 // Author.........: Homes32
 // Remarks........: BitGroup &= ~(1 << BitPosition); // Take OR of <BitGroup> and 1 shifted <BitPosition> positions negated
 // Related........:
@@ -546,13 +546,13 @@ System,EndLocal
 // Name...........: BitSet
 // Description....: Set a specific bit in a binary string.
 // Syntax.........: BitSet,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
-// Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
-//                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
+// Parameters.....: BitArray - A comma separated string of bits in hex format.
+//                  BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
 //                                supplied by <BitArray>. Example: In order to set a bit in the value 'DB' in
 //                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
-//                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
-//                  #4 BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
-// Return values..: #r - Returns <BitArray> with the specified bit set.
+//                  BitPosition - The binary position to modify. (0-based Right to Left)
+//                  BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
+// Return values..: %^RET% - Returns <BitArray> with the specified bit set.
 // Author.........: Homes32
 // Remarks........: BitGroup |= (1 << BitPosition); // Take OR of <BitGroup> and 1 shifted <BitPosition> positions
 // Related........:
@@ -591,13 +591,13 @@ System,EndLocal
 // Name...........: BitToggle
 // Description....: Set/Clear a specific bit in a binary string.
 // Syntax.........: BitToggle,<BitArray>,<BitGroup>,<BitPosition>[,BitSize]
-// Parameters.....: #1 BitArray - A comma separated string of bits in hex format.
-//                  #2 BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
-//                                supplied by <BitArray>. Example: In order to toggle a bit in the value 'DB' in
-//                                <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
-//                  #3 BitPosition - The binary position to modify. (0-based Right to Left)
-//                  #4 BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
-// Return values..: #r - Returns <BitArray> with the specified bit flipped.
+// Parameters.....: BitArray - A comma separated string of bits in hex format.
+//                  BitGroup - The specific group of bits to manipulate. This is determined by the 1-based index of the bit group
+//                             supplied by <BitArray>. Example: In order to toggle a bit in the value 'DB' in
+//                             <BitArray> 01,DB,1A,4C we would specify a <BitGroup> of 2.
+//                  BitPosition - The binary position to modify. (0-based Right to Left)
+//                  BitSize - (Optional) Specify the bitsize (8,16,32,64) used. Default is 32.
+// Return values..: %^RET% - Returns <BitArray> with the specified bit flipped.
 // Author.........: Homes32
 // Remarks........: BitGroup ^= (1 << BitPosition); // Take XOR of <BitGroup> and 1 shifted <BitPosition> positions
 // Related........:
@@ -636,9 +636,9 @@ System,EndLocal
 // Name...........: ConvertImage
 // Description....: Convert an image to the specified format.
 // Syntax.........: ConvertImage,<Source>,<Target>[,<Resize>]
-// Parameters.....: #1 Source - The full path to the image file.
-//                  #2 Target - The full path to the converted image file. 
-//                  #3 Resize - (Optional) Resize the image.
+// Parameters.....: Source - The full path to the image file.
+//                  Target - The full path to the converted image file. 
+//                  Resize - (Optional) Resize the image.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Depends on ImageConvert.a3x in %Tools%.
@@ -647,8 +647,8 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_ConvertImage]
 System,SetLocal
-If,#1,Equal,"",Halt,"ConvertImage Syntax Error: You must specify the path to the source image."
-If,#2,Equal,"",Halt,"ConvertImage Syntax Error: You must specify the path to the destination image."
+If,%^SIPARAM_1%,Equal,"",Halt,"ConvertImage Syntax Error: You must specify the path to the source image."
+If,%^SIPARAM_2%,Equal,"",Halt,"ConvertImage Syntax Error: You must specify the path to the destination image."
 
 GetParam,1,%SourceImage%
 Getparam,2,%TargetImage%
@@ -669,26 +669,26 @@ System,EndLocal
 //                  application or Explorer then give the user a meaningful error message and a chance to correct the problem.
 //                  if that doesn't work halt the build.
 // Syntax.........: DirDeleteEx,<Directory>
-// Parameters.....: #1 Directory - The full path to the directory to delete.
+// Parameters.....: Directory - The full path to the directory to delete.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: 
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_DirDeleteEx]
-If,#1,Equal,"",Halt,"Syntax Error: Directory was not specified."
+If,%^SIPARAM_1%,Equal,"",Halt,"Syntax Error: Directory was not specified."
 
 System,ErrorOff
-If,ExistDir,#1,DirDelete,#1
+If,ExistDir,%^SIPARAM_1%,DirDelete,%^SIPARAM_1%
 // If Dir still exists wait a few more seconds to give async tasks time to complete before we bother the user...
-If,ExistDir,#1,Wait,5
+If,ExistDir,%^SIPARAM_1%,Wait,5
 
-While,ExistDir,#1,Begin
+While,ExistDir,%^SIPARAM_1%,Begin
 
-  If,Question,"Error: The specified folder could not be deleted.#$x#$x#1#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer.#$x#$xRetry?",Begin
+  If,Question,"Error: The specified folder could not be deleted.#$x#$x%^SIPARAM_1%#$x#$xPlease make sure there are no files open in other applications (eg. Text Editor/vmWare/VirtualBox), registry hives are unloaded, and you do not have the directory open in Explorer.#$x#$xRetry?",Begin
     // User clicked 'Yes'
     System,ErrorOff
-    DirDelete,#1
+    DirDelete,%^SIPARAM_1%
     // Wait a few seconds to give async tasks time to complete...
     Wait,5
   End
@@ -704,8 +704,8 @@ End
 // Name...........: DISM
 // Description....: Execute DISM with the provided arguments.
 // Syntax.........: DISM,<Args>[,<WorkDir>]
-// Parameters.....: #1 Args - The arguments to pass to the 7z executable.
-//                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+// Parameters.....: Args - The arguments to pass to the 7z executable.
+//                  WorkDir - The full path to the working directory. Default is the exe path.
 // Return values..: ExitCode provided by the DISM application
 // Author.........: Homes32
 // Remarks........: This command is provided as compatibility shim to allow using DISM on Win10 images from a Win7 Host.
@@ -722,7 +722,7 @@ End
 // ===============================================================================================================================
 [_PhoenixAPI_DISM]
 System,SetLocal
-If,#1,Equal,"",Halt,"DISM Error: You must provide the dism.exe arguments."
+If,%^SIPARAM_1%,Equal,"",Halt,"DISM Error: You must provide the dism.exe arguments."
 
 GetParam,1,%Args%
 Getparam,2,%WorkDir%
@@ -742,8 +742,8 @@ System,EndLocal
 // Name...........: DriveGetType
 // Description....: Get the drive type.
 // Syntax.........: DriveGetType,<DriveLetter>
-// Parameters.....: #1 Drive Letter - The drive letter to query.
-// Return values..: #r - Success - One of the following values:
+// Parameters.....: Drive Letter - The drive letter to query.
+// Return values..: %^RET% - Success - One of the following values:
 //                         - Unknown
 //                         - Removable
 //                         - Fixed
@@ -774,7 +774,7 @@ ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","#$q%Tools%\a3x\PhoenixAPI-Dr
 
 If,Not,%ExitCode%,Equal,0,Halt,"DriveGetType Error: Unable get drive type for [%DriveLetter%]. The command returned [%ExitCode%]."
 
-// Return the result as #r
+// Return the result as %^RET%
 IniRead,"%ProjectTemp%\PhoenixAPI-DriveGetType.ini","DriveType",%DriveLetter%,%DriveType%,"Default="
 Return,%DriveType%
 
@@ -785,8 +785,8 @@ System,EndLocal
 // Name...........: FileCopyEx
 // Description....: Copy a single file and it's .mui's (if they exist) from a specified directory.
 // Syntax.........: FileCopyEx,<SourcePath>,<DestPath>
-// Parameters.....: #1 SourcePath - Full path to the source file to copy. Wildcards are NOT supported.
-//                  #2 DestPath - Full path to the destination.
+// Parameters.....: SourcePath - Full path to the source file to copy. Wildcards are NOT supported.
+//                  DestPath - Full path to the destination.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Wildcards are not supported. If you need wildcards use FileCopy instead.
@@ -797,8 +797,8 @@ System,EndLocal
 [_PhoenixAPI_FileCopyEx]
 System,SetLocal
 
-If,#1,Equal,"",Halt,"FileCopyEx Syntax Error: Source file was not specified."
-If,#2,Equal,"",Halt,"FileCopyEx Syntax Error: Destination was not specified."
+If,%^SIPARAM_1%,Equal,"",Halt,"FileCopyEx Syntax Error: Source file was not specified."
+If,%^SIPARAM_2%,Equal,"",Halt,"FileCopyEx Syntax Error: Destination was not specified."
 
 GetParam,1,%SrcFile%
 GetParam,2,%DestPath%
@@ -832,25 +832,25 @@ System,EndLocal
 //                  application, then give the user a meaningful error message and a chance to correct the problem.
 //                  if that doesn't work halt the build.
 // Syntax.........: DirDeleteEx,<File>
-// Parameters.....: #1 File - The full path to the file to delete.
+// Parameters.....: File - The full path to the file to delete.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: 
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_FileDeleteEx]
-If,#1,Equal,"",Halt,"Syntax Error: File was not specified."
+If,%^SIPARAM_1%,Equal,"",Halt,"Syntax Error: File was not specified."
 
 System,ErrorOff
-If,ExistFile,#1,FileDelete,#1
+If,ExistFile,%^SIPARAM_1%,FileDelete,%^SIPARAM_1%
 
-While,ExistFile,#1,Begin
+While,ExistFile,%^SIPARAM_1%,Begin
 
-  If,Question,"Error: The specified file could not be deleted.#$x#$x#1#$x#$xPlease make sure the file is not running or in use by another application (eg. Text Editor/vmWare/VirtualBox).#$x#$xRetry?",Begin
+  If,Question,"Error: The specified file could not be deleted.#$x#$x%^SIPARAM_1%#$x#$xPlease make sure the file is not running or in use by another application (eg. Text Editor/vmWare/VirtualBox).#$x#$xRetry?",Begin
     // User clicked 'Yes'
     Wait,3
     System,ErrorOff
-    If,ExistFile,#1,FileDelete,#1
+    If,ExistFile,%^SIPARAM_1%,FileDelete,%^SIPARAM_1%
   End
   Else,Begin
     // User clicked 'No'
@@ -864,10 +864,10 @@ End
 // Name...........: FileSearch
 // Description....: Search for a file and return it's full path if it exists. If the file cannot be found an empty string is returned.
 // Syntax.........: FileSearch,<Directory>,<File>
-// Parameters.....: #1 Directory - The directory to search recursively for the specified file.
-//                  #2 Filter - The name of the file including it's extension to search for. (Ex. MyProgram.exe). Wildcards are supported.
-// Return values..: #r - Success - A pipe separated list containing the full path(s) to the file.
-//                     - Fail (File not found) - An Empty String
+// Parameters.....: Directory - The directory to search recursively for the specified file.
+//                  Filter - The name of the file including it's extension to search for. (Ex. MyProgram.exe). Wildcards are supported.
+// Return values..: %^RET% - Success - A pipe separated list containing the full path(s) to the file.
+//                         - Fail (File not found) - An Empty String
 // Author.........: Homes32
 // Remarks........: This command is a work in progress and may change without notice.
 //                  Usage: PhoenixAPI-FileSearch.a3x <PathToSearch> <SearchFilter> <OutputFile>
@@ -893,7 +893,7 @@ GetParam,2,%SearchFilter%
 If,%Path%,Equal,"",Halt,"Syntax Error: Path was not specified."
 If,%SearchFilter%,Equal,"",Halt,"Syntax Error: Search filter was not specified."
 
-Set,%argc%,#a
+Set,%argc%,%^SIPARAM_COUNT%
 Set,%argOptStart%,3
 
 Set,%ReturnFilter%,"Files"
@@ -921,8 +921,8 @@ End
 
 // Recurse the path looking for the specified file
 ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","#$q%Tools%\a3x\PhoenixAPI-FileSearch.a3x#$q #$q%Path%#$q #$q%SearchFilter%#$q #$q%ProjectTemp%\PhoenixAPI-FileSearch.ini#$q %ReturnFilter%"
-If,#r,Equal,0,Begin
-  // Return the result as #r
+If,%^RET%,Equal,0,Begin
+  // Return the result as %^RET%
   IniRead,"%ProjectTemp%\PhoenixAPI-FileSearch.ini","String","List",%SearchResult%,"Default="
   Return,%SearchResult%
 End
@@ -935,11 +935,11 @@ System,EndLocal
 // Name...........: GetBinaryResource
 // Description....: Extract a binary resource from an executable file.
 // Syntax.........: GetBinaryResource,<Source>,<ResourceType>,<ResourceID>,<OutputPath>[,NOERR]
-// Parameters.....: #1 Source - The full path to the source file (.exe, .dll, .mui, .mun, .sys, etc.).
-//                  #2 ResourceType - Can be a named resource type eg. RT_RCDATA or an ordinal number prefixed with # eg. #100
-//                  #3 ResourceID - ID of the resource to extract. eg. NTDRIVER or #1000
-//                  #4 OutputPath - The full path where the resource will be saved.
-//                  #5 NOERR - (Optional) Do not Halt on error, just return the exit code passed by GetBinaryResource.exe
+// Parameters.....: Source - The full path to the source file (.exe, .dll, .mui, .mun, .sys, etc.).
+//                  ResourceType - Can be a named resource type eg. RT_RCDATA or an ordinal number prefixed with # eg. #100
+//                  ResourceID - ID of the resource to extract. eg. NTDRIVER or #1000
+//                  OutputPath - The full path where the resource will be saved.
+//                  NOERR - (Optional) Do not Halt on error, just return the exit code passed by GetBinaryResource.exe
 // Return values..: 0 - Success
 //                  1 - Could not load exe
 //                  2 - Could not find resource
@@ -961,10 +961,10 @@ System,EndLocal
 [_PhoenixAPI_GetBinaryResource]
 System,SetLocal
 
-If,#1,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the path to the source file."
-If,#2,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the resource type."
-If,#3,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the ID of the string to extract."
-If,#4,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the path to extract the file."
+If,%^SIPARAM_1%,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the path to the source file."
+If,%^SIPARAM_2%,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the resource type."
+If,%^SIPARAM_3%,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the ID of the string to extract."
+If,%^SIPARAM_4%,Equal,"",Halt,"GetBinaryResource Syntax Error: You must specify the path to extract the file."
 
 GetParam,1,%Source%
 GetParam,2,%ResourceType%
@@ -1005,9 +1005,9 @@ System,EndLocal
 // Name...........: GetStringResource
 // Description....: Extract a string resource from an executable file.
 // Syntax.........: GetStringResource,<Source>,<StringID>[,NOERR]
-// Parameters.....: #1 Source - The full path to the binary containing the string resource (.exe, .dll, .mui, .mun, .sys, etc.).
-//                  #2 StringID - ID of the string resource to extract. eg. 1000
-//                  #3 NOERR - (Optional) Do not Halt on error, just return the exit code passed by GetStringResource.exe
+// Parameters.....: Source - The full path to the binary containing the string resource (.exe, .dll, .mui, .mun, .sys, etc.).
+//                  StringID - ID of the string resource to extract. eg. 1000
+//                  NOERR - (Optional) Do not Halt on error, just return the exit code passed by GetStringResource.exe
 // Return values..: 0 - Success
 //                  1 - Could not load exe
 //                  2 - Could not load string
@@ -1022,8 +1022,8 @@ System,EndLocal
 [_PhoenixAPI_GetStringResource]
 System,SetLocal
 
-If,#1,Equal,"",Halt,"GetStringResource Syntax Error: You must specify the path to the source file."
-If,#2,Equal,"",Halt,"GetStringResource Syntax Error: You must specify the ID of the string to extract."
+If,%^SIPARAM_1%,Equal,"",Halt,"GetStringResource Syntax Error: You must specify the path to the source file."
+If,%^SIPARAM_2%,Equal,"",Halt,"GetStringResource Syntax Error: You must specify the ID of the string to extract."
 
 GetParam,1,%Source%
 GetParam,2,%StringID%
@@ -1047,9 +1047,9 @@ System,EndLocal
 // Name...........: InnoCleanup
 // Description....: Cleanup extracted Inno Setup files.
 // Syntax.........: InnoCleanup,<Path>,<Filter>[,NOREC]
-// Parameters.....: #1 Path   - The full path to the extracted InnoSetup Files.
-//                  #2 Filter - Comma delimited list of file types to include. eg. *.dll,*.exe
-//                  #3 NOREC  - (Optional) Do not recurse sub-directories.
+// Parameters.....: Path   - The full path to the extracted InnoSetup Files.
+//                  Filter - Comma delimited list of file types to include. eg. *.dll,*.exe
+//                  NOREC  - (Optional) Do not recurse sub-directories.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: An Inno Setup installer may contain several identical files (possibly under different names).
@@ -1089,9 +1089,9 @@ System,EndLocal
 // Name...........: InnoExtract
 // Description....: Extract files from an Inno Setup installer.
 // Syntax.........: InnoExtract,<SetupFile>,<DestDir>[,<Args>]
-// Parameters.....: #1 SetupFile - The inno-setup file to unpack.
-//                  #2 DestDir - The full path to the directory where the files will be unpacked.
-//                  #3-#5 - Additional Arguments:
+// Parameters.....: SetupFile - The inno-setup file to unpack.
+//                  DestDir - The full path to the directory where the files will be unpacked.
+//                  Additional Arguments:
 //                  PASSWORD=<Password> - Password required to decrypt the setup file. (-p)
 //                  CDIR=<CurrentDir> - Notifies innounp that you are only interested in paths from the current directory and below. (-c)
 //                  LIST=<FileList.txt> - Instructs innounp to use a list file to determine the files to extract (@listfile)
@@ -1102,12 +1102,12 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_InnoExtract]
 System,SetLocal
-If,#1,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the setup file."
-If,#2,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the destination directory."
+If,%^SIPARAM_1%,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the setup file."
+If,%^SIPARAM_2%,Equal,"",Halt,"InnoExtract Syntax Error: You must specify the destination directory."
 
 GetParam,1,%SetupFile%
 Getparam,2,%DestDir%
-Set,%argc%,#a
+Set,%argc%,%^SIPARAM_COUNT%
 Set,%argOptStart%,3
 
 Set,%Password%,""
@@ -1160,10 +1160,10 @@ System,EndLocal
 // Name...........: InnoRename
 // Description....: Rename extracted Inno Setup files.
 // Syntax.........: InnoRename,<Path>,<Filter>,<Suffix>[,NOREC]
-// Parameters.....: #1 Path      - The full path to the extracted InnoSetup Files.
-//                  #2 Filter    - Comma delimited list of file types to include. eg. *.dll,*.exe
-//                  #3 Suffix    - A number representing the group of files to process. eg. 1
-//                  #4 NOREC     - (Optional) Do not recurse sub-directories.
+// Parameters.....: Path      - The full path to the extracted InnoSetup Files.
+//                  Filter    - Comma delimited list of file types to include. eg. *.dll,*.exe
+//                  Suffix    - A number representing the group of files to process. eg. 1
+//                  NOREC     - (Optional) Do not recurse sub-directories.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: An Inno Setup installer may contain several identical files (possibly under different names).
@@ -1208,8 +1208,8 @@ System,EndLocal
 // Name...........: Innounp
 // Description....: Execute Innounp (Inno Setup Unpacker) with the provided arguments.
 // Syntax.........: Innounp,<Args>[,<WorkDir>]
-// Parameters.....: #1 Args - The arguments to pass to the Innounp executable.
-//                  #2 WorkDir - The full path to the working directory. Default is the exe path.
+// Parameters.....: Args - The arguments to pass to the Innounp executable.
+//                  WorkDir - The full path to the working directory. Default is the exe path.
 //
 // Return values..: ExitCode provided by the Innounp application
 // Author.........: Homes32
@@ -1221,7 +1221,7 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_Innounp]
 System,SetLocal
-If,#1,Equal,"",Halt,"InnoUnp Syntax Error: You must provide the Innounp.exe arguments."
+If,%^SIPARAM_1%,Equal,"",Halt,"InnoUnp Syntax Error: You must provide the Innounp.exe arguments."
 
 GetParam,1,%Args%
 Getparam,2,%WorkDir%
@@ -1236,7 +1236,7 @@ System,EndLocal
 // Name...........: JSONCompact
 // Description....: Experimental wrapper for jj - Compress the JSON into the fewest characters possible by squashing newlines and spaces.
 // Syntax.........: JSONCompact,<JSONFile>
-// Parameters.....: #1 JSONFile - Full path to the JSON filed to compact.
+// Parameters.....: JSONFile - Full path to the JSON filed to compact.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: https://github.com/tidwall/jj
@@ -1249,7 +1249,7 @@ GetParam,1,%JSONFile%
 If,Not,ExistFile,%JSONFile%,Halt,"JSONCompact Syntax Error: The file [%JSONFile%] does not exist."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-u -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q"
-If,Not,#r,Equal,0,Halt,"JSONCompact Error: Failed to compact [%JSONFile%]."
+If,Not,%^RET%,Equal,0,Halt,"JSONCompact Error: Failed to compact [%JSONFile%]."
 
 System,EndLocal
 
@@ -1258,8 +1258,8 @@ System,EndLocal
 // Name...........: JSONDelete
 // Description....: Experimental wrapper for jj - Delete an JSON value.
 // Syntax.........: JSONDelete,<JSONFile>,<Path>
-// Parameters.....: #1 JSONFile - Full path to the JSON filed to edit.
-//                  #2 Path - GJSON Path notation used to locate the value to delete.
+// Parameters.....: JSONFile - Full path to the JSON filed to edit.
+//                  Path - GJSON Path notation used to locate the value to delete.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj
@@ -1275,7 +1275,7 @@ If,Not,ExistFile,%JSONFile%,Halt,"JSONDelete Syntax Error: The file [%JSONFile%]
 If,%Path%,Equal,"",Halt,"JSONDelete Syntax Error: You must specify an JSON Path."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-D -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q #$q%Path%#$q"
-If,Not,#r,Equal,0,Halt,"JSONDelete Error: Failed to delete [%Path%] from [%JSONFile%]."
+If,Not,%^RET%,Equal,0,Halt,"JSONDelete Error: Failed to delete [%Path%] from [%JSONFile%]."
 
 System,EndLocal
 
@@ -1284,7 +1284,7 @@ System,EndLocal
 // Name...........: JSONPretty
 // Description....: Experimental wrapper for jj - Format and indent the JSON file for easy human reading.
 // Syntax.........: JSONPretty,<JSONFile>
-// Parameters.....: #1 JSONFile - Full path to the JSON filed to compact.
+// Parameters.....: JSONFile - Full path to the JSON filed to compact.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: https://github.com/tidwall/jj
@@ -1297,7 +1297,7 @@ GetParam,1,%JSONFile%
 If,Not,ExistFile,%JSONFile%,Halt,"JSONPretty Syntax Error: The file [%JSONFile%] does not exist."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-p -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q"
-If,Not,#r,Equal,0,Halt,"JSONPretty Error: Failed to pretty [%JSONFile%]."
+If,Not,%^RET%,Equal,0,Halt,"JSONPretty Error: Failed to pretty [%JSONFile%]."
 
 System,EndLocal
 
@@ -1306,10 +1306,10 @@ System,EndLocal
 // Name...........: JSONRead
 // Description....: Experimental wrapper for jj - Read an JSON value.
 // Syntax.........: JSONRead,<JSONFile>,<Path>
-// Parameters.....: #1 JSONFile - Full path to the JSON filed to read.
-//                  #2 Path - GJSON Path notation used to locate the value to read.
-//                  #3 NOERR - Don't Halt on errors. (Use if you intend to handle errors yourself).
-// Return values..: #r - Success - Returns the value of <Path>
+// Parameters.....: JSONFile - Full path to the JSON filed to read.
+//                  Path - GJSON Path notation used to locate the value to read.
+//                  NOERR - Don't Halt on errors. (Use if you intend to handle errors yourself).
+// Return values..: %^RET% - Success - Returns the value of <Path>
 //                       Failure - Returns ""
 // Author.........: Homes32
 // Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj
@@ -1333,7 +1333,7 @@ If,%Arg3%,Equal,"NOERR",Set,%NOERR%,"True"
 FileDeleteEx,"%ProjectTemp%\PhoenixAPI-JSONRead.ini"
 
 ShellExecute,Hide,"cmd.exe","/c for /f #$qusebackq delims=#$q #$p? In (`^#$q#$q%Tools%\%HostArch%\jj.exe#$q -i #$q%JSONFile%#$q #$q%Path%#$q^#$q`) do (>#$q%ProjectTemp%\PhoenixAPI-JSONRead.ini#$q echo Value^=#$p?)"
-If,#r,Equal,0,Begin
+If,%^RET%,Equal,0,Begin
   TXTAddLine,"%ProjectTemp%\PhoenixAPI-JSONRead.ini","[JSONRead]",PREPEND
   IniRead,"%ProjectTemp%\PhoenixAPI-JSONRead.ini","JSONRead","Value",%Value%
   Return,%Value%
@@ -1350,9 +1350,9 @@ System,EndLocal
 // Name...........: JSONWrite
 // Description....: Experimental wrapper for jj - Set/Modify an JSON value.
 // Syntax.........: JSONWrite,<JSONFile>,<Path>,<Value>
-// Parameters.....: #1 JSONFile - Full path to the JSON filed to edit.
-//                  #2 Path - GJSON Path notation used to locate the value to write.
-//                  #3 Value - The value to write. (Can be empty)
+// Parameters.....: JSONFile - Full path to the JSON filed to edit.
+//                  Path - GJSON Path notation used to locate the value to write.
+//                  Value - The value to write. (Can be empty)
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: jj.exe Homepage:  https://github.com/tidwall/jj
@@ -1369,7 +1369,7 @@ If,Not,ExistFile,%JSONFile%,Halt,"JSONWrite Syntax Error: The file [%JSONFile%] 
 If,%Path%,Equal,"",Halt,"JSONWrite Syntax Error: You must specify an JSON Path."
 
 ShellExecute,Hide,"%Tools%\%HostArch%\jj.exe","-v #$q%Value%#$q -i #$q%JSONFile%#$q -o #$q%JSONFile%#$q #$q%Path%#$q"
-If,Not,#r,Equal,0,Halt,"JSONWrite Error: Failed to write the value of [%Value%] to [%Path%] in [%JSONFile%]."
+If,Not,%^RET%,Equal,0,Halt,"JSONWrite Error: Failed to write the value of [%Value%] to [%Path%] in [%JSONFile%]."
 
 System,EndLocal
 
@@ -1378,8 +1378,8 @@ System,EndLocal
 // Name...........: MSIExtract
 // Description....: Extract files from an .msi installer.
 // Syntax.........: MSIExtract,<MSIFile>,<DestDir>
-// Parameters.....: #1 SetupFile - The .msi file to unpack.
-//                  #2 DestDir - The full path to the directory where the files will be unpacked.
+// Parameters.....: SetupFile - The .msi file to unpack.
+//                  DestDir - The full path to the directory where the files will be unpacked.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Note: DestDir MUST end with a \ or lessmsi will consider it a file name to extract. We play it safe by trimming
@@ -1390,8 +1390,8 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_MSIExtract]
 System,SetLocal
-If,#1,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the setup file."
-If,#2,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the destination directory."
+If,%^SIPARAM_1%,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the setup file."
+If,%^SIPARAM_2%,Equal,"",Halt,"MSIExtract Syntax Error: You must specify the destination directory."
 
 GetParam,1,%SetupFile%
 GetParam,2,%DestDir%
@@ -1411,13 +1411,13 @@ System,EndLocal
 // Name...........: PinShortcut
 // Description....: Pin a shortcut to the taskbar or start menu.
 // Syntax.........: PinShortcut,<Location>,<Position>,<ProgramExe>
-// Parameters.....: #1 Location
-//                     StartMenu  - Pin to the start menu.
-//                     Taskbar    - Pin to the taskbar.
-//                  #2 Position
-//                     Auto       - (Default) Automatically determine the pin position.
-//                     1-99       - Pin the shortcut to a specific position [0-99].
-//                  #3 ProgramExe - The full path to the program to be executed.
+// Parameters.....: Location
+//                    StartMenu  - Pin to the start menu.
+//                    Taskbar    - Pin to the taskbar.
+//                  Position
+//                    Auto       - (Default) Automatically determine the pin position.
+//                    1-99       - Pin the shortcut to a specific position [0-99].
+//                  ProgramExe - The full path to the program to be executed.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: This macro relies on PinUtil.exe to perform the actual pinning at boot.
@@ -1438,9 +1438,9 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_PinShortcut]
 System,SetLocal
-If,#1,Equal,"",Halt,"PinShortcut Syntax Error: Pin location was not specified."
-If,#2,Equal,"",Halt,"PinShortcut Syntax Error: Pin position was not specified."
-If,#3,Equal,"",Halt,"PinShortcut Syntax Error: Program Executable was not specified."
+If,%^SIPARAM_1%,Equal,"",Halt,"PinShortcut Syntax Error: Pin location was not specified."
+If,%^SIPARAM_2%,Equal,"",Halt,"PinShortcut Syntax Error: Pin position was not specified."
+If,%^SIPARAM_3%,Equal,"",Halt,"PinShortcut Syntax Error: Program Executable was not specified."
 
 GetParam,1,%PinLocation%
 GetParam,2,%PinPos%
@@ -1505,8 +1505,8 @@ System,EndLocal
 //                  Both the DRIVERS hive and SYSTEM\Drivers store are processed.
 // Syntax.........: RegCopyDriver,<filename.inf>
 // Parameters.....: InfFile - The name of the driver's .inf file
-// Return values..: #r - Success - 0
-//                     - Errors  - 1 
+// Return values..: %^RET% - Success - 0
+//                         - Errors  - 1 
 // Author.........: Homes32
 // Remarks........: Registry hives Tmp_Install_Drivers, Tmp_Install_System, Tmp_Drivers, Tmp_System must be loaded before calling. 
 // Related........: Depends on %Tools%\a3x\PhoenixAPI-RegCopyDriver.a3x
@@ -1516,14 +1516,14 @@ System,SetLocal
 Set,%Debug%,False
 Set,%DebugArg%,""
 
-If,#1,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to register."
+If,%^SIPARAM_1%,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to register."
 GetParam,1,%InfFile%
 
 Echo,"Processing [%InfFile%] registration..."
 If,%Debug%,Equal,True,Set,%DebugArg%," --debug"
 
 ShellExecute,Hide,"%Tools%\%HostArch%\AutoIt3.exe","#$q%Tools%\a3x\PhoenixAPI-RegCopyDriver.a3x#$q #$q%InfFile%#$q%DebugArg%",%Tools%
-Return,#r
+Return,%^RET%
 
 System,EndLocal
 
@@ -1568,7 +1568,7 @@ RegHiveLoad,Tmp_Install_System,%RegInstallSystem%
 [_PhoenixAPI_RegUnloadHives]
 System,SetLocal
 
-Set,%argc%,#a
+Set,%argc%,%^SIPARAM_COUNT%
   
 Set,%ForceUnmount%,False
 Set,%HKEY%,"HKLM"
@@ -1644,7 +1644,7 @@ System,EndLocal
 [_PhoenixAPI_RequireDriver]
 System,SetLocal
 
-If,#1,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to include/register."
+If,%^SIPARAM_1%,Equal,"",Halt,"Syntax Error: You must specify the name of the driver's .inf to include/register."
 GetParam,1,%InfFile%
 GetParam,2,%Arg2%
 
@@ -1678,30 +1678,30 @@ System,EndLocal
 // Name...........: RequireFile
 // Description....: Extract a single file and it's .mui's (if they exist) from Install.wim
 // Syntax.........: RequireFileEx,<FilePath>[,NOMUI]
-// Parameters.....: #1 FilePath - Path to the file to extract relative to the root of Install.wim
-//                  #2 NOMUI - Don't extract .mui files.
+// Parameters.....: FilePath - Path to the file to extract relative to the root of Install.wim
+//                  NOMUI - Don't extract .mui files.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: This command is an alias to RequireFileEx,ExtractFile
 // Related........: _PhoenixAPI_RequireFileEx
 // ===============================================================================================================================
 [_PhoenixAPI_RequireFile]
-Run,%API%,_PhoenixAPI_RequireFileEx,ExtractFile,#1,#2
+Run,%API%,_PhoenixAPI_RequireFileEx,ExtractFile,%^SIPARAM_1%,%^SIPARAM_2%
 
 [#_PhoenixAPI_RequireFileEx#]
 // ===============================================================================================================================
 // Name...........: RequireFileEx
 // Description....: Extract files and their .mui's (if they exist) from Install.wim
 // Syntax.........: RequireFileEx,<Action>,<FilePath>[,NOMUI]
-// Parameters.....: #1 Action:
-//                             AppendList   - Append the file to a list (bulk extraction). You must call RequireFileEx,ExtractList
-//                                            in order to perform the actual extraction of the list.
-//                             ExtractFile  - Single file extraction
-//                             ExtractList  - Extract the list created with Append
-//                  #2 Path to the file to extract relative to the root of Install.wim
-//                  #3 NOMUI - (Optional) Don't extract .mui files.
-//                             If you know the file to be extracted isn't localized you can save a some time by not checking
-//                             for .mui files that don't exist.
+// Parameters.....: Action:
+//                          AppendList   - Append the file to a list (bulk extraction). You must call RequireFileEx,ExtractList
+//                                         in order to perform the actual extraction of the list.
+//                          ExtractFile  - Single file extraction
+//                          ExtractList  - Extract the list created with Append
+//                  Path to the file to extract relative to the root of Install.wim
+//                  NOMUI - (Optional) Don't extract .mui files.
+//                          If you know the file to be extracted isn't localized you can save a some time by not checking
+//                          for .mui files that don't exist.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: RequireFileEx uses WimExtractBulk in NOERR mode so it does not verify that files exist before trying to extract.
@@ -1713,7 +1713,7 @@ Run,%API%,_PhoenixAPI_RequireFileEx,ExtractFile,#1,#2
 // ===============================================================================================================================
 [_PhoenixAPI_RequireFileEx]
 
-If,#1,Equal,"",Halt,"RequireFileEx Syntax Error: Action was not specified."
+If,%^SIPARAM_1%,Equal,"",Halt,"RequireFileEx Syntax Error: Action was not specified."
 
 System,SetLocal
 
@@ -1753,7 +1753,7 @@ Else,If,%Action%,Equal,"ExtractList",Begin
   WimExtractBulk,%SourceInstallWim%,%SourceInstallWimImage%,%BulkFileList%,%TargetDir%,NOACL,NOATTRIB,NOERR,NOWARN
   FileDeleteEx,%BulkFileList%
 End
-Else,Halt,"RequireFileEx Syntax Error: Invalid Action [#1]."
+Else,Halt,"RequireFileEx Syntax Error: Invalid Action [%^SIPARAM_1%]."
 
 System,EndLocal
 
@@ -1762,9 +1762,9 @@ System,EndLocal
 // Name...........: RequireFileEx_Process_MUI
 // Description....: Extract a file's .mui from Install.wim
 // Syntax.........: RequireFileEx_Process_MUI,<FilePath>,<Language>,<ListFile>
-// Parameters.....: #1 FilePath - Path to the file relative to the root of Install.wim
-//                  #2 Language - Language to extract
-//                  #3 ListFile - ListFile to write the MUI path
+// Parameters.....: FilePath - Path to the file relative to the root of Install.wim
+//                  Language - Language to extract
+//                  ListFile - ListFile to write the MUI path
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Internal Function
@@ -1814,7 +1814,7 @@ Set,%PEPrograms%,"X:\Program Files"
 // Name...........: SetFileACL
 // Description....: Give full control for "Everyone" on a file or directory using Helge Klein's SetAcl.exe
 // Syntax.........: SetFileACL,<Path>
-// Parameters.....: #1 Path - The file or directory to modify.
+// Parameters.....: Path - The file or directory to modify.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Depends on SetAcl.exe in %Tools% <https://helgeklein.com/setacl/>
@@ -1822,7 +1822,7 @@ Set,%PEPrograms%,"X:\Program Files"
 // ===============================================================================================================================
 [_PhoenixAPI_SetFileACL]
 System,SetLocal
-If,#1,Equal,"",Halt,"SetFileACL Syntax Error: You must specify the file or directory to modify."
+If,%^SIPARAM_1%,Equal,"",Halt,"SetFileACL Syntax Error: You must specify the file or directory to modify."
 GetParam,1,%Path%
 
 Echo,"Granting full access to [%Path%] ...#$X#$XThis can take awhile, please be patient."
@@ -1836,8 +1836,8 @@ System,EndLocal
 // Name...........: SetRegACL
 // Description....: Take ownership and grant full control for "Everyone" on a registry key using Helge Klein's SetAcl.exe
 // Syntax.........: SetRegACL,<%RegKey%>
-// Parameters.....: #1 %RegKey% - Registry key(s) to modify. The hive must already be mounted.
-//                    Multiple RegKeys can be specified in a pipe separated list. This significantly speeds up processing.
+// Parameters.....: %RegKey% - Registry key(s) to modify. The hive must already be mounted.
+//                             Multiple RegKeys can be specified in a pipe separated list. This significantly speeds up processing.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: Depends on SetAcl.exe in %Tools% <https://helgeklein.com/setacl/> (Distributed with permission)
@@ -1859,7 +1859,7 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_SetRegACL]
 System,SetLocal
-If,#1,Equal,"",Halt,"SetRegACL Syntax Error: You must specify the Registry Key to modify."
+If,%^SIPARAM_1%,Equal,"",Halt,"SetRegACL Syntax Error: You must specify the Registry Key to modify."
 GetParam,1,%RegKey%
 
 StrFormat,EndTrim,%RegKey%,"|",%RegKey%
@@ -1889,8 +1889,8 @@ System,EndLocal
 // Name...........: WebGetEx
 // Description....: An extended version of WebGet utilizing Aria2 as the download engine. Useful for URL's that include javascript based redirects or CDN protection such as CloudFlare.
 // Syntax.........: WebGetEx,<URL>,<DestPath>[,<HashType>=<HashDigest>][,Referer=<URL>][,TimeOut=<Int>][,UserAgent=<Agent>][,NOERR]
-// Parameters.....: #1 URL - URL of the file to download. Valid URI's are `HTTP`, `HTTPS`, `FTP`, `SFTP`
-//                  #2 DestPath - The full path where the downloaded file will be saved. If the path does not exist it will be created. If the file exists it will be overwritten.
+// Parameters.....: URL - URL of the file to download. Valid URI's are `HTTP`, `HTTPS`, `FTP`, `SFTP`
+//                  DestPath - The full path where the downloaded file will be saved. If the path does not exist it will be created. If the file exists it will be overwritten.
 //                  Hash Verification - (Optional) Downloads can be verified by validating the hash value of the downloaded file in the form of <HashType>=<HashDigest>.
 //                  HashType= - Hash type to calculate. Supported hash types: MD5, SHA1, SHA256, SHA384, SHA512.
 //                  Referer= - (Optional) Set an http referrer (Referer).
@@ -1901,7 +1901,7 @@ System,EndLocal
 //                  FTP-Password= - (Optional) Set the FTP/SFTP password. Default: `PhoenixPE`.
 //                  FTP-Passive= - (Optional) Use passive mode in FTP. Default: `true`. This option is ignored for SFTP transfers.
 //                  FTP-Type= - (Optional) Set the FTP transfer type. Supported values are: `binary` or `ascii`. Default: `binary`. This option is ignored for SFTP transfers.
-// Return values..: #r - Success: 0, Fail: Non-Zero - See Aria2 exit code reference.
+// Return values..: %^RET% - Success: 0, Fail: Non-Zero - See Aria2 exit code reference.
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
 //                  Aria2 exit code reference: https://aria2.github.io/manual/en/html/aria2c.html#exit-status
@@ -1909,12 +1909,12 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_WebGetEx]
 System,SetLocal
-If,#1,Equal,"",Halt,"WebGetEx Syntax Error: You must specify the URL of the file to download."
-If,#2,Equal,"",Halt,"WebGetEx Syntax Error: You must specify the destination path."
+If,%^SIPARAM_1%,Equal,"",Halt,"WebGetEx Syntax Error: You must specify the URL of the file to download."
+If,%^SIPARAM_2%,Equal,"",Halt,"WebGetEx Syntax Error: You must specify the destination path."
 
 GetParam,1,%URL%
 Getparam,2,%DestPath%
-Set,%argc%,#a
+Set,%argc%,%^SIPARAM_COUNT%
 Set,%argOptStart%,3
 
 Set,%HashType%,""
@@ -2065,8 +2065,8 @@ System,EndLocal
 // Name...........: WixExtract
 // Description....: Extract files from an WIX based installer.
 // Syntax.........: WixExtract,<SetupFile>,<DestDir>
-// Parameters.....: #1 SetupFile - The WIX exe file to unpack.
-//                  #2 DestDir - The full path to the directory where the files will be unpacked.
+// Parameters.....: SetupFile - The WIX exe file to unpack.
+//                  DestDir - The full path to the directory where the files will be unpacked.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:                      *** Experimental - May be changed or removed without notice ***
@@ -2074,8 +2074,8 @@ System,EndLocal
 // ===============================================================================================================================
 [_PhoenixAPI_WixExtract]
 System,SetLocal
-If,#1,Equal,"",Halt,"WixExtract Syntax Error: You must specify the setup file."
-If,#2,Equal,"",Halt,"WixExtract Syntax Error: You must specify the destination directory."
+If,%^SIPARAM_1%,Equal,"",Halt,"WixExtract Syntax Error: You must specify the setup file."
+If,%^SIPARAM_2%,Equal,"",Halt,"WixExtract Syntax Error: You must specify the destination directory."
 
 Set,%WixExe%,"%Tools%\anycpu\wix\dark.exe"
 //Set,%WixExe%,"%Tools%\%HostArch%\wix\wix.exe"
@@ -2099,15 +2099,15 @@ System,EndLocal
 // Name...........: XMLAdd
 // Description....: Experimental wrapper for XmlStarlet - Add a new element/text/attribute to an XML file.
 // Syntax.........: XMLAdd,<Operation>,<XMLFile>,<XPath>,<Type>,<Name>[,<Value>]
-// Parameters.....: #1 Operation - Can be one of:
-//                     Insert  - Insert a node at the the beginning of the XPath.
-//                     Append  - Append a node to the end of the XPath.
-//                     Subnode - Add a new subnode to each XPath in the document.
-//                  #2 XMLFile - Full path to the .xml filed to edit.
-//                  #3 XPath - XPath (XML Path Language) query used to insert the Attribute/Element.
-//                  #4 Type - XPath type [elem|text|attr]
-//                  #5 Name - Value Name
-//                  #6 Value - (Optional) Value
+// Parameters.....: Operation - Can be one of:
+//                    Insert  - Insert a node at the the beginning of the XPath.
+//                    Append  - Append a node to the end of the XPath.
+//                    Subnode - Add a new subnode to each XPath in the document.
+//                  XMLFile - Full path to the .xml filed to edit.
+//                  XPath - XPath (XML Path Language) query used to insert the Attribute/Element.
+//                  Type - XPath type [elem|text|attr]
+//                  Name - Value Name
+//                  Value - (Optional) Value
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
@@ -2130,15 +2130,15 @@ If,%Name%,Equal,"",Halt,"XMLAdd Syntax Error: You must specify a name."
 
 If,%Operation%,Equal,"Insert",Begin
   ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --insert #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-  If,Not,#r,Equal,0,Halt,"XMLAdd Error: Failed to insert value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+  If,Not,%^RET%,Equal,0,Halt,"XMLAdd Error: Failed to insert value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,If,%Operation%,Equal,"Append",Begin
   ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --append #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-  If,Not,#r,Equal,0,Halt,"XMLAdd Error: Failed to append value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+  If,Not,%^RET%,Equal,0,Halt,"XMLAdd Error: Failed to append value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,If,%Operation%,Equal,"Subnode",Begin
   ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --subnode #$q%XPath%#$q --type #$q%Type%#$q --name #$q%Name%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-  If,Not,#r,Equal,0,Halt,"XMLAdd Error: Failed to add subnode value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
+  If,Not,%^RET%,Equal,0,Halt,"XMLAdd Error: Failed to add subnode value [%XPath%/%Name%: %Value%] to [%XMLFile%]."
 End
 Else,Halt,"XMLAdd Syntax Error: You must specify an valid operation [insert|append|subnode]."
 
@@ -2149,8 +2149,8 @@ System,EndLocal
 // Name...........: XMLDelete
 // Description....: Experimental wrapper for XmlStarlet - Delete an XML path/value.
 // Syntax.........: XMLDelete,<XMLFile>,<XPath>
-// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
-//                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to delete.
+// Parameters.....: XMLFile - Full path to the .xml filed to edit.
+//                  XPath - XPath (XML Path Language) query used to locate the Attribute/Element to delete.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf
@@ -2165,7 +2165,7 @@ If,Not,ExistFile,%XMLFile%,Halt,"XMLDelete Syntax Error: The file [%XMLFile%] do
 If,%XPath%,Equal,"",Halt,"XMLDelete Syntax Error: You must specify an XPath."
 
 ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --delete #$q%XPath%#$q #$q%XMLFile%#$q"
-If,Not,#r,Equal,0,Halt,"XMLDelete Error: Failed to delete [%XPath%] from [%XMLFile%]."
+If,Not,%^RET%,Equal,0,Halt,"XMLDelete Error: Failed to delete [%XPath%] from [%XMLFile%]."
 
 System,EndLocal
 
@@ -2174,12 +2174,12 @@ System,EndLocal
 // Name...........: XMLRead
 // Description....: Experimental wrapper for XmlStarlet - Read a value from an XML file.
 // Syntax.........: XMLRename,<XMLFile>,<XPath>
-// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
-//                  #2 XPath - XPath (XML Path Language) query used to locate the value to read.
-//                  #3 NOERR - Don't Halt on errors. (Use if you intend to handle errors yourself).
-//                             eg. If check #r to see if XMLRead fails and then call XMLAdd   
-// Return values..: #r - Success - Returns the value of <XPath>
-//                       Failure - Returns ""
+// Parameters.....: XMLFile - Full path to the .xml filed to edit.
+//                  XPath - XPath (XML Path Language) query used to locate the value to read.
+//                  NOERR - Don't Halt on errors. (Use if you intend to handle errors yourself).
+//                             eg. If check %^RET% to see if XMLRead fails and then call XMLAdd   
+// Return values..: %^RET% - Success - Returns the value of <XPath>
+//                           Failure - Returns ""
 // Author.........: Homes32
 // Remarks........: The current implementation of this function only returns a single value.
 //                  http://xmlstar.sourceforge.net/doc/UG/xmlstarlet-ug.pdf          
@@ -2202,14 +2202,14 @@ If,%Arg3%,Equal,"NOERR",Set,%NOERR%,"True"
 FileDeleteEx,"%ProjectTemp%\PhoenixAPI-XMLRead.ini"
 
 ShellExecute,Hide,"cmd.exe","/c For /f #$qusebackq delims=#$q #$p? In (`^#$q#$q%Tools%\x86\xml.exe#$q select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q^#$q`) Do (>#$q%ProjectTemp%\PhoenixAPI-XMLRead.ini#$q echo Value^=#$p?)"
-If,#r,Equal,0,Begin
+If,%^RET%,Equal,0,Begin
   TXTAddLine,"%ProjectTemp%\PhoenixAPI-XMLRead.ini","[XMLRead]",PREPEND
   IniRead,"%ProjectTemp%\PhoenixAPI-XMLRead.ini","XMLRead","Value",%Value%
   Return,%Value%
 End
 Else,Begin
   If,%NOERR%,Equal,"True",Return,""
-  Else,Halt,"XMLRead Error: Failed to read [%XMLFile%]. XmlStarlet returned: [#r]"
+  Else,Halt,"XMLRead Error: Failed to read [%XMLFile%]. XmlStarlet returned: [%^RET%]"
 End
 
 System,EndLocal
@@ -2219,9 +2219,9 @@ System,EndLocal
 // Name...........: XMLRename
 // Description....: Experimental wrapper for XmlStarlet - Rename a value in an XML file.
 // Syntax.........: XMLRename,<XMLFile>,<XPath>,<Value>
-// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
-//                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to rename.
-//                  #3 Value - New Value
+// Parameters.....: XMLFile - Full path to the .xml filed to edit.
+//                  XPath - XPath (XML Path Language) query used to locate the Attribute/Element to rename.
+//                  Value - New Value
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: The XPath must exist in order for the value to be Renamed.
@@ -2239,7 +2239,7 @@ If,%XPath%,Equal,"",Halt,"XMLRename Syntax Error: You must specify an XPath."
 If,%Value%,Equal,"",Halt,"XMLRename Syntax Error: You must specify a value."
 
 ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --rename #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-If,Not,#r,Equal,0,Halt,"XMLRename Error: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
+If,Not,%^RET%,Equal,0,Halt,"XMLRename Error: Failed to write value [%XPath%: %Value%] to [%XMLFile%]."
 
 System,EndLocal
 
@@ -2248,12 +2248,12 @@ System,EndLocal
 // Name...........: XMLUpdate
 // Description....: Update the value of an existing Attribute/Element
 // Syntax.........: XMLUpdate,<XMLFile>,<XPath>,<Value>,[NOERR]
-// Parameters.....: #1 XMLFile - Full path to the .xml filed to edit.
-//                  #2 XPath - XPath (XML Path Language) query used to locate the Attribute/Element to update.
-//                  #3 Value - New Value
-//                  #4 NOERR - Don't Halt on errors. (Use if you intend to handle errors yourself).
-//                             eg. If check #r to see if XMLUpdate fails and then call XMLAdd        
-// Return values..: #r - Returns: 0 - Success
+// Parameters.....: XMLFile - Full path to the .xml filed to edit.
+//                  XPath - XPath (XML Path Language) query used to locate the Attribute/Element to update.
+//                  Value - New Value
+//                  NOERR - Don't Halt on errors. (Use if you intend to handle errors yourself).
+//                          eg. If check %^RET% to see if XMLUpdate fails and then call XMLAdd        
+// Return values..: %^RET% - Returns: 0 - Success
 //                                1 - Failure
 //                                2 - Invalid Arguments
 //                                3 - Invalid XML File
@@ -2279,13 +2279,13 @@ If,%Value%,Equal,"",Halt,"XMLUpdate Syntax Error: You must specify a value."
 If,%Arg3%,Equal,"NOERR",Set,%NOERR%,"True"
 
 ShellExecute,Hide,"%Tools%\x86\xml.exe","select --text --template --value-of #$q%XPath%#$q #$q%XMLFile%#$q"
-If,Not,#r,Equal,0,Begin
+If,Not,%^RET%,Equal,0,Begin
   If,%NOERR%,Equal,"False",Halt,"XMLUpdate Error: Failed to query [%XPath%] from [%XMLFile%]. The XPath must exist in order for the value to be updated."
   Return,-99999999
 End
 Else,Begin
   ShellExecute,Hide,"%Tools%\x86\xml.exe","edit --inplace --update #$q%XPath%#$q --value #$q%Value%#$q #$q%XMLFile%#$q"
-  If,#r,Equal,0,Return,0
+  If,%^RET%,Equal,0,Return,0
   Else,Begin
     // There was a problem writing the XML file
     If,%NOERR%,Equal,True,Return,5

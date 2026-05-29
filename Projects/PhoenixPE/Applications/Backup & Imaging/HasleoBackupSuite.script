@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2024-12-23
+Version=1.0.1.0
+Date=2026-05-28
 
 [Variables]
 %ProgramFolder%="Hasleo Backup Suite"
@@ -130,7 +130,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -138,12 +138,15 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%TargetPrograms%\%ProgramFolder%\","CDIR={app}\bin\WINPE\Program Files\Hasleo Backup Suite"
+GetParam,1,%DestDir%
+StrFormat,EndTrim,%DestDir%,"\",%DestDir%
 
-If,%SourceArch%,Equal,x64,InnoRename,"%TargetPrograms%\%ProgramFolder%\","*.*",2
-Else,InnoRename,"%TargetPrograms%\%ProgramFolder%\","*.*",1
+InnoExtract,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%DestDir%\","CDIR={app}\bin\WINPE\Program Files\Hasleo Backup Suite"
 
-InnoCleanup,"%TargetPrograms%\%ProgramFolder%\","*.*"
+If,%SourceArch%,Equal,x64,InnoRename,"%DestDir%\","*.*",2
+Else,InnoRename,"%DestDir%\","*.*",1
+
+InnoCleanup,"%DestDir%\","*.*"
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -159,7 +162,7 @@ InnoCleanup,"%TargetPrograms%\%ProgramFolder%\","*.*"
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#LaunchProgram#]
 // ===============================================================================================================================

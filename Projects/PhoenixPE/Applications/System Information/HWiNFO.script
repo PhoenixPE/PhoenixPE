@@ -106,7 +106,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -115,8 +115,8 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting files..."
 Run,%ScriptFile%,SetProgramArch
-7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -i!%ProgramExe% -o#$q#1#$q"
-If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
+7z,"x -r -y #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -i!%ProgramExe% -o#$q%^SIPARAM_1%#$q"
+If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -134,14 +134,14 @@ If,Not,#r,Equal,0,Halt,"Error: Failed to extract [%SetupFile%]."
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
 WebGetEx,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
-If,Not,#r,Equal,0,Begin
+If,Not,%^RET%,Equal,0,Begin
   // Try incrementing the version number up to 10 times
   ForRange,%i%,0,10,1,Begin
     Math,Add,%ProgramVersion%,%ProgramVersion%,1
 	WebGetEx,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Referer=https://www.hwinfo.com/download/,NOERR
-	If,#r,Equal,0,Break
+	If,%^RET%,Equal,0,Break
   End
-  If,Not,#r,Equal,0,Halt,"Download failed: The code returned was [#r]."
+  If,Not,%^RET%,Equal,0,Halt,"Download failed: The code returned was [%^RET%]."
 End
 
 [#SetProgramArch#]

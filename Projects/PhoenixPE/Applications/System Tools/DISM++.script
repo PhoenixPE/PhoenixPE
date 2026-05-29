@@ -87,7 +87,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // Name...........: ExtractProgram
 // Description....: Extract program files from script/setup files.
 // Syntax.........: Run,%ScriptFile%,ExtractProgram,<DestDir>
-// Parameters.....: #1 DestDir - The directory where the files will be extracted.
+// Parameters.....: DestDir - The directory where the files will be extracted.
 // Return values..: 
 // Author.........: Homes32
 // Remarks........:
@@ -95,18 +95,18 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 // ===============================================================================================================================
 [ExtractProgram]
 Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",#1
+Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",%^SIPARAM_1%
 
-DirDeleteEx,"#1\Config\arm64"
-FileDeleteEx,"#1\Dism++ARM64.exe"
+DirDeleteEx,"%^SIPARAM_1%\Config\arm64"
+FileDeleteEx,"%^SIPARAM_1%\Dism++ARM64.exe"
 
 If,%SourceArch%,Equal,x64,Begin
-  DirDeleteEx,"#1\Config\x86"
-  FileDeleteEx,"#1\Dism++x86.exe"
+  DirDeleteEx,"%^SIPARAM_1%\Config\x86"
+  FileDeleteEx,"%^SIPARAM_1%\Dism++x86.exe"
 End  
 Else,Begin
-  DirDeleteEx,"#1\Config\amd64"
-  FileDeleteEx,"#1\Dism++x64.exe"
+  DirDeleteEx,"%^SIPARAM_1%\Config\amd64"
+  FileDeleteEx,"%^SIPARAM_1%\Dism++x64.exe"
 End
 
 [#DownloadProgram#]
@@ -124,7 +124,7 @@ End
 Echo,"Downloading %ScriptTitle%..."
 Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
-If,Not,#r,Equal,200,Halt,"Download failed: The code returned was [#r]."
+If,Not,%^RET%,Equal,200,Halt,"Download failed: The code returned was [%^RET%]."
 
 [#SetProgramArch#]
 // ===============================================================================================================================
