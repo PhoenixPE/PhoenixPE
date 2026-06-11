@@ -30,20 +30,20 @@
 
 [Main]
 Title=Google Chrome
-Description=(v148.0.7778.168) Google Chrome is a cross-platform web browser developed by Google.
+Description=(v149.0.7827.103) Google Chrome is a cross-platform web browser developed by Google.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.23.0
-Date=2026-05-18
+Version=1.1.24.0
+Date=2026-06-11
 
 [Variables]
 %ProgramFolder%="Chrome"
 %ProgramExe%="chrome.exe"
 %ProgramVersion%="148.0.7778.168"
-%DownloadURLx86%=https://dl.google.com/release2/chrome/acsk4ta2nsju5laxlba67yjzikaq_148.0.7778.168/148.0.7778.168_chrome_installer_uncompressed.exe
-%DownloadURLx64%=https://dl.google.com/release2/chrome/acvxg5jthswikws47ibg4pqxgu2a_148.0.7778.168/148.0.7778.168_chrome_installer_uncompressed.exe
+%DownloadURLx86%=https://dl.google.com/release2/chrome/adkarrjsded6kgeradub5c5lppsa_149.0.7827.103/149.0.7827.103_chrome_installer_uncompressed.exe
+%DownloadURLx64%=https://dl.google.com/release2/chrome/adh7d3qwucqfjphrqm2o27nyvcaq_149.0.7827.103/149.0.7827.103_chrome_installer_uncompressed.exe
 %SetupFile%="Chrome-%ProgramVersion%-%SourceArch%.exe"
 
 [Process]
@@ -166,7 +166,7 @@ End
 Else,Begin
   Echo,"Importing default bookmarks."
   TxtReplace,"%TargetPrograms%\%ProgramFolder%\master_preferences","#$qimport_bookmarks_from_file#$q:#$q%ProgramDirEsc%\\bookmarks.html#$q,",""
-  RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Google\Chrome","ManagedBookmarks","[{#$qtoplevel_name#$q: #$qWinPE#$q},{#$qname#$q:#$qThe Oven#$q,#$qurl#$q:#$qtheoven.org#$q},{#$qname#$q:#$qReboot#$q,#$qurl#$q:#$qreboot.pro#$q},{#$qname#$q:#$qMSFN#$q,#$qurl#$q:#$qmsfn.org#$q},{#$qname#$q:#$qPhoenixPE#$q,#$qurl#$q:#$qgithub.com/PhoenixPE#$q},{#$qname#$q:#$qPEBakery#$q,#$qurl#$q:#$qgithub.com/pebakery/#$q}]"
+  RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Google\Chrome","ManagedBookmarks","[{#$qtoplevel_name#$q: #$qWinPE#$q},{#$qname#$q:#$qThe Oven#$q,#$qurl#$q:#$qtheoven.org#$q},{#$qname#$q:#$qMSFN#$q,#$qurl#$q:#$qmsfn.org#$q},{#$qname#$q:#$qPhoenixPE#$q,#$qurl#$q:#$qgithub.com/PhoenixPE#$q},{#$qname#$q:#$qPEBakery#$q,#$qurl#$q:#$qgithub.com/pebakery/#$q}]"
 End
 
 Echo,"Configuring Extensions..."
@@ -216,6 +216,9 @@ RegWrite,HKLM,REG_SZ,"Tmp_Software\Policies\Google\Chrome\","ExtensionSettings",
 
 // Don't show default browser warning (Policy)
 RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome","DefaultBrowserSettingEnabled",0
+
+// Don't let Chrome automatically download the Gemini Nano on device AI Model (4GB+)
+RegWrite,HKLM,REG_DWORD,"Tmp_Software\Policies\Google\Chrome","GenAILocalFoundationalModelSettings",1
 
 [#RegisterFileExtensions#]
 // ===============================================================================================================================
