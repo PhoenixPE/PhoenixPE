@@ -34,12 +34,16 @@ PhoenixPE was developed from the ground up to be fast, flexible, and user-friend
 ### Security
 - Malware removal
 - Forensics tools
+- Secure disk wipe
 
 ### Hardware & Maintenance
-- Drive partitioning and install prep
+- Benchmarking
+- Drive partitioning
+- Install prep
 - Hardware diagnostics
+- System information
 
-PhoenixPE ships with a curated selection of well-integrated tools to cover the most common recovery scenarios. Because every user's needs are different, PEBakery's scripting language makes it straightforward to add your favorite applications and settings on top.
+PhoenixPE ships with a curated selection of well-integrated tools to cover the most common recovery scenarios. Because every user's needs are different, PEBakery's scripting language makes it straightforward to add your favorite applications and settings to your build.
 
 ## Screenshots
 
@@ -83,12 +87,12 @@ Full documentation is available on the [PhoenixPE Wiki](https://github.com/Phoen
 
 ## Common Questions
 
-**Why does my antivirus flag some software in PhoenixPE as a virus?**
+### Why does my antivirus flag some software in PhoenixPE as a virus?
 This is a known false positive. Recovery tools often use low-level system access that antivirus software flags incorrectly.
 
 See the [Security & Antivirus False Positives](https://github.com/PhoenixPE/PhoenixPE/wiki/Security) page for a full explanation.
 
-**Why should I choose PhoenixPE instead downloading a popular pre-built ISO?**
+### Why should I choose PhoenixPE instead downloading a popular pre-built ISO?
 Pre-made ISOs like Hiren's, Gandalf's, MediCat, and Sergei are often built on Win10XPE or PhoenixPE projects, but strip out all credit while slapping their own name on the result. They add some fancy graphics and tweaks, but can be bloated and almost always ship with outdated software.
 
 Some sketcher pre-built ISO's hide freely available software behind paywalls, and bundle Warez putting you at legal risk.
@@ -97,7 +101,7 @@ Since you have no visibility into what's actually baked into someone else's ISO,
 
 Building PhoenixPE yourself means you control exactly what's included, keep everything current and secure, add your own apps and license keys, and get it all in your native language. Put in a little work and reap the rewards — it's worth the effort.
 
-**Can I request an application be included?**
+### Can I request an application be included?
 It's impossible to bundle every application, and everyone has different needs. Instead, the scripting system makes it easy for *you* to include your favorite applications. Check out the resources above and ask in the forums if you need a hand.
 
 See the full [FAQ](https://github.com/PhoenixPE/PhoenixPE/wiki/FAQ#can-you-include-xyz-application-in-phoneixpe) for more information.
