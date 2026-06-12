@@ -92,8 +92,8 @@ This is a known false positive. Recovery tools often use low-level system access
 
 See the [Security & Antivirus False Positives](https://github.com/PhoenixPE/PhoenixPE/wiki/Security) page for a full explanation.
 
-### Why should I choose PhoenixPE instead downloading a popular pre-built ISO?
-Pre-made ISOs like Hiren's, Gandalf's, MediCat, and Sergei are often built on Win10XPE or PhoenixPE projects, but strip out all credit while slapping their own name on the result. They add some fancy graphics and tweaks, but can be bloated and almost always ship with outdated software.
+### Why should I choose PhoenixPE instead downloading a pre-built ISO?
+Popular pre-made ISOs like Hiren's, Gandalf's, MediCat, and Sergei are often built on Win10XPE or PhoenixPE projects, but strip out all licenses and credit while slapping their own name on the result. They add some fancy graphics and tweaks, but can be bloated, difficult to customize, and almost always ship with outdated software.
 
 Some sketcher pre-built ISO's hide freely available software behind paywalls, and bundle Warez putting you at legal risk.
 
