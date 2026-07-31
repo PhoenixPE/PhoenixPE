@@ -182,8 +182,11 @@ If,%AllowSetModifyInterface%,Equal,True,Set,%Message%,"%Message%WARNING: Compati
 If,%LegacyInterfaceCommand%,Equal,True,Set,%Message%,"%Message%WARNING: Compatibility --> Enable legacy interface commands. This option is for legacy projects only and should not be used with %ProjectTitle%.#$x#$x"
 If,%LegacySectionParamCommand%,Equal,True,Set,%Message%,"%Message%WARNING: Compatibility --> Enable legacy section parameter commands. This option is for legacy projects only and should not be used with %ProjectTitle%.#$x#$x"
 If,%AutoCompactIniWriteCommand%,Equal,True,Set,%Message%,"%Message%WARNING: Compatibility --> Auto Compact .ini files on write commands. This option is for legacy projects only and should not be used with %ProjectTitle%.#$x#$x"
-If,%EnableAllLegacySectionParams%,Equal,True,Set,%Message%,"%Message%WARNING: Compatibility --> Enable legacy sharp-styled section parameters. This option can cause data corruption in some situations and should not be used with %ProjectTitle%.#$x#$x"
-If,%DisableLegacyExtendedSectionParams%,Equal,False,Set,%Message%,"%Message%WARNING: Compatibility --> Disable legacy sharp-styled extended section parameters. This option should be enabled for %ProjectTitle% as it prevents data corruption in certain situations.#$x#$x"
+If,%EnableAllLegacySectionParams%,Equal,True,Begin
+  Set,%Message%,"%Message%ERROR: Compatibility --> Enable legacy sharp-styled section parameters. This option can cause data corruption in some situations and cannot not be used with %ProjectTitle%.#$x#$x"
+  Set,%CriticalErr%,True
+End
+// DisableLegacyExtendedSectionParams doesn't matter because it is only effective if EnableAllLegacySectionParams = True. We don't allow EnableAllLegacySectionParams so this compat setting will never take effect.
 
 If,Not,%Message%,Equal,"",Begin
   If,%CriticalErr%,Equal,True,Begin

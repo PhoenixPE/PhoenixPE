@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.16.0.0
-Date=2026-05-20
+Version=1.16.1.0
+Date=2026-07-30
 Level=0
 Selected=None
 
@@ -60,6 +60,7 @@ FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 FileSearch=Run,%API%,_PhoenixAPI_FileSearch
 GetBinaryResource=Run,%API%,_PhoenixAPI_GetBinaryResource
+//GetMSBin=Run,%API%,_PhoenixAPI_GetMSBin
 GetStringResource=Run,%API%,_PhoenixAPI_GetStringResource
 InnoCleanup=Run,%API%,_PhoenixAPI_InnoCleanup
 InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
@@ -941,12 +942,6 @@ System,EndLocal
 // Author.........: Homes32
 // Remarks........: Depends on GetBinaryResource.exe in %Tools%.
 //                  GetBinaryResource.exe <Source> <ResourceType> <ResourceID> <OutputPath>
-//
-//                  Note: Due to the horrendous Winbuilder syntax we inherited that uses a single # as an argument designation
-//                        (eg. #1, #2, etc.) for arguments passed via Exec to a section, we need to check for and escape single #
-//                        on the ResourceType and ResourceID arguments or they will be dereferenced as variables if the user
-//                        specifies an ordinal such as #400. We also must check for, and handle ## in case the user thought to
-//                        escape any of the arguments themselves.
 // Related........:
 // ===============================================================================================================================
 [_PhoenixAPI_GetBinaryResource]
@@ -964,20 +959,6 @@ GetParam,4,%OutputPath%
 GetParam,5,%Arg5%
 
 If,%Arg5%,Equal,"NOERR",Set,%NOERR%,"True"
-
-StrFormat,Left,%ResourceType%,1,%Left1ResourceType%
-If,%Left1ResourceType%,Equal,"#",Begin
-  // Escape ResourceType ordinal
-  StrFormat,StartTrim,%ResourceType%,"#",%ResourceType%
-  Set,%ResourceType%,"##%ResourceType%"
-End
-
-StrFormat,Left,%ResourceID%,1,%Left1ResourceID%
-If,%Left1ResourceID%,Equal,"#",Begin
-  // Escape ResourceID ordinal
-  StrFormat,StartTrim,%ResourceID%,"#",%ResourceID%
-  Set,%ResourceID%,"##%ResourceID%"
-End
 
 ShellExecute,Hide,"%Tools%\%HostArch%\GetBinaryResource.exe","#$q%Source%#$q %ResourceType% %ResourceID% #$q%OutputPath%#$q"
 If,%ExitCode%,Equal,0,Return,%ExitCode%
