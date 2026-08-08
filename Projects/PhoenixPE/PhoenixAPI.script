@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.16.1.0
-Date=2026-07-30
+Version=1.17.0.0
+Date=2026-08-01
 Level=0
 Selected=None
 
@@ -60,7 +60,7 @@ FileCopyEx=Run,%API%,_PhoenixAPI_FileCopyEx
 FileDeleteEx=Run,%API%,_PhoenixAPI_FileDeleteEx
 FileSearch=Run,%API%,_PhoenixAPI_FileSearch
 GetBinaryResource=Run,%API%,_PhoenixAPI_GetBinaryResource
-//GetMSBin=Run,%API%,_PhoenixAPI_GetMSBin
+GetMSBin=Run,%API%,_PhoenixAPI_GetMSBin
 GetStringResource=Run,%API%,_PhoenixAPI_GetStringResource
 InnoCleanup=Run,%API%,_PhoenixAPI_InnoCleanup
 InnoExtract=Run,%API%,_PhoenixAPI_InnoExtract
@@ -696,21 +696,14 @@ End
 // Name...........: DISM
 // Description....: Execute DISM with the provided arguments.
 // Syntax.........: DISM,<Args>[,<WorkDir>]
-// Parameters.....: Args - The arguments to pass to the 7z executable.
+// Parameters.....: Args - The arguments to pass to the DISM executable.
 //                  WorkDir - The full path to the working directory. Default is the exe path.
 // Return values..: ExitCode provided by the DISM application
 // Author.........: Homes32
-// Remarks........: This command is provided as compatibility shim to allow using DISM on Win10 images from a Win7 Host.
+// Remarks........: This command is provided as compatibility shim.
 //                  The version of DISM provided with Win7 does not recognize Win10 images when using the /image: argument.
-//                  In order to work around this limitation and allow DISM operations (Localization, driver integration, etc) on Win7
-//                  we use DISM from Win10 AIK tools, downloaded using JFX's GetWaikTools.exe during Pre-Flight Check. 
-//                    * Win10+ - Executes DISM.exe from the HostOS
-//                    * Win7/8 - Executes Win10 AIK DISM.exe
-//
-//                  Eventually GetWaikTools will no longer be able to download an AIK that works on Win7, at which time it will
-//                  no longer be possible to build PhoenixPE on Win7. What do you expect running an unsupported OS? ;-)
 //                  
-// Related........: Depends on %Tools%\%HostArch%\GWT.exe
+// Related........: 
 // ===============================================================================================================================
 [_PhoenixAPI_DISM]
 System,SetLocal
@@ -723,7 +716,7 @@ System,GetEnv,windir,%HostWinDir%
 FileVersion,"%HostWinDir%\System32\ntdll.dll",%HostOSVer%
 
 If,%HostOSVer%,Bigger,10.0.0.0,ShellExecute,Hide,"dism.exe",%Args%,%WorkDir%
-Else,ShellExecute,Hide,"%Tools%\%HostArch%\DISM\dism.exe",%Args%,%WorkDir%
+Else,Halt,"DISM Error: You must be running Win10 or later. (Sorry APT...)"
 
 Return,%ExitCode%
 
@@ -970,6 +963,41 @@ Else,Begin
   List,Get,%GetBinaryResourceErrors%,%ErrorDescrPos%,%ErrorDescr%
   Halt,"GetBinaryResource Error: Unable to extract resource [%ResourceID%]. The command returned: [%ExitCode%] %ErrorDescr%."
 End
+System,EndLocal
+
+[#_PhoenixAPI_GetMSBin#]
+// ===============================================================================================================================
+// Name...........: GetMSBin
+// Description....: Download a binary from the Microsoft Symbol Sever.
+// Syntax.........: GetMSBin,<Name>,<Hash>,<DestPath>
+// Parameters.....: Name - Original PE filename as known to the symbol server.
+//                  Hash - Symbol-server hash.
+//                  DestPath - The full path where the blob will be saved.
+// Return values..: 200 - Success
+//                  <HTTP Status Code> - Failure
+// Author.........: Homes32
+// Remarks........: 
+// Related........:
+// ===============================================================================================================================
+[_PhoenixAPI_GetMSBin]
+System,SetLocal
+
+If,%^SIPARAM_1%,Equal,"",Halt,"GetMSBin Syntax Error: You must specify the name of the file to download."
+If,%^SIPARAM_2%,Equal,"",Halt,"GetMSBin Syntax Error: You must specify the hash of the file to download."
+If,%^SIPARAM_3%,Equal,"",Halt,"GetMSBin Syntax Error: You must specify the destination path."
+
+GetParam,1,%FileName%
+GetParam,2,%FileHash%
+GetParam,3,%DestPath%
+
+Set,%SymbolServerBase%,"https://msdl.microsoft.com/download/symbols"
+Set,%SymbolServerUA%,"Microsoft-Symbol-Server/10.0.0.0"
+
+Set,%URL%,"%SymbolServerBase%/%FileName%/%FileHash%/%FileName%"
+
+WebGet,%URL%,%DestPath%,UserAgent=%SymbolServerUA%,NOERR
+Return,%^RET%
+
 System,EndLocal
 
 [#_PhoenixAPI_GetStringResource#]
@@ -1746,6 +1774,7 @@ GetParam,1,%URL%
 Getparam,2,%DestPath%
 Set,%argc%,%^SIPARAM_COUNT%
 Set,%argOptStart%,3
+Math,Sub,%argsRequired%,%argOptStart%,1
 
 Set,%HashType%,""
 Set,%HashDigest%,""
@@ -1758,7 +1787,7 @@ Set,%FTP-Password%,"PhoenixPE"
 Set,%FTP-Passive%,"true"
 Set,%FTP-Type%,"binary"
 
-If,%argc%,>,2,Begin
+If,%argc%,>,%argsRequired%,Begin
   // Process additional arguments
   Math,Add,%argMax%,%argc%,1
   ForRange,%i%,%argOptStart%,%argMax%,1,Begin

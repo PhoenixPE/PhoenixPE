@@ -29,9 +29,9 @@
 Title=PhoenixPE
 Description=PhoenixPE is a fully customizable rescue and recovery environment.
 Author=Homes32
-Version=1.0.10.0
+Version=1.0.11.0
 PathSetting=False
-Date=2025-02-26
+Date=2026-08-01
 Level=0
 Selected=None
 Mandatory=False
@@ -131,7 +131,34 @@ System,GetEnv,PROCESSOR_ARCHITECTURE,%HostArch%
 If,%HostArch%,Equal,"AMD64",Set,%HostArch%,"x64",GLOBAL
 Else,Set,%HostArch%,%HostArch%,GLOBAL
 
+Run,%ScriptFile%,CheckWorkingDirs
+
 System,OnBuildExit,Exec,"%ProjectDir%\script.project",PostBuildCleanup
+
+[#CheckWorkingDirs#]
+// ===============================================================================================================================
+// Name...........: CheckWorkingDirs
+// Description....: Ensure we have a skeleton working directory framework in place.
+//                  We don't know if the user is executing a script via the Run button or the Build button or if a source is
+//                  properly configured and pre-checks have run. This checks runs before each script is executed in order to
+//                  ensure that scripts and external programs have a minimal directory framework to work in.
+//
+//                  Keep in mind that we cannot check for variables like %TargetPrograms%, %PEPrograms%, or %OutputDir%
+//                  as these are dynamically set by Config Source and this would cause a deadlock when attempting to configure
+//                  a source for a project if one has not been configured yet.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Modified.......:
+// Remarks........:
+// Related........: Called by [Process]
+// ===============================================================================================================================
+[CheckWorkingDirs]
+If,Not,ExistDir,%ProjectCache%,DirMake,%ProjectCache%
+If,Not,ExistDir,%ProgramsCache%,DirMake,%ProgramsCache%
+If,Not,ExistDir,%ProjectTemp%,DirMake,%ProjectTemp%
+If,Not,ExistDir,%TargetDir%,DirMake,%TargetDir%
 
 [#PostBuildCleanup#]
 // ===============================================================================================================================
@@ -276,10 +303,8 @@ If,QUESTION,"Nuke PhoenixPE#$x#$xThis operation will obliterate all Target, ISO,
   DirDeleteEx,%ProgramsCache%
 
   Echo,"Removing downloaded tools..."
-  DirDeleteEx,"%Tools%\x86\DISM"
-  DirDeleteEx,"%Tools%\x64\DISM"
-  DirDeleteEx,"%Tools%\x86\Oscdimg"
-  DirDeleteEx,"%Tools%\x64\Oscdimg"
+  FileDeleteEx,"%Tools%\x86\Oscdimg.exe"
+  FileDeleteEx,"%Tools%\x64\Oscdimg.exe"
 
   Echo,"Clearing the Output directories..."
   If,ExistDir,%ISODir%,DirDeleteEx,%ISODir%

@@ -35,8 +35,8 @@ Author=Homes32
 Level=2
 Selected=True
 Mandatory=True
-Version=1.3.0.0
-Date=2026-06-25
+Version=1.3.1.0
+Date=2026-08-01
 
 [Variables]
 // Minimum PEBakery version that has the command/feature set that is compatible with PhoenixPE.
@@ -217,11 +217,11 @@ System,EndLocal
 [CheckTools]
 Echo,"Verifying required 3rd party tools are present..."
 If,Not,ExistFile,"%Tools%\%HostArch%\7z.exe",Run,%ScriptFile%,ErrMissingTool,"7z.exe"
+If,Not,ExistFile,"%Tools%\%HostArch%\aria2c.exe",Run,%ScriptFile%,ErrMissingTool,"aria2c.exe"
 If,Not,ExistFile,"%Tools%\%HostArch%\AutoIt3.exe",Run,%ScriptFile%,ErrMissingTool,"AutoIt3.exe"
 If,Not,ExistFile,"%Tools%\%HostArch%\binmay.exe",Run,%ScriptFile%,ErrMissingTool,"binmay.exe"
 If,Not,ExistFile,"%Tools%\%HostArch%\GetBinaryResource.exe",Run,%ScriptFile%,ErrMissingTool,"GetBinaryResource.exe"
 If,Not,ExistFile,"%Tools%\%HostArch%\GetStringResource.exe",Run,%ScriptFile%,ErrMissingTool,"GetStringResource.exe"
-If,Not,ExistFile,"%Tools%\%HostArch%\GWT.exe",Run,%ScriptFile%,ErrMissingTool,"GWT.exe"
 If,Not,ExistFile,"%Tools%\%HostArch%\hiderun.exe",Run,%ScriptFile%,ErrMissingTool,"hiderun.exe"
 If,Not,ExistFile,"%Tools%\%HostArch%\HiveUnload.exe",Run,%ScriptFile%,ErrMissingTool,"HiveUnload.exe"
 If,Not,ExistFile,"%Tools%\x86\innounp.exe",Run,%ScriptFile%,ErrMissingTool,"innounp.exe"
@@ -229,8 +229,7 @@ If,Not,ExistFile,"%Tools%\x86\mkISOfs.exe",Run,%ScriptFile%,ErrMissingTool,"mkIS
 If,Not,ExistFile,"%Tools%\%HostArch%\SetACL.exe",Run,%ScriptFile%,ErrMissingTool,"SetACL.exe"
 
 // WaikTools
-If,Not,ExistFile,"%Tools%\%HostArch%\DISM\dism.exe",Run,%ScriptFile%,GetWaikTools
-If,Not,ExistFile,"%Tools%\%HostArch%\Oscdimg\oscdimg.exe",Run,%ScriptFile%,GetWaikTools
+If,Not,ExistFile,"%Tools%\%HostArch%\oscdimg.exe",Run,%ScriptFile%,GetWaikTools
 
 [#ErrMissingTool#]
 // ===============================================================================================================================
@@ -250,26 +249,27 @@ Halt,"The build cannot continue because [ %^SIPARAM_1% ] is missing."
 [#GetWaikTools#]
 // ===============================================================================================================================
 // Name...........: GetWaikTools
-// Description....: Download missing/required WAIK tools (oscdimg, etc.) using JFX's GWT.exe
+// Description....: Download missing/required WAIK tools (oscdimg, etc.)
 // Syntax.........: 
 // Parameters.....: 
 // Return values..: 
 // Author.........: Homes32
-// Remarks........: Note: GetWaikTools has been discontinued as of v21.04. Will need to rewrite this function to use adksetup.exe
+// Remarks........: Hashes verified working as of ADK Dec-2024 (10.1.26100.2454)
 // Related........: Called by [CheckTools], btn_DownloadProgram
 // ===============================================================================================================================
 [GetWaikTools]
-Echo,"Downloading required tools from Windows 10 ADK...#$x#$xThis will only need to be done once."
-ShellExecute,Open,"%Tools%\%HostArch%\GWT.exe","-Win10 -Win10dism -Silent -folder:#$q%ProjectTemp%#$q"
-DirCopy,"%ProjectTemp%\ADK_6\x86\*.*","%Tools%\x86"
-DirCopy,"%ProjectTemp%\ADK_6\amd64\*.*","%Tools%\x64"
-If,Not,ExistFile,"%Tools%\x64\Oscdimg\oscdimg.exe",Halt,"Error downloading required Windows 10 ADK tools. The build cannot continue."
+System,SetLocal
 
-// Don't waste disk space with these, we will use the OS versions (DISM required for Win7 Compatibility shim PhoenixAPI_DISM)
-//DirDeleteEx,"%Tools%\x86\DISM"
-DirDeleteEx,"%Tools%\x86\BCDBOOT"
-//DirDeleteEx,"%Tools%\x64\DISM"
-DirDeleteEx,"%Tools%\x64\BCDBOOT"
+Echo,"Downloading required tools from Windows ADK...#$x#$xThis will only need to be done once."
+
+If,%HostArch%,Equal,x64,Set,%Hash%,704FD1B760000
+Else,Set,%Hash%,688CABB065000
+
+GetMSBin,"oscdimg.exe",%Hash%,"%Tools%\%HostArch%\oscdimg.exe"
+
+If,Not,%^RET%,Equal,200,Halt,"Error downloading required Windows ADK tools [%^RET%]. The build cannot continue."
+
+System,EndLocal
 
 [#CheckVerifiedBuilds#]
 // ===============================================================================================================================
@@ -474,10 +474,8 @@ Run,%ScriptFile%,GetWaikTools
 // ===============================================================================================================================
 [ClearDownloadCache]
 Echo,"Removing downloaded tools..."
-DirDeleteEx,%Tools%\x86\DISM
-DirDeleteEx,%Tools%\x64\DISM
-DirDeleteEx,%Tools%\x86\Oscdimg
-DirDeleteEx,%Tools%\x64\Oscdimg
+FileDeleteEx,%Tools%\x86\Oscdimg.exe
+FileDeleteEx,%Tools%\x64\Oscdimg.exe
 
 [#SetDefaultOptions#]
 // ===============================================================================================================================
