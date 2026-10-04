@@ -35,10 +35,12 @@ Author=Homes32
 Level=7
 Selected=True
 Mandatory=True
-Version=1.1.1.0
-Date=2024-04-22
+Version=1.2.0.0
+Date=2026-10-02
 
 [Variables]
+// Boot fonts shipped in Windows\Boot\Fonts_EX (as <name>_EX.ttf) for use with the Windows UEFI CA 2023 boot manager.
+%BootFontsEX%="chs_boot|cht_boot|jpn_boot|kor_boot|malgun_boot|malgunn_boot|meiryo_boot|meiryon_boot|msjh_boot|msjhn_boot|msyh_boot|msyhn_boot|segmono_boot|segoe_slboot|segoen_slboot|wgl4_boot"
 
 [Process]
 Echo,"Preparing to create bootable ISO file..."
@@ -85,37 +87,147 @@ FileCopyEx,"%TargetDir%\Windows\Boot\PCAT\memtest.exe","%OutputDir%\boot\"
 FileCopy,"%TargetDir%\Windows\Boot\Fonts\*.*","%OutputDir%\boot\Fonts\"
 
 Echo,"Processing EFI bootloader files..."
-FileCopyEx,"%TargetDir%\Windows\Boot\EFI\bootmgr.efi","%OutputDir%\efi\microsoft\boot\"
+If,%SourceArch%,Equal,x64,Set,%EfiBootFile%,bootx64.efi
+Else,Set,%EfiBootFile%,bootia32.efi
+
+// Select the boot manager signing certificate and boot files source.
+Run,%ScriptFile%,GetBootSource
+
+// Boot Manager
+Run,%ScriptFile%,CopyEfiFile,"%EfiBootSrc%\EFI%EX%\bootmgr%EX%.efi","%OutputDir%\efi\microsoft\boot",bootmgr.efi
 FileDeleteEx,"%OutputDir%\bootmgr.efi"
 PathMove,"%OutputDir%\efi\microsoft\boot\bootmgr.efi","%OutputDir%\bootmgr.efi"
+Run,%ScriptFile%,CopyEfiFile,"%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi","%OutputDir%\efi\boot",%EfiBootFile%
 
-If,%SourceArch%,Equal,x64,Begin
-  FileCopyEx,"%TargetDir%\Windows\Boot\EFI\bootmgfw.efi","%OutputDir%\efi\boot\"
-  FileDeleteEx,"%OutputDir%\efi\boot\bootx64.efi"
-  FileRename,"%OutputDir%\efi\boot\bootmgfw.efi","%OutputDir%\efi\boot\bootx64.efi"
-  FileRename,"%OutputDir%\efi\boot\%SourceLang%\bootmgfw.efi.mui","%OutputDir%\efi\boot\%SourceLang%\bootx64.efi.mui"
-End  
-Else,Begin
-  FileCopyEx,"%TargetDir%\Windows\Boot\EFI\bootmgfw.efi","%OutputDir%\efi\boot\"
-  FileDeleteEx,"%OutputDir%\efi\boot\bootia32.efi"
-  FileRename,"%OutputDir%\efi\boot\bootmgfw.efi","%OutputDir%\efi\boot\bootia32.efi"
-End
 FileCopy,"%TargetDir%\Windows\Boot\DVD\EFI\bcd","%OutputDir%\efi\microsoft\boot\"
 FileCopyEx,"%TargetDir%\Windows\Boot\EFI\memtest.efi","%OutputDir%\efi\microsoft\boot\"
+
+// Fonts - The CA 2023 boot manager uses the Fonts_EX versions, renamed without the _EX suffix.
 FileCopy,"%TargetDir%\Windows\Boot\Fonts\*.*","%OutputDir%\efi\microsoft\boot\Fonts\"
+If,Not,%EfiBootSrc%,Equal,"%TargetDir%\Windows\Boot",If,ExistDir,"%EfiBootSrc%\Fonts",FileCopy,"%EfiBootSrc%\Fonts\*.*","%OutputDir%\efi\microsoft\boot\Fonts\",NOWARN
+If,%EX%,Equal,_EX,ForEach,%Font%,%BootFontsEX%,If,ExistFile,"%EfiBootSrc%\Fonts_EX\%Font%_EX.ttf",FileCopy,"%EfiBootSrc%\Fonts_EX\%Font%_EX.ttf","%OutputDir%\efi\microsoft\boot\Fonts\%Font%.ttf",NOWARN
 
 // Press Any Key...
+FileDeleteEx,"%OutputDir%\efi\microsoft\boot\efisys*.bin"
 If,%cb_BootFix%,Equal,True,Begin
-  FileDeleteEx,"%OutputDir%\efi\microsoft\boot\efisys_noprompt.bin"
   ForEach,%Language%,%SourceFallbackLang%,Run,%ScriptFile%,CopyBootfix,"%TargetDir%\Windows\Boot\DVD\PCAT\bootfix.bin",%Language%,"%OutputDir%\boot"
-  ForEach,%Language%,%SourceFallbackLang%,Run,%ScriptFile%,CopyBootfix,"%TargetDir%\Windows\Boot\DVD\EFI\efisys.bin",%Language%,"%OutputDir%\efi\microsoft\boot"
+  Set,%EfiSysBin%,efisys%EX%.bin
 End
 Else,Begin
   FileDeleteEx,"%OutputDir%\boot\bootfix.bin"
-  FileDeleteEx,"%OutputDir%\efi\microsoft\boot\efisys.bin"
-  ForEach,%Language%,%SourceFallbackLang%,Run,%ScriptFile%,CopyBootfix,"%TargetDir%\Windows\Boot\DVD\EFI\efisys_noprompt.bin",%Language%,"%OutputDir%\efi\microsoft\boot"
-  FileRename,"%OutputDir%\efi\microsoft\boot\efisys_noprompt.bin","%OutputDir%\efi\microsoft\boot\efisys.bin"
+  Set,%EfiSysBin%,efisys_noprompt%EX%.bin
 End
+ForEach,%Language%,%SourceFallbackLang%,Run,%ScriptFile%,CopyBootfix,"%EfiBootSrc%\DVD%EX%\EFI\%EfiSysBin%",%Language%,"%OutputDir%\efi\microsoft\boot"
+If,Not,%EfiSysBin%,Equal,efisys.bin,FileRename,"%OutputDir%\efi\microsoft\boot\%EfiSysBin%","%OutputDir%\efi\microsoft\boot\efisys.bin"
+If,Not,ExistFile,"%OutputDir%\efi\microsoft\boot\efisys.bin",Halt,"ERROR: Failed to create the EFI boot image. [%EfiSysBin%] was not found in [%EfiBootSrc%\DVD%EX%\EFI\<Language>]."
+
+[#GetBootSource#]
+// ===============================================================================================================================
+// Name...........: GetBootSource
+// Description....: Locate and validate the UEFI boot manager files for the selected certificate and boot files source.
+// Syntax.........:
+// Parameters.....:
+// Return values..: %EfiBootSrc% - Path to the Windows\Boot directory containing the boot manager files.
+//                  %EX% - File/Directory suffix. "" for Source default/PCA 2011, _EX for CA 2023.
+// Author.........: Homes32
+// Remarks........: Source default - Windows\Boot\{EFI,DVD,Fonts} - Signing certificate is reported but not enforced.
+//                  PCA 2011       - Windows\Boot\{EFI,DVD,Fonts}
+//                  CA 2023        - Windows\Boot\{EFI_EX,DVD_EX,Fonts_EX} - Files have an _EX suffix.
+//                  Sources released before the CA 2023 boot manager existed (eg. 23H2 RTM) do not contain the _EX files.
+//                  Firmware only verifies the boot manager, which then loads winload.efi from boot.wim, so a boot manager
+//                  from a newer build (Host bootloader/Custom folder) can be used with an older source.
+// Related........: [ProcessBootloader], cmb_UEFICert, cmb_BootFilesSrc, fb_BootFilesDir
+// ===============================================================================================================================
+[GetBootSource]
+If,%cmb_UEFICert%,Equal,"Windows UEFI CA 2023",Begin
+  If,Not,%SourceArch%,Equal,x64,Halt,"ERROR: The Windows UEFI CA 2023 boot manager is only available for x64 sources. Select [Windows Production PCA 2011] in the Bootmgr script."
+  Set,%EX%,_EX
+  Set,%CertName%,"Windows UEFI CA 2023"
+End
+Else,If,%cmb_UEFICert%,Equal,"Windows Production PCA 2011",Begin
+  Set,%EX%,""
+  Set,%CertName%,"Windows Production PCA 2011"
+End
+Else,Begin
+  Set,%EX%,""
+  Set,%CertName%,"Source default"
+End
+
+If,%cmb_BootFilesSrc%,Equal,"Host bootloader",Begin
+  System,GetEnv,windir,%HostWinDir%
+  Set,%EfiBootSrc%,"%HostWinDir%\Boot"
+End
+Else,If,%cmb_BootFilesSrc%,Equal,"Custom folder",Begin
+  If,%fb_BootFilesDir%,Equal,"",Halt,"ERROR: Boot files source is set to [Custom folder] but no folder was specified in the Bootmgr script."
+  StrFormat,EndTrim,%fb_BootFilesDir%,"\",%EfiBootSrc%
+  // Allow the root of an extracted image to be selected instead of Windows\Boot
+  If,Not,ExistDir,"%EfiBootSrc%\EFI%EX%",If,ExistDir,"%EfiBootSrc%\Windows\Boot\EFI%EX%",Set,%EfiBootSrc%,"%EfiBootSrc%\Windows\Boot"
+End
+Else,Set,%EfiBootSrc%,"%TargetDir%\Windows\Boot"
+
+Echo,"Using the %CertName% boot manager from [%cmb_BootFilesSrc%] [%EfiBootSrc%]..."
+
+// Validate
+If,Not,ExistFile,"%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi",Begin
+  If,%cmb_BootFilesSrc%,Equal,"Source bootloader",Halt,"ERROR: The %CertName% boot manager [EFI%EX%\bootmgfw%EX%.efi] was not found in the source. Sources released before the Windows UEFI CA 2023 boot manager (eg. 23H2 RTM) do not contain it.#$x#$xUse a source serviced with a recent cumulative update, or set the Boot files source to [Host bootloader] or [Custom folder] in the Bootmgr script's advanced options."
+  Else,Halt,"ERROR: The %CertName% boot manager [EFI%EX%\bootmgfw%EX%.efi] was not found in [%EfiBootSrc%].#$x#$xThe Boot files source must be a Windows\Boot folder from Windows 10/11 x64 (eg. extracted from the boot.wim of a recent Windows ISO)."
+End
+If,Not,ExistFile,"%EfiBootSrc%\EFI%EX%\bootmgr%EX%.efi",Halt,"ERROR: The %CertName% boot manager [EFI%EX%\bootmgr%EX%.efi] was not found in [%EfiBootSrc%]."
+If,Not,ExistDir,"%EfiBootSrc%\DVD%EX%\EFI",Halt,"ERROR: The %CertName% EFI boot image folder [DVD%EX%\EFI] was not found in [%EfiBootSrc%]."
+If,%EX%,Equal,_EX,If,Not,ExistDir,"%EfiBootSrc%\Fonts_EX",Echo,"Warning: [Fonts_EX] was not found in [%EfiBootSrc%]. Standard boot fonts will be used.",Warn
+If,Not,ExistFile,"%EfiBootSrc%\EFI%EX%\%SourceLang%\bootmgfw%EX%.efi.mui",Echo,"Warning: The boot manager in [%EfiBootSrc%] does not include the [%SourceLang%] language. Boot menu text may not display in the expected language.",Warn
+
+// Detect the signing certificate. 0=PCA 2011, 1=CA 2023, 2=Other, 3=Unable to verify
+ShellExecute,Hide,powershell.exe,"-ExecutionPolicy Bypass -NoProfile -Command #$qtry { $i = (Get-AuthenticodeSignature -LiteralPath '%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi' -ErrorAction Stop).SignerCertificate.Issuer } catch { exit 3 }; if (-not $i) { exit 3 }; if ($i -like '*Windows Production PCA 2011*') { exit 0 }; if ($i -like '*Windows UEFI CA 2023*') { exit 1 }; exit 2#$q"
+If,%^RET%,Equal,0,Set,%FoundCert%,"Windows Production PCA 2011"
+Else,If,%^RET%,Equal,1,Set,%FoundCert%,"Windows UEFI CA 2023"
+Else,If,%^RET%,Equal,2,Set,%FoundCert%,"an unknown certificate"
+Else,Set,%FoundCert%,""
+
+If,%FoundCert%,Equal,"",Echo,"Warning: Unable to verify the signing certificate of [%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi].",Warn
+Else,If,%CertName%,Equal,"Source default",Begin
+  Echo,"UEFI boot manager is signed with %FoundCert%."
+  If,%FoundCert%,Equal,"Windows Production PCA 2011",Echo,"Note: This media will not UEFI boot with Secure Boot enabled on systems where Windows Production PCA 2011 has been revoked (KB5025885). Select [Windows UEFI CA 2023] in the Bootmgr script to create media for these systems."
+End
+Else,If,Not,%FoundCert%,Equal,%CertName%,Halt,"ERROR: [%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi] is signed with %FoundCert%, not %CertName%."
+
+FileVersion,"%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi",%BootMgrVer%
+Echo,"Boot manager version: %BootMgrVer%"
+
+[#CopyEfiFile#]
+// ===============================================================================================================================
+// Name...........: CopyEfiFile
+// Description....: Copy an EFI file and it's .mui's, renaming them if required.
+// Syntax.........: Run,%ScriptFile%,CopyEfiFile,<SrcFile>,<DestDir>,<DestName>
+// Parameters.....: SrcFile - Full path to the file to copy.
+//                  DestDir - Full path to the destination directory.
+//                  DestName - Name of the destination file. (eg. bootx64.efi)
+// Return values..:
+// Author.........: Homes32
+// Remarks........:
+// Related........: [ProcessBootloader]
+// ===============================================================================================================================
+[CopyEfiFile]
+System,SetLocal
+GetParam,1,%SrcFile%
+GetParam,2,%DestDir%
+GetParam,3,%DestName%
+
+If,Not,ExistFile,%SrcFile%,Halt,"ERROR: Boot file [%SrcFile%] was not found."
+StrFormat,FileName,%SrcFile%,%SrcName%
+
+FileDeleteEx,"%DestDir%\%DestName%"
+FileCopyEx,%SrcFile%,%DestDir%
+If,Not,%SrcName%,Equal,%DestName%,Begin
+  FileRename,"%DestDir%\%SrcName%","%DestDir%\%DestName%"
+  ForEach,%Language%,%SourceFallbackLang%,Begin
+    If,ExistFile,"%DestDir%\%Language%\%SrcName%.mui",Begin
+      FileDeleteEx,"%DestDir%\%Language%\%DestName%.mui"
+      FileRename,"%DestDir%\%Language%\%SrcName%.mui","%DestDir%\%Language%\%DestName%.mui"
+    End
+  End
+End
+System,EndLocal
 
 [#CopyBootfix#]
 // ===============================================================================================================================
@@ -214,6 +326,10 @@ System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cb_BootFix,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_BypassDriverSigning,False
 WriteInterface,Value,%ScriptFile%,Interface,num_BootMenuDelay,0
+WriteInterface,Value,%ScriptFile%,Interface,cmb_UEFICert,"Source default"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_BootFilesSrc,"Source bootloader"
+WriteInterface,Value,%ScriptFile%,Interface,fb_BootFilesDir,""
+Run,%ScriptFile%,ToggleBootFilesDir
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -245,6 +361,29 @@ Else,Begin
 End
 
 WriteInterface,Visible,%ScriptFile%,Interface,cb_BypassDriverSigning,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,lbl_BootFilesSrc,%Toggle%
+WriteInterface,Visible,%ScriptFile%,Interface,cmb_BootFilesSrc,%Toggle%
+Run,%ScriptFile%,ToggleBootFilesDir
+System,EndLocal
+
+[#ToggleBootFilesDir#]
+// ===============================================================================================================================
+// Name...........: ToggleBootFilesDir
+// Description....: Show/Hide the custom boot files folder.
+// Syntax.........: 
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........: Only visible when advanced options are shown and the Boot files source is [Custom folder].
+// Related........: cmb_BootFilesSrc, [ToggleAdvancedOptions]
+// ===============================================================================================================================
+[ToggleBootFilesDir]
+System,SetLocal
+ReadInterface,Visible,%ScriptFile%,Interface,cmb_BootFilesSrc,%AdvVisible%
+ReadInterface,Value,%ScriptFile%,Interface,cmb_BootFilesSrc,%BootFilesSrc%
+Set,%Show%,False
+If,%AdvVisible%,Equal,True,If,%BootFilesSrc%,Equal,"Custom folder",Set,%Show%,True
+WriteInterface,Visible,%ScriptFile%,Interface,fb_BootFilesDir,%Show%
 System,EndLocal
 
 [#ShowScriptInfo#]
@@ -259,7 +398,7 @@ System,EndLocal
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"This script allows you to configure various behaviors of the Windows bootloader."
+Message,"This script allows you to configure various behaviors of the Windows bootloader.#$x#$xUEFI Secure Boot Certificate#$x#$xSource default - Use the boot manager the source ships with (currently PCA 2011 for most sources). The certificate is reported in the build log but not enforced.#$x#$xWindows Production PCA 2011 - Boots on systems that have not received the Windows UEFI CA 2023 certificate update. Will NOT boot on systems where PCA 2011 has been revoked (KB5025885 mitigations applied).#$x#$xWindows UEFI CA 2023 - Boots on systems that have the Windows UEFI CA 2023 certificate in the Secure Boot DB, including systems where PCA 2011 has been revoked. Will NOT boot on systems that have not received the certificate update.#$x#$xBoot Files Source (Advanced)#$x#$xSource bootloader - Use the boot manager from the source being built. Sources released before the CA 2023 boot manager (eg. 23H2 RTM) do not contain it.#$x#$xHost bootloader - Use the boot manager from this computer (#$pwindir#$p\Boot).#$x#$xCustom folder - Use the boot manager from a Windows\Boot folder extracted from a newer Windows 10/11 x64 image (boot.wim). This allows building from an older source while using a newer boot manager."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -276,12 +415,19 @@ Message,"This script allows you to configure various behaviors of the Windows bo
 btn_SetDefaultOptions=,1,8,543,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,574,5,25,25,ToggleAdvancedOptions,Advanced_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,605,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
-bvl_Options="Windows Bootloader Options",1,12,5,50,256,125,8,Bold
+bvl_Options="Windows Bootloader Options",1,12,5,50,256,165,8,Bold
 cb_BootFix="Press any key to boot from CD...",1,3,20,72,264,18,False
 cb_BypassDriverSigning="Bypass Driver Signing Requirement (x64)",0,3,20,92,223,18,False,"__Modify BCD settings in order to disable integrity checking for x64 drivers.#$x#$xMay not be applicable in newer Windows versions."
 lbl_BootMenuDelay="Boot Menu Delay:",1,1,20,120,96,16,8,Normal
 num_BootMenuDelay=num_BootMenuDelay,1,2,20,135,40,22,0,0,60,1,"__Configure how long (in seconds) the boot menu will display before the default action is selected.#$x#$xTo prevent the boot menu from displaying select 0."
 lbl_Seconds=seconds,1,1,65,140,61,16,8,Normal
+bvl_SecureBoot="UEFI Secure Boot",1,12,270,50,330,165,8,Bold
+lbl_UEFICert="Boot manager signing certificate:",1,1,285,72,250,16,8,Normal
+cmb_UEFICert="Source default",1,4,285,90,250,21,"Source default","Windows Production PCA 2011","Windows UEFI CA 2023","__Select the certificate used to sign the UEFI boot manager.#$x#$xSource default - Use the boot manager the source ships with. The signing certificate is reported in the log but not enforced.#$xWindows Production PCA 2011 - Compatible with systems that have NOT received the Secure Boot certificate update. Fails on systems where PCA 2011 has been revoked.#$xWindows UEFI CA 2023 - Required on systems where PCA 2011 has been revoked. Fails on systems that have NOT received the Windows UEFI CA 2023 certificate.#$x#$xBIOS boot is not affected."
+lbl_UEFICertNote="BIOS boot is not affected. See Script Info for details.",1,1,285,115,300,16,8,Normal
+lbl_BootFilesSrc="Boot files source:",0,1,285,140,250,16,8,Normal
+cmb_BootFilesSrc="Source bootloader",0,4,285,156,150,21,"Source bootloader","Host bootloader","Custom folder",_ToggleBootFilesDir_,True,"__Location of the UEFI boot manager files.#$x#$xSource bootloader - Use the boot manager from the source being built.#$xHost bootloader - Use the boot manager from this computer (#$pwindir#$p\Boot).#$xCustom folder - Use the boot manager from a Windows\Boot folder extracted from a newer Windows 10/11 x64 boot.wim."
+fb_BootFilesDir=,0,13,285,183,300,20,dir,"Title=Select a Windows\Boot folder","__A Windows\Boot folder extracted from a Windows 10/11 x64 boot.wim.#$xMust contain EFI/DVD (PCA 2011) or EFI_EX/DVD_EX (CA 2023)."
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
