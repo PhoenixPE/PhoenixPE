@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=True
 Mandatory=False
-Version=1.5.0.0
-Date=2026-05-21
+Version=1.5.1.0
+Date=2026-10-21
 
 [Variables]
 
@@ -150,8 +150,14 @@ RequireFileEx,AppendList,\Windows\System32\DriverStore\FileRepository\wave.inf*,
 
 RequireFileEx,AppendList,\Windows\System32\avicap32.dll
 RequireFileEx,AppendList,\Windows\System32\bdaplgin.ax,NOMUI
+RequireFileEx,AppendList,\Windows\system32\CapabilityAccessHandlers.dll
 RequireFileEx,AppendList,\Windows\System32\CapabilityAccessManager.dll
 RequireFileEx,AppendList,\Windows\System32\CapabilityAccessManagerClient.dll
+If,%SourceVer%,BiggerEqual,10.0.26200.0,Begin
+  RequireFileEx,AppendList,\Windows\System32\CapabilityAccessManager.Desktop.Identity.dll
+  RequireFileEx,AppendList,\Windows\System32\CapabilityAccessManager.Desktop.Storage.dll
+End
+
 RequireFileEx,AppendList,\Windows\System32\control.exe
 RequireFileEx,AppendList,\Windows\System32\ddraw.dll
 RequireFileEx,AppendList,\Windows\System32\ddrawex.dll
