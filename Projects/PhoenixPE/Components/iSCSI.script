@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.0.0.0
-Date=2023-03-01
+Version=1.0.1.0
+Date=2026-10-21
 
 [Variables]
 %ProgramFolder%="#$pSystemRoot#$p\system32"
@@ -48,6 +48,9 @@ Echo,"Processing %ScriptTitle%..."
 RegLoadHives
 RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Group Policy\DataStore"
 RegWrite,HKLM,REG_NONE,"Tmp_Software\Microsoft\Windows\CurrentVersion\Group Policy\DataStore\Machine"
+
+RegWrite,HKLM,REG_EXPAND_SZ,"Tmp_System\ControlSet001\Services\EventLog\System\MSiSCSI","EventMessageFile","%systemroot%\System32\iscsiexe.dll"
+RegWrite,HKLM,REG_DWORD,"Tmp_System\ControlSet001\Services\EventLog\System\MSiSCSI","TypesSupported",7
 RegUnloadHives
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -138,6 +141,7 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,103,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,122,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,162,119,21,"System Tools"
 txt_ShortcutName="Shortcut Name:",1,0,12,204,119,21,"iSCSI Initiator"
+lbl_RuntimeRequirement="Note: Requires the PhoenixPE > Components > Event Logging script to be enabled.",1,1,0,310,626,16,8,Bold
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
