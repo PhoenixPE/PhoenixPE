@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.2.0.0
-Date=2026-07-03
+Version=1.2.1.0
+Date=2026-10-23
 
 [Variables]
 %ProgramFolder%="VeraCrypt"
@@ -223,6 +223,20 @@ Echo,"Downloading %ScriptTitle%..."
 WebGet,"%DownloadURL%","%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]: The code returned was [%^RET%]."
 
+[#ClearDownloadCache#]
+// ===============================================================================================================================
+// Name...........: ClearDownloadCache
+// Description....: Remove all downloaded setup and program files.
+// Syntax.........: Run,%ScriptFile%,ClearDownloadCache
+// Parameters.....: 
+// Return values..: 
+// Author.........: Homes32
+// Remarks........:
+// Related........: btn_PurgeCache
+// ===============================================================================================================================
+[ClearDownloadCache]
+DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
+
 [#SetDefaultOptions#]
 // ===============================================================================================================================
 // Name...........: SetDefaultOptions
@@ -291,6 +305,8 @@ Message,"VeraCrypt is a free open source disk encryption software based on TrueC
 [Interface]
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
 web_Homepage=Homepage,1,10,377,9,60,18,https://www.veracrypt.fr
+btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
+btn_PurgeCache=,1,8,479,5,25,25,ClearDownloadCache,Trash.ico,True,"__Remove all downloaded setup files."
 btn_SetDefaultOptions=,1,8,541,5,25,25,SetDefaultOptions,SetDefaults_16.png,True,"__Restore Defaults"
 btn_AdvancedOptions=,1,8,571,5,25,25,ToggleAdvancedOptions,Advanced_Disabled_16.png,True,"__Show Advanced Options"
 btn_ScriptInfo=,1,8,601,5,25,25,ShowScriptInfo,Help_16.png,True,"__Script Info"
@@ -314,6 +330,8 @@ cb_EnableBackgroundTask="Enable Background Task",1,3,160,197,180,18,True,"__Keep
 SetDefaults_16.png=2475,3404
 Help_16.png=2830,3868
 Advanced_Disabled_16.png=474,744
+VistalcoDownload_16.png=927,1348
+Trash.ico=1150,1228
 
 [AuthorEncoded]
 VeraCrypt_80.png=9407,12644
@@ -337,3 +355,11 @@ lines=0
 [EncodedFile-InterfaceEncoded-Advanced_Disabled_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVQ4y43Tz4tNcRgG8M+dOTGuRLhF9hi/h81IKRuR1IhSxIIssPAn3J1mb2oSNso0O2oWiIwNu2FWw21YkEm6ykwmv5XNc+rQnfLW6Zy+z/d9zvO+z/vWms2mBeIcjuMrhnC/06Wi8r0Ku/EIX9DACixHbwgW4wieo1UlWIsLOIWbmEA/fuI3NmMv9uEknmAQrZKgL8mvcAjH8A2LgveHYB5vQvSgSvAUI9iPOdQwhcngO7Ap2MqoHKuWMIu7+XMX7uAGZoKvw1kMoAfP8LkkOJAaN+I7XmAY7UqDZ3K2IUrOpLEfC1zEGvyI9Ml/kstoB9seh47iU4F6Erv8X9TiTjdqBUaxOjPQk4Y1OqhoBPuFt5mF+QLXcmEAl1Pb+QWa2BsFj3G96sIy7MzYzoVsfQcbZ7EUu3AP70qCwziN6fhcx7YkSs319KmNgyG/WhJMYBx7cCujeiIquvEeV+LApezLw2oJrcx2H25nHrZiC5akaeN5XuNl3n9tY6vcsMQUPqTm6cr5WNWaPzh+YcvU7DU1AAAAAElFTkSuQmCCeJyTcEwpS8xLTk2Jd8ksTkzKATIMzfQK8tIZRsFIALcY8ct/c/M8xcgAANAVDAqUbKQXAQAAAAIAAAAvAAAA2gEAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-VistalcoDownload_16.png]
+lines=0
+0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADZklEQVQ4jUWT3WubdRTHP89L3p8mTfpim7ZL37ZZp6UTV1F0g00dXky9myAiXhf8A0QRvFCGF96o4IViJ0Mm4lSUIbIqdVs6W+3W1da+LW3SpC9Jm6TJ8+RJ+uT5SdLBDpzD4cD3e76Hc470zIUTHJiMU4szP3Yav+stXr00PVQqNL4SG1ea/ltYW29wp8Y2/roxuTF2CzOhANU6StVLe/VEkqBg5sHv8vf2D38b+Hv4bJdS5chRgcdUuZ28hud4elr+ff1lSCbud0UtapkaHCFnMLNPhc8+/8XsyEsEIxK4VYVCBXo98PP8Ga7eOnbc8l2/pzg/HHD1xJaNhSxq/+N9gI1pO/CrI9+c7yM46AMnIGqDqTCgQjoCi3EX0ptBVaRPfR/76Z/BuoL9vIGo6pjejhcOO7wnxVacsd0k4YYAgz2P4LEhU3PHCk88d4Ngbpu07H4sfT1y3mTtspqYy2OXDfTW1tOPhsfJKVPMbW7QUI4Q7nqPlKgwkbvJkrFNceMQvt4Z8EPjcNuZTHTtslpKeqESIG/FO2NCojtwglTvDI41ia/iP5DyXqNs5PFrTSwsj5CdPYe76Qr5lcZwfYT8TQ+KpWNFAtmELfGj8TUxLUdDeYaN6hKhUBiqMgV1hsaBL1m68ixWIUOlulhfn6IdbaVcbqN8+x2s0OJrpcN3kHRw52t1F3ljmb29KusJnYr0L67QFLolMKaXPy8nzEm19ekZ2WpWPFu/Vv5wO1djzYfoqcjgmHuIwuIHbGkfoYWmEXYDOztFKGqUk3rJuJO9VFdguhGyJd7vPJe46n+4YPs68HqCkDO20AJRukIa89FtbKuCpNrsb/vIfLf1hlXMT9UJnL1QXCLqj8ivt58S7e2tENLADkK3v8zUxR2yq1k8ARV5p43cpPPdStb3mRLqROgpVFcASXFhbE+IC76I8qnvySpeDY41aUx+coS9TRdDJ1swkyqbt/QdW6/OSk1VkOSDUxZVhOIkZGaFvjshVoVX7u4fcpP8s2Iu3M381tf34oqc6rJ25+Y3S/vpFcknTUv79sHz1Ajq0WbX6WfU3LOFdU8dLewL7o5XPqYl/vZc9Beqqx0QEjg0LzIC6T74AYF0QFjc5KJtWslk1Oos5Rn1toDd7MDINSK7aydvI+QHYID/Ab48jqdfCQxIAAAAAElFTkSuQmCCeJwTD8ssLknMSc53yS/Py8lPTIk3NNMryEtnGAUjAsxnxi+fwnL8OSMDAKdDC4fwuePJAQAAAAIAAAAvAAAAnwMAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFile-InterfaceEncoded-Trash.ico]
+lines=0
+0=eF511PtLU2EYB/B3KmV0M6IbSdkITlDQFQq6YBEWERV07w8IS43ykoMczs2juc2tXdxsudratDZ0qbPNqdlmUpabZUtnZRdL0yTrWJueY+QT72qhqx74/vJyPue853necxBiIRaKiUGIheJQYhRC8xFCKxBCMQihOPRrHVd8FPqr9uzeFb1je/zME8ePbSIIQkwQhIogCPV/omKz2YLY2MULN6xfN+PA/n1T8D2K5dKII4cP5bjdreD1eqHL5wOapqGvrw9sthooKdFAVVUlPH3aDkqlEthxcQvSziSxJu6D5HFTtVrtuF6vB4PBAFarFcxmM8jlMiDJXLh0SQo6nQ74OTx//JbNc8LfQ1fAPfre104NfXhHMaMjFMMw1JehT1S398lwh7uFarvXGIxJUfCYvXTJ3HBvUYlOh3xHQ3WgQZHDtNksgdviC7RVyKFb7zqC3q5XvYqKiMAtnlQ3xNws7Pu7u4YdkizGXpA+5q42BWolXLqKTGUa9MV+7O/cvNY7a/q0ZeHeLBNIse9otH1r0ghpanBwGO//1bN2qqlUE6jKO09j77SU9c+bPXN1uC9XXtRj73VU+h15yd/7u7u+Yv/G94yq5p0es0uzR7Fvrqn4yF40b9tlcd6k/tcbVDXYD7x+Qb184PJ7TCWjg329VKvFGHAZigMt9sph7FvqrJ9WLYvdqxLmTvLWq/L7of69fujyO0XnvnsqS0fqyOQxh5Qb3DuO21n3edPK5SeKhGREyDbXVrOabxm6Qp4e8VMvnLaAx2Icua+Xj7bfaww+G8fTdIdK2LjmVFpSYmTIG4sk0a328t5/zb+n+zk1cf44B3duzdq7O2FqyOfxeUkikXBcLpOBpLAQNBpN8Ayq1Wrg8/mQkZEOHA4H8vPzQSaTwanExKE9uxKmh7wwn+Q+evQQfJ2d8LjNAwMD/cAwDPT09EBtrR202itgNBrA1eSCzs4OUCoVP1LPJP/5GrUa9aqUlJR6hUIxjs95udkEprJSuFFqDJ59taoIpBIJWCoqQCwSQUZ6mjJ8/rgkhYVrOZmZgus63Ycyo9ErEhakZWdnXzt39mwmmZtbIeDnnCQFgl8/gwnFYyHkjPxH8Prv4GsmJRKht1MR+gkUry6xeJzjDClKLM7Qy0zOZxgFIxDUsUDoQGbs8iFCkXoMbAB+CQU+nVvy0AEAAAACAAAAJAAAAFEDAAAAAAAAAQAAAAAAAAAAAAAA

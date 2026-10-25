@@ -32,19 +32,17 @@
 Title=SpeedCrunch
 Author=Homes32
 Level=5
-Version=1.0.0.1
-Description=(v0.12 x86) SpeedCrunch is a high-precision scientific calculator featuring a fast, keyboard-driven user interface.
-Date=2022-05-27
+Version=1.0.1.0
+Description=(v1.1 x64) SpeedCrunch is a high-precision scientific calculator featuring a fast, keyboard-driven user interface.
+Date=2026-10-24
 Selected=False
 Mandatory=False
 
 [Variables]
 %ProgramFolder%="SpeedCrunch"
 %ProgramExe%="SpeedCrunch.exe"
-%ProgramVersion%="0.12"
-// Only x86 builds are provided at this time
-%DownloadURLx86%=https://bitbucket.org/heldercorreia/speedcrunch/downloads/SpeedCrunch-%ProgramVersion%-win32.zip
-%DownloadURLx64%=https://bitbucket.org/heldercorreia/speedcrunch/downloads/SpeedCrunch-%ProgramVersion%-win32.zip
+%ProgramVersion%="1.1" 
+%DownloadURL%=https://github.com/heldercorreia/speedcrunch/releases/download/v%ProgramVersion%.0/SpeedCrunch-%ProgramVersion%-windows-x64.zip
 %SetupFile%="SpeedCrunch-%ProgramVersion%-%SourceArch%.zip"
 %ConfigFile%="%TargetPrograms%\%ProgramFolder%\SpeedCrunch.ini"
 
@@ -52,7 +50,6 @@ Mandatory=False
 Echo,"Processing %ScriptTitle%..."
 
 If,%cb_RunFromRam%,Equal,True,RunFromRam
-Run,%ScriptFile%,SetProgramArch
 
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 
@@ -66,7 +63,23 @@ Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 IniWrite,%ConfigFile%,"General","ConfigVersion",1200
 IniWrite,%ConfigFile%,"SpeedCrunch","Display\ColorSchemeName",%cmb_ColorScheme%
 IniWrite,%ConfigFile%,"SpeedCrunch","General\Language","C"
-IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",%cb_ShowKeypad%
+If,%cmb_ShowKeypad%,Equal,"Disable",Begin
+  IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",true
+  IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadMode",0
+End
+Else,If,%cmb_ShowKeypad%,Equal,"Basic",Begin
+  IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",true
+  IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadMode",1
+End
+Else,If,%cmb_ShowKeypad%,Equal,"Scientific (wide)",Begin
+  IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",true
+  IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadMode",3
+End
+Else,If,%cmb_ShowKeypad%,Equal,"Scientific (narrow)",Begin
+  IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",true
+  IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadMode",4
+End
+Else,Halt,"Logic Error: [%cmb_ShowKeypad%] is not a valid Keypad Mode." 
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -89,7 +102,7 @@ If,%cb_PinToStartMenu%,Equal,True,PinShortcut,StartMenu,Auto,"%PEPrograms%\%Prog
 [ExtractProgram]
 Echo,"Extracting files..."
 Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%","%ProjectTemp%\%ProgramFolder%"
-FileCopy,"%ProjectTemp%\%ProgramFolder%\speedcrunch-%ProgramVersion%-win32\*.*",%^SIPARAM_1%
+FileCopy,"%ProjectTemp%\%ProgramFolder%\speedcrunch-%ProgramVersion%-windows-x64\*.*",%^SIPARAM_1%
 
 [#DownloadProgram#]
 // ===============================================================================================================================
@@ -104,30 +117,8 @@ FileCopy,"%ProjectTemp%\%ProgramFolder%\speedcrunch-%ProgramVersion%-win32\*.*",
 // ===============================================================================================================================
 [DownloadProgram]
 Echo,"Downloading %ScriptTitle%..."
-Run,%ScriptFile%,SetProgramArch
 WebGet,%DownloadURL%,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",NOERR
 If,Not,%^RET%,Equal,200,Halt,"Failed to download [%SetupFile%]. The code returned was [%^RET%]."
-
-[#SetProgramArch#]
-// ===============================================================================================================================
-// Name...........: SetProgramArch
-// Description....: Configure the script for the correct source architecture.
-// Syntax.........: Run,%ScriptFile%,SetProgramArch
-// Parameters.....: 
-// Return values..: Sets the following local variables:
-//                  %DownloadURL%    - The x86 or x64 download URL for %SetupFile%.
-//                  %ProgramExe%     - The x86 or x64 program exe.
-// Author.........: Homes32
-// Remarks........:
-// Related........: 
-// ===============================================================================================================================
-[SetProgramArch]
-If,%SourceArch%,Equal,x64,Begin
-  Set,%DownloadURL%,%DownloadURLx64%
-End  
-Else,Begin
-  Set,%DownloadURL%,%DownloadURLx86%
-End
 
 [#LaunchProgram#]
 // ===============================================================================================================================
@@ -142,7 +133,6 @@ End
 // ===============================================================================================================================
 [LaunchProgram]
 Echo,"Launching %ScriptTitle%..."
-Run,%ScriptFile%,SetProgramArch
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
 Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
 ShellExecuteEx,Open,"%ProjectTemp%\%ProgramFolder%\%ProgramExe%"
@@ -182,8 +172,8 @@ WriteInterface,Value,%ScriptFile%,Interface,cb_PinToStartMenu,False
 WriteInterface,Value,%ScriptFile%,Interface,txt_StartMenuFolder,"Productivity"
 WriteInterface,Value,%ScriptFile%,Interface,txt_ShortcutName,"SpeedCrunch"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_Language,"System Default"
-WriteInterface,Value,%ScriptFile%,Interface,cmb_ColorScheme,"Terminal"
-WriteInterface,Value,%ScriptFile%,Interface,cb_ShowKeypad,False
+WriteInterface,Value,%ScriptFile%,Interface,cmb_ColorScheme,"GitHub Dark"
+WriteInterface,Value,%ScriptFile%,Interface,cmb_KeypadMode,"Basic"
 System,Cursor,Normal
 
 [#ToggleAdvancedOptions#]
@@ -226,7 +216,7 @@ Message,"SpeedCrunch is a high-precision scientific calculator featuring a fast,
 // Related........:
 // ===============================================================================================================================
 [Interface]
-btn_LaunchProgram="Launch SpeedCrunch",1,8,5,5,130,25,LaunchProgram,play-hot.png,True
+btn_LaunchProgram="Launch Program",1,8,5,5,130,25,LaunchProgram,play-hot.png,True
 bvl_Homepage=bvl_Homepage,1,12,367,5,72,25
 web_Homepage=Homepage,1,10,377,9,60,18,https://heldercorreia.bitbucket.io/speedcrunch/
 btn_DownloadProgram=,1,8,448,5,25,25,DownloadProgram,VistalcoDownload_16.png,False,"__Download the program."
@@ -247,8 +237,9 @@ bvl_Options=Options,1,12,150,90,197,184,8,Bold
 lbl_Language=Language,1,1,159,110,153,16,8,Normal
 cmb_Language="System Default",1,4,160,126,165,21,"System Default"
 lbl_ColorScheme="Color Scheme",1,1,159,160,153,16,8,Normal
-cmb_ColorScheme=Terminal,1,4,160,176,165,21,"Solarized Dark","Solarized Light",Standard,Sublime,Terminal,Tomorrow,"Tomorrow Night","Tomorrow Night Blue","Tomorrow Night Bright","Tomorrow Night Eighties"
-cb_ShowKeypad="Show Keypad",1,3,160,205,176,18,False
+cmb_ColorScheme="GitHub Dark",1,4,160,176,165,21,"Black on White","Breeze Dark",Breeze,Carbonfox,"Catppuccin Latte","Catppuccin Macchiato",Dawnfox,Dayfox,Dracula,Duskfox,"GitHub Dark","GitHub Light","Gruvbox Dark","Gruvbox Light",Monokai,Nightfox,"Nord Dark","Nord Light",Nordfox,"One Dark","Rose Pine Dawn","Rose Pine Moon","Solarized Dark","Solarized Light","Sonokai Andromeda","Sonokai Atlantis","Sonokai Default","Sonokai Espresso","Sonokai Maia","Sonokai Shusia",Standard,Sublime,Terafox,Terminal,"Tokyo Day","Tokyo Night","Tomorrow Night Blue","Tomorrow Night Bright","Tomorrow Night Eighties","Tomorrow Night",Tomorrow,"White on Black"
+lbl_KeypadMode=Keypad,1,1,159,210,153,16,8,Normal
+cmb_KeypadMode=Basic,1,4,160,226,165,21,Disable,Basic,"Scientific (wide)","Scientific (narrow)"
 
 [AuthorEncoded]
 SpeedCrunch_80.png=9700,13040

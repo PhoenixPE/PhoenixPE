@@ -30,19 +30,19 @@
 
 [Main]
 Title=Attribute Changer
-Description=(v11.40b) Attribute Changer is a powerful Windows Explorer add-on, available whenever you right-click on files and folders in Windows Explorer. It allows you full control over the file's attributes.
+Description=(v11.50a x64) Attribute Changer is a powerful Windows Explorer add-on, available whenever you right-click on files and folders in Windows Explorer. It allows you full control over the file's attributes.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.1.14.0
-Date=2025-09-21
+Version=1.1.15.0
+Date=2026-10-23
 
 [Variables]
 %ProgramFolder%="Attribute Changer"
-%ProgramVersion%="11_40b"
+%ProgramVersion%="11_50a"
 %SetupFile%="attribChg-%ProgramVersion%.exe"
-%DownloadURL%=https://www.petges.lu/pubfiles/ac-%ProgramVersion%.exe
+%DownloadURL%=https://pubfiles.petges.lu/ac-%ProgramVersion%.exe
 %aLangMap-Strings%=Brazilian|1|Czech|2|Danish|3|French|4|German|5|Hungarian|6|Italian|7|Korean|8|Dutch|9|Polish|10|Spanish|11|Swedish|12|Turkish|13
 %aLangMap-Docs%=Brazilian|1|Czech|2|Danish|3|English|4|French|5|German|6|Hungarian|7|Italian|8|Korean|9|Dutch|10|Polish|11|Spanish|12|Swedish|13|Turkish|14
 
@@ -63,14 +63,9 @@ Run,%ScriptFile%,ExtractProgram
 DirDeleteEx,%TargetPrograms%\%ProgramFolder%
 
 If,%SourceArch%,Equal,x64,Begin
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\acmain#$c2.exe","%TargetPrograms%\%ProgramFolder%\acmain.exe"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\acshell#$c2.dll","%TargetPrograms%\%ProgramFolder%\acshell.dll"
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\acshell32.dll","%TargetPrograms%\%ProgramFolder%\acshell32.dll"
-End
-Else,Begin
-  FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\acmain#$c1.exe","%TargetPrograms%\%ProgramFolder%\acmain.exe"
   FileCopy,"%ProjectTemp%\%ProgramFolder%\{app}\acshell#$c1.dll","%TargetPrograms%\%ProgramFolder%\acshell.dll"
 End
+Else,Halt,"Error: AttributeChanger does not support x86 builds."
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings

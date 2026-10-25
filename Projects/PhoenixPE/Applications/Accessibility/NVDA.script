@@ -30,18 +30,18 @@
 
 [Main]
 Title=NVDA
-Description=(v2026.1.1) NonVisual Desktop Access (NVDA) is a free, open source, globally accessible screen reader for the blind and vision impaired.
+Description=(v2026.2) NonVisual Desktop Access (NVDA) is a free, open source, globally accessible screen reader for the blind and vision impaired.
 Author=Homes32
 Level=5
-Version=1.0.6.0
-Date=2026-07-25
+Version=1.0.7.0
+Date=2026-10-22
 Selected=False
 Mandatory=False
 
 [Variables]
 %ProgramFolder%="NVDA"
 %ProgramExe%="nvda_uiAccess.exe"
-%ProgramVersion%="2026.1.1"
+%ProgramVersion%="2026.2"
 %DownloadURL%=https://www.nvaccess.org/files/nvda/releases/%ProgramVersion%/nvda_%ProgramVersion%.exe
 %SetupFile%="NVDA-%ProgramVersion%.exe"
 %ConfigFile%="%TargetPrograms%\%ProgramFolder%\userConfig\nvda.ini"
@@ -61,9 +61,28 @@ If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,
 Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 ExtractAllFiles,%ScriptFile%,Config,"%TargetPrograms%\%ProgramFolder%\userConfig"
 
-RequireFileEx,AppendList,\Windows\System32\windows.media.speech.dll
+// OneCore Speech Engine (Not currently working)
+//RequireFileEx,AppendList,\Windows\System32\Speech_OneCore
+// Voice Data
+//RequireFileEx,AppendList,\Windows\Speech_OneCore
+
+RequireFileEx,AppendList,\Windows\System32\Windows.Media.Speech.dll
 RequireFileEx,AppendList,\Windows\System32\PresentationHost.exe
+
+// v2026.2+ 
+// BluetoothGetDeviceInfo at startup. bthprops.cpl forwards it via ext-ms-win-bluetooth-apis-l1-1-0 to BluetoothApis.dll
+// Magnification API and SendSAS at startup (Remote Access Ctrl+Alt+Del)
+RequireFileEx,AppendList,\Windows\System32\bthprops.cpl
+RequireFileEx,AppendList,\Windows\System32\BluetoothApis.dll
+RequireFileEx,AppendList,\Windows\System32\Magnification.dll
+RequireFileEx,AppendList,\Windows\System32\sas.dll
+
 RequireFileEx,ExtractList
+
+// RegKey included in full SOFTWARE hive.
+// HKLM\SOFTWARE\Microsoft\Speech_OneCore
+// HKLM\SOFTWARE\Classes\CLSID\{179F3D56-…}
+// HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Media.SpeechSynthesis.SpeechSynthesizer
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings

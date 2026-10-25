@@ -35,8 +35,8 @@ Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2026-02-21
+Version=1.1.0.0
+Date=2026-10-21
 
 [Variables]
 %ProgramFolder%="DaRT"
@@ -88,16 +88,23 @@ StrFormat,SPLIT,%cmb_Language%,"[",2,%Lang%
 StrFormat,RTRIM,%Lang%,1,%Lang%
 
 // Cache the .msi file so we don't have to waste time extracting from a 3 GB iso file again...
+// We only validate the ISO source path if we don't have the .msi file cached.
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%DaRT-MSI%",Begin  
-  // Validate Src File Input - We only validate the ISO source path if we don't have the .msi file cached. This allows to ditch the ISO for a more "portable" solution.
-  Echo,"Validating source ISO file..."
-  If,%fb_SrcFiles%,Equal,"",Halt,"ERROR: You must specify the path to the Microsoft Desktop Optimization Pack (MDOP) ISO file."
+  Echo,"Validating source..."
+  If,%fb_SrcFile%,Equal,"",Halt,"ERROR: You must specify the path to the Microsoft Desktop Optimization Pack (MDOP) ISO file."
   If,Not,ExistFile,%fb_SrcFile%,Halt,"Error: You must specify the path to the Microsoft Desktop Optimization Pack (MDOP) ISO file."
-
-  // Doesn't matter which Arch we extract for the .msi. Both versions contain x86 and x64 tools.
-  Echo,"Extracting the Microsoft Desktop Optimization Pack ISO file..."
-  7z,"e -y #$q%fb_SrcFile%#$q #$qDaRT\DaRT 10\Installers\%Lang%\%SourceArch%\%DaRT-MSI%#$q -o#$q%ProgramsCache%\%ProgramFolder%\#$q"
-  If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%DaRT-MSI%]."
+	
+  StrFormat,Ext,%fb_SrcFile%,%SrcFileExt%
+  If,%SrcFileExt%,Equal,".msi",Begin
+    Echo,"Caching the DaRT 10 MSI file..."
+    FileCopy,%fb_SrcFile%,"%ProgramsCache%\%ProgramFolder%\%DaRT-MSI%"
+  End
+  Else,Begin
+    // Doesn't matter which Arch we extract for the .msi. Both versions contain x86 and x64 tools.
+    Echo,"Extracting the Microsoft Desktop Optimization Pack ISO file..."
+    7z,"e -y #$q%fb_SrcFile%#$q #$qDaRT\DaRT 10\Installers\%Lang%\%SourceArch%\%DaRT-MSI%#$q -o#$q%ProgramsCache%\%ProgramFolder%\#$q"
+    If,Not,%^RET%,Equal,0,Halt,"Error: Failed to extract [%DaRT-MSI%]."
+  End
 End
 Else,Echo,"Extracting from cache..."
 
@@ -209,7 +216,7 @@ txt_StartMenuFolder="Start Menu Folder:",1,0,12,201,119,21,
 txt_ShortcutName="Shortcut Name:",1,0,12,243,119,21,"MS DaRT Tools"
 lbl_Language=Language,1,1,159,107,153,16,8,Normal
 cmb_Language="English [en-us]",1,4,160,123,150,21,"German [de-de]","English [en-us]","Spanish [es-es]","French [fr-fr]","Italian [it-it]","Japan [ja-jp]","Korean [ko-kr]","Portugues [bt-br]","Russian [ru-ru]","Chinese (Simplified) [zh-cn]","Chinese (Traditional) [zh-tw]"
-fb_SrcFile=,1,13,158,172,460,20,file,"Title=Select the MDOP ISO Image.","Filter=ISO Files|*.iso"
+fb_SrcFile=,1,13,158,172,460,20,file,"Title=Select the MDOP ISO Image or MSDaRT100.msi setup file.","Filter=ISO Files|*.iso|DaRT Setup File|MSDaRT100.msi"
 lbl_SelectSrcFile="Select the path to the Microsoft Desktop Optimization Pack .iso file.",1,1,158,155,435,16,8,Normal
 lbl_Note="DaRT is part of the Microsoft Desktop Optimization Pack (MDOP). The MDOP tools are available to those who have subscribed to Microsoft's Software Assurance program.#$x#$xYou must download the ISO from your Microsoft 365 admin center in order to use this script.",1,1,151,225,474,52,8,Bold
 bvl_SrcFiles="Source Files",1,12,150,90,477,116,8,Bold

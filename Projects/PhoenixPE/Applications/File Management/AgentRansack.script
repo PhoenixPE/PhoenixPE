@@ -30,20 +30,20 @@
 
 [Main]
 Title=AgentRansack
-Description=(v2022 Build 3562) Agent Ransack is a free file search tool for finding files on your PC or network drives.
+Description=(v2022 Build 3566) Agent Ransack is a free file search tool for finding files on your PC or network drives.
 Author=Homes32
 Level=5
 Selected=False
 Mandatory=False
-Version=1.0.21.0
-Date=2026-05-17
+Version=1.1.0.0
+Date=2026-10-23
 
 [Variables]
 %ProgramFolder%="AgentRansack"
 %ProgramExe%="AgentRansack.exe"
-%ProgramVersion%="3562"
+%ProgramVersion%="3566"
 %SetupFile%="AgentRansack-%ProgramVersion%.exe"
-%DownloadURL%=https://download.mythicsoft.com/flp/%ProgramVersion%/X4aef2vyu.bzx/agentransack_%SourceArch%_msi_%ProgramVersion%.zip
+%DownloadURL%=https://download.mythicsoft.com/flp/%ProgramVersion%/oun.aqt1ebc7/agentransack_%ProgramVersion%.exe
 
 [Process]
 Echo,"Processing %ScriptTitle%..."
@@ -57,7 +57,7 @@ StrFormat,RTRIM,%Lang%,1,%Lang%
 // Extract
 If,%cb_AlwaysDownload%,Equal,True,DirDeleteEx,"%ProgramsCache%\%ProgramFolder%"
 If,Not,ExistFile,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",Run,%ScriptFile%,DownloadProgram
-Run,%ScriptFile%,ExtractProgram,"%ProjectTemp%\%ProgramFolder%"
+Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Settings
@@ -236,14 +236,29 @@ RegHiveUnLoad,Tmp_Software
 [ExtractProgram]
 System,SetLocal
 Echo,"Extracting files..."
-Decompress,"%ProgramsCache%\%ProgramFolder%\%SetupFile%",%ProjectTemp%
-MSIExtract,"%ProjectTemp%\AgentRansack_%SourceArch%_%ProgramVersion%.msi","%ProjectTemp%\%ProgramFolder%"
+// Make sure our temp dir is clear so 7z auto-rename works correctly.
+DirDeleteEx,"%ProjectTemp%\%ProgramFolder%"
+
+// Don't use Decompress. we need -aou for auto-renaming of NSIS user variables. ($_5_)
+7z,"x -aou #$q%ProgramsCache%\%ProgramFolder%\%SetupFile%#$q -o#$q%ProjectTemp%\%ProgramFolder%#$q"
+
+ShellExecute,Hide,"%Tools%\%HostArch%\Autoit3.exe","#$q%Tools%\a3x\MsiSearch.a3x#$q #$q%ProjectTemp%\%ProgramFolder%#$q #$q%ProjectTemp%\%ProgramFolder%\MsiSearch.ini#$q"
+If,Not,%ExitCode%,Equal,0,Halt,"MsiSearch failed with exit code [%ExitCode%]"
+IniRead,"%ProjectTemp%\%ProgramFolder%\MsiSearch.ini","Arch",%SourceArch%,%MsiFile%
+If,%MsiFile%,Equal,"",Halt,"No [%SourceArch%] MSI was found."
+
+// Renamed cab file needs to match the file name in the .msi's MEDIA table.
+FileRename,"%ProjectTemp%\%ProgramFolder%\$TEMP\$_4_\$_6_","%ProjectTemp%\%ProgramFolder%\$TEMP\$_4_\shared.cab"
+
+MSIExtract,%MsiFile%,"%ProjectTemp%\%ProgramFolder%"
+
 FileSearch,"%ProjectTemp%\%ProgramFolder%",%ProgramExe%
 If,%^RET%,Equal,"",Halt,"Failed to find [%ProgramExe%]: The code returned was [%^RET%]."
 Else,List,Get,%^RET%,1,%ProgramPath%
 StrFormat,DirPath,%ProgramPath%,%ProgramPathFolder%
 StrFormat,EndTrim,%ProgramPathFolder%,"\",%ProgramPathFolder%
 FileCopy,"%ProgramPathFolder%\*.*",%^SIPARAM_1%
+
 System,EndLocal
 
 [#DownloadProgram#]
