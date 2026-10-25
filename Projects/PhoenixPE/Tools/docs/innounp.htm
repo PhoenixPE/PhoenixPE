@@ -5,11 +5,11 @@
 </head>
 
 <body>
-<h3>innounp, the Inno Setup Unpacker</h3>
-<h4>Version 2.70.1 - Unicode </h4>
+<h1>innounp, the Inno Setup Unpacker</h1>
+<h2 style="margin-bottom:-10px;">Version 2.71.2 - Unicode </h2>
 <p><b>based on <a href="https://sourceforge.net/projects/innounp/" target="_blank"><i>innounp</i> version 0.50</a> by 
   <a href="https://sourceforge.net/u/ariman_ua/profile/" target="_blank">ariman</a></b><br>
-  Supports Inno Setup versions 2.0.7 through 7.0.2</p>
+  Supports Inno Setup versions 2.0.7 through 7.1.0</p>
 <p><a href="http://www.jrsoftware.org/isinfo.php">Inno Setup</a> is a popular program
   for making software installations. Unfortunately, there is no official unpacker - the
   only method of getting the files out of the self-extracting executable
@@ -41,7 +41,7 @@
 <a href="https://sourceforge.net/projects/innounp/"><i>Inno Unpack 0.50</i></a></dd>
 </dl>
 
-<h2><a name="Usage"></a>Usage</h2>
+<h2 style="margin-bottom:-8px;"><a name="Usage"></a>Usage</h2>
 <p><i>Innounp</i> is a console application, and it uses command-line options to find out
   what to do. For a more human-friendly interface the 
   <a href="https://github.com/jrathlev/InnoUnpacker-Windows-GUI" title="Inno Setup Unpacker - Windows GUI" target="_blank">Inno Setup Unpacker - Windows GUI</a>
@@ -81,12 +81,22 @@ Exit codes: 0 no errors
 </pre>
 <p>If an installation has <tt>..setup.0</tt> (it is made without using SetupLdr), run
   innounp on <tt>setup.0</tt> instead of <tt>setup.exe</tt>.</p>
-  <p>To extract all files from a specific directory, use <tt>dirname\*.*</tt>, not
-  just <tt>dirname</tt>.</p>
-  <p>By default all files are extracted to the current directory. Use <tt>-d</tt> to
+  
+<h4 style="margin-bottom:-10px;">File selection</h4>
+<p>If neither <tt>filelist</tt> nor <tt>filemask</tt> is specified, all files will be
+  extracted while preserving the directory structure.</p>
+<p>To extract all files from a specific directory, use <tt>dirname\*</tt> as file mask, 
+  not just <tt>dirname</tt>. If you do not want the files in the subdirectories to 
+  be extracted, you must specify  <tt>dirname\**</tt> (double asterisks) as file mask.</p>
+<p><tt>filelist</tt> refers to a text file in which the files to be extracted are 
+  listed line by line.</p>  
+
+<h4 style="margin-bottom:-10px;">Additional notes</h4>
+<p>By default all files are extracted to the current directory. Use <tt>-d</tt> to
   override this behavior. For example, <tt>-dUnpacked</tt> will create a directory named
   <tt>Unpacked</tt> inside the current directory and put the extracted files there.</p>
-  <p>The <tt>-c</tt> option is a little more tricky to explain. Suppose you opened an installation
+  
+<p>The <tt>-c</tt> option is a little more tricky to explain. Suppose you opened an installation
   in a file manager and browsed to <tt>{app}\subdir\program.exe</tt>. Now if you copied
   <tt>program.exe</tt> to another location, the entire directory tree (<tt>{app}\subdir\</tt>)
   would be created and <tt>program.exe</tt> would be extracted there. <tt>-c</tt> notifies innounp
@@ -94,14 +104,29 @@ Exit codes: 0 no errors
   file, <tt>program.exe</tt>, is extracted right where you intended to copy it, not several
   directory levels deeper. Note that in order to avoid confusion, files must still be
   specified by their full path names inside the installation.</p>
-  <p>Note that an installation can contain several identical files (possibly under different names). Inno Setup
+  
+<p>Note that an installation can contain several identical files (possibly under different names). Inno Setup
   stores only one copy of such files, and by default innounp will also unpack one file. If you want to have
   all files that could ever be installed anywhere, regardless of how many identical files this may get you,
   <tt>-a</tt> option will do it.</p>
   <p>If <tt>-m</tt> is specified, the file listing includes <tt>embedded\CompiledCode.bin</tt>
   which is the code made by the RemObjects Pascal Script compiler.</p>
 
-<h2><a name="History"></a>What's new / History</h2>
+<h2 style="margin-bottom:-8px;"><a name="History"></a>What's new / History</h2>
+<p style="margin-bottom:-15px;"><b>2.71.2</b> <small>(2026-10-15)</small></p>
+<ul>
+  <li>Fixed: Retrieving the full path name of a file to be extracted</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.71.1</b> <small>(2026-08-29)</small></p>
+<ul>
+  <li>Fixed: Extraction of selected files</li>
+</ul>
+<p style="margin-bottom:-15px;"><b>2.71.0</b> <small>(2026-08-23)</small></p>
+<ul>
+  <li>Supports IS up to 7.1.0</li>
+  <li>Added: new filemask wildcard "**" to extract files without scanning subdirectories</li>
+  <li>Fixed: RebuildScript.GetVersionText did not recognize Windows Vista</li>
+</ul>
 <p style="margin-bottom:-15px;"><b>2.70.1</b> <small>(2026-07-21)</small></p>
 <ul>
   <li>Added support for IS up to 7.0.2 (x86 and x64)</li>
@@ -579,7 +604,7 @@ Exit codes: 0 no errors
 </ul>
 
 
-<h2><a name="Copyrights"></a>Copyrights and licensing</h2>
+<h2 style="margin-bottom:-5px;"><a name="Copyrights"></a>Copyrights and licensing</h2>
 <p>&copy; 2004-2019 QuickeneR, 2009-2020 Ariman, 2020 - 2026 J. Rathlev<br>
   This program is licensed under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">
   GNU General Public License (GPL)</a>. A copy of the license is included with the source files.<br>
