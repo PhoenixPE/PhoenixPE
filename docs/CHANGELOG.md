@@ -2,6 +2,66 @@
 
 Notable changes to the PhoenixPE project.
 
+## Release 2026-10-25
+
+## Added
+- Support for Win11 26H2
+- Bootmgr: Option to use the Windows UEFI CA 2023 signed boot manager for systems where the Windows Production PCA 2011 Secure Boot certificate has been revoked. (KB5025885) The default (Source default) uses the boot manager included with the source, as in previous releases.
+- Bootmgr: Advanced option to select the boot manager source (Build source, Build host, or a custom Windows\Boot folder), allowing a newer boot manager to be used with an older source.
+- Macrorit Partition Expert
+
+### Changed
+- PhoenixPE script editor updated to Notepad++ v8.9.8.1
+- .Net 10 runtime updated to v10.0.13
+- .Net 8 runtime updated to v8.0.32
+- .Net 9 runtime updated to v9.0.21
+- 7-Zip script and tools updated to v26.05
+- AIDA64 updated to v8.40.5000
+- AgentRansack updated to v2022 build 3566
+- Arsenal Image Mounter updated. (Driver v1.2.29.95 / GUI v3.13.368.0)
+- Attribute Changer updated to v11.50a
+- BeyondCompare v5.2.6.32774
+- BeyondCompare5 updated to v5.2.5.32528
+- BleachBit updated to v6.0.6
+- CPU-Z updated to v.3.01
+- DesktopInfo updated to v3.23.0
+- DiskCyptor updated to v2.0.2
+- DriverStoreExplorer updated to v1.0.36
+- FastStone Capture updated to v11.3
+- Google Chrome updated to v156.0.8078.48
+- GPU-Z updated to v2.71.0
+- HWinfo updated to v8.50
+- Innounp updated to v2.71.2
+- IrfanView updated to v4.76
+- KeyboardTestUtility updated to v2.2.0
+- MPC-BE updated to v1.9.0.0
+- MonitorTestUtility updated to v3.0.0
+- NVDA updated to v2026.2
+- Notepad++ updated to v8.9.8.1
+- PowerShell Core updated to v7.6.8
+- RustDesk updated to v1.5.0
+- SpeedCrunch updated to v1.1.0
+- Ventoy updated to v1.1.18
+- WinMerge updated to v2.16.58.2
+- WinSCP updated to v6.7
+- WizTree updated to v4.33
+- Zulu JRE11 updated to v11.92.109
+- Zulu JRE17 updated to v17.70.111
+- Zulu JRE21 updated to v21.54.107
+- Zulu JRE25 updated to v25.38.107
+
+### Fixed
+- Fixed Pin to taskbar in all versions!
+- Fixed dependencies for LibreOffice (25H2+)
+- Fixed download links for MailView and WRR. (Issue #205)
+- Fixed PhoenixPE script editor not displaying PEBakery/PhoenixAPI functions in the FunctionList.
+- Fixed taskbar freeze on explorer startup (25H2+) due to missing CapabilityAccessManager.Desktop.Storage.dll dependency.
+- Fixed a bug in LetterSwap that prevented rollback of drive letters in case of failure.
+- Updated download URL for AOMEI Partition Assistant.
+
+### Removed
+- Removed dependency on GWT.exe for ADK files.
+
 ## Release 2026-07-25
 
 IMPORTANT: [See here](#ScriptBreakingChanges-2026-07-15) for recent script-breaking changes.
@@ -9,6 +69,28 @@ IMPORTANT: [See here](#ScriptBreakingChanges-2026-07-15) for recent script-break
 As of this release PhoenixPE will only officially support building from an x64 host. 
 
 Note that you can still build an x86 PhoenixPE using an x86 Windows ISO, you just need to do it from a x64 host.
+
+### Script Breaking Changes {ScriptBreakingChanges-2026-07-15}
+
+This section contains a list of all changes made in recent updates that will almost certainly break existing scripts. Please read this list carefully when upgrading. If any of these issues affect you then you will need to modify your scripts.
+
+- `JSONRead` now returns a value via `%DestVar%` instead of `#r`. Then syntax remains the same except for the addition of the `DestVar` parameter.
+
+  Old Syntax: `JSONRead,<JSONFile>,<Path>[,NOERR]`
+  
+  New Syntax: `JSONRead,<JSONFile>,<Path>,<%DestVar%>[,NOERR]`
+
+
+- `XMLRead` now returns a value via `%DestVar%` instead of `#r`. Then syntax remains the same except for the addition of the `DestVar` parameter.
+
+  Old Syntax: `XMLRead,<XMLFile>,<XPath>[,NOERR]`
+  
+  New Syntax: `XMLRead,<XMLFile>,<XPath>,<%DestVar%>[,NOERR]`
+
+- `XMLUpdate` now returns an `ExitCode%` of `2` instead of an `%ExitCode%` of `-99999999` if the path/value does not exist.
+
+- Migrated from buggy #1,#a,#c,#r section parameters to PEBakery variable based parameters (%^RET%, %^SIPARAM_n%, %^SIPARAM_COUNT%, etc.).
+  Legacy section parameters have been disabled. You must update your scripts to use new variable based parameters in place of the old winbuilder style parameters. (eg. `#r` -> `%^RET%`)
 
 ### Added
 - .Net 10 runtime
@@ -19,10 +101,10 @@ Note that you can still build an x86 PhoenixPE using an x86 Windows ISO, you jus
 ### Changed
 - Include additional module dependencies in WindowsPowerShell.script
 - Implemented a workaround for crappy iVentoy hooks that mess with the working directory and crash the PhoenixPE loader. (Issue #179)
-- Merged AcctPicExtractor functionality into ImgageConvert (Phoenix-API > ConvertImage)
+- Merged AcctPicExtractor functionality into ImageConvert (Phoenix-API > ConvertImage)
 - Moved ventoy detection into the PhoenixPE loader to get rid of incompetent antivirus false-positives.
 - Migrated from buggy #1,#a,#c,#r section parameters to PEBakery variable based parameters (%^RET%, %^SIPARAM_n%, %^SIPARAM_COUNT%, etc.).
-- Disable automatic ReFS Volume Upgrades (prevents the volume appearing as RAW or inaccessible if PhoenixPE was built with a newer source then the original host OS supports.
+- Disable automatic ReFS Volume Upgrades. This prevents the volume appearing as RAW or inaccessible if PhoenixPE was built with a newer source then the original host OS supports.
 - Innounp updated to v2.70.1
 - WixToolkit updated to v8.0.6 (Self-Contained build)
 - Update .NET runtime scripts for new WixToolkit.
@@ -81,28 +163,6 @@ Note that you can still build an x86 PhoenixPE using an x86 Windows ISO, you jus
 - PhoenixAPI experimental JSONPretty and JSONCompact commands have been removed. Native support for Pretty/Compact JSON files was added via the new `JSONFormat` command.
 - PhoenixAPI experimental XML commands have been removed. XMLRead, XMLAdd, XMLUpdate, XMLRename, XMLDelete have been re-written for native support in PEBakery. **This is a script breaking change**.
 - Migrated from buggy and dangerous #1,#a,#c,#r section parameters to PEBakery variable based parameters (%^RET%, %^SIPARAM_n%, %^SIPARAM_COUNT%, etc.). Any previous token usage, ie. `#r` or `#1` will need to be converted to `%^RET%`, `%^SIPARAM_1%`, etc.
-
-### Script Breaking Changes {ScriptBreakingChanges-2026-07-15}
-
-This section contains a list of all changes made in recent updates that will almost certainly break existing scripts. Please read this list carefully when upgrading. If any of these issues affect you then you will need to modify your scripts.
-
-- `JSONRead` now returns a value via `%DestVar%` instead of `#r`. Then syntax remains the same except for the addition of the `DestVar` parameter.
-
-  Old Syntax: `JSONRead,<JSONFile>,<Path>[,NOERR]`
-  
-  New Syntax: `JSONRead,<JSONFile>,<Path>,<%DestVar%>[,NOERR]`
-
-
-- `XMLRead` now returns a value via `%DestVar%` instead of `#r`. Then syntax remains the same except for the addition of the `DestVar` parameter.
-
-  Old Syntax: `XMLRead,<XMLFile>,<XPath>[,NOERR]`
-  
-  New Syntax: `XMLRead,<XMLFile>,<XPath>,<%DestVar%>[,NOERR]`
-
-- `XMLUpdate` now returns an `ExitCode%` of `2` instead of an `%ExitCode%` of `-99999999` if the path/value does not exist.
-
-- Migrated from buggy #1,#a,#c,#r section parameters to PEBakery variable based parameters (%^RET%, %^SIPARAM_n%, %^SIPARAM_COUNT%, etc.).
-  Legacy section parameters have been disabled. You must update your scripts to use new variable based parameters in place of the old winbuilder style parameters. (eg. `#r` -> `%^RET%`)
 
 ## Release 2026-04-16
 
