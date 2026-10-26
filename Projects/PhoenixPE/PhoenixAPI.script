@@ -32,8 +32,8 @@
 Title=PhoenixPE API
 Author=Homes32
 Description=PhoenixPE scripting support library.
-Version=1.17.0.0
-Date=2026-08-01
+Version=1.18.0.0
+Date=2026-09-28
 Level=0
 Selected=None
 
@@ -992,7 +992,6 @@ GetParam,3,%DestPath%
 
 Set,%SymbolServerBase%,"https://msdl.microsoft.com/download/symbols"
 Set,%SymbolServerUA%,"Microsoft-Symbol-Server/10.0.0.0"
-
 Set,%URL%,"%SymbolServerBase%/%FileName%/%FileHash%/%FileName%"
 
 WebGet,%URL%,%DestPath%,UserAgent=%SymbolServerUA%,NOERR
@@ -1268,7 +1267,7 @@ System,EndLocal
 // ===============================================================================================================================
 // Name...........: PinShortcut
 // Description....: Pin a shortcut to the taskbar or start menu.
-// Syntax.........: PinShortcut,<Location>,<Position>,<ProgramExe>
+// Syntax.........: PinShortcut,<Location>,<Position>,<ProgramExe>,[Title],[Parameters],[WorkDir],[IconPath],[IconIndex],[State],[Hotkey],[Tooltip]
 // Parameters.....: Location
 //                    StartMenu  - Pin to the start menu.
 //                    Taskbar    - Pin to the taskbar.
@@ -1276,6 +1275,17 @@ System,EndLocal
 //                    Auto       - (Default) Automatically determine the pin position.
 //                    1-99       - Pin the shortcut to a specific position [0-99].
 //                  ProgramExe - The full path to the program to be executed.
+//                  Title - (Optional) The name of the shortcut. 
+//                  Parameters - (Optional) Parameters that will be passed to the program.
+//                  WorkDir - (Optional) The work directory for the program.
+//                  IconPath - (Optional) The full path to file containing the icon.
+//                  IconIndex - (Optional) For files containing multiple icons this is Index of the icon to use.
+//                  WindowState - (Optional) One of the following:
+//                    Normal - Start the program normally.
+//                    Minimized - Start the program minimized to the taskbar.
+//                    Maximized - Start the program maximized.
+//                  Hotkey - (Optional) Keyboard sequence used to active the shortcut.
+//                  Tooltip - (Optional) Tooltip Text
 // Return values..: 
 // Author.........: Homes32
 // Remarks........: This macro relies on PinUtil.exe to perform the actual pinning at boot.
@@ -1303,6 +1313,15 @@ If,%^SIPARAM_3%,Equal,"",Halt,"PinShortcut Syntax Error: Program Executable was 
 GetParam,1,%PinLocation%
 GetParam,2,%PinPos%
 GetParam,3,%ProgramExe%
+// Optional Args
+GetParam,4,%Title%
+GetParam,5,%Parameters%
+GetParam,6,%WorkDir%
+GetParam,7,%IconPath%
+GetParam,8,%IconIndex%
+GetParam,9,%WindowState%
+GetParam,10,%Hotkey%
+GetParam,11,%Tooltip%
 
 Set,%MaxPins%,100
 
@@ -1351,7 +1370,7 @@ Else,Begin
     Else,Set,%RamDisk%,"B:"
     StrFormat,Replace,%ProgramExe%,"Y:\","%RamDisk%\",%ProgramExe%
 
-    IniWrite,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%PinPos%,%ProgramExe%
+    IniWrite,"%TargetSystem32%\PinUtil.ini","PinUtil",%PinLocation%%PinPos%,"%ProgramExe%|%Title%|%Parameters%|%WorkDir%|%IconPath%|%IconIndex%|%WindowState%|%Hotkey%|%Tooltip%"
   End
 End
 System,EndLocal
@@ -1914,7 +1933,7 @@ If,Not,%ExitCode%,Equal,0,Begin
   End
   
   If,%NoErr%,Equal,True,Return,%ExitCode%
-  Else,Halt,"WebGetEx Error: Failed to download [%URL%]. The command returned: [%ExitCode%]%Aria2ErrorDescr%. Please check the log for details."
+  Else,Halt,"WebGetEx Error: Failed to download [%URL%]. The command returned: [%ExitCode%] %Aria2ErrorDescr%. Please check the log for details."
 End
 
 System,EndLocal
