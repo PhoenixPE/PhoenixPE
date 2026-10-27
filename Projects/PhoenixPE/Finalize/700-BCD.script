@@ -35,8 +35,8 @@ Author=Homes32
 Level=7
 Selected=True
 Mandatory=True
-Version=1.2.1.0
-Date=2026-10-26
+Version=1.2.2.0
+Date=2026-10-27
 
 [Variables]
 // Boot fonts shipped in Windows\Boot\Fonts_EX (as <name>_EX.ttf) for use with the Windows UEFI CA 2023 boot manager.
@@ -187,7 +187,10 @@ If,%EX%,Equal,_EX,If,Not,ExistDir,"%EfiBootSrc%\Fonts_EX",Echo,"Warning: [Fonts_
 If,Not,ExistFile,"%EfiBootSrc%\EFI%EX%\%SourceLang%\bootmgfw%EX%.efi.mui",Echo,"Warning: The boot manager in [%EfiBootSrc%] does not include the [%SourceLang%] language. Boot menu text may not display in the expected language.",Warn
 
 // Detect the signing certificate. 0=PCA 2011, 1=CA 2023, 2=Other, 3=Unable to verify
-ShellExecute,Hide,powershell.exe,"-ExecutionPolicy Bypass -NoProfile -Command #$qtry { $i = (Get-AuthenticodeSignature -LiteralPath '%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi' -ErrorAction Stop).SignerCertificate.Issuer } catch { exit 3 }; if (-not $i) { exit 3 }; if ($i -like '*Windows Production PCA 2011*') { exit 0 }; if ($i -like '*Windows UEFI CA 2023*') { exit 1 }; exit 2#$q"
+// Read the embedded Authenticode signature (the one UEFI firmware verifies). Get-AuthenticodeSignature is not used as it
+// returns the catalog signature instead when the file is in the host's catalog database (eg. Host bootloader, or a source
+// of the same build as the host).
+ShellExecute,Hide,powershell.exe,"-ExecutionPolicy Bypass -NoProfile -Command #$qtry { $i = [Security.Cryptography.X509Certificates.X509Certificate]::CreateFromSignedFile('%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi').Issuer } catch { exit 3 }; if (-not $i) { exit 3 }; if ($i -like '*Windows Production PCA 2011*') { exit 0 }; if ($i -like '*Windows UEFI CA 2023*') { exit 1 }; exit 2#$q"
 If,%^RET%,Equal,0,Set,%FoundCert%,"Windows Production PCA 2011"
 Else,If,%^RET%,Equal,1,Set,%FoundCert%,"Windows UEFI CA 2023"
 Else,If,%^RET%,Equal,2,Set,%FoundCert%,"an unknown certificate"
