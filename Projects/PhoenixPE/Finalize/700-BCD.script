@@ -35,8 +35,8 @@ Author=Homes32
 Level=7
 Selected=True
 Mandatory=True
-Version=1.2.0.0
-Date=2026-10-02
+Version=1.2.1.0
+Date=2026-10-26
 
 [Variables]
 // Boot fonts shipped in Windows\Boot\Fonts_EX (as <name>_EX.ttf) for use with the Windows UEFI CA 2023 boot manager.
@@ -94,9 +94,19 @@ Else,Set,%EfiBootFile%,bootia32.efi
 Run,%ScriptFile%,GetBootSource
 
 // Boot Manager
-Run,%ScriptFile%,CopyEfiFile,"%EfiBootSrc%\EFI%EX%\bootmgr%EX%.efi","%OutputDir%\efi\microsoft\boot",bootmgr.efi
+// bootmgr.efi (in the root of %OutputDir%) is not loaded by UEFI firmware.
+// bootmgr_EX.efi was removed from Windows starting with the May 2026 preview update,
+// so fall back to the standard bootmgr.efi (same as Microsoft's media tools) if it does not exist.
 FileDeleteEx,"%OutputDir%\bootmgr.efi"
-PathMove,"%OutputDir%\efi\microsoft\boot\bootmgr.efi","%OutputDir%\bootmgr.efi"
+If,ExistFile,"%EfiBootSrc%\EFI%EX%\bootmgr%EX%.efi",Set,%RootBootMgr%,"%EfiBootSrc%\EFI%EX%\bootmgr%EX%.efi"
+Else,If,ExistFile,"%EfiBootSrc%\EFI\bootmgr.efi",Set,%RootBootMgr%,"%EfiBootSrc%\EFI\bootmgr.efi"
+Else,Set,%RootBootMgr%,""
+If,%RootBootMgr%,Equal,"",Echo,"Warning: [bootmgr.efi] was not found in [%EfiBootSrc%\EFI]. The bootmgr.efi will not be created on the target media. Normal UEFI and BIOS boot are not affected; however third-party boot menus that load \bootmgr.efi directly may experience issues.",Warn
+Else,Begin
+  If,%EX%,Equal,_EX,If,%RootBootMgr%,Equal,"%EfiBootSrc%\EFI\bootmgr.efi",Echo,"Using the standard bootmgr.efi for the target media (bootmgr_EX.efi was retired in the May 2026 update). UEFI boot is not affected."
+  Run,%ScriptFile%,CopyEfiFile,%RootBootMgr%,"%OutputDir%\efi\microsoft\boot",bootmgr.efi
+  PathMove,"%OutputDir%\efi\microsoft\boot\bootmgr.efi","%OutputDir%\bootmgr.efi"
+End
 Run,%ScriptFile%,CopyEfiFile,"%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi","%OutputDir%\efi\boot",%EfiBootFile%
 
 FileCopy,"%TargetDir%\Windows\Boot\DVD\EFI\bcd","%OutputDir%\efi\microsoft\boot\"
@@ -172,7 +182,6 @@ If,Not,ExistFile,"%EfiBootSrc%\EFI%EX%\bootmgfw%EX%.efi",Begin
   If,%cmb_BootFilesSrc%,Equal,"Source bootloader",Halt,"ERROR: The %CertName% boot manager [EFI%EX%\bootmgfw%EX%.efi] was not found in the source. Sources released before the Windows UEFI CA 2023 boot manager (eg. 23H2 RTM) do not contain it.#$x#$xUse a source serviced with a recent cumulative update, or set the Boot files source to [Host bootloader] or [Custom folder] in the Bootmgr script's advanced options."
   Else,Halt,"ERROR: The %CertName% boot manager [EFI%EX%\bootmgfw%EX%.efi] was not found in [%EfiBootSrc%].#$x#$xThe Boot files source must be a Windows\Boot folder from Windows 10/11 x64 (eg. extracted from the boot.wim of a recent Windows ISO)."
 End
-If,Not,ExistFile,"%EfiBootSrc%\EFI%EX%\bootmgr%EX%.efi",Halt,"ERROR: The %CertName% boot manager [EFI%EX%\bootmgr%EX%.efi] was not found in [%EfiBootSrc%]."
 If,Not,ExistDir,"%EfiBootSrc%\DVD%EX%\EFI",Halt,"ERROR: The %CertName% EFI boot image folder [DVD%EX%\EFI] was not found in [%EfiBootSrc%]."
 If,%EX%,Equal,_EX,If,Not,ExistDir,"%EfiBootSrc%\Fonts_EX",Echo,"Warning: [Fonts_EX] was not found in [%EfiBootSrc%]. Standard boot fonts will be used.",Warn
 If,Not,ExistFile,"%EfiBootSrc%\EFI%EX%\%SourceLang%\bootmgfw%EX%.efi.mui",Echo,"Warning: The boot manager in [%EfiBootSrc%] does not include the [%SourceLang%] language. Boot menu text may not display in the expected language.",Warn
