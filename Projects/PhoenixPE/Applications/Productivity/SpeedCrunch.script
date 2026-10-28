@@ -32,9 +32,9 @@
 Title=SpeedCrunch
 Author=Homes32
 Level=5
-Version=1.0.1.0
 Description=(v1.1 x64) SpeedCrunch is a high-precision scientific calculator featuring a fast, keyboard-driven user interface.
-Date=2026-10-24
+Version=1.0.2.0
+Date=2026-10-27
 Selected=False
 Mandatory=False
 
@@ -63,23 +63,23 @@ Run,%ScriptFile%,ExtractProgram,"%TargetPrograms%\%ProgramFolder%"
 IniWrite,%ConfigFile%,"General","ConfigVersion",1200
 IniWrite,%ConfigFile%,"SpeedCrunch","Display\ColorSchemeName",%cmb_ColorScheme%
 IniWrite,%ConfigFile%,"SpeedCrunch","General\Language","C"
-If,%cmb_ShowKeypad%,Equal,"Disable",Begin
+If,%cmb_KeypadMode%,Equal,"Disable",Begin
   IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",true
   IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadMode",0
 End
-Else,If,%cmb_ShowKeypad%,Equal,"Basic",Begin
+Else,If,%cmb_KeypadMode%,Equal,"Basic",Begin
   IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",true
   IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadMode",1
 End
-Else,If,%cmb_ShowKeypad%,Equal,"Scientific (wide)",Begin
+Else,If,%cmb_KeypadMode%,Equal,"Scientific (wide)",Begin
   IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",true
   IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadMode",3
 End
-Else,If,%cmb_ShowKeypad%,Equal,"Scientific (narrow)",Begin
+Else,If,%cmb_KeypadMode%,Equal,"Scientific (narrow)",Begin
   IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadVisible",true
   IniWrite,%ConfigFile%,"SpeedCrunch","Layout\KeypadMode",4
 End
-Else,Halt,"Logic Error: [%cmb_ShowKeypad%] is not a valid Keypad Mode." 
+Else,Halt,"Logic Error: [%cmb_KeypadMode%] is not a valid Keypad Mode." 
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
