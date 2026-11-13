@@ -35,8 +35,8 @@ Author=Homes32
 Level=7
 Selected=True
 Mandatory=True
-Version=1.2.2.0
-Date=2026-10-27
+Version=1.3.0.0
+Date=2026-11-12
 
 [Variables]
 // Boot fonts shipped in Windows\Boot\Fonts_EX (as <name>_EX.ttf) for use with the Windows UEFI CA 2023 boot manager.
@@ -305,6 +305,19 @@ ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q
 // Show progress bar
 ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {default} bootmenupolicy legacy"
 
+// Display resolution
+// Under UEFI the Microsoft Basic Display Adapter cannot change the mode set by the bootloader,
+// so if no graphics driver is available PE is stuck with the firmware's default GOP mode (often 800x600).
+// BIOS is not affected as the Basic Display Adapter can change modes at runtime.
+// Clear any existing values first so only the selected setting is applied. (Firmware default = neither)
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /deletevalue {globalsettings} graphicsresolution"
+ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /deletevalue {globalsettings} highestmode"
+If,%cmb_UEFIResolution%,Equal,"800x600",ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {globalsettings} graphicsresolution 800x600"
+Else,If,%cmb_UEFIResolution%,Equal,"1024x600",ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {globalsettings} graphicsresolution 1024x600"
+Else,If,%cmb_UEFIResolution%,Equal,"1024x768",ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {globalsettings} graphicsresolution 1024x768"
+Else,If,%cmb_UEFIResolution%,Equal,"Highest available",ShellExecute,Hide,"bcdedit.exe","/store #$q%OutputDir%\efi\microsoft\boot\bcd#$q /set {globalsettings} highestmode on"
+Else,If,Not,%cmb_UEFIResolution%,Equal,"Firmware default",Halt,"Logic Error: [%cmb_UEFIResolution%] is not a supported resolution."
+
 [#BypassDriverSigning#]
 // ===============================================================================================================================
 // Name...........: BypassDriverSigning
@@ -338,6 +351,7 @@ System,Cursor,Wait
 WriteInterface,Value,%ScriptFile%,Interface,cb_BootFix,False
 WriteInterface,Value,%ScriptFile%,Interface,cb_BypassDriverSigning,False
 WriteInterface,Value,%ScriptFile%,Interface,num_BootMenuDelay,0
+WriteInterface,Value,%ScriptFile%,Interface,cmb_UEFIResolution,"1024x768"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_UEFICert,"Source default"
 WriteInterface,Value,%ScriptFile%,Interface,cmb_BootFilesSrc,"Source bootloader"
 WriteInterface,Value,%ScriptFile%,Interface,fb_BootFilesDir,""
@@ -410,7 +424,7 @@ System,EndLocal
 // Related........: btn_ScriptInfo
 // ===============================================================================================================================
 [ShowScriptInfo]
-Message,"This script allows you to configure various behaviors of the Windows bootloader.#$x#$xUEFI Secure Boot Certificate#$x#$xSource default - Use the boot manager the source ships with (currently PCA 2011 for most sources). The certificate is reported in the build log but not enforced.#$x#$xWindows Production PCA 2011 - Boots on systems that have not received the Windows UEFI CA 2023 certificate update. Will NOT boot on systems where PCA 2011 has been revoked (KB5025885 mitigations applied).#$x#$xWindows UEFI CA 2023 - Boots on systems that have the Windows UEFI CA 2023 certificate in the Secure Boot DB, including systems where PCA 2011 has been revoked. Will NOT boot on systems that have not received the certificate update.#$x#$xBoot Files Source (Advanced)#$x#$xSource bootloader - Use the boot manager from the source being built. Sources released before the CA 2023 boot manager (eg. 23H2 RTM) do not contain it.#$x#$xHost bootloader - Use the boot manager from this computer (#$pwindir#$p\Boot).#$x#$xCustom folder - Use the boot manager from a Windows\Boot folder extracted from a newer Windows 10/11 x64 image (boot.wim). This allows building from an older source while using a newer boot manager."
+Message,"This script allows you to configure various behaviors of the Windows bootloader.#$x#$xUEFI Secure Boot Certificate#$x#$xSource default - Use the boot manager the source ships with (currently PCA 2011 for most sources). The certificate is reported in the build log but not enforced.#$x#$xWindows Production PCA 2011 - Boots on systems that have not received the Windows UEFI CA 2023 certificate update. Will NOT boot on systems where PCA 2011 has been revoked (KB5025885 mitigations applied).#$x#$xWindows UEFI CA 2023 - Boots on systems that have the Windows UEFI CA 2023 certificate in the Secure Boot DB, including systems where PCA 2011 has been revoked. Will NOT boot on systems that have not received the certificate update.#$x#$xBoot Files Source (Advanced)#$x#$xSource bootloader - Use the boot manager from the source being built. Sources released before the CA 2023 boot manager (eg. 23H2 RTM) do not contain it.#$x#$xHost bootloader - Use the boot manager from this computer (#$pwindir#$p\Boot).#$x#$xCustom folder - Use the boot manager from a Windows\Boot folder extracted from a newer Windows 10/11 x64 image (boot.wim). This allows building from an older source while using a newer boot manager.#$x#$xUEFI Display Resolution#$x#$xWhen booting in UEFI mode without a graphics driver for the video card, PE uses the display mode set by the bootloader and it cannot be changed afterwards.#$x#$xFirmware default - Use the firmware's default mode (often 800x600).#$x#$x1024x768 - Supported by nearly all UEFI firmware.#$x#$xHighest available - Use the highest mode reported by the firmware. Text may be very small on high resolution displays, and some firmware may report modes the monitor does not support, resulting in a blank screen.#$x#$xBIOS boot is not affected."
 
 [#Interface#]
 // ===============================================================================================================================
@@ -433,6 +447,8 @@ cb_BypassDriverSigning="Bypass Driver Signing Requirement (x64)",0,3,20,92,223,1
 lbl_BootMenuDelay="Boot Menu Delay:",1,1,20,120,96,16,8,Normal
 num_BootMenuDelay=num_BootMenuDelay,1,2,20,135,40,22,0,0,60,1,"__Configure how long (in seconds) the boot menu will display before the default action is selected.#$x#$xTo prevent the boot menu from displaying select 0."
 lbl_Seconds=seconds,1,1,65,140,61,16,8,Normal
+lbl_UEFIResolution="UEFI display resolution:",1,1,20,165,200,16,8,Normal
+cmb_UEFIResolution=1024x768,1,4,20,182,150,21,"Firmware default",800x600,1024x600,1024x768,"Highest available","__Display resolution used when booting in UEFI mode and no graphics driver is available for the video card.#$x#$xFirmware default - Use the firmware's default mode (often 800x600).#$x800x600 - Universal fail-safe resolution.#$x1024x600 - Useful for older netbooks or industrial machine interfaces.#$x1024x768 - Supported by nearly all UEFI firmware.#$xHighest available - Use the highest mode reported by the firmware. #$x    Note: Text may be very small on high resolution displays (eg. 4K) and some firmware may report modes the monitor does not support.#$x#$xOnce PE has booted the resolution cannot be changed without a graphics driver. BIOS boot is not affected."
 bvl_SecureBoot="UEFI Secure Boot",1,12,270,50,330,165,8,Bold
 lbl_UEFICert="Boot manager signing certificate:",1,1,285,72,250,16,8,Normal
 cmb_UEFICert="Source default",1,4,285,90,250,21,"Source default","Windows Production PCA 2011","Windows UEFI CA 2023","__Select the certificate used to sign the UEFI boot manager.#$x#$xSource default - Use the boot manager the source ships with. The signing certificate is reported in the log but not enforced.#$xWindows Production PCA 2011 - Compatible with systems that have NOT received the Secure Boot certificate update. Fails on systems where PCA 2011 has been revoked.#$xWindows UEFI CA 2023 - Required on systems where PCA 2011 has been revoked. Fails on systems that have NOT received the Windows UEFI CA 2023 certificate.#$x#$xBIOS boot is not affected."
