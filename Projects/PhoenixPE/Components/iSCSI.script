@@ -35,8 +35,8 @@ Author=Homes32
 Level=4
 Selected=False
 Mandatory=False
-Version=1.0.1.0
-Date=2026-10-21
+Version=1.0.2.0
+Date=2026-11-20
 
 [Variables]
 %ProgramFolder%="#$pSystemRoot#$p\system32"
@@ -61,6 +61,17 @@ RegUnloadHives
 RequireFileEx,AppendList,\Windows\System32\iscsi*
 
 RequireFileEx,ExtractList
+
+If,%SourceVer%,BiggerEqual,10.0.22000.0,Begin
+  // Prime the Event Log service (Windows 11)
+  // On Windows 11 the iSCSI Initiator service fails with "Access Denied" unless the eventlog service has been started
+  // outside of WinPE mode (MiniNT key removed) at least once, which creates the event logs iSCSI needs to write to.
+  // Once primed, eventlog can be restarted in WinPE mode and iSCSI will continue to work, without the overhead of
+  // full event logging consuming FBWF space. The cmd skips itself if the Event Logging script is enabled, since that
+  // already starts eventlog outside of WinPE mode. (Issue #30)
+  ExtractAllFiles,%ScriptFile%,cmd,%TargetSystem32%
+  AddAutoRun,PreShell,HideWait,"Priming Windows Event Log Service...","#$pWinDir#$p\system32\PrimeEventLog.cmd"
+End
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
@@ -141,7 +152,6 @@ cb_PinToTaskbar="Pin to Taskbar",1,3,12,103,122,18,False
 cb_PinToStartMenu="Pin to Start Menu",1,3,12,122,122,18,False
 txt_StartMenuFolder="Start Menu Folder:",1,0,12,162,119,21,"System Tools"
 txt_ShortcutName="Shortcut Name:",1,0,12,204,119,21,"iSCSI Initiator"
-lbl_RuntimeRequirement="Note: Requires the PhoenixPE > Components > Event Logging script to be enabled.",1,1,0,310,626,16,8,Bold
 
 [InterfaceEncoded]
 SetDefaults_16.png=2475,3404
@@ -171,3 +181,13 @@ lines=4
 [EncodedFile-InterfaceEncoded-Advanced_Disabled_16.png]
 lines=0
 0=iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVQ4y43Tz4tNcRgG8M+dOTGuRLhF9hi/h81IKRuR1IhSxIIssPAn3J1mb2oSNso0O2oWiIwNu2FWw21YkEm6ykwmv5XNc+rQnfLW6Zy+z/d9zvO+z/vWms2mBeIcjuMrhnC/06Wi8r0Ku/EIX9DACixHbwgW4wieo1UlWIsLOIWbmEA/fuI3NmMv9uEknmAQrZKgL8mvcAjH8A2LgveHYB5vQvSgSvAUI9iPOdQwhcngO7Ap2MqoHKuWMIu7+XMX7uAGZoKvw1kMoAfP8LkkOJAaN+I7XmAY7UqDZ3K2IUrOpLEfC1zEGvyI9Ml/kstoB9seh47iU4F6Erv8X9TiTjdqBUaxOjPQk4Y1OqhoBPuFt5mF+QLXcmEAl1Pb+QWa2BsFj3G96sIy7MzYzoVsfQcbZ7EUu3AP70qCwziN6fhcx7YkSs319KmNgyG/WhJMYBx7cCujeiIquvEeV+LApezLw2oJrcx2H25nHrZiC5akaeN5XuNl3n9tY6vcsMQUPqTm6cr5WNWaPzh+YcvU7DU1AAAAAElFTkSuQmCCeJyTcEwpS8xLTk2Jd8ksTkzKATIMzfQK8tIZRsFIALcY8ct/c/M8xcgAANAVDAqUbKQXAQAAAAIAAAAvAAAA2gEAAAAAAAABAAAAAAAAAAAAAAA
+
+[EncodedFolders]
+cmd
+
+[cmd]
+PrimeEventLog.cmd=918,728
+
+[EncodedFile-cmd-PrimeEventLog.cmd]
+lines=0
+0=/Td6WFoAAATm1rRGBMCQA5YHIQEWAAAAAAAAACpFFEPgA5UBiF0AIBFEb71wHaR2IZcwmoQYpKOr1SrQAyMUNC3LAOaV/RGn1TpCdzhV4l37QmSLnfJd1Hde6HhEPOH8FgQWX1x8w3gUtc/7YziAdmBUDkhFjbTgrsmxNdfCFgJbCKtckQ0BWeZkGMS2ogK0oB2EylR5NZl+Lg9kyPQJYX6JpTYOX4jvMoMv29ffCFoTutU88UEpW7zvLtJ0bfaGPRDegaNk5ZLxLHnmzhYyQyWryPjUvYEN9smO1ohQ9OkIfZA1Cke4tg8SQLu/j5hOv+9YEdXQNVRBWoERl0R2Nj1d9O48t3C2w+u/+t7JqbMqpkrQ0dTxK7u95w6TmC1Y8xglP6QUo2pmW0jKxjxPzF+oQdMzLnpmlfpI6q+w6KiAFKgjZva60Q5zpvciYCE/G9zZHJnhWWNiO7ogvM28tTTslcR78ydOszSaPNsDDxPWRsotNM+n9sL1jZjpYNSPlRhxL6tHhxPJRLz7DebB2KEjA4kH2wB8TbkqSQmdC4BajFokzZyBWAxWSMeT75QA0PlKuqUugxMAAawDlgcAAGXXT3exxGf7AgAAAAAEWVp4nBMMKMrMTXUtS80r8clP10vOTWEYBSMITGOG0BcYscufK5rUzMQGACUPClyG1dfxAQAAAAIAAAAtAAAA0AEAAAAAAAABAAAAAAAAAAAAAAA
