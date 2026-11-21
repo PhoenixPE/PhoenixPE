@@ -34,8 +34,8 @@ Description=Enable the collection and monitoring of Windows Event logs.
 Selected=False
 Level=4
 Author=Homes32
-Version=1.0.2.0
-Date=2024-07-06
+Version=1.0.3.0
+Date=2026-11-20
 Mandatory=False
 
 [Variables]
@@ -48,6 +48,14 @@ RegLoadHives
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\Wecsvc*",HKLM,"Tmp_System\ControlSet001\Services\",WILDCARD
 // Extended Categories/Messages
 RegCopy,HKLM,"Tmp_Install_System\ControlSet001\Services\EventLog\*",HKLM,"Tmp_System\ControlSet001\Services\EventLog",WILDCARD
+
+If,%SourceVer%,Smaller,10.0.22000.0,Begin
+  // Windows 10: The eventlog service depends on Network Location Awareness (NlaSvc) and Network List Service (netprofm).
+  // Disable them in the hive so they don't start before eventlog, then StartEventLogging.cmd will start them in the correct order.
+  // Windows 11 does not need this. Thanks to Whatslp for the fix. (Issue #41)
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\NlaSvc",Start,4
+  RegWrite,HKLM,0x4,"Tmp_System\ControlSet001\Services\netprofm",Start,4
+End
 RegUnloadHives
 
 // Start the Event Logging Service
@@ -58,6 +66,21 @@ RegUnloadHives
 // Note that we want to do this early in the startup process, as several network services (nlasvc, netprofm, etc.)
 // depend on eventlog and it can be a pain to try and kill them off once they startup and get all cozy with each other.
 ExtractAllFiles,%ScriptFile%,cmd,%TargetSystem32%
+
+If,%SourceVer%,Smaller,10.0.22000.0,Begin
+  // Windows 10: Start NlaSvc and netprofm after eventlog. netprofm refuses to start while SystemSetupInProgress=1,
+  // so temporarily clear it while the service starts. (Issue #41)
+  TXTDelLine,%TargetSystem32%\StartEventLogging.cmd,"Echo Done."
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"Echo Starting Network Location Awareness service...",Append
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"sc.exe config NlaSvc start= auto",Append
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"sc.exe start NlaSvc",Append
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"Echo Starting Network List service...",Append
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"sc.exe config netprofm start= demand",Append
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"reg.exe add HKLM\SYSTEM\Setup /v SystemSetupInProgress /t REG_DWORD /d 0 /f",Append
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"sc.exe start netprofm",Append
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"reg.exe add HKLM\SYSTEM\Setup /v SystemSetupInProgress /t REG_DWORD /d 1 /f",Append
+  TXTAddLine,%TargetSystem32%\StartEventLogging.cmd,"Echo Done.",Append
+End
 AddAutoRun,PreShell,HideWait,"Starting Windows Event Log Service...","#$pWinDir#$p\system32\StartEventLogging.cmd"
 
 If,%cb_IncludeEventViewer%,Equal,True,Run,%ScriptFile%,IncludeWindowsEventViewer
